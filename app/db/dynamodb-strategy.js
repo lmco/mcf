@@ -1132,30 +1132,52 @@ class Model {
   }
 
   /**
-   * @description Populates an array of documents
-   * @param docs
-   * @param options
-   * @returns {Promise<void>}
+   * @description Populates a single document with specified fields provided in
+   * the options object.
+   * @async
+   *
+   * @param {object} doc - The document to populate.
+   * @param {object} options - The object containing the options.
+   * @param {string} [options.populate] - A string of fields to populate,
+   * separated by spaces.
+   *
+   * @returns {Promise<object>} The document, populated with the fields
+   * specified in options.populate.
    */
-  async populate(docs, options) {
-    // If there are no fields to populate, return documents
-    if (!options.populate) {
-      return docs;
-    }
-    else {
+  async populate(doc, options) {
+    // If there are fields to populate
+    if (options.populate) {
       // Get an array of the fields to populate
       const fieldsToPop = options.populate.split(' ');
 
+      const promises = [];
       fieldsToPop.forEach((f) => {
         // Get the populate object, defined in the schema definition
         const popObj = this.definition.populate[f];
 
         // If the field to populate is defined
         if (popObj) {
-          console.log(popObj);
+          // Create the find query
+          const query = {};
+          query[popObj.foreignField] = doc[popObj.localField];
+
+          // If justOne is true, use findOne
+          if (popObj.justOne) {
+            promises.push(models[popObj.ref].findOne(query, null, {})
+            .then((objs) => { doc[f] = objs; }));
+          }
+          // findOne is false, find an array of matching documents
+          else {
+            promises.push(models[popObj.ref].find(query, null, {})
+            .then((objs) => { doc[f] = objs; }));
+          }
         }
-      })
+      });
+
+      // Wait for all promises to complete
+      await Promise.all(promises);
     }
+    return doc;
   }
 
   /**
