@@ -22,10 +22,10 @@ const path = require('path');
 const mongoose = require('mongoose');
 
 // MBEE modules
+const migrate = M.require('lib.migrate');
 const Element = M.require('models.element');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
-const ServerData = M.require('models.server-data');
 const User = M.require('models.user');
 const jmi = M.require('lib.jmi-conversions');
 
@@ -45,24 +45,7 @@ if (M.config.db.strategy !== 'mongoose-mongodb-strategy') {
  * @returns {Promise} Returns an empty promise upon completion.
  */
 module.exports.down = function() {
-  return new Promise((resolve, reject) => {
-    // Get all documents from the server data
-    ServerData.find({}, null, { lean: true })
-    .then((serverData) => {
-      // Restrict collection to one document
-      if (serverData.length > 1) {
-        throw new Error('Cannot have more than one server data document.');
-      }
-      // If no server data currently exists, create the document
-      if (serverData.length === 0) {
-        return ServerData.insertMany([{ _id: 'server_data', version: '0.6.0' }]);
-      }
-
-      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.6.0' });
-    })
-    .then(() => resolve())
-    .catch((error) => reject(error));
-  });
+  return migrate.shiftVersion('0.6.0');
 };
 
 /**
@@ -83,104 +66,51 @@ module.exports.down = function() {
  *
  * @returns {Promise} Returns an empty promise upon completion.
  */
-module.exports.up = function() {
-  return new Promise((resolve, reject) => {
-    // Define global variables
-    let orgs = [];
-    let projects = [];
-    let elements = [];
-    let users = [];
-    let jmiOrgs = [];
-    let jmiProjects = [];
-    let jmiElements = [];
-    let jmiUsers = [];
-
+module.exports.up = async function() {
+  try {
     // If data directory doesn't exist, create it
     if (!fs.existsSync(path.join(M.root, 'data'))) {
       fs.mkdirSync(path.join(M.root, 'data'));
     }
 
     // Find all orgs
-    Organization.find({})
-    .then((foundOrgs) => {
-      orgs = foundOrgs;
-      jmiOrgs = jmi.convertJMI(1, 2, orgs);
+    const orgs = await Organization.find({});
+    const jmiOrgs = jmi.convertJMI(1, 2, orgs);
 
-      // Write contents to temporary file
-      return new Promise(function(res, rej) {
-        fs.writeFile(path.join(M.root, 'data', 'orgs.json'), JSON.stringify(orgs), function(err) {
-          if (err) rej(err);
-          else res();
-        });
-      });
-    })
+    // Write contents to temporary file
+    fs.writeFileSync(path.join(M.root, 'data', 'orgs.json'), JSON.stringify(orgs));
+
     // Find all projects
-    .then(() => Project.find({}))
-    .then((foundProjects) => {
-      projects = foundProjects;
-      jmiProjects = jmi.convertJMI(1, 2, projects);
+    const projects = await Project.find({});
+    const jmiProjects = jmi.convertJMI(1, 2, projects);
 
-      // Write contents to temporary file
-      return new Promise(function(res, rej) {
-        fs.writeFile(path.join(M.root, 'data', 'project.json'),
-          JSON.stringify(projects), function(err) {
-            if (err) rej(err);
-            else res();
-          });
-      });
-    })
+    // Write contents to temporary file
+    fs.writeFileSync(path.join(M.root, 'data', 'projects.json'), JSON.stringify(projects));
+
     // Find all elements
-    .then(() => Element.find({}))
-    .then((foundElements) => {
-      elements = foundElements;
-      jmiElements = jmi.convertJMI(1, 2, elements);
+    const elements = await Element.find({});
+    const jmiElements = jmi.convertJMI(1, 2, elements);
 
-      // Write contents to temporary file
-      return new Promise(function(res, rej) {
-        fs.writeFile(path.join(M.root, 'data', 'elements.json'),
-          JSON.stringify(elements), function(err) {
-            if (err) rej(err);
-            else res();
-          });
-      });
-    })
+    // Write contents to temporary file
+    fs.writeFileSync(path.join(M.root, 'data', 'elements.json'), JSON.stringify(elements));
+
     // Find all users
-    .then(() => User.find({}))
-    .then((foundUsers) => {
-      users = foundUsers;
-      jmiUsers = jmi.convertJMI(1, 2, users);
+    const users = await User.find({});
+    const jmiUsers = jmi.convertJMI(1, 2, users);
 
-      // Write contents to temporary file
-      return new Promise(function(res, rej) {
-        fs.writeFile(path.join(M.root, 'data', 'users.json'),
-          JSON.stringify(users), function(err) {
-            if (err) rej(err);
-            else res();
-          });
-      });
-    })
+    // Write contents to temporary file
+    fs.writeFileSync(path.join(M.root, 'data', 'users.json'), JSON.stringify(users));
+
     // Find all currently existing collections
-    .then(() => sixToSevenOrgHelper(orgs, jmiUsers))
-    .then(() => sixToSevenProjectHelper(projects, jmiUsers, jmiOrgs))
-    .then(() => sixToSevenElementHelper(elements, jmiUsers, jmiProjects, jmiElements))
-    .then(() => sixToSevenUserHelper(users, jmiUsers))
-    // Get all documents from the server data
-    .then(() => ServerData.find({}))
-    .then((serverData) => {
-      // Restrict collection to one document
-      if (serverData.length > 1) {
-        throw new Error('Cannot have more than one server data document.');
-      }
-      // If no server data currently exists, create the document
-      if (serverData.length === 0) {
-        return ServerData.insertMany([{ _id: 'server_data', version: '0.6.0.1' }]);
-      }
-
-      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.6.0.1' });
-    })
-    .then(() => resolve())
-    .catch((error) => reject(error));
-  });
+    await sixToSevenOrgHelper(orgs, jmiUsers);
+    await sixToSevenProjectHelper(projects, jmiUsers, jmiOrgs);
+    await sixToSevenElementHelper(elements, jmiUsers, jmiProjects, jmiElements);
+    await sixToSevenUserHelper(users, jmiUsers);
+  }
+  catch (error) {
+    throw new M.DatabaseError(error.message, 'warn');
+  }
+  return migrate.shiftVersion('0.6.0.1');
 };
 
 
