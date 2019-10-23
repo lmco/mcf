@@ -21,32 +21,15 @@ const path = require('path');
 
 // MBEE modules
 const Project = M.require('models.project');
-const ServerData = M.require('models.server-data');
+const migrate = M.require('lib.migrate');
 
 /**
  * @description Handles the database migration from 0.7.3.1 to 0.7.3.
  *
  * @returns {Promise} Returns an empty promise upon completion.
  */
-module.exports.down = function() {
-  return new Promise((resolve, reject) => {
-    // Get all documents from the server data
-    ServerData.find({})
-    .then((serverData) => {
-      // Restrict collection to one document
-      if (serverData.length > 1) {
-        throw new Error('Cannot have more than one server data document.');
-      }
-      // If no server data currently exists, create the document
-      if (serverData.length === 0) {
-        return ServerData.insertMany([{ _id: 'server_data', version: '0.7.3' }]);
-      }
-
-      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.7.3' });
-    })
-    .then(() => resolve())
-    .catch((error) => reject(error));
-  });
+module.exports.down = async function() {
+  return migrate.shiftVersion('0.7.3');
 };
 
 /**
@@ -55,26 +38,9 @@ module.exports.down = function() {
  *
  * @returns {Promise} Returns an empty promise upon completion.
  */
-module.exports.up = function() {
-  return new Promise((resolve, reject) => {
-    projectHelper()
-    // Get all documents from the server data
-    .then(() => ServerData.find({}))
-    .then((serverData) => {
-      // Restrict collection to one document
-      if (serverData.length > 1) {
-        throw new Error('Cannot have more than one server data document.');
-      }
-      // If no server data currently exists, create the document
-      if (serverData.length === 0) {
-        return ServerData.insertMany([{ _id: 'server_data', version: '0.7.3.1' }]);
-      }
-
-      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.7.3.1' });
-    })
-    .then(() => resolve())
-    .catch((error) => reject(error));
-  });
+module.exports.up = async function() {
+  await projectHelper();
+  return migrate.shiftVersion('0.7.3.1');
 };
 
 /**
@@ -98,24 +64,13 @@ function projectHelper() {
       projects = foundProjects;
 
       // Write contents to temporary file
-      return new Promise(function(res, rej) {
-        fs.writeFile(path.join(M.root, 'data', 'project-0731.json'),
-          JSON.stringify(projects), function(err) {
-            if (err) rej(err);
-            else res();
-          });
-      });
+      fs.writeFileSync(path.join(M.root, 'data', 'projects-0731.json'), JSON.stringify(projects));
     })
     // Add the projectReferences field to each project
     .then(() => Project.updateMany({}, { projectReferences: [] }))
     .then(() => {
       if (fs.existsSync(path.join(M.root, 'data', 'projects-0731.json'))) {
-        return new Promise(function(res, rej) {
-          fs.unlink(path.join(M.root, 'data', 'projects-0731.json'), function(err) {
-            if (err) rej(err);
-            else res();
-          });
-        });
+        fs.unlinkSync(path.join(M.root, 'data', 'projects-0731.json'));
       }
     })
     .then(() => resolve())
