@@ -1019,7 +1019,6 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
     for (let i = 0; i < arrIDs.length / 50000; i++) {
       // Split arrIDs list into batches of 50000
       searchQuery._id = { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) };
-
       // Add find operation to promises array
       promises3.push(Element.find(searchQuery, validatedOptions.fieldsString,
         { populate: validatedOptions.populateString,

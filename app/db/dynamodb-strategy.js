@@ -691,7 +691,9 @@ class Model {
           // Run validators
           if (def[param].hasOwnProperty('validate')) {
             def[param].validate.forEach((v) => {
-              if (!v.validator(doc[param])) {
+              // Call each validator, binding the document to "this"
+              if (!v.validator.call(doc, doc[param])) {
+                // If the validator fails, throw an error
                 throw new M.DataFormatError(`${modelName} validation failed: `
                 + `${param}: ${v.message({ value: doc[param] })}`);
               }
@@ -823,7 +825,24 @@ class Model {
    * @returns {Promise<number>} The number of documents which matched the filter.
    */
   async countDocuments(filter, cb) {
-    // return super.countDocuments(filter, cb);
+    return new Promise((resolve, reject) => {
+      // Create a new DynamoDB query
+      const query = new Query(this, null, {});
+      const scanObj = query.scan(filter);
+
+      // Tell the query to only return the count
+      scanObj.Select = 'COUNT';
+
+      M.log.debug(`DB OPERATION: ${this.TableName} countDocuments`);
+      connect()
+      .then((conn) => conn.scan(scanObj).promise())
+      .then((data) => resolve(data.Count))
+      .catch((error) => {
+        M.log.verbose('Failed in countDocuments');
+        M.log.error(error);
+        return reject(error);
+      });
+    });
   }
 
   /**

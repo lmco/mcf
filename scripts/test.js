@@ -25,6 +25,15 @@ require('@babel/register')();        // Transpile react tests to javascript
 require('@babel/polyfill');          // Transpile async await for javascript
 require(path.join(M.root, 'test', '7xx_ui_tests', 'setup.js'));
 
+// MBEE modules
+const Artifact = M.require('models.artifact');
+const Branch = M.require('models.branch');
+const Element = M.require('models.element');
+const Organization = M.require('models.organization');
+const Project = M.require('models.project');
+const ServerData = M.require('models.server-data');
+const User = M.require('models.user');
+
 // If the application is run directly from node, notify the user and fail
 if (module.parent == null) {
   // eslint-disable-next-line no-console
@@ -122,17 +131,26 @@ function test(_args) {
   // Call the mochaWalk function to load in all of the test files
   mochaWalk(testDir, mocha);
 
-  // Run the tests.
-  mocha.run((error) => {
-    // Check for failures
-    if (error) {
-      // mocha did not pass all test, exit with error code -1
-      process.exit(-1);
-    }
-    else {
-      // mocha passed all tests, exit with error code 0
-      process.exit(0);
-    } // if (failures) {}
+  Artifact.init()
+  .then(() => Branch.init())
+  .then(() => Element.init())
+  .then(() => Organization.init())
+  .then(() => Project.init())
+  .then(() => ServerData.init())
+  .then(() => User.init())
+  .then(() => {
+    // Run the tests.
+    mocha.run((error) => {
+      // Check for failures
+      if (error) {
+        // mocha did not pass all test, exit with error code -1
+        process.exit(-1);
+      }
+      else {
+        // mocha passed all tests, exit with error code 0
+        process.exit(0);
+      } // if (failures) {}
+    });
   });
 }
 
