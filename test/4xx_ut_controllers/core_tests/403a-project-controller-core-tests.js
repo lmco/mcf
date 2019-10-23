@@ -125,7 +125,6 @@ function createProject(done) {
     const createdProj = createdProjects[0];
 
     // Verify project created properly
-    chai.expect(createdProj.id).to.equal(utils.createID(org._id, projData.id));
     chai.expect(createdProj._id).to.equal(utils.createID(org._id, projData.id));
     chai.expect(createdProj.name).to.equal(projData.name);
     chai.expect(createdProj.custom).to.deep.equal(projData.custom);
@@ -178,7 +177,6 @@ function createProjects(done) {
       const createdProj = jmi2Projects[projectID];
 
       // Verify project created properly
-      chai.expect(createdProj.id).to.equal(projectID);
       chai.expect(createdProj._id).to.equal(projectID);
       chai.expect(createdProj.name).to.equal(projDataObject.name);
       chai.expect(createdProj.custom).to.deep.equal(projDataObject.custom);
@@ -221,7 +219,6 @@ function createOrReplaceProject(done) {
     const replacedProj = replacedProjects[0];
 
     // Verify project created/replaced properly
-    chai.expect(replacedProj.id).to.equal(utils.createID(org._id, projData.id));
     chai.expect(replacedProj._id).to.equal(utils.createID(org._id, projData.id));
     chai.expect(replacedProj.name).to.equal(projData.name);
     chai.expect(replacedProj.custom).to.deep.equal(projData.custom);
@@ -274,7 +271,6 @@ function createOrReplaceProjects(done) {
       const replacedProj = jmi2Projects[projectID];
 
       // Verify project created/replaced properly
-      chai.expect(replacedProj.id).to.equal(projectID);
       chai.expect(replacedProj._id).to.equal(projectID);
       chai.expect(replacedProj.name).to.equal(projDataObject.name);
       chai.expect(replacedProj.custom).to.deep.equal(projDataObject.custom);
@@ -317,7 +313,6 @@ function findProject(done) {
     const foundProj = foundProjects[0];
 
     // Verify correct project found
-    chai.expect(foundProj.id).to.equal(utils.createID(org._id, projData.id));
     chai.expect(foundProj._id).to.equal(utils.createID(org._id, projData.id));
     chai.expect(foundProj.name).to.equal(projData.name);
     chai.expect(foundProj.custom).to.deep.equal(projData.custom);
@@ -373,7 +368,6 @@ function findProjects(done) {
       const foundProj = jmi2Projects[projectID];
 
       // Verify correct project found
-      chai.expect(foundProj.id).to.equal(projectID);
       chai.expect(foundProj._id).to.equal(projectID);
       chai.expect(foundProj.name).to.equal(projDataObject.name);
       chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom);
@@ -428,7 +422,6 @@ function findAllProjects(done) {
       const foundProj = jmi2Projects[projectID];
 
       // Verify correct project found
-      chai.expect(foundProj.id).to.equal(projectID);
       chai.expect(foundProj._id).to.equal(projectID);
       chai.expect(foundProj.name).to.equal(projDataObject.name);
       chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom);
@@ -477,7 +470,6 @@ function updateProject(done) {
     const updatedProj = updatedProjects[0];
 
     // Verify correct project updated
-    chai.expect(updatedProj.id).to.equal(utils.createID(org._id, projData.id));
     chai.expect(updatedProj._id).to.equal(utils.createID(org._id, projData.id));
     chai.expect(updatedProj.name).to.equal(`${projData.name}_edit`);
     chai.expect(updatedProj.custom).to.deep.equal(projData.custom);
@@ -536,7 +528,6 @@ function updateProjects(done) {
       const updatedProj = jmi2Projects[projectID];
 
       // Verify correct project updated
-      chai.expect(updatedProj.id).to.equal(projectID);
       chai.expect(updatedProj._id).to.equal(projectID);
       chai.expect(updatedProj.name).to.equal(`${projDataObject.name}_edit`);
       chai.expect(updatedProj.custom).to.deep.equal(projDataObject.custom);

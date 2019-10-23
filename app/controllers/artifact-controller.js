@@ -551,11 +551,27 @@ async function update(requestingUser, organizationID, projectID, branchID,
 
         // Get validator for field if one exists
         if (validators.artifact.hasOwnProperty(key)) {
-          // If validation fails, throw error
-          if (!RegExp(validators.artifact[key]).test(updateArtifact[key])) {
-            throw new M.DataFormatError(
-              `Invalid ${key}: [${updateArtifact[key]}]`, 'warn'
-            );
+          // If the validator is a regex string
+          if (typeof validators.artifact[key] === 'string') {
+            // If validation fails, throw error
+            if (!RegExp(validators.artifact[key]).test(updateArtifact[key])) {
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateArtifact[key]}]`, 'warn'
+              );
+            }
+          }
+          // If the validator is a functions
+          else if (typeof validators.artifact[key] === 'function') {
+            if (!validators.artifact[key](updateArtifact[key])) {
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateArtifact[key]}]`, 'warn'
+              );
+            }
+          }
+          // Improperly formatted validator
+          else {
+            throw new M.ServerError(`Artifact validator [${key}] is neither a `
+              + 'function not a regex string.');
           }
         }
 

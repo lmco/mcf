@@ -56,12 +56,12 @@ describe(M.getModuleName(module.filename), () => {
       adminUser = await testUtils.createTestAdmin();
       // Create the organization model object
       org = await testUtils.createTestOrg(adminUser);
-      orgID = org.id;
+      orgID = org._id;
 
 
       // Create the project model object
       project = await testUtils.createTestProject(adminUser, orgID);
-      projectID = utils.parseID(project.id).pop();
+      projectID = utils.parseID(project._id).pop();
       branchID = testData.branches[0].id;
 
       // Get png test file
