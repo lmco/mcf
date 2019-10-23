@@ -184,7 +184,7 @@ async function find(requestingUser, organizationID, projectID, branchID, artifac
   // Check the type of the artifact parameter
   if (Array.isArray(saniArtifacts)) {
     // An array of artifact ids, find all
-    searchQuery._id = saniArtifacts.map(a => utils.createID(orgID, projID, branchID, a));
+    searchQuery._id = { $in: saniArtifacts.map(a => utils.createID(orgID, projID, branchID, a)) };
   }
   else if (typeof saniArtifacts === 'string') {
     // A single artifact id
