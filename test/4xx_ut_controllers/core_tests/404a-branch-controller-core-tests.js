@@ -130,7 +130,6 @@ function createBranch(done) {
     const createdBranch = _createdBranch[0];
 
     // Verify branch created properly
-    chai.expect(createdBranch.id).to.equal(utils.createID(org._id, projID, branchData.id));
     chai.expect(createdBranch._id).to.equal(utils.createID(org._id, projID, branchData.id));
     chai.expect(createdBranch.name).to.equal(branchData.name);
     chai.expect(createdBranch.custom || {}).to.deep.equal(branchData.custom);
@@ -182,7 +181,6 @@ function createBranches(done) {
       const createdBranch = jmi2Branches[branchID];
 
       // Verify branches created properly
-      chai.expect(createdBranch.id).to.equal(branchID);
       chai.expect(createdBranch._id).to.equal(branchID);
       chai.expect(createdBranch.name).to.equal(branchObj.name);
       chai.expect(createdBranch.custom || {}).to.deep.equal(branchObj.custom);
@@ -222,7 +220,6 @@ function createTag(done) {
     const createdBranch = _createdBranch[0];
 
     // Verify branch created properly
-    chai.expect(createdBranch.id).to.equal(utils.createID(org._id, projID, branchData.id));
     chai.expect(createdBranch._id).to.equal(utils.createID(org._id, projID, branchData.id));
     chai.expect(createdBranch.name).to.equal(branchData.name);
     chai.expect(createdBranch.custom || {}).to.deep.equal(branchData.custom);
@@ -262,7 +259,6 @@ function findBranch(done) {
     const foundBranch = _foundBranch[0];
 
     // Verify correct branch found
-    chai.expect(foundBranch.id).to.equal(utils.createID(org._id, projID, branchData.id));
     chai.expect(foundBranch._id).to.equal(utils.createID(org._id, projID, branchData.id));
     chai.expect(foundBranch.name).to.equal(branchData.name);
     chai.expect(foundBranch.custom || {}).to.deep.equal(branchData.custom);
@@ -315,7 +311,6 @@ function findBranches(done) {
       const foundBranch = jmi2Branches[branchID];
 
       // Verify correct branches found
-      chai.expect(foundBranch.id).to.equal(branchID);
       chai.expect(foundBranch._id).to.equal(branchID);
       chai.expect(foundBranch.name).to.equal(branchObj.name);
       chai.expect(foundBranch.custom || {}).to.deep.equal(branchObj.custom);
@@ -369,7 +364,6 @@ function findAllBranches(done) {
       const foundBranch = jmi2Branches[branchID];
 
       // Verify correct branch found
-      chai.expect(foundBranch.id).to.equal(branchID);
       chai.expect(foundBranch._id).to.equal(branchID);
       chai.expect(foundBranch.name).to.equal(branchDataObject.name);
       chai.expect(foundBranch.custom).to.deep.equal(branchDataObject.custom);
@@ -417,7 +411,6 @@ function updateBranch(done) {
     const updatedBranch = updatedBranches[0];
 
     // Verify branch updated properly
-    chai.expect(updatedBranch.id).to.equal(utils.createID(org._id, projID, branchData.id));
     chai.expect(updatedBranch._id).to.equal(utils.createID(org._id, projID, branchData.id));
     chai.expect(updatedBranch.name).to.equal(updateObj.name);
     chai.expect(updatedBranch.custom || {}).to.deep.equal(branchData.custom);
@@ -474,7 +467,6 @@ function updateBranches(done) {
       const updatedBranch = jmi2Elements[branchID];
 
       // Verify branch updated properly
-      chai.expect(updatedBranch.id).to.equal(branchID);
       chai.expect(updatedBranch._id).to.equal(branchID);
       chai.expect(updatedBranch.name).to.equal(`${branchObj.name}_edit`);
       chai.expect(updatedBranch.custom || {}).to.deep.equal(branchObj.custom);

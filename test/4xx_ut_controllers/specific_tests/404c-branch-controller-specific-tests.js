@@ -358,11 +358,11 @@ async function optionSortFind() {
 
     // Validate that the sort option is working
     chai.expect(foundBranches[0].name).to.equal('a');
-    chai.expect(foundBranches[0].id).to.equal(utils.createID(org._id, projID, 'testbranch02'));
+    chai.expect(foundBranches[0]._id).to.equal(utils.createID(org._id, projID, 'testbranch02'));
     chai.expect(foundBranches[1].name).to.equal('b');
-    chai.expect(foundBranches[1].id).to.equal(utils.createID(org._id, projID, 'testbranch00'));
+    chai.expect(foundBranches[1]._id).to.equal(utils.createID(org._id, projID, 'testbranch00'));
     chai.expect(foundBranches[2].name).to.equal('c');
-    chai.expect(foundBranches[2].id).to.equal(utils.createID(org._id, projID, 'testbranch01'));
+    chai.expect(foundBranches[2]._id).to.equal(utils.createID(org._id, projID, 'testbranch01'));
 
     // Find the branches and return them sorted in reverse
     const reverseBranches = await BranchController.find(adminUser, org._id, projID,
@@ -373,11 +373,11 @@ async function optionSortFind() {
 
     // Validate that the sort option is working
     chai.expect(reverseBranches[0].name).to.equal('c');
-    chai.expect(reverseBranches[0].id).to.equal(utils.createID(org._id, projID, 'testbranch01'));
+    chai.expect(reverseBranches[0]._id).to.equal(utils.createID(org._id, projID, 'testbranch01'));
     chai.expect(reverseBranches[1].name).to.equal('b');
-    chai.expect(reverseBranches[1].id).to.equal(utils.createID(org._id, projID, 'testbranch00'));
+    chai.expect(reverseBranches[1]._id).to.equal(utils.createID(org._id, projID, 'testbranch00'));
     chai.expect(reverseBranches[2].name).to.equal('a');
-    chai.expect(reverseBranches[2].id).to.equal(utils.createID(org._id, projID, 'testbranch02'));
+    chai.expect(reverseBranches[2]._id).to.equal(utils.createID(org._id, projID, 'testbranch02'));
 
     await BranchController.remove(adminUser, org._id, projID, testBranches.map((b) => b.id));
   }

@@ -1310,11 +1310,11 @@ async function optionSortFind() {
 
     // Validate that the sort option is working
     chai.expect(foundElems[0].name).to.equal('a');
-    chai.expect(foundElems[0].id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem02'));
+    chai.expect(foundElems[0]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem02'));
     chai.expect(foundElems[1].name).to.equal('b');
-    chai.expect(foundElems[1].id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem00'));
+    chai.expect(foundElems[1]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem00'));
     chai.expect(foundElems[2].name).to.equal('c');
-    chai.expect(foundElems[2].id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem01'));
+    chai.expect(foundElems[2]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem01'));
 
     // Find the elements and return them sorted in reverse
     const reverseElems = await ElementController.find(adminUser, org._id, projIDs[0], branchID,
@@ -1325,11 +1325,11 @@ async function optionSortFind() {
 
     // Validate that the sort option is working
     chai.expect(reverseElems[0].name).to.equal('c');
-    chai.expect(reverseElems[0].id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem01'));
+    chai.expect(reverseElems[0]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem01'));
     chai.expect(reverseElems[1].name).to.equal('b');
-    chai.expect(reverseElems[1].id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem00'));
+    chai.expect(reverseElems[1]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem00'));
     chai.expect(reverseElems[2].name).to.equal('a');
-    chai.expect(reverseElems[2].id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem02'));
+    chai.expect(reverseElems[2]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem02'));
 
     await ElementController.remove(adminUser, org._id, projIDs[0], branchID,
       testElems.map((e) => e.id));
@@ -1388,11 +1388,11 @@ async function optionSortSearch() {
 
     // Validate that the sort option is working
     chai.expect(sortedElems[0].name).to.equal('a');
-    chai.expect(sortedElems[0].id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem02'));
+    chai.expect(sortedElems[0]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem02'));
     chai.expect(sortedElems[1].name).to.equal('b');
-    chai.expect(sortedElems[1].id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem00'));
+    chai.expect(sortedElems[1]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem00'));
     chai.expect(sortedElems[2].name).to.equal('c');
-    chai.expect(sortedElems[2].id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem01'));
+    chai.expect(sortedElems[2]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem01'));
 
     // Search the elements and return them sorted in reverse
     const reverseElems = await ElementController.search(adminUser, org._id, projIDs[0], branchID,
@@ -1402,11 +1402,11 @@ async function optionSortSearch() {
 
     // Validate that the sort option is working
     chai.expect(reverseElems[0].name).to.equal('c');
-    chai.expect(reverseElems[0].id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem01'));
+    chai.expect(reverseElems[0]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem01'));
     chai.expect(reverseElems[1].name).to.equal('b');
-    chai.expect(reverseElems[1].id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem00'));
+    chai.expect(reverseElems[1]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem00'));
     chai.expect(reverseElems[2].name).to.equal('a');
-    chai.expect(reverseElems[2].id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem02'));
+    chai.expect(reverseElems[2]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem02'));
 
     await ElementController.remove(adminUser, org._id, projIDs[0], branchID,
       testElems.map((e) => e.id));
