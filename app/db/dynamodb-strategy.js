@@ -1499,7 +1499,7 @@ class Query {
           };
             break;
           default: throw new M.DatabaseError(
-            `Query param type ${typeof query[k]} is not supported`, 'critical'
+            `Query param type [${typeof query[k]}] is not supported`, 'critical'
           );
         }
 
