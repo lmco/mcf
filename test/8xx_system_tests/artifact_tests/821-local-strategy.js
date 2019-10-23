@@ -5,16 +5,17 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Phillip Lee <phillip.lee@lmco.com>
+ * @owner Phillip Lee
  *
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Phillip Lee
  *
  * @description Tests the exported functions and classes from the
  * artifact local-strategy. If this strategy is NOT selected in the running
  * config, the tests will be skipped.
  */
+
 // Node modules
 const path = require('path');
 const fs = require('fs');

@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Phillip Lee <phillip.lee@lmco.com>
+ * @owner Phillip Lee
  *
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Phillip Lee
  *
  * @description Tests creating, updating and deleting artifacts through the
  * model. Tests the artifact model by performing various actions such as a
