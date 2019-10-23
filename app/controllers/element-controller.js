@@ -855,9 +855,9 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
     const sourceTargetQuery = { _id: { $in: sourceTargetIDs } };
 
     // Find elements in batches
-    for (let i = 0; i < elementsToUpdate.length / 50000; i++) {
+    for (let i = 0; i < arrIDs.length / 50000; i++) {
       // Split elementIDs list into batches of 50000
-      searchQuery._id = { $in: elementsToUpdate.slice(i * 50000, i * 50000 + 50000) };
+      searchQuery._id = { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) };
 
       // Add find operation to promises array
       promises2.push(Element.find(searchQuery, null, { lean: true })
