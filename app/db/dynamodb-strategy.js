@@ -390,9 +390,15 @@ class Model {
    */
   async formatDocuments(documents, options) {
     // Loop through each document
+    const promises = [];
     for (let i = 0; i < documents.length; i++) {
-      documents[i] = await this.formatDocument(documents[i], options);
+      promises.push(this.formatDocument(documents[i], options)
+      .then((doc) => {
+        documents[i] = doc;
+      }));
     }
+
+    await Promise.all(promises);
 
     // Return modified documents
     return documents;
@@ -408,6 +414,7 @@ class Model {
    * @returns {object} - Modified documents.
    */
   async formatDocument(document, options = {}, recurse = false) {
+    const promises = [];
     Object.keys(document).forEach((field) => {
       // If the string null, convert to actual value
       if (Object.values(document[field])[0] === 'null') {
@@ -416,7 +423,10 @@ class Model {
 
       // Go through each type
       if (Object.keys(document[field])[0] === 'M') {
-        document[field] = this.formatDocument(document[field].M, {}, true);
+        promises.push(this.formatDocument(document[field].M, {}, true)
+        .then((retDoc) => {
+          document[field] = retDoc;
+        }));
       }
       else if (Object.keys(document[field])[0] === 'N'
         && Object.values(document[field])[0] !== null) {
@@ -441,6 +451,9 @@ class Model {
         document[field] = null;
       }
     });
+
+    // Wait for any recursive portions to complete
+    await Promise.all(promises);
 
     // If the top level
     if (!recurse) {
@@ -479,9 +492,8 @@ class Model {
    */
   async batchGetItem(filter, projection, options) {
     return new Promise((resolve, reject) => {
-      const query = new Query('batchGetItem', this,
-        filter, projection, options);
-      const queriesToMake = query.query;
+      const query = new Query(this, projection, options);
+      const queriesToMake = query.batchGetItem(filter);
 
       // If there are actually query parameters
       if (queriesToMake.length > 0) {
@@ -498,7 +510,7 @@ class Model {
             .then((found) => {
               foundDocs = foundDocs.concat(found.Responses[this.TableName]);
             })
-            .catch((e) => console.log(e))
+            .catch((e) => M.log.error(e))
           );
         });
 
@@ -523,7 +535,7 @@ class Model {
       .then((conn) => conn.batchWriteItem(params).promise())
       .then(() => resolve())
       .catch((error) => {
-        console.log(error);
+        M.log.error(error);
         M.log.verbose('Failed in batchWriteItem');
         return reject(error)
       });
@@ -714,6 +726,9 @@ class Model {
               doc[param] = 'null';
             }
           }
+
+          // If value is a blank string, delete key; blank strings are not allowed in DynamoDB
+          if (doc[param] === '') delete doc[param];
         }
         // If the parameter is required and no default is provided, throw an error
         else if (def[param].required && !def[param].default) {
@@ -844,7 +859,7 @@ class Model {
       tmpQuery._id.$in.push(doc._id);
     });
 
-    const query = new Query('deleteMany', this, conditions, null, options);
+    const query = new Query(this, null, options);
     const deleteQuery = query.deleteMany(tmpQuery);
 
     // If there are items to delete
@@ -976,15 +991,8 @@ class Model {
    */
   async getItem(filter, projection, options) {
     return new Promise((resolve, reject) => {
-      // Make the projection comma separated instead of space separated
-      const projectionString = (projection) ? projection.split(' ').join(',') : undefined;
-      const getObj = {
-        Key: {},
-        TableName: this.TableName,
-        ProjectionExpression: projectionString
-      };
-
-      getObj.Key = this.formatObject(filter);
+      const query = new Query(this, projection, options);
+      const getObj = query.getItem(filter);
 
       M.log.debug(`DB OPERATION: ${this.TableName} getItem`);
       // Make the getItem request
@@ -993,16 +1001,17 @@ class Model {
       .then((foundItem) => {
         // If no document is found, return null
         if (Object.keys(foundItem).length === 0) {
-          return resolve(null);
+          return null;
         }
         else {
           // Return the document
-          return resolve(this.formatDocument(foundItem.Item, options));
+          return this.formatDocument(foundItem.Item, options);
         }
       })
+      .then((doc) => resolve(doc))
       .catch((error) => {
         M.log.verbose('Failed in getItem');
-        return reject(error)
+        return reject(error);
       });
     });
   }
@@ -1110,10 +1119,9 @@ class Model {
           promises3.push(
             connect()
             .then((conn) => conn.batchGetItem(batchGetObj).promise())
-            .then((foundDocs) => {
-              foundDocuments = foundDocuments.concat(
-                this.formatDocuments(foundDocs.Responses[this.TableName], options)
-              );
+            .then((foundDocs) => this.formatDocuments(foundDocs.Responses[this.TableName], options))
+            .then((formattedDocs) => {
+              foundDocuments = foundDocuments.concat(formattedDocs);
             })
             .catch((error) => {
               return reject(error);
@@ -1267,7 +1275,7 @@ class Model {
   async scan(filter, projection, options) {
     return new Promise((resolve, reject) => {
       // Create a new DynamoDB query
-      const query = new Query('scan', this, filter, projection, options);
+      const query = new Query(this, projection, options);
       const scanObj = query.scan(filter);
 
       M.log.debug(`DB OPERATION: ${this.TableName} scan`);
@@ -1276,7 +1284,7 @@ class Model {
       .then((data) => resolve(this.formatDocuments(data.Items, options)))
       .catch((error) => {
         M.log.verbose('Failed in scan');
-        console.log(error)
+        M.log.error(error);
         console.log(JSON.stringify(scanObj, null, 1));
         return reject(error);
       });
@@ -1297,7 +1305,7 @@ class Model {
   async updateItem(filter, doc, options) {
     return new Promise((resolve, reject) => {
       // Create Query object and retrieve update object
-      const query = new Query('updateItem', this, filter, null, options);
+      const query = new Query(this, null, options);
       const updateObj = query.updateItem(filter, doc);
 
       M.log.debug(`DB OPERATION: ${this.TableName} updateItem`);
@@ -1365,9 +1373,8 @@ class Store extends DynamoDBStore {
 
 
 class Query {
-  constructor(functionName, model, query, projection, options) {
+  constructor(model, projection, options) {
     this.model = model;
-    this.query = [];
     this.ExpressionAttributeNames = {};
     this.ExpressionAttributeValues = {};
     this.ProjectionExpression = '';
@@ -1376,28 +1383,6 @@ class Query {
 
     // Parse the projection
     this.parseProjection(projection);
-
-    if (functionName === 'batchGetItem') {
-      this.parseRequestItemsKeys(query);
-
-      const baseObj = { RequestItems: {} };
-      baseObj.RequestItems[model.TableName] = { Keys: [] };
-
-      // Add on the ProjectionExpression and ExpressionAttributeNames if defined
-      if (this.ProjectionExpression.length) {
-        baseObj.RequestItems[model.TableName].ProjectionExpression = this.ProjectionExpression;
-      }
-      if (Object.keys(this.ExpressionAttributeNames).length !== 0) {
-        baseObj.RequestItems[model.TableName]
-        .ExpressionAttributeNames = this.ExpressionAttributeNames;
-      }
-
-      for (let i = 0; i < this.RequestItemsKeys.length / 25; i++) {
-        baseObj.RequestItems[model.TableName].Keys = this.RequestItemsKeys
-        .slice(i * 25, i * 25 + 25);
-        this.query.push(baseObj);
-      }
-    }
   }
 
 
@@ -1570,6 +1555,52 @@ class Query {
     }
 
     this.RequestItemsKeys = returnArray;
+  }
+
+  batchGetItem(filter) {
+    this.parseRequestItemsKeys(filter);
+    const queries = [];
+
+    const baseObj = {
+      RequestItems: {}
+    };
+    baseObj.RequestItems[this.model.TableName] = { Keys: [] };
+
+    // Add on the ProjectionExpression and ExpressionAttributeNames if defined
+    if (this.ProjectionExpression.length) {
+      baseObj.RequestItems[this.model.TableName].ProjectionExpression = this.ProjectionExpression;
+    }
+    if (Object.keys(this.ExpressionAttributeNames).length !== 0) {
+      baseObj.RequestItems[this.model.TableName]
+      .ExpressionAttributeNames = this.ExpressionAttributeNames;
+    }
+
+    for (let i = 0; i < this.RequestItemsKeys.length / 25; i++) {
+      baseObj.RequestItems[this.model.TableName].Keys = this.RequestItemsKeys
+      .slice(i * 25, i * 25 + 25);
+      queries.push(baseObj);
+    }
+
+    return queries;
+  }
+
+  getItem(filter) {
+    this.parseRequestItemsKeys(filter);
+
+    const baseObj = {
+      TableName: this.model.TableName,
+      Key: this.RequestItemsKeys[0]
+    };
+
+    // Add on the ProjectionExpression and ExpressionAttributeNames if defined
+    if (this.ProjectionExpression.length) {
+      baseObj.ProjectionExpression = this.ProjectionExpression;
+    }
+    if (Object.keys(this.ExpressionAttributeNames).length !== 0) {
+      baseObj.ExpressionAttributeNames = this.ExpressionAttributeNames;
+    }
+
+    return baseObj;
   }
 
   updateItem(filter, doc) {
