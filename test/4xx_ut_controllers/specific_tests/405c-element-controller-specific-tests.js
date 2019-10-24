@@ -413,12 +413,20 @@ async function optionPopulateFind() {
 
     // For each field in pop
     pop.forEach((field) => {
-      // If the field is defined in the returned element
-      if (elem.hasOwnProperty(field)) {
+      chai.expect(field in elem).to.equal(true);
+      if (Array.isArray(elem[field])) {
+        elem[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (elem[field] !== null) {
         // Expect each populated field to be an object
-        chai.expect(typeof elem.field).to.equal('object');
-        // Expect each populated field to at least have an _id
-        chai.expect(elem.field.hasOwnProperty('_id')).to.equal(true);
+        chai.expect(typeof elem[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in elem[field]).to.equal(true);
       }
     });
   }
@@ -678,12 +686,20 @@ async function optionPopulateCreate() {
 
     // For each field in pop
     pop.forEach((field) => {
-      // If the field is defined in the returned element
-      if (elem.hasOwnProperty(field)) {
+      chai.expect(field in elem).to.equal(true);
+      if (Array.isArray(elem[field])) {
+        elem[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (elem[field] !== null) {
         // Expect each populated field to be an object
-        chai.expect(typeof elem.field).to.equal('object');
-        // Expect each populated field to at least have an _id
-        chai.expect(elem.field.hasOwnProperty('_id')).to.equal(true);
+        chai.expect(typeof elem[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in elem[field]).to.equal(true);
       }
     });
   }
@@ -824,12 +840,20 @@ async function optionPopulateUpdate() {
 
     // For each field in pop
     pop.forEach((field) => {
-      // If the field is defined in the returned element
-      if (elem.hasOwnProperty(field)) {
+      chai.expect(field in elem).to.equal(true);
+      if (Array.isArray(elem[field])) {
+        elem[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (elem[field] !== null) {
         // Expect each populated field to be an object
-        chai.expect(typeof elem.field).to.equal('object');
-        // Expect each populated field to at least have an _id
-        chai.expect(elem.field.hasOwnProperty('_id')).to.equal(true);
+        chai.expect(typeof elem[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in elem[field]).to.equal(true);
       }
     });
   }
@@ -975,12 +999,20 @@ async function optionPopulateReplace() {
 
     // For each field in pop
     pop.forEach((field) => {
-      // If the field is defined in the returned element
-      if (elem.hasOwnProperty(field)) {
+      chai.expect(field in elem).to.equal(true);
+      if (Array.isArray(elem[field])) {
+        elem[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (elem[field] !== null) {
         // Expect each populated field to be an object
-        chai.expect(typeof elem.field).to.equal('object');
-        // Expect each populated field to at least have an _id
-        chai.expect(elem.field.hasOwnProperty('_id')).to.equal(true);
+        chai.expect(typeof elem[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in elem[field]).to.equal(true);
       }
     });
   }
@@ -1118,12 +1150,20 @@ async function optionPopulateSearch() {
 
     // For each field in pop
     pop.forEach((field) => {
-      // If the field is defined in the returned element
-      if (elem.hasOwnProperty(field)) {
+      chai.expect(field in elem).to.equal(true);
+      if (Array.isArray(elem[field])) {
+        elem[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (elem[field] !== null) {
         // Expect each populated field to be an object
-        chai.expect(typeof elem.field).to.equal('object');
-        // Expect each populated field to at least have an _id
-        chai.expect(elem.field.hasOwnProperty('_id')).to.equal(true);
+        chai.expect(typeof elem[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in elem[field]).to.equal(true);
       }
     });
   }
