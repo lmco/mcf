@@ -1184,19 +1184,26 @@ class Model {
 
         // If the field to populate is defined
         if (popObj) {
-          // Create the find query
-          const query = {};
-          query[popObj.foreignField] = doc[popObj.localField];
-
-          // If justOne is true, use findOne
-          if (popObj.justOne) {
-            promises.push(models[popObj.ref].findOne(query, null, {})
-            .then((objs) => { doc[f] = objs; }));
+          // If the field is null, empty string or undefined
+          if (!doc[f]) {
+            // Set the value to null if justOne is true, else an empty array
+            doc[f] = (popObj.justOne) ? null : [];
           }
-          // findOne is false, find an array of matching documents
           else {
-            promises.push(models[popObj.ref].find(query, null, {})
-            .then((objs) => { doc[f] = objs; }));
+            // Create the find query
+            const query = {};
+            query[popObj.foreignField] = doc[popObj.localField];
+
+            // If justOne is true, use findOne
+            if (popObj.justOne) {
+              promises.push(models[popObj.ref].findOne(query, null, {})
+              .then((objs) => { doc[f] = objs; }));
+            }
+            // findOne is false, find an array of matching documents
+            else {
+              promises.push(models[popObj.ref].find(query, null, {})
+              .then((objs) => { doc[f] = objs; }));
+            }
           }
         }
       });
@@ -1399,6 +1406,7 @@ class Query {
     this.ProjectionExpression = '';
     this.FilterExpression = '';
     this.RequestItemsKeys = [];
+    this.UpdateExpression = '';
 
     // Parse the projection
     this.parseProjection(projection);
@@ -1498,9 +1506,12 @@ class Query {
             N: query[k].toString()
           };
             break;
-          default: throw new M.DatabaseError(
-            `Query param type [${typeof query[k]}] is not supported`, 'critical'
-          );
+          default: {
+            console.log(query)
+            throw new M.DatabaseError(
+              `Query param type [${typeof query[k]}] is not supported`, 'critical'
+            );
+          }
         }
 
         // Handle special case where searching an array of permissions
@@ -1576,6 +1587,63 @@ class Query {
     this.RequestItemsKeys = returnArray;
   }
 
+
+  parseUpdateExpression(filter) {
+    // Handle filter expression
+    Object.keys(filter).forEach((k) => {
+      // Handle special case where key name starts with an underscore
+      let keyName = (k === '_id') ? 'id' : k;
+
+      // Handle case where updating an object
+      if (keyName.includes('.')) {
+        const split = keyName.split('.');
+        split.forEach((s) => {
+          const kName = (s === '_id') ? 'id' : s;
+          // Add key to ExpressionAttributeNames
+          this.ExpressionAttributeNames[`#${kName}`] = s;
+        });
+        keyName = split.join('.#');
+      }
+      else {
+        // Add key to ExpressionAttributeNames
+        this.ExpressionAttributeNames[`#${keyName}`] = k;
+      }
+
+      const valueKey = (k.includes('.')) ? k.split('.').join('_') : k;
+
+      // Perform operation based on the type of parameter being updated
+      switch (typeof filter[k]) {
+        case 'string': this.ExpressionAttributeValues[`:${valueKey}`] = { S: filter[k] };
+          break;
+        case 'boolean': this.ExpressionAttributeValues[`:${valueKey}`] = { BOOL: filter[k] };
+          break;
+        case 'number': this.ExpressionAttributeValues[`:${valueKey}`] = {
+          N: filter[k].toString()
+        };
+          break;
+        case 'object': {
+          console.log(keyName)
+          console.log(filter[k]);
+        }
+          break;
+        default: {
+          throw new M.DatabaseError(
+            `Query param type [${typeof filter[k]}] is not supported`, 'critical'
+          );
+        }
+      }
+
+      // If UpdateExpression is not defined yet, define it
+      if (this.UpdateExpression === '') {
+        this.UpdateExpression = `SET #${keyName} = :${valueKey}`;
+      }
+      else {
+        // Append on condition
+        this.UpdateExpression += `, #${keyName} = :${valueKey}`;
+      }
+    });
+  }
+
   batchGetItem(filter) {
     this.parseRequestItemsKeys(filter);
     const queries = [];
@@ -1623,7 +1691,7 @@ class Query {
   }
 
   updateItem(filter, doc) {
-    this.parseFilterExpression(doc);
+    this.parseUpdateExpression(doc);
     this.parseRequestItemsKeys(filter);
 
     const baseObj = {
@@ -1641,9 +1709,8 @@ class Query {
     }
 
     // Add on ExpressionAttributeValues and UpdateExpression if defined
-    if (this.FilterExpression.length) {
-      // Append SET and replace the AND with commas
-      baseObj.UpdateExpression = `SET ${this.FilterExpression.replace(/ AND /g, ', ')}`;
+    if (this.UpdateExpression.length) {
+      baseObj.UpdateExpression = this.UpdateExpression;
     }
     if (Object.keys(this.ExpressionAttributeValues).length !== 0) {
       baseObj.ExpressionAttributeValues = this.ExpressionAttributeValues;
