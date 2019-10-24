@@ -41,10 +41,10 @@ const errors = M.require('lib.errors');
  * from the local file system.
  *
  * @param {string} artMetadata - Artifact metadata.
- * @param {string} [artMetadata.filename] - The filename of the artifact.
- * @param {string} [artMetadata.location] - The location of the artifact.
- * @param {string} [artMetadata.org] - The org of the artifact blob.
- * @param {string} [artMetadata.project] - The project of the artifact blob.
+ * @param {string} artMetadata.filename - The filename of the artifact.
+ * @param {string} artMetadata.location - The location of the artifact.
+ * @param {string} artMetadata.org - The org of the artifact blob.
+ * @param {string} artMetadata.project - The project of the artifact blob.
  *
  * @returns {Buffer} Artifact binary.
  */
@@ -67,42 +67,45 @@ function getBlob(artMetadata) {
 
 /**
  * @description This function writes an artifact blob
- * to the local file system.
- *
- * This function does NOT overwrite existing blob.
+ * to the local file system. This function does NOT overwrite existing blob.
  *
  * @param {string} artMetadata - Artifact metadata.
- * @param {string} [artMetadata.filename] - The filename of the artifact.
- * @param {string} [artMetadata.location] - The location of the artifact.
- * @param {string} [artMetadata.org] - The org of the artifact blob.
- * @param {string} [artMetadata.project] - The project of artifact blob.
+ * @param {string} artMetadata.filename - The filename of the artifact.
+ * @param {string} artMetadata.location - The location of the artifact.
+ * @param {string} artMetadata.org - The org of the artifact blob.
+ * @param {string} artMetadata.project - The project of artifact blob.
  * @param {Buffer} artifactBlob - A binary large object artifact.
  */
 function postBlob(artMetadata, artifactBlob) {
-  // Validate metadata
-  validateBlobMeta(artMetadata);
+  try {
+    // Validate metadata
+    validateBlobMeta(artMetadata);
 
-  // Create artifact path
-  const fullPath = createBlobPath(artMetadata);
+    // Create artifact path
+    const fullPath = createBlobPath(artMetadata);
 
-  // Check if artifact file exist
-  if (fs.existsSync(fullPath)) {
-    throw new M.DataFormatError('Artifact blob already exists.', 'warn');
+    // Check if artifact file exist
+    if (fs.existsSync(fullPath)) {
+      throw new M.DataFormatError('Artifact blob already exists.', 'warn');
+    }
+
+    // Replace the Blob
+    putBlob(artMetadata, artifactBlob);
   }
-
-  // Replace the Blob
-  putBlob(artMetadata, artifactBlob);
+  catch (err) {
+    throw errors.captureError(err);
+  }
 }
 
 /**
- * @description This function writes an artifact blob
- * to the local file system. Existing files will be overwritten.
+ * @description This function writes an artifact blob to the local file system.
+ * Existing files will be overwritten.
  *
  * @param {string} artMetadata - Artifact metadata.
- * @param {string} [artMetadata.filename] - The filename of the artifact.
- * @param {string} [artMetadata.location] - The location of the artifact.
- * @param {string} [artMetadata.org] - The org of the artifact blob.
- * @param {string} [artMetadata.project] - The project of artifact blob.
+ * @param {string} artMetadata.filename - The filename of the artifact.
+ * @param {string} artMetadata.location - The location of the artifact.
+ * @param {string} artMetadata.org - The org of the artifact blob.
+ * @param {string} artMetadata.project - The project of artifact blob.
  * @param {Buffer} artifactBlob - A binary large object artifact.
  */
 function putBlob(artMetadata, artifactBlob) {
@@ -131,14 +134,14 @@ function putBlob(artMetadata, artifactBlob) {
 }
 
 /**
- * @description This function deletes an artifact blob file from the
- * local file system.
+ * @description This function deletes an artifact blob from the local file
+ * system.
  *
  * @param {string} artMetadata - Artifact metadata.
- * @param {string} [artMetadata.filename] - The filename of the artifact.
- * @param {string} [artMetadata.location] - The location of the artifact.
- * @param {string} [artMetadata.org] - The org of the artifact blob.
- * @param {string} [artMetadata.project] - The project of artifact blob.
+ * @param {string} artMetadata.filename - The filename of the artifact.
+ * @param {string} artMetadata.location - The location of the artifact.
+ * @param {string} artMetadata.org - The org of the artifact blob.
+ * @param {string} artMetadata.project - The project of artifact blob.
  */
 function deleteBlob(artMetadata) {
   try {
@@ -176,8 +179,6 @@ function deleteBlob(artMetadata) {
 /**
  * @description This function recursively creates directories based on
  * the input path.
- *
- * Note: Creates from root Artifact path defined in config file.
  *
  * @param {string} pathString - The full directory path.
  *
@@ -234,8 +235,6 @@ function createDirectory(pathString) {
  * @description This function recursively deletes directories based on
  * the input path.
  *
- * Note: Deletes from root Artifact path defined in config file.
- *
  * @param {string} pathString - The full directory path.
  */
 function deleteDirectory(pathString) {
@@ -253,9 +252,13 @@ function deleteDirectory(pathString) {
  * Handles specific cases to format path and filename consistently
  * across the artifact strategy.
  *
- * @param {object} artMetadata - Object containing location, file, and project.
+ * @param {string} artMetadata - Artifact metadata.
+ * @param {string} artMetadata.filename - The filename of the artifact.
+ * @param {string} artMetadata.location - The location of the artifact.
+ * @param {string} artMetadata.org - The org of the artifact blob.
+ * @param {string} artMetadata.project - The project of artifact blob.
  *
- * @returns {string} BlobPath - The blob file path.
+ * @returns {string} The blob file path.
  */
 function createBlobPath(artMetadata) {
   // defined blob location
@@ -284,18 +287,17 @@ function createBlobPath(artMetadata) {
   // Form the blob name, location concat with filename
   const concatenName = convertedLocation + artMetadata.filename;
 
-  // Form complete path
-  const blobPath = path.join(artRootPath, orgID, projID, concatenName);
-
-  // Return the path
-  return blobPath;
+  // Create and return the complete path
+  return path.join(artRootPath, orgID, projID, concatenName);
 }
 
 /**
  * @description This function validates the artifact object metadata.
  * Ensures fields such as 'location' and 'filename' are defined.
  *
- * @param {object} artMetadata - Object containing location, file, and project.
+ * @param {string} artMetadata - Artifact metadata.
+ * @param {string} artMetadata.filename - The filename of the artifact.
+ * @param {string} artMetadata.location - The location of the artifact.
  */
 function validateBlobMeta(artMetadata) {
   try {
@@ -327,6 +329,10 @@ function validateBlobMeta(artMetadata) {
  * @description This function deletes multiple blobs.
  *
  * @param {object} clearObj - Contains meta data to clear blobs.
+ * @param {string} [clearObj.orgID] - The organization ID. If provided and no
+ * projectID is provided, deletes all blobs in the organization.
+ * @param {string} [clearObj.projectID] - The project ID. If provided, deletes
+ * all blobs in the project.
  */
 function clear(clearObj) {
   let dirPath;

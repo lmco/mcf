@@ -1,5 +1,5 @@
 /* eslint-disable jsdoc/require-description-complete-sentence */
-// The rule is too picky for this file
+// Disabled to allow html in description
 /**
  * @classification UNCLASSIFIED
  *
@@ -17,9 +17,9 @@
  *
  * @description
  * <p>This module defines the branch data model. Branches contain elements which
- * make up a model. Every branch should at least contain 4 elements. The root
+ * make up a model. Every branch should at least contain 4 elements; the root
  * "model" element contains an "__mbee__" package, which contains an "undefined"
- * element and "holding_bin". Every element that gets created is placed under
+ * element and "holding_bin". Every element which gets created is placed under
  * the root model element unless otherwise specified. Branches contain two
  * unique fields, a reference to the source branch and a boolean field denoting
  * if the branch is a tag. Branches also have the ability to store custom
@@ -33,10 +33,9 @@
  *
  * <h4>Tag</h4>
  * <p>The tag field is a boolean which is false by default. If true, the branch
- * becomes a tag and no new elements can be created for that branch and no
- * elements can be updated or deleted. Tags are designed to be read-only
- * moments in the model and allow for quick retrieval of the model at a certain
- * point in time.</p>
+ * becomes a tag and no new elements can be created, updated or deleted for that
+ * branch. Tags are designed to be read-only moments in the model and allow for
+ * quick retrieval of the model at a certain point in time.</p>
  *
  * <h4>Custom Data</h4>
  * <p>Custom data is designed to store any arbitrary JSON meta-data. Custom data

@@ -177,7 +177,7 @@ module.exports.removeNonAdminUser = function() {
 /**
  * @description Helper function to delete test admin user in MBEE tests.
  *
- * @returns {Promise<User>} Returns the newly created user upon completion.
+ * @returns {Promise<string>} Returns the id of the deleted admin user.
  */
 module.exports.removeTestAdmin = function() {
   return new Promise((resolve, reject) => {
@@ -204,11 +204,12 @@ module.exports.removeTestAdmin = function() {
 };
 
 /**
- * @description Helper function to create organization in MBEE tests.
+ * @description Helper function to create a test organization in MBEE tests.
  *
  * @param {object} adminUser - The admin user to create the org with.
  *
- * @returns {Promise<Organization>} Returns the newly created org upon completion.
+ * @returns {Promise<Organization>} Returns the newly created org upon
+ * completion.
  */
 module.exports.createTestOrg = function(adminUser) {
   return new Promise((resolve, reject) => {
@@ -255,12 +256,13 @@ module.exports.removeTestOrg = async function() {
 };
 
 /**
- * @description Helper function to create project in MBEE tests.
+ * @description Helper function to create a test project in MBEE tests.
  *
  * @param {object} adminUser - The admin user to create the project with.
  * @param {string} orgID - The id of the org to create the project on.
  *
- * @returns {Promise<Project>} Returns the newly created project upon completion.
+ * @returns {Promise<Project>} Returns the newly created project upon
+ * completion.
  */
 module.exports.createTestProject = function(adminUser, orgID) {
   return new Promise((resolve, reject) => {

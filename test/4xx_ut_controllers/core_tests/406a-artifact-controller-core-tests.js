@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.406a-artifact-model-tests
+ * @module test.406a-artifact-controller-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -58,7 +58,6 @@ describe(M.getModuleName(module.filename), () => {
       org = await testUtils.createTestOrg(adminUser);
       orgID = org.id;
 
-
       // Create the project model object
       project = await testUtils.createTestProject(adminUser, orgID);
       projectID = utils.parseID(project.id).pop();
@@ -107,13 +106,11 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates an artifact.
+ * @description Validates that the ArtifactController can create an artifact document.
  */
 async function createArtifact() {
   // Define test data
   const artData = testData.artifacts[0];
-
-  // Define test data
   const artObj = {
     id: artData.id,
     name: artData.name,
@@ -121,6 +118,7 @@ async function createArtifact() {
     location: artData.location,
     custom: artData.custom
   };
+
   try {
     const createdArtifact = await ArtifactController.create(adminUser, orgID,
       projectID, branchID, artObj);
@@ -129,20 +127,12 @@ async function createArtifact() {
     chai.expect(createdArtifact[0]._id).to.equal(
       utils.createID(orgID, projectID, branchID, artData.id)
     );
-    chai.expect(createdArtifact[0].filename).to.equal(
-      artData.filename
-    );
+    chai.expect(createdArtifact[0].filename).to.equal(artData.filename);
     chai.expect(createdArtifact[0].project).to.equal(project._id);
-    chai.expect(createdArtifact[0].branch).to.equal(
-      utils.createID(orgID, projectID, branchID)
-    );
-    chai.expect(createdArtifact[0].location).to.equal(
-      artData.location
-    );
+    chai.expect(createdArtifact[0].branch).to.equal(utils.createID(orgID, projectID, branchID));
+    chai.expect(createdArtifact[0].location).to.equal(artData.location);
     chai.expect(createdArtifact[0].strategy).to.equal(M.config.artifact.strategy);
-    chai.expect(createdArtifact[0].custom || {}).to.deep.equal(
-      artData.custom
-    );
+    chai.expect(createdArtifact[0].custom || {}).to.deep.equal(artData.custom);
 
     // Verify additional properties
     chai.expect(createdArtifact[0].createdBy).to.equal(adminUser._id);
@@ -160,11 +150,12 @@ async function createArtifact() {
 }
 
 /**
- * @description Finds an existing artifact.
+ * @description Validates that the ArtifactController can find an artifact document.
  */
 async function getArtifact() {
   // Define test data
   const artData = testData.artifacts[0];
+
   try {
     // Find the artifact previously uploaded.
     const foundArtifact = await ArtifactController.find(adminUser, orgID,
@@ -176,23 +167,13 @@ async function getArtifact() {
     chai.expect(foundArtifact[0]._id).to.equal(
       utils.createID(orgID, projectID, branchID, artData.id)
     );
-    chai.expect(foundArtifact[0].name).to.equal(
-      artData.name
-    );
-    chai.expect(foundArtifact[0].filename).to.equal(
-      artData.filename
-    );
+    chai.expect(foundArtifact[0].name).to.equal(artData.name);
+    chai.expect(foundArtifact[0].filename).to.equal(artData.filename);
     chai.expect(foundArtifact[0].project).to.equal(project._id);
-    chai.expect(foundArtifact[0].branch).to.equal(
-      utils.createID(orgID, projectID, branchID)
-    );
-    chai.expect(foundArtifact[0].location).to.equal(
-      artData.location
-    );
+    chai.expect(foundArtifact[0].branch).to.equal(utils.createID(orgID, projectID, branchID));
+    chai.expect(foundArtifact[0].location).to.equal(artData.location);
     chai.expect(foundArtifact[0].strategy).to.equal(M.config.artifact.strategy);
-    chai.expect(foundArtifact[0].custom || {}).to.deep.equal(
-      artData.custom
-    );
+    chai.expect(foundArtifact[0].custom || {}).to.deep.equal(artData.custom);
 
     // Verify additional properties
     chai.expect(foundArtifact[0].createdBy).to.equal(adminUser._id);
@@ -210,12 +191,11 @@ async function getArtifact() {
 }
 
 /**
- * @description Finds an existing artifact and updates its metadata.
+ * @description Validates that the ArtifactController can update an artifact document.
  */
 async function updateArtifact() {
   // Define test data
   const artUpdateData = testData.artifacts[2];
-  // Define test data
   const artObj = {
     id: testData.artifacts[0].id,
     filename: artUpdateData.filename,
@@ -223,8 +203,8 @@ async function updateArtifact() {
     location: artUpdateData.location,
     archived: false,
     custom: artUpdateData.custom
-
   };
+
   try {
     const updatedArtifact = await ArtifactController.update(adminUser, orgID,
       projectID, branchID, [artObj]);
@@ -235,21 +215,13 @@ async function updateArtifact() {
     chai.expect(updatedArtifact[0]._id).to.equal(
       utils.createID(orgID, projectID, branchID, testData.artifacts[0].id)
     );
-    chai.expect(updatedArtifact[0].name).to.equal(
-      artUpdateData.name
-    );
-    chai.expect(updatedArtifact[0].filename).to.equal(
-      artUpdateData.filename
-    );
+    chai.expect(updatedArtifact[0].name).to.equal(artUpdateData.name);
+    chai.expect(updatedArtifact[0].filename).to.equal(artUpdateData.filename);
     chai.expect(updatedArtifact[0].project).to.equal(project._id);
-    chai.expect(updatedArtifact[0].branch).to.equal(
-      utils.createID(orgID, projectID, branchID)
-    );
+    chai.expect(updatedArtifact[0].branch).to.equal(utils.createID(orgID, projectID, branchID));
     chai.expect(updatedArtifact[0].location).to.equal(artUpdateData.location);
     chai.expect(updatedArtifact[0].strategy).to.equal(M.config.artifact.strategy);
-    chai.expect(updatedArtifact[0].custom || {}).to.deep.equal(
-      artUpdateData.custom
-    );
+    chai.expect(updatedArtifact[0].custom || {}).to.deep.equal(artUpdateData.custom);
 
     // Verify additional properties
     chai.expect(updatedArtifact[0].createdBy).to.equal(adminUser._id);
@@ -267,14 +239,14 @@ async function updateArtifact() {
 }
 
 /**
- * @description Finds and deletes an artifact.
+ * @description Validates that the ArtifactController can delete an artifact document.
  */
 async function deleteArtifact() {
   // Define test data
   const artData = testData.artifacts[0];
 
   try {
-    // Find and delete the artifact
+    // Delete the artifact
     const deletedArtifact = await ArtifactController.remove(adminUser,
       orgID, projectID, branchID, artData.id);
 
@@ -301,7 +273,7 @@ async function deleteArtifact() {
 }
 
 /**
- * @description Post an artifact blob.
+ * @description Validates that the ArtifactController can post an artifact blob.
  */
 async function postBlob() {
   // Define test data
@@ -317,13 +289,9 @@ async function postBlob() {
       projectID, artData, artifactBlob1);
 
     // Verify response
-    chai.expect(createdArtifact.filename).to.equal(
-      testData.artifacts[0].filename
-    );
+    chai.expect(createdArtifact.filename).to.equal(testData.artifacts[0].filename);
     chai.expect(createdArtifact.project).to.equal(projectID);
-    chai.expect(createdArtifact.location).to.equal(
-      testData.artifacts[0].location
-    );
+    chai.expect(createdArtifact.location).to.equal(testData.artifacts[0].location);
   }
   catch (error) {
     M.log.error(error);
@@ -333,7 +301,7 @@ async function postBlob() {
 }
 
 /**
- * @description Gets the artifact blob.
+ * @description Validates that the ArtifactController can retrieve an artifact blob.
  */
 async function getBlob() {
   const artData = {
@@ -362,7 +330,7 @@ async function getBlob() {
 }
 
 /**
- * @description Finds and deletes an artifact blob.
+ * @description Validates that the ArtifactController can delete an artifact blob.
  */
 async function deleteBlob() {
   try {
@@ -374,8 +342,7 @@ async function deleteBlob() {
     };
 
     // Find and delete the artifact
-    await ArtifactController.deleteBlob(adminUser,
-      orgID, projectID, artData);
+    await ArtifactController.deleteBlob(adminUser, orgID, projectID, artData);
 
     await ArtifactController.getBlob(adminUser, orgID,
       projectID, artData).should.eventually.be.rejectedWith(

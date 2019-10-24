@@ -148,6 +148,8 @@ async function findInternalProject() {
     await ProjectController.update(adminUser, org._id, projUpdate);
   }
   catch (error) {
+    M.log.error(error.message);
+    // Expect no error
     chai.expect(error.message).to.equal(null);
   }
 }
@@ -199,7 +201,7 @@ async function optionPopulateFind() {
 }
 
 /**
- * @description Validates that the find results can be include archived results.
+ * @description Validates that the find results can include archived results.
  */
 async function optionIncludeArchivedFind() {
   try {
@@ -586,7 +588,7 @@ async function optionArchivedByFind() {
     await ProjectController.update(adminUser, org.id, update);
 
     // Create archivedBy option
-    const options = { archivedBy: 'test_admin' };
+    const options = { archivedBy: 'test_admin', includeArchived: true };
 
     // Find the project
     const foundProjects = await ProjectController.find(adminUser, org.id, options);
@@ -859,11 +861,11 @@ async function optionLeanUpdate() {
     const options = { lean: true };
 
     // Update the project
-    const createdProjects = await ProjectController.update(adminUser, org.id,
+    const updatedProjects = await ProjectController.update(adminUser, org.id,
       projectObj, options);
     // There should be one project
-    chai.expect(createdProjects.length).to.equal(1);
-    const foundProject = createdProjects[0];
+    chai.expect(updatedProjects.length).to.equal(1);
+    const foundProject = updatedProjects[0];
 
     // Expect the instance method getValidUpdateFields to be undefined
     chai.expect(typeof foundProject.getValidUpdateFields).to.equal('undefined');

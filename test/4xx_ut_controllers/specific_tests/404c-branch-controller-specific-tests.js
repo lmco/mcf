@@ -167,7 +167,7 @@ async function optionPopulateFind() {
 }
 
 /**
- * @description Validates that the find results can be include archived results.
+ * @description Validates that the find results can include archived results.
  */
 async function optionIncludeArchivedFind() {
   try {
@@ -257,7 +257,7 @@ async function optionLimitFind() {
   try {
     // Create limit option
     const options = { limit: 3 };
-    // There should be seven branches, including the master branch
+    // There should be seven branches plus the master branch
     const numBranches = branches.length + 1;
 
     // Find all the branches just to check
@@ -284,7 +284,7 @@ async function optionSkipFind() {
   try {
     // Create limit option
     const options = { skip: 3 };
-    // There should be seven branches, including the master branch
+    // There should be seven branches, plus the master branch
     const numBranches = branches.length + 1;
 
     // Find all the branches just to check
@@ -584,7 +584,7 @@ async function optionArchivedByFind() {
     await BranchController.update(adminUser, org.id, projID, update);
 
     // Create archivedBy option
-    const options = { archivedBy: 'test_admin' };
+    const options = { archivedBy: 'test_admin', includeArchived: true };
 
     // Find the branch
     const foundBranches = await BranchController.find(adminUser, org.id, projID, options);

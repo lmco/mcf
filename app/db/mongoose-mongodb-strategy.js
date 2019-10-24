@@ -14,8 +14,6 @@
  * @description This file defines the schema strategy for using MBEE with Mongoose
  * and MongoDB.
  */
-/* eslint-disable jsdoc/require-description-complete-sentence */
-// Disabled to allow chart in description
 
 // Node modules
 const fs = require('fs');
@@ -51,13 +49,11 @@ function connect() {
     const options = {};
 
     // Configure an SSL connection
-    // The 'sslCAFile' references file located in /certs.
     if (M.config.db.ssl) {
       connectURL += '?ssl=true';
-      // Retrieve CA file from /certs directory
+      // Retrieve CA file
       const caPath = path.join(M.root, M.config.db.ca);
-      const caFile = fs.readFileSync(caPath, 'utf8');
-      options.sslCA = caFile;
+      options.sslCA = fs.readFileSync(caPath, 'utf8');
     }
 
     // Remove mongoose deprecation warnings
@@ -73,6 +69,7 @@ function connect() {
     });
 
     // Connect to database
+    // TODO: investigate using async/await
     mongoose.connect(connectURL, options, (err) => {
       if (err) {
         // If error, reject it
@@ -86,7 +83,7 @@ function connect() {
 /**
  * @description Closes connection to database.
  *
- * @returns {Promise} Resolved promise.
+ * @returns {Promise} Resolves an empty promise upon completion.
  */
 function disconnect() {
   return new Promise((resolve, reject) => {
@@ -111,12 +108,6 @@ async function clear() {
  * @description Sanitizes data which will be used in queries and inserted into
  * the database. If the data contains a $, which is a MongoDB reserved
  * character, the object key/value pair will be deleted.
- *
- * <p> +-------+-----------------+
- * <br>| Input | Sanitized Output|
- * <br>+-------+-----------------+
- * <br>|   $   |                 |
- * <br>+-------+-----------------+ </p>
  *
  * @param {*} data - User input to be sanitized. May be in any data format.
  *
@@ -195,6 +186,7 @@ class Schema extends mongoose.Schema {
     changeType(obj);
 
     // Call parent add
+    // TODO: This function does NOT return a promise, figure out what it does return
     return super.add(obj, prefix);
   }
 
@@ -513,7 +505,10 @@ class Model {
 
 class Store extends MongoStore {
 
-  constructor(options) {
+  /**
+   * @description Calls the parent constructor to initialize the store.
+   */
+  constructor() {
     super({ mongooseConnection: mongoose.connection });
   }
 

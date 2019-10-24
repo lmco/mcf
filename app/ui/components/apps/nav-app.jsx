@@ -1,13 +1,13 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.apps.nav
+ * @module ui.components.apps.nav-app
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Leah De Laurell
+ * @owner James Eckstein
  *
  * @author Leah De Laurell
  *

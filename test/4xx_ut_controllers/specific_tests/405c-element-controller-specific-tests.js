@@ -553,7 +553,7 @@ async function optionFieldsFind() {
     const visibleFields2 = Object.keys(elem2._doc);
 
     // Check that the keys in the notFindOptions are not in elem
-    chai.expect(Object.keys(visibleFields2)).to.not.have.members(['createdOn', 'updatedOn']);
+    chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
   }
   catch (error) {
     M.log.error(error);
@@ -759,7 +759,7 @@ async function optionFieldsCreate() {
     const visibleFields2 = Object.keys(elem2._doc);
 
     // Check that the keys in the notFindOptions are not in elem
-    chai.expect(Object.keys(visibleFields2)).to.not.have.members(['createdOn', 'updatedOn']);
+    chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
   }
   catch (error) {
     M.log.error(error);
@@ -879,9 +879,9 @@ async function optionFieldsUpdate() {
       id: 'not-fields-element',
       name: 'Not Fields Element Updated'
     };
-    // Create the options object with the list of fields specifically find
+    // Create the options object with the list of fields specifically to find
     const findOptions = { fields: ['name', 'createdBy'] };
-    // Create the options object with the list of fields to specifically NOT find
+    // Create the options object with the list of fields to specifically NOT to find
     const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
     // Create the list of fields which are always provided no matter what
     const fieldsAlwaysProvided = ['_id'];
@@ -913,7 +913,7 @@ async function optionFieldsUpdate() {
     const visibleFields2 = Object.keys(elem2._doc);
 
     // Check that the keys in the notFindOptions are not in elem
-    chai.expect(Object.keys(visibleFields2)).to.not.have.members(['createdOn', 'updatedOn']);
+    chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
   }
   catch (error) {
     M.log.error(error);
@@ -1038,9 +1038,9 @@ async function optionFieldsReplace() {
       id: 'not-fields-element',
       name: 'Not Fields Element'
     };
-    // Create the options object with the list of fields specifically find
+    // Create the options object with the list of fields specifically to find
     const findOptions = { fields: ['name', 'createdBy'] };
-    // Create the options object with the list of fields to specifically NOT find
+    // Create the options object with the list of fields to specifically NOT to find
     const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
     // Create the list of fields which are always provided no matter what
     const fieldsAlwaysProvided = ['_id'];
@@ -1072,7 +1072,7 @@ async function optionFieldsReplace() {
     const visibleFields2 = Object.keys(elem2._doc);
 
     // Check that the keys in the notFindOptions are not in elem
-    chai.expect(Object.keys(visibleFields2)).to.not.have.members(['createdOn', 'updatedOn']);
+    chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
   }
   catch (error) {
     M.log.error(error);

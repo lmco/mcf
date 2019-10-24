@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module  test.204-lib-parse-json
+ * @module  test.204-lib-config-utils
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -12,8 +12,8 @@
  * @author Connor Doyle
  * @author Leah De Laurell
  *
- * @description Tests the parse-json module to verify successful parsing of
- * of JSON files with comments allowed.
+ * @description Tests the config utils functions, including the config validator module and the
+ * parse-json module to verify successful parsing of of JSON files with comments allowed.
  */
 
 // NPM modules

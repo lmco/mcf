@@ -7,7 +7,7 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell
+ * @owner James Eckstein
  *
  * @author Josh Kaplan
  * @author Leah De Laurell

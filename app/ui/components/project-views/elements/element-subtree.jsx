@@ -7,13 +7,14 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell
+ * @owner James Eckstein
  *
  * @author Leah De Laurell
  * @author Josh Kaplan
  * @author James Eckstein
  *
- * @description This renders the element tree in the project's page.
+ * @description This renders the elements in the element
+ * tree in the project's page.
  */
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */

@@ -7,13 +7,13 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell
+ * @owner James Eckstein
  *
  * @author Leah De Laurell
  * @author Josh Kaplan
  * @author James Eckstein
  *
- * @description This renders the element component.
+ * @description This renders the element edit form.
  */
 
 /* Modified ESLint rules for React. */

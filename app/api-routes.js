@@ -2583,10 +2583,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
  *         description: Comma separated list of specific fields to return. By
  *                      default the username field is returned. To specifically
  *                      NOT include a field, include a '-' in front of the field
- *                      (-name). [admin, archived, archivedBy, archivedOn,
- *                      createdBy, createdOn, custom, email, fname,
- *                      lastModifiedBy, lname, username, preferredName,
- *                      updatedOn]
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, documentation, lastModifiedBy, name,
+ *                      org, parent, project, source, target, type, updatedOn,
+ *                      branch]
  *         in: query
  *         type: string
  *       - name: limit
@@ -3948,8 +3948,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
  *   post:
  *     tags:
  *       - artifacts
- *     description: Post an artifact Blob. Requesting user must have read access
- *                  on the project to post an artifact.
+ *     description: Post an artifact Blob. Requesting user must have write
+ *                  access on the project to post an artifact.
  *     produces:
  *       - application/json
  *     consumes: multipart/form-data
@@ -4061,18 +4061,15 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  AuthController.doLogin,
   APIController.getBlob
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  AuthController.doLogin,
   APIController.postBlob
 ).delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  AuthController.doLogin,
   APIController.deleteBlob
 );
 
@@ -4125,7 +4122,9 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org, project,
+ *                      updatedOn, branch, filename, location, strategy]
  *         in: query
  *         type: string
  *       - name: minified
@@ -4215,7 +4214,9 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org, project,
+ *                      updatedOn, branch, filename, location, strategy]
  *         in: query
  *         type: string
  *       - name: minified
@@ -4288,9 +4289,6 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *             filename:
  *               type: string
  *               description: Filename of Artifact.
- *             contentType:
- *               type: string
- *               description: Content Type of Artifact.
  *             location:
  *               type: string
  *               description: Storage location of Artifact.
@@ -4310,7 +4308,9 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *         description: Comma separated list of specific fields to return. By
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
- *                      (-name).
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, custom, lastModifiedBy, name, org, project,
+ *                      updatedOn, branch, filename, location, strategy]
  *         in: query
  *         type: string
  *       - name: minified
@@ -4426,7 +4426,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
  *     description: Returns an artifact Blob via artifact ID. Requesting user must have
  *                  read access on the project to find an artifact.
  *     produces:
- *       - application/json
+ *       - application/octet-stream
  *     parameters:
  *       - name: orgid
  *         description: The ID of the organization containing the specified
