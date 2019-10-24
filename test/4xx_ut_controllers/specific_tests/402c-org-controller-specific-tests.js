@@ -133,8 +133,21 @@ async function optionPopulateFind() {
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      chai.expect(typeof foundOrg[field] === 'object').to.equal(true);
-      chai.expect(foundOrg[field]).to.not.equal(null);
+      chai.expect(field in foundOrg).to.equal(true);
+      if (Array.isArray(foundOrg[field])) {
+        foundOrg[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (foundOrg[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof foundOrg[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in foundOrg[field]).to.equal(true);
+      }
     });
   }
   catch (error) {
@@ -145,7 +158,7 @@ async function optionPopulateFind() {
 }
 
 /**
- * @description Validates that the find results can be include archived results.
+ * @description Validates that the find results can include archived results.
  */
 async function optionIncludeArchivedFind() {
   try {
@@ -171,7 +184,7 @@ async function optionIncludeArchivedFind() {
     chai.expect(foundOrg.length).to.equal(1);
     chai.expect(foundOrg[0]._id).to.equal(org._id);
 
-    // Perform a find on the orgs
+    // Perform a find on the orgs with the includeArchived option
     const foundOrgs = await OrgController.find(adminUser,
       [orgID, archivedID], options);
     // There should be two orgs
@@ -490,7 +503,7 @@ async function optionArchivedByFind() {
     await OrgController.update(adminUser, update);
 
     // Create archivedBy option
-    const options = { archivedBy: 'test_admin' };
+    const options = { archivedBy: 'test_admin', includeArchived: true };
 
     // Find the org
     const foundOrgs = await OrgController.find(adminUser, options);
@@ -559,8 +572,21 @@ async function optionPopulateCreate() {
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      chai.expect(typeof createdOrg[field] === 'object').to.equal(true);
-      chai.expect(createdOrg[field]).to.not.equal(null);
+      chai.expect(field in createdOrg).to.equal(true);
+      if (Array.isArray(createdOrg[field])) {
+        createdOrg[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (createdOrg[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof createdOrg[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in createdOrg[field]).to.equal(true);
+      }
     });
   }
   catch (error) {
@@ -668,12 +694,25 @@ async function optionPopulateUpdate() {
       orgObj, options);
     // There should be one org
     chai.expect(updatedOrgs.length).to.equal(1);
-    const createdOrg = updatedOrgs[0];
+    const updatedOrg = updatedOrgs[0];
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      chai.expect(typeof createdOrg[field] === 'object').to.equal(true);
-      chai.expect(createdOrg[field]).to.not.equal(null);
+      chai.expect(field in updatedOrg).to.equal(true);
+      if (Array.isArray(updatedOrg[field])) {
+        updatedOrg[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (updatedOrg[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof updatedOrg[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in updatedOrg[field]).to.equal(true);
+      }
     });
   }
   catch (error) {
@@ -779,8 +818,21 @@ async function optionPopulateReplace() {
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      chai.expect(typeof createdOrg[field] === 'object').to.equal(true);
-      chai.expect(createdOrg[field]).to.not.equal(null);
+      chai.expect(field in createdOrg).to.equal(true);
+      if (Array.isArray(createdOrg[field])) {
+        createdOrg[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (createdOrg[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof createdOrg[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in createdOrg[field]).to.equal(true);
+      }
     });
   }
   catch (error) {

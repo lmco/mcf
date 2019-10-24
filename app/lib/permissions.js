@@ -55,7 +55,7 @@ module.exports = {
 /**
  * @description Verifies if user has permission to create users.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  *
  * @throws {PermissionError}
  */
@@ -68,21 +68,17 @@ function createUser(user) {
 /**
  * @description Verifies if user has permission to read other user objects.
  *
- * @param {User} user - The user object to check permission for.
- *
- * @returns {boolean} Allows users to read other user objects by default.
+ * @param {User} user - The user object to check permissions for.
  */
-function readUser(user) {
-  return true;
-}
+function readUser(user) {}
 
 /**
  * @description Verifies if user has permission to update users.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {User} userToUpdate - The user object to updated.
  *
- * @throws {PermissionError} - A custom MBEE error.
+ * @throws {PermissionError}
  */
 function updateUser(user, userToUpdate) {
   try {
@@ -96,7 +92,7 @@ function updateUser(user, userToUpdate) {
 /**
  * @description Verifies if user has permission to delete users.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  *
  * @throws {PermissionError}
  */
@@ -109,7 +105,7 @@ function deleteUser(user) {
 /**
  * @description Verifies if user has permission to create an organization.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  *
  * @throws {PermissionError}
  */
@@ -122,7 +118,7 @@ function createOrg(user) {
 /**
  * @description Verifies if user has permission to read the organization.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object to read.
  *
  * @throws {PermissionError}
@@ -139,7 +135,7 @@ function readOrg(user, org) {
 /**
  * @description Verifies user has permission to update organization object.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object to update.
  *
  * @throws {PermissionError}
@@ -157,10 +153,10 @@ function updateOrg(user, org) {
 }
 
 /**
- * @description Verifies if user has permission to delete the
- * organization object.
+ * @description Verifies if user has permission to delete the organization
+ * object.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  *
  * @throws {PermissionError}
  */
@@ -171,9 +167,10 @@ function deleteOrg(user) {
 }
 
 /**
- * @description Verifies if user has permission to create a project within the org.
+ * @description Verifies if user has permission to create a project within the
+ * org.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  *
  * @throws {PermissionError}
@@ -194,7 +191,7 @@ function createProject(user, org) {
 /**
  * @description Verifies if user has permission to read the project.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project to read.
  *
@@ -223,7 +220,7 @@ function readProject(user, org, project) {
 /**
  * @description Verifies if user has permission to update project object.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project to update.
  *
@@ -248,7 +245,7 @@ function updateProject(user, org, project) {
 /**
  * @description Verifies if user has permission to delete the project object.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project to delete.
  *
@@ -263,10 +260,10 @@ function deleteProject(user, org, project) {
 /**
  * @description Verify if user has permission to create elements in the project.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project to add elements to.
- * @param {Branch} branch - Param not yet supported.
+ * @param {Branch} branch - Parameter currently unused.
  *
  * @throws {PermissionError}
  */
@@ -292,10 +289,10 @@ function createElement(user, org, project, branch) {
  * @description Verify if user has permission to read elements in the
  * project.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project containing the elements.
- * @param {Branch} branch - Param not yet supported.
+ * @param {Branch} branch - Parameter currently unused.
  *
  * @throws {PermissionError}
  */
@@ -319,12 +316,12 @@ function readElement(user, org, project, branch) {
 }
 
 /**
- * @description Verify if user has permission to update project element objects.
+ * @description Verify if user has permission to update element objects.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project containing the elements.
- * @param {Branch} branch - Param not yet supported.
+ * @param {Branch} branch - Parameter currently unused.
  *
  * @throws {PermissionError}
  */
@@ -347,12 +344,12 @@ function updateElement(user, org, project, branch) {
 }
 
 /**
- * @description Verify if user has permission to delete the project elements.
+ * @description Verify if user has permission to delete elements.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project containing the elements.
- * @param {Branch} branch - Param not yet supported.
+ * @param {Branch} branch - Parameter currently unused.
  *
  * @throws {PermissionError}
  */
@@ -377,7 +374,7 @@ function deleteElement(user, org, project, branch) {
 /**
  * @description Verify if user has permission to create branches in the project.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project to add branches to.
  *
@@ -404,10 +401,10 @@ function createBranch(user, org, project) {
 /**
  * @description Verify if user has permission to read branches in the project.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project containing the branch.
- * @param {Branch} branch - Param not yet supported.
+ * @param {Branch} branch - Parameter currently unused.
  *
  * @throws {PermissionError}
  */
@@ -435,10 +432,10 @@ function readBranch(user, org, project, branch) {
 /**
  * @description Verify if user has permission to update project branches.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project containing the branch.
- * @param {Branch} branch - Param not yet supported.
+ * @param {Branch} branch - Parameter currently unused.
  *
  * @throws {PermissionError}
  */
@@ -463,10 +460,10 @@ function updateBranch(user, org, project, branch) {
 /**
  * @description Verify if user has permission to delete the project branches.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project containing the elements.
- * @param {Branch} branch - Param not yet supported.
+ * @param {Branch} branch - Parameter currently unused.
  *
  * @throws {PermissionError}
  */
@@ -491,12 +488,13 @@ function deleteBranch(user, org, project, branch) {
 
 
 /**
- * @description Verify if user has permission to create artifacts in the project.
+ * @description Verify if user has permission to create artifacts in the
+ * project.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project to add artifacts to.
- * @param {Branch} branch - Param not yet supported.
+ * @param {Branch} branch - Parameter currently unused.
  *
  * @throws {PermissionError}
  */
@@ -522,10 +520,10 @@ function createArtifact(user, org, project, branch) {
  * @description Verify if user has permission to read artifacts in the
  * project.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project containing the artifacts.
- * @param {Branch} branch - Param not yet supported.
+ * @param {Branch} branch - Parameter currently unused.
  *
  * @throws {PermissionError}
  */
@@ -549,12 +547,13 @@ function readArtifact(user, org, project, branch) {
 }
 
 /**
- * @description Verify if user has permission to update project artifact objects.
+ * @description Verify if user has permission to update project artifact
+ * objects.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project containing the artifacts.
- * @param {Branch} branch - Param not yet supported.
+ * @param {Branch} branch - Parameter currently unused.
  *
  * @throws {PermissionError}
  */
@@ -579,10 +578,10 @@ function updateArtifact(user, org, project, branch) {
 /**
  * @description Verify if user has permission to delete the project artifacts.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project containing the artifacts.
- * @param {Branch} branch - Param not yet supported.
+ * @param {Branch} branch - Parameter currently unused.
  *
  * @throws {PermissionError}
  */
@@ -605,10 +604,10 @@ function deleteArtifact(user, org, project, branch) {
 }
 
 /**
- * @description Verify if user has permission to create artifact blob
- * in the project.
+ * @description Verify if user has permission to create artifact blob in the
+ * project.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project to add artifact blob to.
  *
@@ -633,10 +632,9 @@ function createBlob(user, org, project) {
 }
 
 /**
- * @description Verify if user has permission to read blob in the
- * project.
+ * @description Verify if user has permission to read blob in the project.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project containing the artifact blob.
  *
@@ -662,9 +660,9 @@ function readBlob(user, org, project) {
 }
 
 /**
- * @description Verify if user has permission to delete the project blob.
+ * @description Verify if user has permission to delete the artifact blob.
  *
- * @param {User} user - The user object to check permission for.
+ * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object containing the project.
  * @param {Project} project - The project containing the artifact blob.
  *

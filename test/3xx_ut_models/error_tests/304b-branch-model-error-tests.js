@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.304b-branch-model-tests
+ * @module test.304b-branch-model-error-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

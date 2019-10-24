@@ -69,10 +69,10 @@ if (!ArtifactStrategy.hasOwnProperty('clear')) {
  * @description This function finds an artifact based on artifact id.
  *
  * @param {User} requestingUser - The requesting user.
- * @param {string} organizationID - The organization ID for the org the project belongs to.
- * @param {string} projectID - The project ID of the Project which is being searched for.
+ * @param {string} organizationID - The organization ID.
+ * @param {string} projectID - The project ID.
  * @param {string} branchID - The branch ID.
- * @param {(string|string[])} artifacts - The artifacts to find. Can either be
+ * @param {(string|string[])} [artifacts] - The artifacts to find. Can either be
  * an array of artifact ids, a single artifact id, or not provided, which defaults
  * to every artifact in a branch being found.
  * @param {object} [options] - A parameter that provides supported options.
@@ -93,6 +93,9 @@ if (!ArtifactStrategy.hasOwnProperty('clear')) {
  * @param {string} [options.sort] - Provide a particular field to sort the results by.
  * You may also add a negative sign in front of the field to indicate sorting in
  * reverse order.
+ * @param {string} [options.name] - Search for artifacts with a specific name.
+ * @param {string} [options.filename] - Search for artifacts with a specific
+ * filename.
  * @param {string} [options.createdBy] - Search for artifacts with a specific
  * createdBy value.
  * @param {string} [options.lastModifiedBy] - Search for artifacts with a
@@ -142,8 +145,8 @@ async function find(requestingUser, organizationID, projectID, branchID, artifac
   // Ensure options are valid
   if (options) {
     // Create array of valid search options
-    const validSearchOptions = ['filename', 'name',
-      'createdBy', 'lastModifiedBy', 'archived', 'archivedBy'];
+    const validSearchOptions = ['filename', 'name', 'createdBy',
+      'lastModifiedBy', 'archived', 'archivedBy'];
 
     // Loop through provided options, look for validSearchOptions
     Object.keys(options).forEach((o) => {
@@ -162,16 +165,16 @@ async function find(requestingUser, organizationID, projectID, branchID, artifac
 
   // Find the organization
   const organization = await helper.findAndValidate(Org, orgID, reqUser,
-    validatedOptions.archived);
+    validatedOptions.includeArchived);
 
   // Find the project
   const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    reqUser, validatedOptions.archived);
+    reqUser, validatedOptions.includeArchived);
 
   // Find the branch, validate it was found and not archived
   const branch = await helper.findAndValidate(Branch, utils.createID(
     orgID, projID, branID
-  ), reqUser, validatedOptions.archived);
+  ), reqUser, validatedOptions.includeArchived);
 
   // Permissions check
   permissions.readArtifact(reqUser, organization, project, branch);
@@ -223,23 +226,22 @@ async function find(requestingUser, organizationID, projectID, branchID, artifac
  * artifact data or a single object containing artifact data to create.
  * @param {string} artifacts.id - The ID of the artifact being created.
  * @param {string} [artifacts.name] - The name of the artifact.
- * @param {string} [artifacts.filename] - The filename of the artifact.
- * @param {string} [artifacts.location] - The file blob location.
+ * @param {string} artifacts.filename - The filename of the artifact.
+ * @param {string} artifacts.location - The file blob location.
  * @param {object} [artifacts.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
  * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
- * @param {string[]} [options.fields] - An array of fields to return.
- * To NOT include a field, provide a '-' in
- * front.
+ * @param {string[]} [options.fields] - An array of fields to return. To NOT
+ * include a field, provide a '-' in front.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @returns {Promise} Array of created artifact objects.
+ * @returns {Promise<object[]>} Array of created artifact objects.
  *
  * @example
- * create({User}, 'orgID', 'projID', 'branch', [{Art1}, {Art2}, ...], { populate: ['filename'] })
+ * create({User}, 'orgID', 'projID', 'branch', [{Art1}, {Art2}, ...], { populate: ['project'] })
  * .then(function(artifacts) {
  *   // Do something with the newly created artifacts
  * })
@@ -267,7 +269,7 @@ async function create(requestingUser, organizationID, projectID, branchID,
     const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
       'lean'], Artifact);
 
-    // Define array to store org data
+    // Define array to store artifact data
     let artsToCreate = [];
     const arrIDs = [];
     const validArtKeys = Artifact.getValidUpdateFields();
@@ -279,7 +281,7 @@ async function create(requestingUser, organizationID, projectID, branchID,
       artsToCreate = saniArtifacts;
     }
     else if (typeof saniArtifacts === 'object') {
-      // artifacts is an object, create a single org
+      // artifacts is an object, create a single artifact
       artsToCreate = [saniArtifacts];
     }
     else {
@@ -300,8 +302,8 @@ async function create(requestingUser, organizationID, projectID, branchID,
 
     // Check that the branch is is not a tag
     if (branch.tag) {
-      throw new M.OperationError(`[${branID}] is a tag and `
-        + 'does not allow artifacts to be created, updated, or deleted.', 'warn');
+      throw new M.OperationError(`[${branID}] is a tag and does not allow `
+        + 'artifacts to be created, updated, or deleted.', 'warn');
     }
 
     // Permissions check
@@ -323,8 +325,8 @@ async function create(requestingUser, organizationID, projectID, branchID,
         assert.ok(typeof artifact.id === 'string', `Artifact #${index}'s id is not a string.`);
         artifact.id = utils.createID(orgID, projID, branID, artifact.id);
         // Check if art with same ID is already being created
-        assert.ok(!arrIDs.includes(artifact.id), 'Multiple artifacts with the same ID '
-          + `[${artifact.id}] cannot be created.`);
+        assert.ok(!arrIDs.includes(artifact.id), 'Multiple artifacts with the '
+          + `same ID [${artifact.id}] cannot be created.`);
 
         // Set the _id equal to the id
         artifact._id = artifact.id;
@@ -336,7 +338,7 @@ async function create(requestingUser, organizationID, projectID, branchID,
       throw new M.DataFormatError(err.message, 'warn');
     }
 
-    // Create searchQuery to search for any existing, conflicting arts
+    // Create searchQuery to search for any existing, conflicting artifacts
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Check if the artifacts already exists
@@ -347,8 +349,8 @@ async function create(requestingUser, organizationID, projectID, branchID,
       // Get array of found artifact's IDs
       const foundArtifactID = existingArtifact.map(a => utils.parseID(a._id).pop());
 
-      throw new M.OperationError('Artifacts with the following IDs already exist'
-        + ` [${foundArtifactID.toString()}].`, 'warn');
+      throw new M.OperationError('Artifacts with the following IDs already '
+        + `exist [${foundArtifactID.toString()}].`, 'warn');
     }
 
     const artObjects = artsToCreate.map((a) => {
@@ -371,8 +373,7 @@ async function create(requestingUser, organizationID, projectID, branchID,
     // Emit the event artifacts-created
     EventEmitter.emit('artifacts-created', createdArtifacts);
 
-    return await Artifact.find({ _id: { $in: arrIDs } },
-      validatedOptions.fieldsString,
+    return await Artifact.find(searchQuery, validatedOptions.fieldsString,
       { populate: validatedOptions.populateString,
         lean: validatedOptions.lean
       });
@@ -388,30 +389,29 @@ async function create(requestingUser, organizationID, projectID, branchID,
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
  * @param {string} projectID - The ID of the owning project.
- * @param {string} branchID - The ID of the branch to add artifacts to.
+ * @param {string} branchID - The ID of the owning branch.
  * @param {(object|object[])} artifacts - Either an array of objects containing
  * artifact data or a single object containing artifact data to update.
  * @param {string} artifacts.id - The ID of the artifact being updated.
  * @param {string} [artifacts.name] - The name of the artifact.
  * @param {string} [artifacts.filename] - The filename of the artifact.
  * @param {string} [artifacts.location] - The file blob location.
- * @param {string} [artifacts.archived = false] - The updated archived field. If true,
+ * @param {string} [artifacts.archived] - The updated archived field. If true,
  * the artifact will not be able to be found until unarchived.
  * @param {object} [artifacts.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
  * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
- * @param {string[]} [options.fields] - An array of fields to return.
- * To NOT include a field, provide a '-' in
- * front.
+ * @param {string[]} [options.fields] - An array of fields to return. To NOT
+ * include a field, provide a '-' in front.
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
  * @returns {Promise<object[]>} Array of updated artifact objects.
  *
  * @example
- * update({User}, 'orgID', 'projID', 'branch', [{Art1}, {Art2}, ...], { populate: ['filename'] })
+ * update({User}, 'orgID', 'projID', 'branch', [{Art1}, {Art2}, ...], { populate: ['project'] })
  * .then(function(artifacts) {
  *   // Do something with the newly updated artifacts
  * })
@@ -439,7 +439,7 @@ async function update(requestingUser, organizationID, projectID, branchID,
     const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
       'lean'], Artifact);
 
-    // Define array to store org data
+    // Define array to store artifact data
     let artsToUpdate = [];
     const arrIDs = [];
     const validArtKeys = Artifact.getValidUpdateFields();
@@ -451,13 +451,14 @@ async function update(requestingUser, organizationID, projectID, branchID,
       artsToUpdate = saniArtifacts;
     }
     else if (typeof saniArtifacts === 'object') {
-      // artifacts is an object, update a single org
+      // artifacts is an object, update a single artifact
       artsToUpdate = [saniArtifacts];
     }
     else {
       // artifact is not an object or array, throw an error
       throw new M.DataFormatError('Invalid input for updating artifacts.', 'warn');
     }
+
     // Find organization, validate found and not archived
     const organization = await helper.findAndValidate(Org, orgID, reqUser);
 
@@ -471,8 +472,8 @@ async function update(requestingUser, organizationID, projectID, branchID,
 
     // Check that the branch is is not a tag
     if (branch.tag) {
-      throw new M.OperationError(`[${branID}] is a tag and `
-        + 'does not allow artifacts to be created, updated, or deleted.', 'warn');
+      throw new M.OperationError(`[${branID}] is a tag and does not allow `
+        + 'artifacts to be created, updated, or deleted.', 'warn');
     }
 
     // Permissions check
@@ -489,7 +490,7 @@ async function update(requestingUser, organizationID, projectID, branchID,
           assert.ok(validArtKeys.includes(k), `Invalid key [${k}].`);
         });
 
-        // Ensure each art has an id and that its a string
+        // Ensure each artifact has an id and that its a string
         assert.ok(art.hasOwnProperty('id'), `Artifact #${index} does not have an id.`);
         assert.ok(typeof art.id === 'string', `Artifact #${index}'s id is not a string.`);
         art.id = utils.createID(orgID, projID, branID, art.id);
@@ -604,8 +605,7 @@ async function update(requestingUser, organizationID, projectID, branchID,
     });
     await Artifact.bulkWrite(bulkArray);
 
-    const foundArtifacts = await Artifact.find({ _id: { $in: arrIDs } },
-      validatedOptions.fieldsString,
+    const foundArtifacts = await Artifact.find(searchQuery, validatedOptions.fieldsString,
       { populate: validatedOptions.populateString,
         lean: validatedOptions.lean
       });
@@ -620,8 +620,8 @@ async function update(requestingUser, organizationID, projectID, branchID,
 }
 
 /**
- * @description This function removes one or many artifacts.
- * Returns the IDs of the deleted artifacts.
+ * @description This function removes one or many artifacts. Returns the IDs of
+ * the deleted artifacts.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -694,9 +694,10 @@ async function remove(requestingUser, organizationID, projectID, branchID,
     // Permissions check
     permissions.deleteArtifact(reqUser, organization, project, branch);
 
+    const searchQuery = { _id: { $in: artifactsToFind } };
+
     // Find the artifacts to delete
-    const foundArtifacts = await Artifact.find({ _id: { $in: artifactsToFind } },
-      null, { lean: true });
+    const foundArtifacts = await Artifact.find(searchQuery, null, { lean: true });
     const foundArtifactIDs = foundArtifacts.map(a => a._id);
 
     // Check if all artifacts were found
@@ -707,7 +708,7 @@ async function remove(requestingUser, organizationID, projectID, branchID,
         + `[${notFoundIDs.map(a => utils.parseID(a).pop())}].`, 'warn');
     }
     // Delete the artifacts
-    await Artifact.deleteMany({ _id: { $in: foundArtifactIDs } });
+    await Artifact.deleteMany(searchQuery);
 
     // Emit the event artifacts-deleted
     EventEmitter.emit('artifacts-deleted', foundArtifacts);
@@ -727,12 +728,10 @@ async function remove(requestingUser, organizationID, projectID, branchID,
  * @param {User} requestingUser - The requesting user.
  * @param {string} organizationID - The organization ID for the org the
  * project belongs to.
- * @param {string} projectID - The project ID of the Project which is being
- * searched for.
- * @param {object} artifact - Metadata containing parameters for creating
- * and storing the artifact blob.
- * @param {string} [artifact.filename] - The filename of the artifact.
- * @param {string} [artifact.location] - The location of the artifact.
+ * @param {string} projectID - The project ID of the project which which
+ * contains the blob.
+ * @param {object} artifact - Metadata containing parameters for finding the
+ * artifact blob.
  * @param {object} [options] - A parameter that provides supported options.
  *
  * @returns {Promise<Buffer>} Artifact Blob object.
@@ -750,16 +749,11 @@ async function getBlob(requestingUser, organizationID,
     const orgID = sani.db(organizationID);
     const projID = sani.db(projectID);
 
-    // Initialize and ensure options are valid
-    const validatedOptions = utils.validateOptions(options, [], Artifact);
-
     // Find the organization
-    const organization = await helper.findAndValidate(Org, orgID, reqUser,
-      validatedOptions.archived);
+    const organization = await helper.findAndValidate(Org, orgID, reqUser);
 
     // Find the project
-    const project = await helper.findAndValidate(Project,
-      utils.createID(orgID, projID), reqUser, validatedOptions.archived);
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
 
     // Permissions check
     permissions.readBlob(reqUser, organization, project);
@@ -783,8 +777,8 @@ async function getBlob(requestingUser, organizationID,
  * @param {User} requestingUser - The requesting user.
  * @param {string} organizationID - The organization ID for the org the
  * project belongs to.
- * @param {string} projectID - The project ID of the Project which is being
- * searched for.
+ * @param {string} projectID - The project ID of the project which will contain
+ * the newly created blob.
  * @param {object} artifact - Metadata containing parameters for creating
  * and storing the artifact blob.
  * @param {string} [artifact.filename] - The filename of the artifact.
@@ -792,7 +786,7 @@ async function getBlob(requestingUser, organizationID,
  * @param {Buffer} artifactBlob - A binary large object artifact.
  * @param {object} [options] - A parameter that provides supported options.
  *
- * @returns {Promise<object>} Artifact object that contains location, filename,
+ * @returns {Promise<object>} Object that contains artifact location, filename,
  * and project.
  */
 async function postBlob(requestingUser, organizationID,
@@ -813,22 +807,17 @@ async function postBlob(requestingUser, organizationID,
     const orgID = sani.db(organizationID);
     const projID = sani.db(projectID);
 
-    // Initialize and ensure options are valid
-    const validatedOptions = utils.validateOptions(options, [], Artifact);
-
     // Find the organization
-    const organization = await helper.findAndValidate(Org, orgID, reqUser,
-      validatedOptions.archived);
+    const organization = await helper.findAndValidate(Org, orgID, reqUser);
 
     // Find the project
-    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-      reqUser, validatedOptions.archived);
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
 
     // Permissions check
     permissions.createBlob(reqUser, organization, project);
 
     // Include org and project id
-    saniArt.project = projectID;
+    saniArt.project = projID;
     saniArt.org = orgID;
 
     // Return artifact object
@@ -849,15 +838,13 @@ async function postBlob(requestingUser, organizationID,
  * @param {User} requestingUser - The requesting user.
  * @param {string} organizationID - The organization ID for the org the
  * project belongs to.
- * @param {string} projectID - The project ID of the Project which is being
- * searched for.
- * @param {object[]} artifact - Metadata containing parameters for creating
- * and storing the artifact blob.
- * @param {string} [artifact.filename] - The filename of the artifact.
- * @param {string} [artifact.location] - The location of the artifact.
+ * @param {string} projectID - The project ID of the project which contains
+ * the artifact blob.
+ * @param {object[]} artifact - Metadata containing parameters for finding
+ * the artifact blob.
  * @param {object} [options] - A parameter that provides supported options.
  *
- * @returns {Promise<object>} Artifact object that contains location, filename,
+ * @returns {Promise<object>} Object that contains artifact location, filename,
  * and project.
  */
 async function deleteBlob(requestingUser, organizationID, projectID,
@@ -873,17 +860,12 @@ async function deleteBlob(requestingUser, organizationID, projectID,
     const orgID = sani.db(organizationID);
     const projID = sani.db(projectID);
 
-    // Initialize and ensure options are valid
-    const validatedOptions = utils.validateOptions(options, ['archived',
-      'populate', 'fields', 'limit', 'skip', 'lean', 'sort'], Artifact);
-
     // Find the organization
-    const organization = await helper.findAndValidate(Org, orgID, reqUser,
-      validatedOptions.archived);
+    const organization = await helper.findAndValidate(Org, orgID, reqUser);
 
     // Find the project
     const project = await helper.findAndValidate(Project,
-      utils.createID(orgID, projID), reqUser, validatedOptions.archived);
+      utils.createID(orgID, projID), reqUser);
 
     // Permissions check
     permissions.deleteBlob(reqUser, organization, project);
@@ -892,7 +874,8 @@ async function deleteBlob(requestingUser, organizationID, projectID,
     saniArt.project = projectID;
     saniArt.org = orgID;
 
-    await ArtifactStrategy.deleteBlob(saniArt);
+    // Delete the artifact blob
+    ArtifactStrategy.deleteBlob(saniArt);
 
     // Return Artifact obj
     return saniArt;

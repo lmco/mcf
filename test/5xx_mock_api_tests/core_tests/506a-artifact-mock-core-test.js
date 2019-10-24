@@ -294,7 +294,7 @@ function postBlob(done) {
     // Ensure the response was logged correctly
     setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
-  // GETs an artifact
+  // POSTs a blob
   apiController.postBlob(req, res);
 }
 
@@ -346,7 +346,7 @@ function getBlob(done) {
     // Ensure the response was logged correctly
     setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
-  // GETs an artifact
+  // GETs a blob
   apiController.getBlob(req, res);
 }
 
@@ -396,7 +396,7 @@ function getBlobById(done) {
     // Ensure the response was logged correctly
     setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
-  // GETs an artifact
+  // GETs a blob
   apiController.getBlobById(req, res);
 }
 
@@ -442,7 +442,7 @@ function deleteBlob(done) {
     // Ensure the response was logged correctly
     setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
-  // GETs an artifact
+  // DELETEs a blob
   apiController.deleteBlob(req, res);
 }
 
@@ -513,7 +513,7 @@ function patchArtifact(done) {
     setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
-  // PATCHs an artifact
+  // PATCHes an artifact
   apiController.patchArtifact(req, res);
 }
 

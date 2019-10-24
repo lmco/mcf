@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.301a-user-model-tests
+ * @module test.301a-user-model-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -14,7 +14,7 @@
  * @author Austin Bieber
  *
  * @description Tests the user model by performing various actions such as a
- * find, create, updated, archive, and delete. Does NOT test the user
+ * find, create, update, archive, and delete. Does NOT test the user
  * controller but instead directly manipulates data to check the user model
  * methods, validators, setters, and getters.
  */
@@ -84,24 +84,23 @@ describe(M.getModuleName(module.filename), () => {
  * @description Creates a user via model and save it to the database.
  */
 async function createUser() {
-  const userData = testData.users[1];
-  userData._id = userData.username;
-  // Create a hash of the password
-  const derivedKey = crypto.pbkdf2Sync(userData.password, userData._id.toString(), 1000, 32, 'sha256');
-  // Create a new User object
-  const user = User.createDocument(userData);
-  let savedUser;
   try {
+    const userData = testData.users[1];
+    userData._id = userData.username;
+    // Create a hash of the password
+    const derivedKey = crypto.pbkdf2Sync(userData.password, userData._id.toString(), 1000, 32, 'sha256');
+    // Create a new User object
+    const user = User.createDocument(userData);
     // Save user object to the database
-    savedUser = await user.save();
+    const savedUser = await user.save();
+    // Ensure that the user password is stored as a hash
+    savedUser.password.should.equal(derivedKey.toString('hex'));
   }
   catch (error) {
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
   }
-  // Ensure that the user password is stored as a hash
-  savedUser.password.should.equal(derivedKey.toString('hex'));
 }
 
 /**
@@ -109,40 +108,38 @@ async function createUser() {
  * created successfully and contains the expected data.
  */
 async function getUser() {
-  let user;
   try {
     // Find the created user from the previous createUser test.
-    user = await User.findOne({ _id: testData.users[1].username });
+    const user = await User.findOne({ _id: testData.users[1].username });
+    // Check first, last, and preferred name
+    user.fname.should.equal(testData.users[1].fname);
+    user.lname.should.equal(testData.users[1].lname);
+    user.preferredName.should.equal(testData.users[1].preferredName);
   }
   catch (error) {
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
   }
-  // Check first, last, and preferred name
-  user.fname.should.equal(testData.users[1].fname);
-  user.lname.should.equal(testData.users[1].lname);
-  user.preferredName.should.equal(testData.users[1].preferredName);
 }
 
 /**
  * @description Gets a users public data.
  */
 async function getUserPublicData() {
-  let user;
   try {
     // Find the created user from the previous createUser test.
-    user = await User.findOne({ _id: testData.users[1].username });
+    const user = await User.findOne({ _id: testData.users[1].username });
+    // Check first, last, and preferred name
+    user.fname.should.equal(testData.users[1].fname);
+    user.lname.should.equal(testData.users[1].lname);
+    user.preferredName.should.equal(testData.users[1].preferredName);
   }
   catch (error) {
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
   }
-  // Check first, last, and preferred name
-  user.fname.should.equal(testData.users[1].fname);
-  user.lname.should.equal(testData.users[1].lname);
-  user.preferredName.should.equal(testData.users[1].preferredName);
 }
 
 /**
@@ -150,21 +147,19 @@ async function getUserPublicData() {
  * authenticated.
  */
 async function verifyValidPassword() {
-  let user;
-  let result;
   try {
     // Find the created user from the previous createUser test.
-    user = await User.findOne({ _id: testData.users[1].username });
+    const user = await User.findOne({ _id: testData.users[1].username });
     // Verify the user's password
-    result = await user.verifyPassword(testData.users[1].password);
+    const result = await user.verifyPassword(testData.users[1].password);
+    // expected - verifyPassword() returned true
+    result.should.equal(true);
   }
   catch (error) {
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
   }
-  // expected - verifyPassword() returned true
-  result.should.equal(true);
 }
 
 /**
@@ -194,12 +189,19 @@ async function updateUser() {
  * @description Delete a user.
  */
 async function deleteUser() {
-  // Remove the user
-  await User.deleteMany({ _id: testData.users[1].username });
+  try {
+    // Remove the user
+    await User.deleteMany({ _id: testData.users[1].username });
 
-  // Attempt to find the user
-  const foundUser = await User.findOne({ _id: testData.users[1].username });
+    // Attempt to find the user
+    const foundUser = await User.findOne({ _id: testData.users[1].username });
 
-  // foundUser should be null
-  should.not.exist(foundUser);
+    // foundUser should be null
+    should.not.exist(foundUser);
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
 }

@@ -92,7 +92,7 @@ const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
  * @param {string} [options.custom....] - Search for any key in custom data. Use
  * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @returns {Promise} Array of found organization objects.
+ * @returns {Promise<object[]>} Array of found organization objects.
  *
  * @example
  * find({User}, ['org1', 'org2'], { populate: 'createdBy' })
@@ -219,7 +219,7 @@ async function find(requestingUser, orgs, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @returns {Promise} Array of created organization objects.
+ * @returns {Promise<object[]>} Array of created organization objects.
  *
  * @example
  * create({User}, [{Org1}, {Org2}, ...], { populate: 'createdBy' })
@@ -411,7 +411,7 @@ async function create(requestingUser, orgs, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @returns {Promise} Array of updated organization objects.
+ * @returns {Promise<object[]>} Array of updated organization objects.
  *
  * @example
  * update({User}, [{Updated Org 1}, {Updated Org 2}...], { populate: 'createdBy' })
@@ -497,7 +497,7 @@ async function update(requestingUser, orgs, options) {
       throw new M.DatabaseError(error.message, 'warn');
     }
 
-    // Check that the user has admin permissions
+    // Check that the user has permissions to update each org
     foundOrgs.forEach((org) => {
       permissions.updateOrg(reqUser, org);
     });
@@ -511,7 +511,7 @@ async function update(requestingUser, orgs, options) {
       );
     }
 
-    let foundUsers;
+    let foundUsers = [];
     // Find users if updating permissions
     if (updatingPermissions) {
       try {
@@ -521,10 +521,7 @@ async function update(requestingUser, orgs, options) {
         throw new M.DatabaseError(error.message, 'warn');
       }
     }
-    else {
-      // Return an empty array if not updating permissions
-      foundUsers = [];
-    }
+
     // Set existing users
     existingUsers = foundUsers.map(u => u._id);
 
@@ -717,7 +714,7 @@ async function update(requestingUser, orgs, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @returns {Promise} Array of replaced/created organization objects.
+ * @returns {Promise<object[]>} Array of replaced/created organization objects.
  *
  * @example
  * createOrReplace({User}, [{Updated Org 1}, {Updated Org 2}...])
@@ -791,11 +788,11 @@ async function createOrReplace(requestingUser, orgs, options) {
     // Check if there are new orgs
     // Note: if more orgs than found, there must be new orgs
     if (orgsToLookup.length > foundOrgs.length) {
-      // Requires global admin to create new orgs
+      // Ensure user can create new orgs
       permissions.createOrg(reqUser);
     }
 
-    // Check that the user has admin permissions
+    // Ensure the user can update each org
     foundOrgs.forEach((org) => {
       permissions.updateOrg(reqUser, org);
     });
@@ -827,7 +824,7 @@ async function createOrReplace(requestingUser, orgs, options) {
       createdOrgs = await create(reqUser, orgsToLookup, options);
     }
     catch (error) {
-      const finalError = await new Promise(async (res) => {
+      throw await new Promise(async (res) => {
         // Reinsert original data
         try {
           await Organization.insertMany(foundOrgs);
@@ -842,13 +839,10 @@ async function createOrReplace(requestingUser, orgs, options) {
           res(restoreErr);
         }
       });
-      // Throw whichever error was passed
-      throw finalError;
     }
 
     // Delete the temporary file.
-    const filePath = path.join(M.root, 'data',
-      `PUT-backup-orgs-${ts}.json`);
+    const filePath = path.join(M.root, 'data', `PUT-backup-orgs-${ts}.json`);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
@@ -871,7 +865,7 @@ async function createOrReplace(requestingUser, orgs, options) {
  * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @returns {Promise} Array of deleted organization ids.
+ * @returns {Promise<string[]>} Array of deleted organization ids.
  *
  * @example
  * remove({User}, ['org1', 'org2'])
@@ -914,9 +908,15 @@ async function remove(requestingUser, orgs, options) {
     // Find the orgs to delete
     const foundOrgs = await Organization.find(searchQuery, null, { lean: true });
 
+    // Check that user can remove each org
     foundOrgs.forEach(org => {
-      // Only for create or remove orgs: must be an admin
+      // Ensure user has permissions to delete each org
       permissions.deleteOrg(requestingUser, org);
+
+      // If trying to delete the default org, throw an error
+      if (org._id === M.config.server.defaultOrganizationId) {
+        throw new M.OperationError('The default organization cannot be deleted.', 'warn');
+      }
     });
 
     const foundOrgIDs = foundOrgs.map(o => o._id);
@@ -929,14 +929,6 @@ async function remove(requestingUser, orgs, options) {
         + `[${notFoundIDs}].`, 'warn');
     }
 
-    // Check that user can remove each org
-    foundOrgs.forEach((org) => {
-      // If trying to delete the default org, throw an error
-      if (org._id === M.config.server.defaultOrganizationId) {
-        throw new M.OperationError('The default organization cannot be deleted.', 'warn');
-      }
-    });
-
     // Find all projects to delete
     const projectsToDelete = await Project.find({ org: { $in: searchedIDs } },
       null, { lean: true });
@@ -946,7 +938,7 @@ async function remove(requestingUser, orgs, options) {
     // Delete any elements in the found projects
     await Element.deleteMany({ project: { $in: projectIDs } });
 
-    // Delete any artifacts in the org
+    // Delete any artifacts in the found projects
     await Artifact.deleteMany({ project: { $in: projectIDs } });
 
     // Remove all blobs under org
@@ -971,7 +963,7 @@ async function remove(requestingUser, orgs, options) {
       M.log.error(`Some of the following orgs were not deleted [${saniOrgs.toString()}].`);
     }
 
-    return foundOrgs.map(o => o._id);
+    return foundOrgIDs;
   }
   catch (error) {
     throw errors.captureError(errors);

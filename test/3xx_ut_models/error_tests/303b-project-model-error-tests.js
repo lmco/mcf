@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.303b-project-model-tests
+ * @module test.303b-project-model-error-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
