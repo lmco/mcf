@@ -142,21 +142,20 @@ async function optionPopulateFind() {
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      if (field in foundBranch) {
-        if (Array.isArray(foundBranch[field]) && foundBranch[field] !== []) {
-          foundBranch[field].forEach((item) => {
-            // Expect each populated field to be an object
-            chai.expect(typeof item).to.equal('object');
-            // Expect each populated field to at least have an id
-            chai.expect('_id' in item).to.equal(true);
-          });
-        }
-        else if (foundBranch[field] !== null) {
+      chai.expect(field in foundBranch).to.equal(true);
+      if (Array.isArray(foundBranch[field])) {
+        foundBranch[field].forEach((item) => {
           // Expect each populated field to be an object
-          chai.expect(typeof foundBranch[field]).to.equal('object');
+          chai.expect(typeof item).to.equal('object');
           // Expect each populated field to at least have an id
-          chai.expect('_id' in foundBranch[field]).to.equal(true);
-        }
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (foundBranch[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof foundBranch[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in foundBranch[field]).to.equal(true);
       }
     });
   }
@@ -656,21 +655,20 @@ async function optionPopulateCreate() {
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      if (field in createdBranch) {
-        if (Array.isArray(createdBranch[field]) && createdBranch[field] !== []) {
-          createdBranch[field].forEach((item) => {
-            // Expect each populated field to be an object
-            chai.expect(typeof item).to.equal('object');
-            // Expect each populated field to at least have an id
-            chai.expect('_id' in item).to.equal(true);
-          });
-        }
-        else if (createdBranch[field] !== null) {
+      chai.expect(field in createdBranch).to.equal(true);
+      if (Array.isArray(createdBranch[field])) {
+        createdBranch[field].forEach((item) => {
           // Expect each populated field to be an object
-          chai.expect(typeof createdBranch[field]).to.equal('object');
+          chai.expect(typeof item).to.equal('object');
           // Expect each populated field to at least have an id
-          chai.expect('_id' in createdBranch[field]).to.equal(true);
-        }
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (createdBranch[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof createdBranch[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in createdBranch[field]).to.equal(true);
       }
     });
   }
@@ -785,21 +783,20 @@ async function optionPopulateUpdate() {
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      if (field in updatedBranch) {
-        if (Array.isArray(updatedBranch[field]) && updatedBranch[field] !== []) {
-          updatedBranch[field].forEach((item) => {
-            // Expect each populated field to be an object
-            chai.expect(typeof item).to.equal('object');
-            // Expect each populated field to at least have an id
-            chai.expect('_id' in item).to.equal(true);
-          });
-        }
-        else if (updatedBranch[field] !== null) {
+      chai.expect(field in updatedBranch).to.equal(true);
+      if (Array.isArray(updatedBranch[field])) {
+        updatedBranch[field].forEach((item) => {
           // Expect each populated field to be an object
-          chai.expect(typeof updatedBranch[field]).to.equal('object');
+          chai.expect(typeof item).to.equal('object');
           // Expect each populated field to at least have an id
-          chai.expect('_id' in updatedBranch[field]).to.equal(true);
-        }
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (updatedBranch[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof updatedBranch[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in updatedBranch[field]).to.equal(true);
       }
     });
   }

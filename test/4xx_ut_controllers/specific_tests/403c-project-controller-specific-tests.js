@@ -174,21 +174,20 @@ async function optionPopulateFind() {
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      if (field in foundProject) {
-        if (Array.isArray(foundProject[field]) && foundProject[field] !== []) {
-          foundProject[field].forEach((item) => {
-            // Expect each populated field to be an object
-            chai.expect(typeof item).to.equal('object');
-            // Expect each populated field to at least have an id
-            chai.expect('_id' in item).to.equal(true);
-          });
-        }
-        else if (foundProject[field] !== null) {
+      chai.expect(field in foundProject).to.equal(true);
+      if (Array.isArray(foundProject[field])) {
+        foundProject[field].forEach((item) => {
           // Expect each populated field to be an object
-          chai.expect(typeof foundProject[field]).to.equal('object');
+          chai.expect(typeof item).to.equal('object');
           // Expect each populated field to at least have an id
-          chai.expect('_id' in foundProject[field]).to.equal(true);
-        }
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (foundProject[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof foundProject[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in foundProject[field]).to.equal(true);
       }
     });
   }
@@ -656,21 +655,20 @@ async function optionPopulateCreate() {
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      if (field in createdProject) {
-        if (Array.isArray(createdProject[field]) && createdProject[field] !== []) {
-          createdProject[field].forEach((item) => {
-            // Expect each populated field to be an object
-            chai.expect(typeof item).to.equal('object');
-            // Expect each populated field to at least have an id
-            chai.expect('_id' in item).to.equal(true);
-          });
-        }
-        else if (createdProject[field] !== null) {
+      chai.expect(field in createdProject).to.equal(true);
+      if (Array.isArray(createdProject[field])) {
+        createdProject[field].forEach((item) => {
           // Expect each populated field to be an object
-          chai.expect(typeof createdProject[field]).to.equal('object');
+          chai.expect(typeof item).to.equal('object');
           // Expect each populated field to at least have an id
-          chai.expect('_id' in createdProject[field]).to.equal(true);
-        }
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (createdProject[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof createdProject[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in createdProject[field]).to.equal(true);
       }
     });
   }
@@ -783,21 +781,20 @@ async function optionPopulateUpdate() {
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      if (field in updatedProject) {
-        if (Array.isArray(updatedProject[field]) && updatedProject[field] !== []) {
-          updatedProject[field].forEach((item) => {
-            // Expect each populated field to be an object
-            chai.expect(typeof item).to.equal('object');
-            // Expect each populated field to at least have an id
-            chai.expect('_id' in item).to.equal(true);
-          });
-        }
-        else if (updatedProject[field] !== null) {
+      chai.expect(field in updatedProject).to.equal(true);
+      if (Array.isArray(updatedProject[field])) {
+        updatedProject[field].forEach((item) => {
           // Expect each populated field to be an object
-          chai.expect(typeof updatedProject[field]).to.equal('object');
+          chai.expect(typeof item).to.equal('object');
           // Expect each populated field to at least have an id
-          chai.expect('_id' in updatedProject[field]).to.equal(true);
-        }
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (updatedProject[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof updatedProject[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in updatedProject[field]).to.equal(true);
       }
     });
   }
@@ -904,21 +901,20 @@ async function optionPopulateReplace() {
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      if (field in createdProject) {
-        if (Array.isArray(createdProject[field]) && createdProject[field] !== []) {
-          createdProject[field].forEach((item) => {
-            // Expect each populated field to be an object
-            chai.expect(typeof item).to.equal('object');
-            // Expect each populated field to at least have an id
-            chai.expect('_id' in item).to.equal(true);
-          });
-        }
-        else if (createdProject[field] !== null) {
+      chai.expect(field in createdProject).to.equal(true);
+      if (Array.isArray(createdProject[field])) {
+        createdProject[field].forEach((item) => {
           // Expect each populated field to be an object
-          chai.expect(typeof createdProject[field]).to.equal('object');
+          chai.expect(typeof item).to.equal('object');
           // Expect each populated field to at least have an id
-          chai.expect('_id' in createdProject[field]).to.equal(true);
-        }
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (createdProject[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof createdProject[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in createdProject[field]).to.equal(true);
       }
     });
   }
