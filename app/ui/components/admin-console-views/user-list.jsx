@@ -1,13 +1,13 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.apps.admin-console-app
+ * @module ui.components.admin-console-views.user-list
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Leah De Laurell
+ * @owner James Eckstein
  *
  * @author Leah De Laurell
  *
