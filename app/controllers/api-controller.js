@@ -4794,6 +4794,22 @@ async function deleteBranch(req, res) {
   }
 }
 
+/**
+ * ALL /api/*
+ *
+ * @description Returns an error message if a user tries to access an invalid
+ * api route.
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {object} Response error message
+ */
+function invalidRoute(req, res) {
+  const json = 'Invalid Route or Method.';
+  return returnResponse(req, res, json, 404);
+}
+
 async function getWebhook(req, res) {
   // Define options
   let options;
@@ -4992,20 +5008,4 @@ async function deleteWebhook(req, res) {
     // If an error was thrown, return it and its status
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
-}
-
-/**
- * ALL /api/*
- *
- * @description Returns an error message if a user tries to access an invalid
- * api route.
- *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
- *
- * @returns {object} Response error message
- */
-function invalidRoute(req, res) {
-  const json = 'Invalid Route or Method.';
-  return returnResponse(req, res, json, 404);
 }
