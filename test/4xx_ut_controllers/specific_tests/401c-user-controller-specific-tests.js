@@ -212,11 +212,21 @@ async function optionPopulateCreate() {
     // For each field in pop
     pop.forEach((field) => {
       // If the field is defined in the returned user
-      if (createdUser.hasOwnProperty(field)) {
-        // Expect each populated field to be an object
-        chai.expect(typeof createdUser.field).to.equal('object');
-        // Expect each populated field to at least have an _id
-        chai.expect(createdUser.field.hasOwnProperty('_id')).to.equal(true);
+      if (field in createdUser) {
+        if (Array.isArray(createdUser[field]) && createdUser[field] !== []) {
+          createdUser[field].forEach((item) => {
+            // Expect each populated field to be an object
+            chai.expect(typeof item).to.equal('object');
+            // Expect each populated field to at least have an id
+            chai.expect('_id' in item).to.equal(true);
+          });
+        }
+        else if (createdUser[field] !== null) {
+          // Expect each populated field to be an object
+          chai.expect(typeof createdUser[field]).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in createdUser[field]).to.equal(true);
+        }
       }
     });
 
@@ -513,11 +523,21 @@ async function optionPopulateFind() {
 
     // For each field in pop
     pop.forEach((field) => {
-      if (foundUser.hasOwnProperty(field)) {
-        // Expect each populated field to be an object
-        chai.expect(typeof foundUser.field).to.equal('object');
-        // Expect each populated field to at least have an id
-        chai.expect(foundUser.field.hasOwnProperty('_id')).to.equal(true);
+      if (field in foundUser) {
+        if (Array.isArray(foundUser[field]) && foundUser[field] !== []) {
+          foundUser[field].forEach((item) => {
+            // Expect each populated field to be an object
+            chai.expect(typeof item).to.equal('object');
+            // Expect each populated field to at least have an id
+            chai.expect('_id' in item).to.equal(true);
+          });
+        }
+        else if (foundUser[field] !== null) {
+          // Expect each populated field to be an object
+          chai.expect(typeof foundUser[field]).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in foundUser[field]).to.equal(true);
+        }
       }
     });
 
@@ -726,11 +746,21 @@ async function optionPopulateUpdate() {
 
     // Validate that the returned object has populated fields
     pop.forEach((field) => {
-      if (updatedUser.hasOwnProperty(field)) {
-        // Expect each populated field to be an object
-        chai.expect(typeof updatedUser.field).to.equal('object');
-        // Expect each populated field to at least have an id
-        chai.expect(updatedUser.field.hasOwnProperty('_id')).to.equal(true);
+      if (field in updatedUser) {
+        if (Array.isArray(updatedUser[field]) && updatedUser[field] !== []) {
+          updatedUser[field].forEach((item) => {
+            // Expect each populated field to be an object
+            chai.expect(typeof item).to.equal('object');
+            // Expect each populated field to at least have an id
+            chai.expect('_id' in item).to.equal(true);
+          });
+        }
+        else if (updatedUser[field] !== null) {
+          // Expect each populated field to be an object
+          chai.expect(typeof updatedUser[field]).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in updatedUser[field]).to.equal(true);
+        }
       }
     });
     // Remove test user
@@ -912,11 +942,21 @@ async function optionPopulateReplace() {
 
     // Validate that the returned object has populated fields
     pop.forEach((field) => {
-      if (replacedUser.hasOwnProperty(field)) {
-        // Expect each populated field to be an object
-        chai.expect(typeof replacedUser.field).to.equal('object');
-        // Expect each populated field to at least have an id
-        chai.expect(replacedUser.field.hasOwnProperty('_id')).to.equal(true);
+      if (field in replacedUser) {
+        if (Array.isArray(replacedUser[field]) && replacedUser[field] !== []) {
+          replacedUser[field].forEach((item) => {
+            // Expect each populated field to be an object
+            chai.expect(typeof item).to.equal('object');
+            // Expect each populated field to at least have an id
+            chai.expect('_id' in item).to.equal(true);
+          });
+        }
+        else if (replacedUser[field] !== null) {
+          // Expect each populated field to be an object
+          chai.expect(typeof replacedUser[field]).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in replacedUser[field]).to.equal(true);
+        }
       }
     });
 
@@ -1188,11 +1228,21 @@ async function optionPopulateSearch() {
     // Validate that fields were populated
     pop.forEach((field) => {
       foundUsers.forEach((foundUser) => {
-        if (foundUser.hasOwnProperty(field)) {
-          // Expect the populated field to be an object
-          chai.expect(typeof foundUser.field).to.equal('object');
-          // Expect the field to have at least an _id property
-          chai.expect(foundUser.field.hasOwnProperty('_id')).to.equal(true);
+        if (field in foundUser) {
+          if (Array.isArray(foundUser[field]) && foundUser[field] !== []) {
+            foundUser[field].forEach((item) => {
+              // Expect each populated field to be an object
+              chai.expect(typeof item).to.equal('object');
+              // Expect each populated field to at least have an id
+              chai.expect('_id' in item).to.equal(true);
+            });
+          }
+          else if (foundUser[field] !== null) {
+            // Expect each populated field to be an object
+            chai.expect(typeof foundUser[field]).to.equal('object');
+            // Expect each populated field to at least have an id
+            chai.expect('_id' in foundUser[field]).to.equal(true);
+          }
         }
       });
     });
