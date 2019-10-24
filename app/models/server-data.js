@@ -9,16 +9,16 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Austin Bieber
  *
  * @description
  * <p>This module defines the server-data model. Server-data is designed to be
  * a model that only ever holds one single document. This document specifies
  * the schemaVersion, used to know which migration scripts need to be run. For
- * this reason, there clearly should not be multiple server-data documents in
- * the database.</p>
+ * this reason, there should never be multiple server-data documents in the
+ * database.</p>
  */
 
 // MBEE modules

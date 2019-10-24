@@ -7,11 +7,11 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
  * @author Josh Kaplan
  * @author Jake Ursetta
- * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Connor Doyle
  *
  * @description Defines the MBEE logger. The logger should be used instead of
  * using `console.log`. The logger adds the ability to write to log
@@ -201,7 +201,7 @@ function makeLogger(subcommand, opts) {
     ],
     exitOnError: false
   };
-  // Add in a transport to log to the console if the mbee is not running tests
+  // Add in a transport to log to the console if not running tests
   if (!(subcommand === 'test' && opts.includes('--suppress-console'))) {
     loggerConfig.transports.push(new winston.transports.Console());
   }

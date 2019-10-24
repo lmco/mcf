@@ -7,9 +7,9 @@
 #
 # @license LMPI - Lockheed Martin Proprietary Information
 #
-# @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+# @owner Leah De Laurell
 #
-# @author Leah De Laurell <leah.p.delaurell@lmco.com>
+# @author Leah De Laurell
 #
 # @description This Dockerfile defines the Docker build for MBEE.
 ##

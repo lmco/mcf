@@ -7,10 +7,10 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
  * @author Jake Ursetta
- * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Austin Bieber
  *
  * @description This file defines middleware functions which can be used by
  * express to perform actions during requests.

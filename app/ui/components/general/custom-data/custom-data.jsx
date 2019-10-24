@@ -7,10 +7,10 @@
  *
  * @license MIT
  *
- * @owner James Eckstein <james.eckstein@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author James Eckstein <james.eckstein@lmco.com>
+ * @author Leah De Laurell
+ * @author James Eckstein
  *
  * @description This renders the custom data view.
  */

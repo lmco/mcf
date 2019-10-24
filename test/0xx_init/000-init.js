@@ -7,11 +7,11 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  * @author Josh Kaplan
- * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Austin Bieber
  *
  * @description This "test" is used to clean out the database before other
  * tests. It SHOULD NOT be run if testing against production databases. It
@@ -21,6 +21,10 @@
 
 // NPM modules
 const chai = require('chai');
+
+// Node.js Modules
+const { execSync } = require('child_process');
+const path = require('path');
 
 // MBEE modules
 const Artifact = M.require('models.artifact');
@@ -70,6 +74,7 @@ describe(M.getModuleName(module.filename), function() {
   it('clean database', cleanDB);
   it('should initialize the models', initModels);
   it('should create the default org if it doesn\'t exist', createDefaultOrg);
+  it('should clear local artifact storage folder', clearArtifactStorage);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -144,4 +149,14 @@ async function createDefaultOrg() {
     // Expect no error
     chai.expect(error.message).to.equal(null);
   }
+}
+
+/**
+ * @description Clears the local artifact storage folder.
+ */
+function clearArtifactStorage() {
+  const artifactPath = path.join(M.root, '/storage');
+  // Remove artifacts
+  const rmd = (process.platform === 'win32') ? 'RMDIR /S /Q' : 'rm -rf';
+  execSync(`${rmd} ${artifactPath}/*`);
 }

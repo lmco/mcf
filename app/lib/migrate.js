@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Austin Bieber
  *
  * @description Supports the ability to migrate the database between specific
  * versions.
@@ -344,6 +344,27 @@ function runMigrations(from, migrations, move) {
     }
   });
 }
+
+/**
+ * @description A helper function to shift the version in the server data document either up or
+ * down to the next or previous version.
+ *
+ * @param {string} version - The version number to shift to.
+ *
+ * @returns {Promise} - Returns the result of the database operation to update or insert a server
+ * data document.
+ */
+module.exports.shiftVersion = async function(version) {
+  try {
+    // Delete the current server data document(s)
+    await ServerData.deleteMany({});
+    // Insert a new server data document
+    return await ServerData.insertMany([{ _id: 'server_data', version: version }]);
+  }
+  catch (error) {
+    throw new M.DatabaseError(error.message, 'warn');
+  }
+};
 
 /**
  * @description Gets the schema version from the database. Runs the migrate

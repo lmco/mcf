@@ -1,15 +1,15 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.304b-branch-model-tests
+ * @module test.304b-branch-model-error-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Austin Bieber
  *
  * @description Tests for expected errors within the branch model.
  */

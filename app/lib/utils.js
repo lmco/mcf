@@ -7,11 +7,11 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Connor Doyle <connor.p.doyle@lmco.com>
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Austin Bieber
+ * @author Connor Doyle
+ * @author Phillip Lee
  *
  * @description Defines miscellaneous helper functions.
  */
@@ -26,6 +26,31 @@ const zlib = require('zlib');
 
 // MBEE modules
 const publicData = M.require('lib.get-public-data');
+
+// Define mine type to content type look up table
+const mineTypeTable = {
+  '7z': 'application/x-7z-compressed',
+  pdf: 'application/pdf',
+  bin: 'application/octet-stream',
+  bmp: 'image/bmp',
+  css: 'text/css',
+  csv: 'text/csv',
+  json: 'application/json',
+  jpeg: 'image/jpeg',
+  jpg: 'image/jpeg',
+  xls: 'application/vnd.ms-excel',
+  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ppt: 'application/vnd.ms-powerpoint',
+  mp4: 'video/mp4',
+  png: 'image/png',
+  svg: 'image/svg+xml',
+  svd: 'application/vnd.svd',
+  tar: 'application/x-tar',
+  xml: 'application/xml',
+  yaml: 'text/yaml',
+  zip: 'application/zip'
+};
 
 /**
  * @description Provides time unit conversions.
@@ -271,6 +296,10 @@ module.exports.validateOptions = function(options, validOptions, model) {
       // Set populateString to include require virtuals
       validatedOptions.populateString = 'contains sourceOf targetOf ';
       break;
+    case 'Artifact':
+      validSearchOptions = ['filename', 'name', 'createdBy', 'lastModifiedBy',
+        'archivedBy'];
+      break;
     case 'User':
       validSearchOptions = ['fname', 'preferredName', 'lname', 'email', 'createdBy',
         'lastModifiedBy', 'archived', 'archivedBy'];
@@ -466,7 +495,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
  *
  * @param {object} dataStream - The stream object carrying a gzip file.
  *
- * @returns {Promise} A promise containing the unzipped data.
+ * @returns {Promise<Buffer>} A promise containing the unzipped data.
  */
 module.exports.handleGzip = function(dataStream) {
   // Create the promise to return
@@ -491,4 +520,30 @@ module.exports.handleGzip = function(dataStream) {
       });
     });
   });
+};
+
+/**
+ * @description Looks up the content type based on the file extension.
+ * Defaults to 'application/octet-stream' if no extension is found.
+ *
+ * @param {string} filename - Name of the file.
+ *
+ * @returns {string} - The content type of the file.
+ */
+module.exports.getContentType = function(filename) {
+  // Initialize content type
+  let contentType = 'application/octet-stream';
+
+  // If filename null or has no extensions
+  if (filename === null || !(filename.includes('.'))) {
+    return contentType;
+  }
+  // Extract extension
+  const ext = filename.split('.').pop();
+
+  // Check ext in lookup table
+  if (ext in mineTypeTable) {
+    contentType = mineTypeTable[ext];
+  }
+  return contentType;
 };

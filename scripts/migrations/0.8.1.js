@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Austin Bieber
  *
  * @description Migration script for version 0.8.1. Modifies element IDs to
  * include the branch ID. New format is org:proj:branch:element. Adds a
@@ -26,33 +26,16 @@ const path = require('path');
 const Branch = M.require('models.branch');
 const Element = M.require('models.element');
 const Project = M.require('models.project');
-const ServerData = M.require('models.server-data');
 const utils = M.require('lib.utils');
+const migrate = M.require('lib.migrate');
 
 /**
  * @description Handles the database migration from 0.8.1 to 0.8.0.
  *
  * @returns {Promise} Returns an empty promise upon completion.
  */
-module.exports.down = function() {
-  return new Promise((resolve, reject) => {
-    // Get all documents from the server data
-    ServerData.find({})
-    .then((serverData) => {
-      // Restrict collection to one document
-      if (serverData.length > 1) {
-        throw new Error('Cannot have more than one server data document.');
-      }
-      // If no server data currently exists, create the document
-      if (serverData.length === 0) {
-        return ServerData.insertMany([{ _id: 'server_data', version: '0.8.0' }]);
-      }
-
-      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.8.0' });
-    })
-    .then(() => resolve())
-    .catch((error) => reject(error));
-  });
+module.exports.down = async function() {
+  return migrate.shiftVersion('0.8.0');
 };
 
 /**
@@ -63,27 +46,10 @@ module.exports.down = function() {
  *
  * @returns {Promise} Returns an empty promise upon completion.
  */
-module.exports.up = function() {
-  return new Promise((resolve, reject) => {
-    elementHelper()
-    .then(() => branchHelper())
-    // Get all documents from the server data
-    .then(() => ServerData.find({}))
-    .then((serverData) => {
-      // Restrict collection to one document
-      if (serverData.length > 1) {
-        throw new Error('Cannot have more than one server data document.');
-      }
-      // If no server data currently exists, create the document
-      if (serverData.length === 0) {
-        return ServerData.insertMany([{ _id: 'server_data', version: '0.8.1' }]);
-      }
-
-      return ServerData.updateOne({ _id: serverData[0]._id }, { version: '0.8.1' });
-    })
-    .then(() => resolve())
-    .catch((error) => reject(error));
-  });
+module.exports.up = async function() {
+  await elementHelper();
+  await branchHelper();
+  return migrate.shiftVersion('0.8.1');
 };
 
 /**

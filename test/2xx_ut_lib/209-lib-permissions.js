@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author James Eckstein <james.eckstein@lmco.com>
+ * @author James Eckstein
  * @author Josh Kaplan
  *
  * @description Tests the permissions library functions.

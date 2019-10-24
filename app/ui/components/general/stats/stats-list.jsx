@@ -7,7 +7,7 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
  * @author Jake Ursetta
  *

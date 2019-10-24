@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
  * @description This renders the create page.
  */
@@ -64,7 +64,7 @@ class Create extends Component {
 
   // Define the submit function
   onSubmit() {
-    // Initialize project data
+    // Initialize data
     const data = {
       id: this.state.id,
       name: this.state.name,

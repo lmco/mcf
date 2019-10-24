@@ -9,10 +9,10 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
  * @author Jake Ursetta
- * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Austin Bieber
  *
  * @description
  * <p>This module defines the project data model. Projects contain branches,
@@ -44,8 +44,8 @@
  * visibility is internal, any users in the organization can view the model.</p>
  *
  * <p>The biggest benefit to setting a project's visibility to internal is that
- * other model in the organization can create relationships which point to
- * element in the internal project's model. Projects can only point to elements
+ * other models in the organization can create relationships which point to
+ * elements in the internal project's model. Projects can only point to elements
  * on internal projects in their own organization or the "default"
  * organization.</p>
  *

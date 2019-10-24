@@ -7,12 +7,12 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
  * @author Josh Kaplan
  * @author Jake Ursetta
- * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Austin Bieber
+ * @author Connor Doyle
  *
  * @description Provides an abstraction layer on top of the Project model that
  * implements controller logic and behavior for Projects.
@@ -35,6 +35,7 @@ const fs = require('fs');
 const path = require('path');
 
 // MBEE modules
+const Artifact = M.require('models.artifact');
 const Element = M.require('models.element');
 const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
@@ -48,6 +49,7 @@ const jmi = M.require('lib.jmi-conversions');
 const errors = M.require('lib.errors');
 const helper = M.require('lib.controller-utils');
 const permissions = M.require('lib.permissions');
+const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
 
 /**
  * @description This function finds one or many projects. Depending on the given
@@ -93,7 +95,7 @@ const permissions = M.require('lib.permissions');
  * @param {string} [options.custom....] - Search for any key in custom data. Use
  * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @returns {Promise} Array of found project objects.
+ * @returns {Promise<object[]>} Array of found project objects.
  *
  * @example
  * find({User}, 'orgID', ['proj1', 'proj2'], { populate: 'org' })
@@ -294,7 +296,7 @@ async function find(requestingUser, organizationID, projects, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @returns {Promise} Array of created project objects.
+ * @returns {Promise<object[]>} Array of created project objects.
  *
  * @example
  * create({User}, 'orgID', [{Proj1}, {Proj2}, ...], { populate: 'org' })
@@ -397,7 +399,7 @@ async function create(requestingUser, organizationID, projects, options) {
     }
 
     // Get all existing users for permissions
-    const foundUsers = await User.find({}, null, { lean: true });
+    const foundUsers = await User.find({}, '_id', { lean: true });
 
     // Create array of usernames
     const foundUsernames = foundUsers.map(u => u._id);
@@ -589,7 +591,7 @@ async function create(requestingUser, organizationID, projects, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @returns {Promise} Array of updated project objects.
+ * @returns {Promise<object[]>} Array of updated project objects.
  *
  * @example
  * update({User}, 'orgID', [{Updated Proj 1}, {Updated Proj 2}...], { populate: 'org' })
@@ -650,7 +652,7 @@ async function update(requestingUser, organizationID, projects, options) {
       // If a duplicate ID, throw an error
       if (duplicateCheck[proj.id]) {
         throw new M.DataFormatError('Multiple objects with the same ID '
-          + `[${proj.id}] exist in the update.`, 'warn');
+          + `[${utils.parseID(proj.id).pop()}] exist in the update.`, 'warn');
       }
       else {
         duplicateCheck[proj.id] = proj.id;
@@ -675,7 +677,7 @@ async function update(requestingUser, organizationID, projects, options) {
     // Find the projects to update
     const foundProjects = await Project.find(searchQuery, null, { lean: true });
 
-    // Check that the user has admin permissions
+    // Check that the user has permission to update each project
     foundProjects.forEach((proj) => {
       permissions.updateProject(reqUser, foundOrg, proj);
     });
@@ -690,14 +692,10 @@ async function update(requestingUser, organizationID, projects, options) {
       );
     }
 
-    let foundUsers;
+    let foundUsers = [];
     // Find users if updating permissions
     if (updatingPermissions) {
-      foundUsers = await User.find({}, null, { lean: true });
-    }
-    else {
-      // Return an empty array if not updating permissions
-      foundUsers = [];
+      foundUsers = await User.find({}, '_id', { lean: true });
     }
 
     // Set existing users
@@ -720,7 +718,7 @@ async function update(requestingUser, organizationID, projects, options) {
       // Error Check: if proj is currently archived, it must first be unarchived
       if (proj.archived && (updateProj.archived === undefined
         || JSON.parse(updateProj.archived) !== false)) {
-        throw new M.OperationError(`Project [${proj._id}] is archived. `
+        throw new M.OperationError(`Project [${utils.parseID(proj._id).pop()}] is archived. `
           + 'Archived objects cannot be modified.', 'warn');
       }
 
@@ -978,7 +976,7 @@ async function update(requestingUser, organizationID, projects, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @returns {Promise} Array of created project objects.
+ * @returns {Promise<object[]>} Array of created project objects.
  *
  * @example
  * createOrReplace({User}, 'orgID', [{Proj1}, {Proj2}, ...], { populate: 'org' })
@@ -1056,11 +1054,11 @@ async function createOrReplace(requestingUser, organizationID, projects, options
 
     // Check if new projects are being created
     if (projectsToLookUp.length > foundProjects.length) {
-      // Ensure the user has at least write access on the organization
+      // Ensure the user has permission to create projects
       permissions.createProject(reqUser, foundOrg);
     }
 
-    // Check that the user has admin permissions
+    // Ensure the user has permission to update each project
     foundProjects.forEach((proj) => {
       permissions.updateProject(reqUser, foundOrg, proj);
     });
@@ -1115,7 +1113,7 @@ async function createOrReplace(requestingUser, organizationID, projects, options
       createdProjects = await create(reqUser, orgID, projectsToLookUp, options);
     }
     catch (error) {
-      const finalError = await new Promise(async (res) => {
+      throw await new Promise(async (res) => {
         // Reinsert original data
         try {
           await Project.insertMany(foundProjects);
@@ -1130,8 +1128,6 @@ async function createOrReplace(requestingUser, organizationID, projects, options
           res(restoreErr);
         }
       });
-      // Throw whichever error was passed
-      throw finalError;
     }
 
     // Code block after former project has been deleted and replaced
@@ -1170,7 +1166,7 @@ async function createOrReplace(requestingUser, organizationID, projects, options
  * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @returns {Promise} Array of deleted project ids.
+ * @returns {Promise<string[]>} Array of deleted project ids.
  *
  * @example
  * remove({User}, 'orgID', ['proj1', 'proj2'])
@@ -1218,8 +1214,8 @@ async function remove(requestingUser, organizationID, projects, options) {
     // Find the projects to delete
     const foundProjects = await Project.find(searchQuery, null, { lean: true });
 
+    // Ensure user has permission to delete each project
     foundProjects.forEach(project => {
-      // Permissions Check - Must be Sys Admin
       permissions.deleteProject(requestingUser, foundOrg, project);
     });
 
@@ -1234,10 +1230,21 @@ async function remove(requestingUser, organizationID, projects, options) {
         + `[${notFoundIDs.map(p => utils.parseID(p).pop())}].`, 'warn');
     }
 
-    // Delete any elements in the project
+    // Delete any elements in the projects
     await Element.deleteMany(ownedQuery);
 
-    // Delete any branches in the project
+    // Delete any artifacts in the projects
+    await Artifact.deleteMany(ownedQuery);
+
+    // Remove all blobs under the projects
+    foundProjectIDs.forEach((p) => {
+      ArtifactStrategy.clear({
+        orgID: orgID,
+        projectID: utils.parseID(p).pop()
+      });
+    });
+
+    // Delete any branches in the projects
     await Branch.deleteMany(ownedQuery);
 
     // Delete the projects
@@ -1251,7 +1258,7 @@ async function remove(requestingUser, organizationID, projects, options) {
       M.log.error('Some of the following projects were not '
         + `deleted [${saniProjects.toString()}].`);
     }
-    return foundProjects.map(p => p._id);
+    return foundProjectIDs;
   }
   catch (error) {
     throw errors.captureError(error);

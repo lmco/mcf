@@ -7,11 +7,12 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
- * @description This renders an organization or project home page.
+ * @description This renders an organization or project
+ * information page.
  */
 
 /* Modified ESLint rules for React. */

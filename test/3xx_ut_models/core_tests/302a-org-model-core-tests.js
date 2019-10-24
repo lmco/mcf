@@ -1,17 +1,17 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.302a-org-model-tests
+ * @module test.302a-org-model-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
  * @author Josh Kaplan
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Leah De Laurell
+ * @author Austin Bieber
  *
  * @description Tests the organization model by performing various actions
  * such as a create, archive, and delete. The test Does NOT test the
@@ -50,7 +50,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   before((done) => {
     db.connect()
-    .then((user) => done())
+    .then(() => done())
     .catch((error) => {
       M.log.error(error);
       // Expect no error
@@ -151,12 +151,19 @@ async function updateOrg() {
  * @description Deletes the previously created organization from createOrg.
  */
 async function deleteOrg() {
-  // Remove the org
-  await Org.deleteMany({ _id: testData.orgs[0].id });
+  try {
+    // Remove the org
+    await Org.deleteMany({ _id: testData.orgs[0].id });
 
-  // Attempt to find the org
-  const foundOrg = await Org.findOne({ _id: testData.orgs[0].id });
+    // Attempt to find the org
+    const foundOrg = await Org.findOne({ _id: testData.orgs[0].id });
 
-  // foundOrg should be null
-  should.not.exist(foundOrg);
+    // foundOrg should be null
+    should.not.exist(foundOrg);
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
 }

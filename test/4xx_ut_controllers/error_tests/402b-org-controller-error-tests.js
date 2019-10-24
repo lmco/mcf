@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Phillip Lee
  *
  * @description This tests for expected errors within the org controller.
  */
@@ -141,7 +141,7 @@ async function putWithoutId() {
   const testOrgObj1 = testData.orgs[1];
   const invalidOrgObj = { name: 'missing id' };
 
-  // Expect
+  // Expect operation to be rejected with specific error message.
   await OrgController.createOrReplace(adminUser,
     [testOrgObj0, testOrgObj1, invalidOrgObj])
   .should.eventually.be.rejectedWith('Org #3 does not have an id.');

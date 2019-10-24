@@ -1,15 +1,15 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.profile-views.project-list
+ * @module ui.components.admin-console-views.project-list
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
  * @description This renders the project list page with the orgs.
  */

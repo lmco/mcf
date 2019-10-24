@@ -5,11 +5,11 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Connor Doyle
  *
  * @description This tests for expected errors in mock requests of user endpoints in the API
  * controller.

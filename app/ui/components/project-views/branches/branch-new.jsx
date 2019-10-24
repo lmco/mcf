@@ -1,17 +1,17 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.shared-views.create
+ * @module ui.components.project-views.branches.branch-new
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
- * @description This renders the new branch form.
+ * @description This renders the form to create a new branch.
  */
 
 /* Modified ESLint rules for React. */

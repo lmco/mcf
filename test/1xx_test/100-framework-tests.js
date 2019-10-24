@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
  * @description These tests are used to ensure that the Mocha test framework and
  * chai assertions library exist and are working as expected. If this test suite
@@ -34,7 +34,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Runs an empty test case. This show that Mocha is working.
+ * @description Runs an empty test case. This shows that Mocha is working.
  *
  * @param {Function} done - The Mocha callback.
  */

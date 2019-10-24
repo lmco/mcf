@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Connor Doyle
  * @author Jake Ursetta
  *
  * @description Provides utilities for handling .cfg files, specifically
@@ -133,18 +133,18 @@ module.exports.validate = function(config) {
   test(config, 'db', 'object');
   test(config, 'db.strategy', 'string');
 
+  // Ensure that the db strategy exists
+  const dbFiles = fs.readdirSync(path.join(M.root, 'app', 'db'))
+  .filter((file) => file.includes(config.db.strategy));
+  if (dbFiles.length === 0) {
+    throw new Error(`Configuration file: DB strategy file ${config.db.strategy} not found in app/db directory.`);
+  }
+
   // Test supported database
   if (config.db.strategy === 'mongoose-mongodb-strategy') {
     test(config, 'db.url', 'string');
     test(config, 'db.port', 'number');
     test(config, 'db.name', 'string');
-
-    // Ensure that the db strategy exists
-    const dbFiles = fs.readdirSync(path.join(M.root, 'app', 'db'))
-    .filter((file) => file.includes(config.db.strategy));
-    if (dbFiles.length === 0) {
-      throw new Error(`Configuration file: DB strategy file ${config.db.strategy} not found in app/db directory.`);
-    }
 
     // Test optional fields
     if (config.db.username !== undefined) test(config, 'db.username', 'string');
@@ -193,7 +193,6 @@ module.exports.validate = function(config) {
       throw new Error(`Configuration file: Dockerfile ${Dockerfile} not found in specified directory.`);
     }
   }
-
 
   // ----------------------------- Verify log ----------------------------- //
   test(config, 'log', 'object');
@@ -265,32 +264,42 @@ module.exports.validate = function(config) {
   }
   test(config, 'server.secret', 'string');
 
-
   // ----------------------------- Verify test ----------------------------- //
   test(config, 'test', 'object');
   test(config, 'test.url', 'string');
-
 
   // --------------------------- Verify validators -------------------------- //
   if (config.validators) {
     test(config, 'validators', 'object');
     if (config.validators.id) test(config, 'validators.id', 'string');
-    if (config.validators.id_length) test(config, 'validators.id_length', 'string');
-    if (config.validators.org_id) test(config, 'validators', 'string');
-    if (config.validators.org_id_length) test(config, 'validators.id_length', 'string');
-    if (config.validators.project_id) test(config, 'validators', 'string');
-    if (config.validators.project_id_length) test(config, 'validators.id_length', 'string');
-    if (config.validators.branch_id) test(config, 'validators', 'string');
-    if (config.validators.branch_id_length) test(config, 'validators.id_length', 'string');
-    if (config.validators.element_id) test(config, 'validators', 'string');
-    if (config.validators.element_id_length) test(config, 'validators', 'string');
-    if (config.validators.user_username) test(config, 'validators', 'string');
-    if (config.validators.user_username_length) test(config, 'validators', 'string');
-    if (config.validators.user_email) test(config, 'validators', 'string');
-    if (config.validators.user_fname) test(config, 'validators', 'string');
-    if (config.validators.user_lname) test(config, 'validators', 'string');
-    if (config.validators.user_provider) test(config, 'validators', 'string');
-    if (config.validators.url_next) test(config, 'validators', 'string');
+    if (config.validators.id_length) test(config, 'validators.id_length', 'number');
+    if (config.validators.org_id) test(config, 'validators.org_id', 'string');
+    if (config.validators.org_id_length) test(config, 'validators.org_id_length', 'number');
+    if (config.validators.project_id) test(config, 'validators.project_id', 'string');
+    if (config.validators.project_id_length) test(config, 'validators.project_id_length', 'number');
+    if (config.validators.branch_id) test(config, 'validators.branch_id', 'string');
+    if (config.validators.branch_id_length) test(config, 'validators.branch_id_length', 'number');
+    if (config.validators.element_id) test(config, 'validators.element_id', 'string');
+    if (config.validators.element_id_length) test(config, 'validators.element_id_length', 'number');
+    if (config.validators.user_username) test(config, 'validators.user_username', 'string');
+    if (config.validators.user_username_length) test(config, 'validators.user_username_length', 'number');
+    if (config.validators.user_email) test(config, 'validators.user_email', 'string');
+    if (config.validators.user_fname) test(config, 'validators.user_fname', 'string');
+    if (config.validators.user_lname) test(config, 'validators.user_lname', 'string');
+    if (config.validators.user_provider) test(config, 'validators.user_provider', 'string');
+    if (config.validators.url_next) test(config, 'validators.url_next', 'string');
+  }
+
+  // ----------------------------- Verify Artifact ----------------------------- //
+  test(config, 'artifact', 'object');
+  test(config, 'artifact.strategy', 'string');
+  // Check that the strategy file exists
+  const artStratFiles = fs.readdirSync(path.join(M.root, 'app', 'artifact'))
+  .filter((file) => file === `${config.artifact.strategy}.js`);
+  if (artStratFiles.length === 0) {
+    throw new Error(
+      `Configuration file: Artifact strategy file ${config.artifact.strategy} not found in app/artifact directory.`
+    );
   }
 };
 
@@ -300,7 +309,7 @@ module.exports.validate = function(config) {
  *
  * @param {string} inputString - The name of the file to parse.
  *
- * @returns {object} Valid JSON.
+ * @returns {object} Valid JSON object.
  */
 module.exports.removeComments = function(inputString) {
   // Ensure inputString is of type string

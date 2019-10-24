@@ -7,10 +7,10 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Leah De Laurell
  *
  * @author Josh Kaplan
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
  * @description Builds and runs docker containers.
  */

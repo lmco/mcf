@@ -7,10 +7,10 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Austin Bieber
+ * @author Leah De Laurell
  *
  * @description Defines the JMI Type conversion functions.
  */
@@ -77,6 +77,8 @@ function jmi12(data, field) {
     });
   }
   catch (error) {
+    // TODO: This is super bad hardcoding... creating elements has nothing to do
+    //  with this function. We should really rethink this
     throw new M.DataFormatError('Cannot create multiple elements with the same ID.', 'warn');
   }
 
@@ -95,7 +97,7 @@ function jmi12(data, field) {
  * @returns {object} The converted JMI type 3 object.
  */
 function jmi13(data, field, unique = 'id') {
-  // Ensure that each element has a parent and contain field
+  // Ensure that each element has a parent and contains field
   if (!data.every(e => e.hasOwnProperty('contains'))) {
     throw new M.DataFormatError('Elements must have the \'contains\' field to '
       + 'convert to JMI type 3.');

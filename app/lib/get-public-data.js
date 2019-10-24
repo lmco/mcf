@@ -7,11 +7,12 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Austin Bieber
+ * @author Phillip Lee
+ * @author Leah De Laurell
+ * @author Connor Doyle
  *
  * @description Defines functions for returning JSON public data.
  */
@@ -40,6 +41,8 @@ module.exports.getPublicData = function(object, type, options) {
 
   // Call correct getPublicData() function
   switch (type.toLowerCase()) {
+    case 'artifact':
+      return getArtifactPublicData(object, options);
     case 'element':
       return getElementPublicData(object, options);
     case 'branch':
@@ -54,6 +57,131 @@ module.exports.getPublicData = function(object, type, options) {
       throw new M.DataFormatError(`Invalid model type [${type}]`, 'warn');
   }
 };
+
+/**
+ * @description Returns an artifacts public data.
+ *
+ * @param {object} artifact - The raw JSON of the artifact.
+ * @param {object} options - A list of options passed in by the user to
+ * the API Controller.
+ *
+ * @returns {object} The public data of the artifact.
+ */
+function getArtifactPublicData(artifact, options) {
+  // Parse the artifact ID
+  const idParts = utils.parseID(artifact._id);
+
+  let createdBy = null;
+  let lastModifiedBy = null;
+  let archivedBy;
+  let project;
+  let branch;
+
+  // If artifact.createdBy is defined
+  if (artifact.createdBy) {
+    // If artifact.createdBy is populated
+    if (typeof artifact.createdBy === 'object') {
+      // Get the public data of createdBy
+      createdBy = getUserPublicData(artifact.createdBy, {});
+    }
+    else {
+      createdBy = artifact.createdBy;
+    }
+  }
+
+  // If artifact.lastModifiedBy is defined
+  if (artifact.lastModifiedBy) {
+    // If artifact.lastModifiedBy is populated
+    if (typeof artifact.lastModifiedBy === 'object') {
+      // Get the public data of lastModifiedBy
+      lastModifiedBy = getUserPublicData(artifact.lastModifiedBy, {});
+    }
+    else {
+      lastModifiedBy = artifact.lastModifiedBy;
+    }
+  }
+
+  // If artifact.archivedBy is defined
+  if (artifact.archivedBy && artifact.archived) {
+    // If artifact.archivedBy is populated
+    if (typeof artifact.archivedBy === 'object') {
+      // Get the public data of archivedBy
+      archivedBy = getUserPublicData(artifact.archivedBy, {});
+    }
+    else {
+      archivedBy = artifact.archivedBy;
+    }
+  }
+
+  // If artifact.branch is defined
+  if (artifact.branch) {
+    // If artifact.branch is populated
+    if (typeof artifact.branch === 'object') {
+      // Get the public data of branch
+      branch = getBranchPublicData(artifact.branch, {});
+    }
+    else {
+      branch = utils.parseID(artifact.branch).pop();
+    }
+  }
+
+  // If artifact.project is defined
+  if (artifact.project) {
+    // If artifact.project is populated
+    if (typeof artifact.project === 'object') {
+      // Get the public data of project
+      project = getProjectPublicData(artifact.project, {});
+    }
+    else {
+      project = idParts[1];
+    }
+  }
+
+  const data = {
+    id: idParts.pop(),
+    name: artifact.name,
+    branch: branch,
+    project: project,
+    org: idParts[0],
+    filename: artifact.filename,
+    location: artifact.location,
+    strategy: artifact.strategy,
+    custom: artifact.custom || {},
+    createdOn: (artifact.createdOn) ? artifact.createdOn.toString() : undefined,
+    createdBy: createdBy,
+    updatedOn: (artifact.updatedOn) ? artifact.updatedOn.toString() : undefined,
+    lastModifiedBy: lastModifiedBy,
+    archived: artifact.archived,
+    archivedOn: (artifact.archivedOn) ? artifact.archivedOn.toString() : undefined,
+    archivedBy: archivedBy
+  };
+
+  // If the fields options is defined
+  if (options.hasOwnProperty('fields')) {
+    // If fields should be excluded
+    if (options.fields.every(f => f.startsWith('-'))) {
+      // For each of those fields
+      options.fields.forEach((f) => {
+        // If -id, ignore it
+        if (f === '-id') {
+          return;
+        }
+        // Remove the field from data
+        data[f.slice(1)] = undefined;
+      });
+    }
+    // If only specific fields should be included
+    else if (options.fields.every(f => !f.startsWith('-'))) {
+      const returnObj = { id: data.id };
+      // Add specific field to returnObj
+      options.fields.forEach((f) => {
+        returnObj[f] = (data.hasOwnProperty(f)) ? data[f] : undefined;
+      });
+      return returnObj;
+    }
+  }
+  return data;
+}
 
 /**
  * @description Returns an elements public data.

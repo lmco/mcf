@@ -7,13 +7,13 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Austin Bieber
  * @author Josh Kaplan
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author Phillip Lee <phillip.lee@lmco.com>
- * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Leah De Laurell
+ * @author Phillip Lee
+ * @author Connor Doyle
  *
  * @description Defines the HTTP Rest API interface file. This file tightly
  * couples with the app/api-routes.js file.
@@ -28,8 +28,11 @@ const path = require('path');
 
 // NPM modules
 const swaggerJSDoc = require('swagger-jsdoc');
+const multer = require('multer');
+const upload = multer().single('file');
 
 // MBEE modules
+const ArtifactController = M.require('controllers.artifact-controller');
 const ElementController = M.require('controllers.element-controller');
 const BranchController = M.require('controllers.branch-controller');
 const OrgController = M.require('controllers.organization-controller');
@@ -102,6 +105,14 @@ module.exports = {
   patchBranch,
   postBranch,
   deleteBranch,
+  getArtifact,
+  patchArtifact,
+  postArtifact,
+  deleteArtifact,
+  getBlob,
+  postBlob,
+  deleteBlob,
+  getBlobById,
   getWebhook,
   postWebhook,
   patchWebhook,
@@ -138,18 +149,22 @@ function formatJSON(obj, minified = false) {
  * @param {object} res - The response object.
  * @param {string} message - The response message or error message.
  * @param {number} statusCode - The status code for the response.
+ * @param {string} [contentType="application/json"] - The content type for
+ * the response.
  *
  * @returns {object} The response object.
  */
-function returnResponse(req, res, message, statusCode) {
+function returnResponse(req, res, message, statusCode,
+  contentType = 'application/json') {
   if (statusCode === 200) {
     // We send these headers for a success response
-    res.header('Content-Type', 'application/json');
+    res.header('Content-Type', contentType);
   }
   else {
     // We send these headers for an error response
     res.header('Content-Type', 'text/plain');
   }
+
   // Send the message
   res.status(statusCode).send(message);
   // Log the response
@@ -4794,20 +4809,507 @@ async function deleteBranch(req, res) {
   }
 }
 
+/* -----------------------( Artifacts API Endpoints )------------------------- */
 /**
- * ALL /api/*
+ * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  *
- * @description Returns an error message if a user tries to access an invalid
- * api route.
+ * @description Gets a single artifact by ID.
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
  *
- * @returns {object} Response error message
+ * @returns {object} Response object with found artifact
  */
-function invalidRoute(req, res) {
-  const json = 'Invalid Route or Method.';
-  return returnResponse(req, res, json, 404);
+async function getArtifact(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array',
+    minified: 'boolean',
+    includeArchived: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
+
+  try {
+    // Find the artifact from its artifact.id, branch.id, project.id, and org.id
+    // NOTE: find() sanitizes input params
+    const artifact = await ArtifactController.find(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.params.artifactid, options);
+
+    // If no artifact found, return 404 error
+    if (artifact.length === 0) {
+      throw new M.NotFoundError(
+        `Artifact [${req.params.artifactid}] not found.`, 'warn'
+      );
+    }
+
+    const publicArtifactData = sani.html(
+      artifact.map(a => publicData.getPublicData(a, 'artifact', options))
+    );
+
+    // Format JSON
+    const json = formatJSON(publicArtifactData[0], minified);
+
+    // Return 200: OK and public artifact data
+    return returnResponse(req, res, json, 200);
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+/**
+ * POST /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
+ *
+ * @description Creates a single artifact.
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {object} Response object with created artifact
+ */
+async function postArtifact(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array',
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
+
+  // If artifact ID was provided in the body, ensure it matches artifact ID in params
+  if (Object.prototype.hasOwnProperty.call('id')
+    && (req.params.artifactid !== req.body.id)) {
+    const error = new M.DataFormatError(
+      'Artifact ID in the body does not match ID in the params.', 'warn'
+    );
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Set the artifact ID in the body equal req.params.artifactid
+  req.body.id = req.params.artifactid;
+
+  // Create artifact with provided parameters
+  // NOTE: create() sanitizes input params
+  try {
+    const artifact = await ArtifactController.create(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.body, options);
+
+    const artifactsPublicData = sani.html(
+      artifact.map(a => publicData.getPublicData(a, 'artifact', options))
+    );
+    // Format JSON
+    const json = formatJSON(artifactsPublicData[0], minified);
+    return returnResponse(req, res, json, 200);
+  }
+  catch (error) {
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+/**
+ * PATCH /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
+ *
+ * @description Updates a single artifact.
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {object} Response object with updated artifact
+ */
+async function patchArtifact(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array',
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
+
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Sanitize body
+  req.body = JSON.parse(JSON.stringify(req.body));
+
+  // If an ID was provided in the body, ensure it matches the ID in params
+  if (Object.prototype.hasOwnProperty.call('id')
+    && (req.params.artifactid !== req.body.id)) {
+    const error = new M.DataFormatError(
+      'Artifact ID in the body does not match ID in the params.', 'warn'
+    );
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Set the artifact ID in the body equal req.params.artifactid
+  req.body.id = req.params.artifactid;
+
+  try {
+    // Update the specified artifact
+    // NOTE: update() sanitizes input params
+    const artifact = await ArtifactController.update(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.body, options);
+
+    const artifactsPublicData = sani.html(
+      artifact.map(a => publicData.getPublicData(a, 'artifact', options))
+    );
+
+    // Format JSON
+    const json = formatJSON(artifactsPublicData[0], minified);
+    return returnResponse(req, res, json, 200);
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+/**
+ * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
+ *
+ * @description Deletes a single artifact.
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {object} Response object with success boolean
+ */
+async function deleteArtifact(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return res.status(error.status).send(error);
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+  try {
+    // Remove the specified artifact
+    // NOTE: remove() sanitizes input params
+    const artIDs = await ArtifactController.remove(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.params.artifactid, options);
+    const parsedIDs = artIDs.map(a => utils.parseID(a).pop());
+
+    // Format JSON
+    const json = formatJSON(parsedIDs[0], minified);
+
+    return returnResponse(req, res, json, 200);
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/artifacts/blob
+ *
+ * @description Gets an artifact blob by org.id, project.id,
+ * location, filename.
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {Buffer} Artifact blob.
+ */
+async function getBlob(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  try {
+    const artifactBlob = await ArtifactController.getBlob(req.user, req.params.orgid,
+      req.params.projectid, req.query);
+
+    // Set filename
+    res.header('Content-Disposition', `attachment; filename=${req.query.filename}`);
+
+    // Return 200: OK and public artifact data
+    return returnResponse(req, res, artifactBlob, 200,
+      utils.getContentType(req.query.filename));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+/**
+ * POST /api/orgs/:orgid/projects/:projectid/artifacts/blob
+ *
+ * @description Post an artifact blob by org.id, project.id,
+ * location, filename.
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {object} Posted Artifact object.
+ */
+async function postBlob(req, res) {
+  await upload(req, res, async function(err) {
+    // Sanity Check: there should always be a user in the request
+    if (!req.user) {
+      M.log.critical('No requesting user available.');
+      const error = new M.ServerError('Request Failed');
+      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    }
+
+    if (err instanceof multer.MulterError) {
+      // A Multer error occurred when uploading.
+      M.log.error(err);
+      const error = new M.ServerError('Artifact upload failed.', 'warn');
+      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    }
+
+    // Sanity Check: file is required
+    if (!req.file) {
+      const error = new M.DataFormatError('Artifact Blob file must be defined.', 'warn');
+      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    }
+
+    try {
+      const artifact = await ArtifactController.postBlob(req.user, req.params.orgid,
+        req.params.projectid, req.body, req.file.buffer);
+
+      // Set minified to true
+      const minified = true;
+
+      // Format JSON
+      const json = formatJSON(artifact, minified);
+      return returnResponse(req, res, json, 200);
+    }
+    catch (error) {
+      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    }
+  });
+}
+
+/**
+ * DELETE /api/orgs/:orgid/projects/:projectid/artifacts/blob
+ *
+ * @description Deletes an artifact blob by org.id, project.id,
+ * location, filename.
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {object} Deleted Artifact object.
+ */
+async function deleteBlob(req, res) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  try {
+    const artifact = await ArtifactController.deleteBlob(req.user, req.params.orgid,
+      req.params.projectid, req.query);
+
+    // Set minified to true
+    const minified = true;
+
+    // Format JSON
+    const json = formatJSON(artifact, minified);
+
+    // Return 200: OK and public artifact data
+    return returnResponse(req, res, json, 200);
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid/blob
+ *
+ * @description Gets an artifact blob by its org.id, project.id, branch.id and
+ * artifact.id.
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {Buffer} Artifact blob.
+ */
+async function getBlobById(req, res) {
+  // Define options
+  // Note: Undefined if not set
+  let options;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    includeArchived: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  try {
+    // Add additional options
+    options.fields = ['location', 'filename'];
+
+    // Find the artifact from its artifact.id, project.id, and org.id
+    // NOTE: find() sanitizes input params
+    const artMetadata = await ArtifactController.find(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, req.params.artifactid, options);
+
+    // Ensure blob found
+    if (artMetadata.length === 0) {
+      throw new M.NotFoundError(
+        `No artifact blob found. [${req.params.artifactid}]`, 'warn'
+      );
+    }
+    const artifactBlob = await ArtifactController.getBlob(req.user, req.params.orgid,
+      req.params.projectid, artMetadata[0]);
+
+    // Set filename
+    res.header('Content-Disposition', `attachment; filename=${artMetadata[0].filename}`);
+
+    // Return 200: OK and public artifact data
+    return returnResponse(req, res, artifactBlob, 200,
+      utils.getContentType(artMetadata[0].filename));
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
 }
 
 async function getWebhook(req, res) {
@@ -5009,3 +5511,20 @@ async function deleteWebhook(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
+
+/**
+ * ALL /api/*
+ *
+ * @description Returns an error message if a user tries to access an invalid
+ * api route.
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {object} Response error message
+ */
+function invalidRoute(req, res) {
+  const json = 'Invalid Route or Method.';
+  return returnResponse(req, res, json, 404);
+}
+

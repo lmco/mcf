@@ -7,11 +7,11 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
  * @author Josh Kaplan
- * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Austin Bieber
+ * @author Connor Doyle
  *
  * @description This file defines validators - common regular expressions and
  * helper functions - used to validate data within MBEE.
@@ -20,7 +20,8 @@
 // Disabled to allow lists in descriptions
 
 // MBEE modules
-const utils = require('./utils');
+const utils = M.require('lib.utils');
+const artifactVal = M.require(`artifact.${M.config.artifact.strategy}`).validator;
 
 // If validators isn't defined, just set custom to an empty object.
 const customValidators = M.config.validators || {};
@@ -34,7 +35,7 @@ const reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
   'login', 'about', 'assets', 'static', 'public', 'api', 'organizations',
   'orgs', 'projects', 'users', 'plugins', 'ext', 'extension', 'search',
   'whoami', 'profile', 'edit', 'proj', 'elements', 'branch', 'anonymous',
-  'server'];
+  'server', 'blob', 'artifact', 'artifacts'];
 
 /**
  * @description Regular Expressions to validate organization data.
@@ -114,7 +115,10 @@ const branch = {
 const artifact = {
   id: customValidators.artifact_id || `^${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}${utils.ID_DELIMITER}${id}$`,
   idLength: branch.idLength + utils.ID_DELIMITER.length
-    + (customValidators.artifact_id_length ? customValidators.artifact_id_length : idLength)
+    + (customValidators.artifact_id_length ? customValidators.artifact_id_length : idLength),
+  location: (artifactVal.location) ? artifactVal.location : '^[^.]+$',
+  filename: (artifactVal.filename) ? artifactVal.filename : '^[^!\\<>:"\'|?*]+$',
+  extension: (artifactVal.extension) ? artifactVal.extension : '^[\\w]+[.][\\w]+$'
 };
 
 /**

@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner James Eckstein <james.eckstein@lmco.com>
+ * @owner James Eckstein
  *
- * @author James Eckstein <james.eckstein@lmco.com>
+ * @author James Eckstein
  *
  * @description This renders the custom data edit view.
  */

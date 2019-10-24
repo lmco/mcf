@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Connor Doyle
  *
  * @description These tests test for specific use cases within the user
  * controller. The tests verify that operations can be done that are more
@@ -211,12 +211,20 @@ async function optionPopulateCreate() {
 
     // For each field in pop
     pop.forEach((field) => {
-      // If the field is defined in the returned user
-      if (createdUser.hasOwnProperty(field)) {
+      chai.expect(field in createdUser).to.equal(true);
+      if (Array.isArray(createdUser[field])) {
+        createdUser[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (createdUser[field] !== null) {
         // Expect each populated field to be an object
-        chai.expect(typeof createdUser.field).to.equal('object');
-        // Expect each populated field to at least have an _id
-        chai.expect(createdUser.field.hasOwnProperty('_id')).to.equal(true);
+        chai.expect(typeof createdUser[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in createdUser[field]).to.equal(true);
       }
     });
 
@@ -275,7 +283,7 @@ async function optionFieldsCreate() {
     const visibleFields2 = Object.keys(notFindUser._doc);
 
     // Check that the keys in the notFindOptions are not in createdUser
-    chai.expect(Object.keys(visibleFields2)).to.not.have.members(['createdOn', 'updatedOn']);
+    chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
 
     // Remove the test user
     await UserController.remove(adminUser, [userObjFind.username, userObjNotFind.username]);
@@ -513,11 +521,20 @@ async function optionPopulateFind() {
 
     // For each field in pop
     pop.forEach((field) => {
-      if (foundUser.hasOwnProperty(field)) {
+      chai.expect(field in foundUser).to.equal(true);
+      if (Array.isArray(foundUser[field])) {
+        foundUser[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (foundUser[field] !== null) {
         // Expect each populated field to be an object
-        chai.expect(typeof foundUser.field).to.equal('object');
+        chai.expect(typeof foundUser[field]).to.equal('object');
         // Expect each populated field to at least have an id
-        chai.expect(foundUser.field.hasOwnProperty('_id')).to.equal(true);
+        chai.expect('_id' in foundUser[field]).to.equal(true);
       }
     });
 
@@ -726,11 +743,20 @@ async function optionPopulateUpdate() {
 
     // Validate that the returned object has populated fields
     pop.forEach((field) => {
-      if (updatedUser.hasOwnProperty(field)) {
+      chai.expect(field in updatedUser).to.equal(true);
+      if (Array.isArray(updatedUser[field])) {
+        updatedUser[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (updatedUser[field] !== null) {
         // Expect each populated field to be an object
-        chai.expect(typeof updatedUser.field).to.equal('object');
+        chai.expect(typeof updatedUser[field]).to.equal('object');
         // Expect each populated field to at least have an id
-        chai.expect(updatedUser.field.hasOwnProperty('_id')).to.equal(true);
+        chai.expect('_id' in updatedUser[field]).to.equal(true);
       }
     });
     // Remove test user
@@ -912,11 +938,20 @@ async function optionPopulateReplace() {
 
     // Validate that the returned object has populated fields
     pop.forEach((field) => {
-      if (replacedUser.hasOwnProperty(field)) {
+      chai.expect(field in replacedUser).to.equal(true);
+      if (Array.isArray(replacedUser[field])) {
+        replacedUser[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (replacedUser[field] !== null) {
         // Expect each populated field to be an object
-        chai.expect(typeof replacedUser.field).to.equal('object');
+        chai.expect(typeof replacedUser[field]).to.equal('object');
         // Expect each populated field to at least have an id
-        chai.expect(replacedUser.field.hasOwnProperty('_id')).to.equal(true);
+        chai.expect('_id' in replacedUser[field]).to.equal(true);
       }
     });
 
@@ -998,7 +1033,7 @@ async function optionFieldsReplace() {
     const visibleFields2 = Object.keys(notFindUser._doc);
 
     // Check that the keys in the notFindOptions are not in createdUser
-    chai.expect(Object.keys(visibleFields2)).to.not.have.members(['createdOn', 'updatedOn']);
+    chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
     // Remove test user
     await UserController.remove(adminUser, userData.username);
   }
@@ -1094,8 +1129,7 @@ async function optionIncludeArchivedSearch() {
     chai.expect(foundUsers).to.have.lengthOf.at.least(1);
     // Validate search text in found users
     foundUsers.forEach((foundUser) => {
-      chai.expect(foundUser.fname || foundUser.lname
-        || foundUser.preferredName).to.equal(searchQuery);
+      chai.expect(foundUser.fname).to.equal(searchQuery);
     });
 
     // Remove the test user
@@ -1188,11 +1222,20 @@ async function optionPopulateSearch() {
     // Validate that fields were populated
     pop.forEach((field) => {
       foundUsers.forEach((foundUser) => {
-        if (foundUser.hasOwnProperty(field)) {
-          // Expect the populated field to be an object
-          chai.expect(typeof foundUser.field).to.equal('object');
-          // Expect the field to have at least an _id property
-          chai.expect(foundUser.field.hasOwnProperty('_id')).to.equal(true);
+        chai.expect(field in foundUser).to.equal(true);
+        if (Array.isArray(foundUser[field])) {
+          foundUser[field].forEach((item) => {
+            // Expect each populated field to be an object
+            chai.expect(typeof item).to.equal('object');
+            // Expect each populated field to at least have an id
+            chai.expect('_id' in item).to.equal(true);
+          });
+        }
+        else if (foundUser[field] !== null) {
+          // Expect each populated field to be an object
+          chai.expect(typeof foundUser[field]).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in foundUser[field]).to.equal(true);
         }
       });
     });

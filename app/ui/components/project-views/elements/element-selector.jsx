@@ -7,10 +7,10 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
  * @author Josh Kaplan
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
  * @description Renders an element selector that has two parts: the selected
  * element and the modal to select an element.

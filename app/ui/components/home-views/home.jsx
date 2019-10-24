@@ -1,15 +1,15 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.apps.home-app
+ * @module ui.components.home-views.home
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
  * @description This renders the homepage.
  */
