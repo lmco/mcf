@@ -34,7 +34,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Runs an empty test case. This show that Mocha is working.
+ * @description Runs an empty test case. This shows that Mocha is working.
  *
  * @param {Function} done - The Mocha callback.
  */

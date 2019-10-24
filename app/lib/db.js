@@ -11,7 +11,8 @@
  *
  * @author Austin Bieber
  *
- * @description Defines database connection functions.
+ * @description The database abstraction layer. Defines functions and classes
+ * which must be implemented by all database strategies.
  */
 
 // Node modules
@@ -35,7 +36,7 @@ requiredFunctions.forEach((fxn) => {
  * @description Connects to the database.
  * @async
  *
- * @returns {Function} The connect function of the implemented database strategy.
+ * @returns {Promise} Resolves on successful completion of promise.
  */
 async function connect() {
   try {
@@ -50,7 +51,7 @@ async function connect() {
  * @description Disconnects from the database.
  * @async
  *
- * @returns {Function} The disconnect function of the implemented database strategy.
+ * @returns {Promise} Resolves on successful completion of promise.
  */
 async function disconnect() {
   try {
@@ -66,7 +67,7 @@ async function disconnect() {
  * from scratch. Used in 000 and 999 tests, which SHOULD NOT BE RUN IN PRODUCTION.
  * @async
  *
- * @returns {Function} The clear function of the implemented database strategy.
+ * @returns {Promise} Resolves on successful completion of promise.
  */
 async function clear() {
   try {
@@ -97,16 +98,16 @@ function sanitize(data) {
 }
 
 /**
- * @description Defines the Schema class. Schemas define the properties and methods that each
- * instance of a document should have, as well as the static functions which belong on a model.
- * The Schema class is closely based on the Mongoose.js Schema class
- * {@link https://mongoosejs.com/docs/api/schema.html}.
+ * @description Defines the Schema class. Schemas define the properties and
+ * methods that each instance of a document should have, as well as the static
+ * functions which belong on a model. The Schema class is closely based on the
+ * mongoose.js Schema class {@link https://mongoosejs.com/docs/api/schema.html}.
  */
 class Schema extends DBModule.Schema {
 
   /**
    * @description Class constructor. Calls the parent constructor and ensures
-   * that the parent class defined the required functions.
+   * that the parent class defines the required functions.
    *
    * @param {object} definition - The parameters and functions which define the
    * schema.
@@ -117,8 +118,8 @@ class Schema extends DBModule.Schema {
     super(definition, options);
 
     // Check that expected functions are defined
-    const expectedFunctions = ['add', 'plugin', 'index', 'pre',
-      'virtual', 'static', 'method'];
+    const expectedFunctions = ['add', 'plugin', 'index', 'pre', 'virtual',
+      'static', 'method'];
     expectedFunctions.forEach((f) => {
       // Ensure the parameter is defined
       if (!(f in this)) {
@@ -140,8 +141,7 @@ class Schema extends DBModule.Schema {
    * schema.
    * @param {string} [prefix] - The optional prefix to add to the paths in obj.
    *
-   * @returns {Function} Calls super on the add function of the implemented
-   * database strategy's schema.
+   * @returns {Schema} The modified Schema.
    */
   add(obj, prefix) {
     return super.add(obj, prefix);
@@ -151,13 +151,10 @@ class Schema extends DBModule.Schema {
    * @description Registers a plugin for the schema.
    *
    * @param {Function} cb - A callback function to run.
-   * @param {object} [options] - A object containing options.
-   *
-   * @returns {Function} Calls super on the plugin function of the implemented
-   * database strategy's schema.
+   * @param {object} [options] - An object containing options.
    */
   plugin(cb, options) {
-    return super.plugin(cb, options);
+    super.plugin(cb, options);
   }
 
   /**
@@ -169,12 +166,9 @@ class Schema extends DBModule.Schema {
    * where 1 defines an ascending index, -1 a descending index, and 'text'
    * defines a text index.
    * @param {object} [options] - An object containing options.
-   *
-   * @returns {Function} Calls super on the index function of the implemented
-   * database strategy's schema.
    */
   index(fields, options) {
-    return super.index(fields, options);
+    super.index(fields, options);
   }
 
   /**
@@ -186,21 +180,19 @@ class Schema extends DBModule.Schema {
    * @param {object} [options] - An object containing options.
    * @param {Function} cb - The callback function to run prior to the event
    * occurring.
-   *
-   * @returns {Function} Calls super on the pre function of the implemented
-   * database strategy's schema.
    */
   pre(methodName, options, cb) {
-    return super.pre(methodName, options, cb);
+    super.pre(methodName, options, cb);
   }
 
   /**
-   * @description Defines a virtual field for the schema. Virtuals are not stored in the
-   * database and rather are calculated post-find. Virtuals generally will require a second
-   * request to retrieve referenced documents. Populated virtuals contains a localField and
-   * foreignField which must match for a document to be added to the virtual collection. For
-   * example, the Organization Schema contains a virtual called "projects". This virtual
-   * returns all projects who "org" field matches the organization's "_id".
+   * @description Defines a virtual field for the schema. Virtuals are not
+   * stored in the database and rather are calculated post-find. Virtuals
+   * generally will require a second request to retrieve referenced documents.
+   * Populated virtuals contains a localField and foreignField which must match
+   * for a document to be added to the virtual collection. For example, the
+   * organization Schema contains a virtual called "projects". This virtual
+   * returns all projects whose "org" field matches the organizations "_id".
    *
    * @param {string} name - The name of the field to be added to the schema
    * post-find.
@@ -219,6 +211,7 @@ class Schema extends DBModule.Schema {
    * database strategy's schema.
    */
   virtual(name, options) {
+    // TODO: Figure out what this actually returns
     return super.virtual(name, options);
   }
 
@@ -228,12 +221,9 @@ class Schema extends DBModule.Schema {
    *
    * @param {string} name - The name of the static function.
    * @param {Function} fn - The function to be added to the model.
-   *
-   * @returns {Function} Calls super on the static function of the implemented
-   * database strategy's schema.
    */
   static(name, fn) {
-    return super.static(name, fn);
+    super.static(name, fn);
   }
 
   /**
@@ -242,12 +232,9 @@ class Schema extends DBModule.Schema {
    *
    * @param {string} name - The name of the non-static function.
    * @param {Function} fn - The function to be added to the model.
-   *
-   * @returns {Function} Calls super on the method function of the implemented
-   * database strategy's schema.
    */
   method(name, fn) {
-    return super.method(name, fn);
+    super.method(name, fn);
   }
 
 }
@@ -266,7 +253,7 @@ class Model extends DBModule.Model {
 
   /**
    * @description Class constructor. Calls parent constructor, and ensures that
-   * each of the required functions is defined in the parent class.
+   * each of the required functions are defined in the parent class.
    *
    * @param {string} name - The name of the model being created. This name is
    * used to create the collection name in the database.
@@ -314,7 +301,7 @@ class Model extends DBModule.Model {
    * @async
    *
    * @param {object[]} ops - An array of objects detailing what operations to
-   * perform the data required for those operations.
+   * perform and the data required for those operations.
    * @param {object} [ops.insertOne] - Specified an insertOne operation.
    * @param {object} [ops.insertOne.document] - The document to create, for
    * insertOne.
@@ -354,7 +341,11 @@ class Model extends DBModule.Model {
    *   }
    * ]);
    *
-   * @returns {Promise<object>} Result of the bulkWrite operation.
+   * @returns {Promise<object>} Result of the bulkWrite operation. This result
+   * should contain the number of documents inserted (insertedCount), the number
+   * of documents updated (matchedCount), the number of documents deleted
+   * (deletedCount) and the success of the operation (result), with 1 being
+   * success and 0 being failure.
    */
   async bulkWrite(ops, options, cb) {
     return super.bulkWrite(ops, options, cb);
@@ -367,8 +358,8 @@ class Model extends DBModule.Model {
    * roughly align with the model's schema. Each document created should at
    * least contain an _id, as well as the methods defined in the schema.
    *
-   * @returns {Function} Calls the createDocument function of the implemented
-   * database strategy's model schema.
+   * @returns {object} The created document, should contain fields defined in
+   * the model's schema.
    */
   createDocument(doc) {
     return super.createDocument(doc);
@@ -382,7 +373,8 @@ class Model extends DBModule.Model {
    * find query by.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @returns {Promise<number>} The number of documents which matched the filter.
+   * @returns {Promise<number>} The number of documents which matched the
+   * filter.
    */
   async countDocuments(filter, cb) {
     return super.countDocuments(filter, cb);
@@ -410,7 +402,9 @@ class Model extends DBModule.Model {
    * @param {Function} [cb] - A callback function to run.
    *
    * @returns {Promise<object>} An object denoting the success of the delete
-   * operation.
+   * operation. The object should contain the key "n" which is the number of
+   * documents deleted and the key "ok" which is either 1 for success or 0 for
+   * failure.
    */
   async deleteMany(conditions, options, cb) {
     return super.deleteMany(conditions, options, cb);
@@ -439,7 +433,7 @@ class Model extends DBModule.Model {
    * final 5 documents would be returned. A skip value of 0 is equivalent to not
    * skipping any documents. A negative skip value is not supported.
    * @param {string} [options.populate] - A space separated list of fields to
-   * populate of return of a document. Only fields that reference other
+   * populate on return of a document. Only fields that reference other
    * documents can be populated. Populating a field returns the entire
    * referenced document instead of that document's ID. If no document exists,
    * null is returned.
@@ -475,7 +469,8 @@ class Model extends DBModule.Model {
    * just the raw JSON will be returned from the database.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @returns {Promise<object>} The found document, if any.
+   * @returns {Promise<(object|null)>} The found document, if any otherwise
+   * null.
    */
   async findOne(conditions, projection, options, cb) {
     return super.findOne(conditions, projection, options, cb);
@@ -521,7 +516,9 @@ class Model extends DBModule.Model {
    * @param {object} [options] - An object containing options.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @returns {Promise<object[]>} The updated documents.
+   * @returns {Promise<object>} An object denoting the success of the operation.
+   * It should contain two keys, "n" which is the number of documents matched
+   * and "nModified" which is the number of documents updated.
    */
   async updateMany(filter, doc, options, cb) {
     return super.updateMany(filter, doc, options, cb);
@@ -538,7 +535,9 @@ class Model extends DBModule.Model {
    * @param {object} [options] - An object containing options.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @returns {Promise<object>} The updated document.
+   * @returns {Promise<object>} An object denoting the success of the operation.
+   * It should contain two keys, "n" which is the number of documents matched
+   * and "nModified" which is the number of documents updated.
    */
   async updateOne(filter, doc, options, cb) {
     return super.updateOne(filter, doc, options, cb);
@@ -547,18 +546,25 @@ class Model extends DBModule.Model {
 }
 
 /**
- * @description Defines the Store class. The Store class is used along with express-session
- * to manage sessions. The class MUST extend the node's built in EventEmitter class. Please
- * review the express-session documentation at
+ * @description Defines the Store class. The Store class is used along with
+ * express-session to manage sessions. The class MUST extend node's built
+ * in EventEmitter class. Please review the express-session documentation at
  * {@link https://github.com/expressjs/session#session-store-implementation}
- * to learn more about the Store implementation. There are many libraries available that
- * support different databases, and a list of those are also available at the link above.
+ * to learn more about the Store implementation. There are many libraries
+ * available that support different databases, and a list of those are also
+ * available at the link above.
  */
 class Store extends DBModule.Store {
 
+  /**
+   * @description Calls the parent constructor.
+   *
+   * @param {object} options - An object containing valid options.
+   */
   constructor(options) {
     super(options);
 
+    // Ensure that the parent class extends node's EventEmitter class
     if (!(this instanceof events)) {
       M.log.critical('The Store class must extend the Node.js EventEmitter '
       + 'class!');
@@ -626,7 +632,7 @@ class Store extends DBModule.Store {
    * @param {Function} cb - The callback to run, should be called as
    * cb(error, len).
    *
-   * @returns {Promise} Resolves an empty promise upon completion.
+   * @returns {Promise<number>} The number of sessions in the store.
    */
   length(cb) {
     return super.length(cb);

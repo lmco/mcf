@@ -1,18 +1,18 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.profile-views.organization-list
+ * @module ui.components.admin-console-views.organization-list
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Leah De Laurell
+ * @owner James Eckstein
  *
  * @author Leah De Laurell
  * @author Jake Ursetta
  *
- * @description This renders the orgs list.
+ * @description This renders the orgs list for the admin console.
  */
 
 /* Modified ESLint rules for React. */

@@ -133,18 +133,18 @@ module.exports.validate = function(config) {
   test(config, 'db', 'object');
   test(config, 'db.strategy', 'string');
 
+  // Ensure that the db strategy exists
+  const dbFiles = fs.readdirSync(path.join(M.root, 'app', 'db'))
+  .filter((file) => file.includes(config.db.strategy));
+  if (dbFiles.length === 0) {
+    throw new Error(`Configuration file: DB strategy file ${config.db.strategy} not found in app/db directory.`);
+  }
+
   // Test supported database
   if (config.db.strategy === 'mongoose-mongodb-strategy') {
     test(config, 'db.url', 'string');
     test(config, 'db.port', 'number');
     test(config, 'db.name', 'string');
-
-    // Ensure that the db strategy exists
-    const dbFiles = fs.readdirSync(path.join(M.root, 'app', 'db'))
-    .filter((file) => file.includes(config.db.strategy));
-    if (dbFiles.length === 0) {
-      throw new Error(`Configuration file: DB strategy file ${config.db.strategy} not found in app/db directory.`);
-    }
 
     // Test optional fields
     if (config.db.username !== undefined) test(config, 'db.username', 'string');
@@ -272,17 +272,17 @@ module.exports.validate = function(config) {
   if (config.validators) {
     test(config, 'validators', 'object');
     if (config.validators.id) test(config, 'validators.id', 'string');
-    if (config.validators.id_length) test(config, 'validators.id_length', 'string');
+    if (config.validators.id_length) test(config, 'validators.id_length', 'number');
     if (config.validators.org_id) test(config, 'validators.org_id', 'string');
-    if (config.validators.org_id_length) test(config, 'validators.org_id_length', 'string');
+    if (config.validators.org_id_length) test(config, 'validators.org_id_length', 'number');
     if (config.validators.project_id) test(config, 'validators.project_id', 'string');
-    if (config.validators.project_id_length) test(config, 'validators.project_id_length', 'string');
+    if (config.validators.project_id_length) test(config, 'validators.project_id_length', 'number');
     if (config.validators.branch_id) test(config, 'validators.branch_id', 'string');
-    if (config.validators.branch_id_length) test(config, 'validators.branch_id_length', 'string');
+    if (config.validators.branch_id_length) test(config, 'validators.branch_id_length', 'number');
     if (config.validators.element_id) test(config, 'validators.element_id', 'string');
-    if (config.validators.element_id_length) test(config, 'validators.element_id_length', 'string');
+    if (config.validators.element_id_length) test(config, 'validators.element_id_length', 'number');
     if (config.validators.user_username) test(config, 'validators.user_username', 'string');
-    if (config.validators.user_username_length) test(config, 'validators.user_username_length', 'string');
+    if (config.validators.user_username_length) test(config, 'validators.user_username_length', 'number');
     if (config.validators.user_email) test(config, 'validators.user_email', 'string');
     if (config.validators.user_fname) test(config, 'validators.user_fname', 'string');
     if (config.validators.user_lname) test(config, 'validators.user_lname', 'string');
@@ -309,7 +309,7 @@ module.exports.validate = function(config) {
  *
  * @param {string} inputString - The name of the file to parse.
  *
- * @returns {object} Valid JSON.
+ * @returns {object} Valid JSON object.
  */
 module.exports.removeComments = function(inputString) {
   // Ensure inputString is of type string

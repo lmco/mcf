@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.304a-branch-model-tests
+ * @module test.304a-branch-model-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -137,14 +137,21 @@ async function updateBranch() {
  * @description Delete a branch using the branch model.
  */
 async function deleteBranch() {
-  const branchID = utils.createID(org.id, project.id, testData.branches[0].id);
+  try {
+    const branchID = utils.createID(org.id, project.id, testData.branches[0].id);
 
-  // Remove the branch
-  await Branch.deleteMany({ _id: branchID });
+    // Remove the branch
+    await Branch.deleteMany({ _id: branchID });
 
-  // Attempt to find the branch
-  const foundBranch = await Branch.findOne({ _id: branchID });
+    // Attempt to find the branch
+    const foundBranch = await Branch.findOne({ _id: branchID });
 
-  // foundBranch should be null
-  should.not.exist(foundBranch);
+    // foundBranch should be null
+    should.not.exist(foundBranch);
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
 }

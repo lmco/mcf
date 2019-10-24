@@ -6,7 +6,7 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license  MIT
+ * @license MIT
  *
  * @owner Connor Doyle
  *

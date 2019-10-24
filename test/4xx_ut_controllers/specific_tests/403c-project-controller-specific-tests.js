@@ -148,6 +148,8 @@ async function findInternalProject() {
     await ProjectController.update(adminUser, org._id, projUpdate);
   }
   catch (error) {
+    M.log.error(error.message);
+    // Expect no error
     chai.expect(error.message).to.equal(null);
   }
 }
@@ -174,8 +176,21 @@ async function optionPopulateFind() {
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      chai.expect(typeof foundProject[field] === 'object').to.equal(true);
-      chai.expect(foundProject[field]).to.not.equal(null);
+      chai.expect(field in foundProject).to.equal(true);
+      if (Array.isArray(foundProject[field])) {
+        foundProject[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (foundProject[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof foundProject[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in foundProject[field]).to.equal(true);
+      }
     });
   }
   catch (error) {
@@ -186,7 +201,7 @@ async function optionPopulateFind() {
 }
 
 /**
- * @description Validates that the find results can be include archived results.
+ * @description Validates that the find results can include archived results.
  */
 async function optionIncludeArchivedFind() {
   try {
@@ -573,7 +588,7 @@ async function optionArchivedByFind() {
     await ProjectController.update(adminUser, org._id, update);
 
     // Create archivedBy option
-    const options = { archivedBy: 'test_admin' };
+    const options = { archivedBy: 'test_admin', includeArchived: true };
 
     // Find the project
     const foundProjects = await ProjectController.find(adminUser, org._id, options);
@@ -642,8 +657,21 @@ async function optionPopulateCreate() {
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      chai.expect(typeof createdProject[field] === 'object').to.equal(true);
-      chai.expect(createdProject[field]).to.not.equal(null);
+      chai.expect(field in createdProject).to.equal(true);
+      if (Array.isArray(createdProject[field])) {
+        createdProject[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (createdProject[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof createdProject[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in createdProject[field]).to.equal(true);
+      }
     });
   }
   catch (error) {
@@ -751,12 +779,25 @@ async function optionPopulateUpdate() {
       projectObj, options);
     // There should be one project
     chai.expect(updatedProjects.length).to.equal(1);
-    const createdProject = updatedProjects[0];
+    const updatedProject = updatedProjects[0];
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      chai.expect(typeof createdProject[field] === 'object').to.equal(true);
-      chai.expect(createdProject[field]).to.not.equal(null);
+      chai.expect(field in updatedProject).to.equal(true);
+      if (Array.isArray(updatedProject[field])) {
+        updatedProject[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (updatedProject[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof updatedProject[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in updatedProject[field]).to.equal(true);
+      }
     });
   }
   catch (error) {
@@ -820,11 +861,11 @@ async function optionLeanUpdate() {
     const options = { lean: true };
 
     // Update the project
-    const createdProjects = await ProjectController.update(adminUser, org._id,
+    const updatedProjects = await ProjectController.update(adminUser, org._id,
       projectObj, options);
     // There should be one project
-    chai.expect(createdProjects.length).to.equal(1);
-    const foundProject = createdProjects[0];
+    chai.expect(updatedProjects.length).to.equal(1);
+    const foundProject = updatedProjects[0];
 
     // Expect the instance method getValidUpdateFields to be undefined
     chai.expect(typeof foundProject.getValidUpdateFields).to.equal('undefined');
@@ -862,8 +903,21 @@ async function optionPopulateReplace() {
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      chai.expect(typeof createdProject[field] === 'object').to.equal(true);
-      chai.expect(createdProject[field]).to.not.equal(null);
+      chai.expect(field in createdProject).to.equal(true);
+      if (Array.isArray(createdProject[field])) {
+        createdProject[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (createdProject[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof createdProject[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in createdProject[field]).to.equal(true);
+      }
     });
   }
   catch (error) {

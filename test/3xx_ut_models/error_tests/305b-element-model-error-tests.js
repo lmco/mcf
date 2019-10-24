@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.305b-element-model-tests
+ * @module test.305b-element-model-error-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -220,7 +220,7 @@ async function projectInvalid() {
 }
 
 /**
- * @description Attempts to create an element with no project.
+ * @description Attempts to create an element with no branch.
  */
 async function branchNotProvided() {
   const elemData = Object.assign({}, testData.elements[0]);
