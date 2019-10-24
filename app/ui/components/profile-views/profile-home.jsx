@@ -1,17 +1,17 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.apps.profile-app
+ * @module ui.components.profile-views.profile-home
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Leah De Laurell
+ * @owner James Eckstein
  *
  * @author Leah De Laurell
  *
- * @description This renders a user's page.
+ * @description This renders a user's profile home page.
  */
 
 /* Modified ESLint rules for React. */

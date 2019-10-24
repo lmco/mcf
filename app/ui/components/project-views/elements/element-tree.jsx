@@ -7,14 +7,15 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell
+ * @owner James Eckstein
  *
  * @author Leah De Laurell
  * @author Josh Kaplan
  * @author James Eckstein
  *
  * @description This the element tree wrapper, grabbing the
- * root model element and then the subtree.
+ * root model element and then pushing to the subtree to
+ * create the elements.
  */
 
 /* Modified ESLint rules for React. */
