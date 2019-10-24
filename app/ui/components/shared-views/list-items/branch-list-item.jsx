@@ -1,17 +1,17 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.shared-views.list-items.user-list-item
+ * @module ui.components.shared-views.list-items.branch-list-item
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Leah De Laurell
+ * @owner James Eckstein
  *
  * @author Leah De Laurell
  *
- * @description This renders the user list items.
+ * @description This renders the branch list items.
  */
 
 /* Modified ESLint rules for React. */

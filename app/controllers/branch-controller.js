@@ -89,7 +89,7 @@ const permissions = M.require('lib.permissions');
  * @param {string} [options.custom....] - Search for any key in custom data. Use
  * dot notation for the keys. Ex: custom.hello = 'world'.
  *
- * @returns {Promise} Array of found branch objects.
+ * @returns {Promise<object>} Array of found branch objects.
  *
  * @example
  * find({User}, 'orgID', 'projID', ['branch1', 'branch2'], { populate: 'project' })
@@ -161,7 +161,7 @@ async function find(requestingUser, organizationID, projectID, branches, options
     if (validatedOptions.includeArchived) {
       delete searchQuery.archived;
     }
-    // If the archived field is true, query only for archived elements
+    // If the archived field is true, query only for archived branches
     if (validatedOptions.archived) {
       searchQuery.archived = true;
     }
@@ -193,7 +193,7 @@ async function find(requestingUser, organizationID, projectID, branches, options
       throw new M.DataFormatError('Invalid input for finding branches.', 'warn');
     }
 
-    // Find branches in a project
+    // Find and return branches
     return await Branch.find(searchQuery, validatedOptions.fieldsString,
       { limit: validatedOptions.limit,
         skip: validatedOptions.skip,
@@ -234,7 +234,7 @@ async function find(requestingUser, organizationID, projectID, branches, options
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @returns {Promise} Array of created branch objects.
+ * @returns {Promise<object[]>} Array of created branch objects.
  *
  * @example
  * create({User}, 'orgID', 'projID', 'branchID', [{Branch1}, {Branch2}, ...],
@@ -545,7 +545,7 @@ async function create(requestingUser, organizationID, projectID, branches, optio
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @returns {Promise} Array of updated branch objects.
+ * @returns {Promise<object[]>} Array of updated branch objects.
  *
  * @example
  * update({User}, 'orgID', 'projID' [{Updated Branch 1},
@@ -747,7 +747,7 @@ async function update(requestingUser, organizationID, projectID, branches, optio
  * an array of branch ids or a single branch id.
  * @param {object} [options] - A parameter that provides supported options.
  *
- * @returns {Promise} Array of deleted branch ids.
+ * @returns {Promise<string>} Array of deleted branch ids.
  *
  * @example
  * remove({User}, 'orgID', 'projID', ['branch1', 'branch2'])
@@ -843,9 +843,9 @@ async function remove(requestingUser, organizationID, projectID, branches, optio
         + `deleted [${saniBranches.toString()}].`);
     }
     // Emit the event branches-deleted
-    EventEmitter.emit('branches-deleted', retQuery);
+    EventEmitter.emit('branches-deleted', foundBranchIDs);
 
-    return foundBranches.map(b => b._id);
+    return foundBranchIDs;
   }
   catch (error) {
     throw errors.captureError(error);

@@ -98,7 +98,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates a user using the user controller.
+ * @description Validates that the User Controller can create a user.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -150,7 +150,7 @@ function createUser(done) {
 }
 
 /**
- * @description Creates multiple users using the user controller.
+ * @description Validates that the User Controller can create multiple users.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -215,7 +215,7 @@ function createUsers(done) {
 }
 
 /**
- * @description Creates or replaces a user using the user controller.
+ * @description Validates that the User Controller can create or replace a user.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -267,7 +267,7 @@ function createOrReplaceUser(done) {
 }
 
 /**
- * @description Creates/replaces multiple users using the user controller.
+ * @description Validates that the User Controller can create or replace multiple users.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -332,7 +332,7 @@ function createOrReplaceUsers(done) {
 }
 
 /**
- * @description Finds a user using the user controller.
+ * @description Validates that the User Controller can find a user.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -375,7 +375,7 @@ function findUser(done) {
 }
 
 /**
- * @description Finds multiple users using the user controller.
+ * @description Validates that the User Controller can find multiple users.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -431,7 +431,7 @@ function findUsers(done) {
 }
 
 /**
- * @description Finds all users in the database using the user controller.
+ * @description Validates that the User Controller can find all users.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -495,7 +495,7 @@ function findAllUsers(done) {
 }
 
 /**
- * @description Finds a user through text based search via the user controller.
+ * @description Validates that the User Controller can find a user through text based search.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -552,7 +552,7 @@ function searchUser(done) {
 
 
 /**
- * @description Updates a user using the user controller.
+ * @description Validates that the User Controller can update a user.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -601,7 +601,7 @@ function updateUser(done) {
 }
 
 /**
- * @description Updates multiple users using the user controller.
+ * @description Validates that the User Controller can update multiple users.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -661,7 +661,7 @@ function updateUsers(done) {
 }
 
 /**
- * @description Updates a users password using the user controller.
+ * @description Validates that the User Controller can update a user's password.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -714,7 +714,7 @@ function updateUserPassword(done) {
 }
 
 /**
- * @description Deletes a user using the user controller.
+ * @description Validates that the User Controller can delete a user.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -754,7 +754,7 @@ function deleteUser(done) {
 }
 
 /**
- * @description Deletes multiple users using the user controller.
+ * @description Validates that the User Controller can delete multiple users.
  *
  * @param {Function} done - The Mocha callback.
  */

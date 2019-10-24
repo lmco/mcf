@@ -201,7 +201,7 @@ function makeLogger(subcommand, opts) {
     ],
     exitOnError: false
   };
-  // Add in a transport to log to the console if the mbee is not running tests
+  // Add in a transport to log to the console if not running tests
   if (!(subcommand === 'test' && opts.includes('--suppress-console'))) {
     loggerConfig.transports.push(new winston.transports.Console());
   }

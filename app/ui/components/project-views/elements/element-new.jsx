@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.elements.element-new
+ * @module ui.components.project-views.elements.element-new
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -11,7 +11,7 @@
  *
  * @author Josh Kaplan
  *
- * @description This renders create element component.
+ * @description This renders create element form.
  */
 
 /* Modified ESLint rules for React. */

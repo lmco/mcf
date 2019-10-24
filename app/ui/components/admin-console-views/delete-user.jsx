@@ -7,7 +7,7 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell
+ * @owner James Eckstein
  *
  * @author Leah De Laurell
  *
@@ -96,7 +96,6 @@ class DeleteUser extends Component {
   // Define update username
   updateUsername(event) {
     this.setState({ username: event.target.value });
-
     this.doSearch(event.target.value);
   }
 

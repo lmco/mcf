@@ -44,8 +44,8 @@
  * visibility is internal, any users in the organization can view the model.</p>
  *
  * <p>The biggest benefit to setting a project's visibility to internal is that
- * other model in the organization can create relationships which point to
- * element in the internal project's model. Projects can only point to elements
+ * other models in the organization can create relationships which point to
+ * elements in the internal project's model. Projects can only point to elements
  * on internal projects in their own organization or the "default"
  * organization.</p>
  *

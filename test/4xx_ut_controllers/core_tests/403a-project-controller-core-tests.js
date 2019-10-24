@@ -110,7 +110,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates a project using the project controller.
+ * @description Validates that the Project Controller can create a project.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -152,7 +152,7 @@ function createProject(done) {
 }
 
 /**
- * @description Creates multiple projects using the project controller.
+ * @description Validates that the Project Controller can create multiple projects.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -206,7 +206,7 @@ function createProjects(done) {
 }
 
 /**
- * @description Creates or replaces a project using the project controller.
+ * @description Validates that the Project Controller can create or replace a project.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -248,7 +248,7 @@ function createOrReplaceProject(done) {
 }
 
 /**
- * @description Creates or replaces multiple projects using the project controller.
+ * @description Validates that the Project Controller can create or replace multiple projects.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -302,7 +302,7 @@ function createOrReplaceProjects(done) {
 }
 
 /**
- * @description Finds a project via the project controller.
+ * @description Validates that the Project Controller can find a project.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -344,7 +344,7 @@ function findProject(done) {
 }
 
 /**
- * @description Finds multiple projects using the project controller.
+ * @description Validates that the Project Controller can find multiple projects.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -401,7 +401,7 @@ function findProjects(done) {
 }
 
 /**
- * @description Finds all projects on a given organization using the project controller.
+ * @description Validates that the Project Controller can find all projects on a given org.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -456,7 +456,7 @@ function findAllProjects(done) {
 }
 
 /**
- * @description Updates a project using the project controller.
+ * @description Validates that the Project Controller can update a project.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -504,7 +504,7 @@ function updateProject(done) {
 }
 
 /**
- * @description Updates multiple projects using the project controller.
+ * @description Validates that the Project Controller can update multiple projects.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -564,7 +564,7 @@ function updateProjects(done) {
 }
 
 /**
- * @description Deletes a project using the project controller.
+ * @description Validates that the Project Controller can delete a project.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -596,7 +596,7 @@ function deleteProject(done) {
 }
 
 /**
- * @description Deletes multiple projects using the project controller.
+ * @description Validates that the Project Controller can delete multiple projects.
  *
  * @param {Function} done - The Mocha callback.
  */

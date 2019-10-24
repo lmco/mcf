@@ -189,12 +189,20 @@ async function optionPopulateFind() {
 
     // For each field in pop
     pop.forEach((field) => {
-      // If the field is defined in the returned element
-      if (elem.hasOwnProperty(field)) {
+      chai.expect(field in elem).to.equal(true);
+      if (Array.isArray(elem[field])) {
+        elem[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (elem[field] !== null) {
         // Expect each populated field to be an object
-        chai.expect(typeof elem.field).to.equal('object');
-        // Expect each populated field to at least have an _id
-        chai.expect(elem.field.hasOwnProperty('_id')).to.equal(true);
+        chai.expect(typeof elem[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in elem[field]).to.equal(true);
       }
     });
   }
@@ -321,7 +329,7 @@ async function optionFieldsFind() {
     const visibleFields2 = Object.keys(elem2._doc);
 
     // Check that the keys in the notFindOptions are not in elem
-    chai.expect(Object.keys(visibleFields2)).to.not.have.members(['createdOn', 'updatedOn']);
+    chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
   }
   catch (error) {
     M.log.error(error);
@@ -662,12 +670,20 @@ async function optionPopulateCreate() {
 
     // For each field in pop
     pop.forEach((field) => {
-      // If the field is defined in the returned element
-      if (elem.hasOwnProperty(field)) {
+      chai.expect(field in elem).to.equal(true);
+      if (Array.isArray(elem[field])) {
+        elem[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (elem[field] !== null) {
         // Expect each populated field to be an object
-        chai.expect(typeof elem.field).to.equal('object');
-        // Expect each populated field to at least have an _id
-        chai.expect(elem.field.hasOwnProperty('_id')).to.equal(true);
+        chai.expect(typeof elem[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in elem[field]).to.equal(true);
       }
     });
   }
@@ -731,7 +747,7 @@ async function optionFieldsCreate() {
     const visibleFields2 = Object.keys(elem2._doc);
 
     // Check that the keys in the notFindOptions are not in elem
-    chai.expect(Object.keys(visibleFields2)).to.not.have.members(['createdOn', 'updatedOn']);
+    chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
   }
   catch (error) {
     M.log.error(error);
@@ -915,12 +931,20 @@ async function optionPopulateUpdate() {
 
     // For each field in pop
     pop.forEach((field) => {
-      // If the field is defined in the returned element
-      if (elem.hasOwnProperty(field)) {
+      chai.expect(field in elem).to.equal(true);
+      if (Array.isArray(elem[field])) {
+        elem[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (elem[field] !== null) {
         // Expect each populated field to be an object
-        chai.expect(typeof elem.field).to.equal('object');
-        // Expect each populated field to at least have an _id
-        chai.expect(elem.field.hasOwnProperty('_id')).to.equal(true);
+        chai.expect(typeof elem[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in elem[field]).to.equal(true);
       }
     });
   }
@@ -946,9 +970,9 @@ async function optionFieldsUpdate() {
       id: utils.parseID(elements[12].id).pop(),
       name: 'Not Fields Element Updated'
     };
-    // Create the options object with the list of fields specifically find
+    // Create the options object with the list of fields specifically to find
     const findOptions = { fields: ['name', 'createdBy'] };
-    // Create the options object with the list of fields to specifically NOT find
+    // Create the options object with the list of fields to specifically NOT to find
     const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
     // Create the list of fields which are always provided no matter what
     const fieldsAlwaysProvided = ['_id'];
@@ -980,7 +1004,7 @@ async function optionFieldsUpdate() {
     const visibleFields2 = Object.keys(elem2._doc);
 
     // Check that the keys in the notFindOptions are not in elem
-    chai.expect(Object.keys(visibleFields2)).to.not.have.members(['createdOn', 'updatedOn']);
+    chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
   }
   catch (error) {
     M.log.error(error);
@@ -1066,12 +1090,20 @@ async function optionPopulateReplace() {
 
     // For each field in pop
     pop.forEach((field) => {
-      // If the field is defined in the returned element
-      if (elem.hasOwnProperty(field)) {
+      chai.expect(field in elem).to.equal(true);
+      if (Array.isArray(elem[field])) {
+        elem[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (elem[field] !== null) {
         // Expect each populated field to be an object
-        chai.expect(typeof elem.field).to.equal('object');
-        // Expect each populated field to at least have an _id
-        chai.expect(elem.field.hasOwnProperty('_id')).to.equal(true);
+        chai.expect(typeof elem[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in elem[field]).to.equal(true);
       }
     });
   }
@@ -1097,9 +1129,9 @@ async function optionFieldsReplace() {
       id: utils.parseID(elements[11].id).pop(),
       name: 'Not Fields Element'
     };
-    // Create the options object with the list of fields specifically find
+    // Create the options object with the list of fields specifically to find
     const findOptions = { fields: ['name', 'createdBy'] };
-    // Create the options object with the list of fields to specifically NOT find
+    // Create the options object with the list of fields to specifically NOT to find
     const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
     // Create the list of fields which are always provided no matter what
     const fieldsAlwaysProvided = ['_id'];
@@ -1131,7 +1163,7 @@ async function optionFieldsReplace() {
     const visibleFields2 = Object.keys(elem2._doc);
 
     // Check that the keys in the notFindOptions are not in elem
-    chai.expect(Object.keys(visibleFields2)).to.not.have.members(['createdOn', 'updatedOn']);
+    chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
   }
   catch (error) {
     M.log.error(error);
@@ -1237,12 +1269,20 @@ async function optionPopulateSearch() {
 
     // For each field in pop
     pop.forEach((field) => {
-      // If the field is defined in the returned element
-      if (elem.hasOwnProperty(field)) {
+      chai.expect(field in elem).to.equal(true);
+      if (Array.isArray(elem[field])) {
+        elem[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (elem[field] !== null) {
         // Expect each populated field to be an object
-        chai.expect(typeof elem.field).to.equal('object');
-        // Expect each populated field to at least have an _id
-        chai.expect(elem.field.hasOwnProperty('_id')).to.equal(true);
+        chai.expect(typeof elem[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in elem[field]).to.equal(true);
       }
     });
   }

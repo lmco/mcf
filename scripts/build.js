@@ -200,11 +200,6 @@ function build(_args) {
 
       M.log.info(`  + Transpiling react in ${mode} mode...`);
       webpack({
-        externals: {
-          cheerio: 'window',
-          'react/lib/ExecutionEnvironment': true,
-          'react/lib/ReactContext': true
-        },
         mode: mode,
         entry: {
           navbar: path.join(M.root, 'app', 'ui', 'components', 'apps', 'nav-app.jsx'),

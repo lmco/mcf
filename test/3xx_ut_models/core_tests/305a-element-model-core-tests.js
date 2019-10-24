@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.305a-element-model-tests
+ * @module test.305a-element-model-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -146,14 +146,21 @@ async function updateElement() {
  * @description Delete an element using the element model.
  */
 async function deleteElement() {
-  const elemID = utils.createID(org.id, project.id, branch.id, testData.elements[0].id);
+  try {
+    const elemID = utils.createID(org.id, project.id, branch.id, testData.elements[0].id);
 
-  // Remove the element
-  await Element.deleteMany({ _id: elemID });
+    // Remove the element
+    await Element.deleteMany({ _id: elemID });
 
-  // Attempt to find the element
-  const foundElement = await Element.findOne({ _id: elemID });
+    // Attempt to find the element
+    const foundElement = await Element.findOne({ _id: elemID });
 
-  // foundElement should be null
-  should.not.exist(foundElement);
+    // foundElement should be null
+    should.not.exist(foundElement);
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
 }
