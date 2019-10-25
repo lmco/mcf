@@ -291,7 +291,6 @@ module.exports.validate = function(config) {
     if (config.validators.element_id) {
       test(config, 'validators.element_id', 'string');
       // Check that custom id validators don't exclude root ids
-      console.log()
       rootIDs.forEach((id) => {
         if (!RegExp(config.validators.element_id).test(id)) {
           throw new Error(`Configuration file: custom element id regex excludes root id "${id}".`);
