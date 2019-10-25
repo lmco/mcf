@@ -7,10 +7,10 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Austin Bieber
+ * @author Phillip Lee
  *
  * @description Defines sanitization functions.
  */
@@ -33,7 +33,7 @@ module.exports.sanitize = function(userInput) {
 
 /**
  * @description Sanitizes database queries. Uses the sanitize function defined
- * in the database strategy defined in the running config.
+ * in the database strategy, which is defined in the running config.
  */
 module.exports.db = db.sanitize;
 

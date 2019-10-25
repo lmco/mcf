@@ -7,20 +7,22 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Connor Doyle
  *
  * @description This tests specific functionality of the element API:
  * GET, POST, PATCH, and DELETE of an element.
  */
 
-// NPM modules
-const chai = require('chai');
-const request = require('request');
+// Node modules
 const path = require('path');
 const fs = require('fs');
 const zlib = require('zlib');
+
+// NPM modules
+const chai = require('chai');
+const request = require('request');
 
 // MBEE modules
 const db = M.require('lib.db');

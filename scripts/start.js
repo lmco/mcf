@@ -8,9 +8,9 @@
  *
  * @license MIT
  *
- * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
  *
  * @description Initializes and starts the http/https servers and listens
  * for incoming requests.

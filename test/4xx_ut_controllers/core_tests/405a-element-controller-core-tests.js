@@ -7,9 +7,10 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Austin Bieber
+ * @author Connor Doyle
  *
  * @description This tests the Element Controller functionality.
  */
@@ -119,7 +120,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates an element using the element controller.
+ * @description Validates that the Element Controller can create an element.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -179,7 +180,7 @@ function createElement(done) {
 }
 
 /**
- * @description Creates multiple elements using the element controller.
+ * @description Validates that the Element Controller can create multiple elements.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -257,7 +258,7 @@ function createElements(done) {
 }
 
 /**
- * @description Creates or replaces an element using the element controller.
+ * @description Validates that the Element Controller can create or replace an element.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -317,7 +318,7 @@ function createOrReplaceElement(done) {
 }
 
 /**
- * @description Creates or replaces multiple elements using the element controller.
+ * @description Validates that the Element Controller can create or replace multiple elements.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -395,7 +396,7 @@ function createOrReplaceElements(done) {
 }
 
 /**
- * @description Finds an element via the elements controller.
+ * @description Validates that the Element Controller can find an element.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -455,7 +456,7 @@ function findElement(done) {
 }
 
 /**
- * @description Finds multiple elements via the element controller.
+ * @description Validates that the Element Controller can find multiple elements.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -532,7 +533,7 @@ function findElements(done) {
 }
 
 /**
- * @description Finds all elements on a given project using the element controller.
+ * @description Validates that the Element Controller can find all elements on a project.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -606,7 +607,7 @@ function findAllElements(done) {
 }
 
 /**
- * @description Finds an element through text based search via the element controller.
+ * @description Validates that the Element Controller can find an element through text based search.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -665,7 +666,7 @@ function searchElement(done) {
 }
 
 /**
- * @description Updates an element using the element controller.
+ * @description Validates that the Element Controller can update an element.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -731,7 +732,7 @@ function updateElement(done) {
 }
 
 /**
- * @description Updates multiple elements using the element controller.
+ * @description Validates that the Element Controller can update multiple elements.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -811,7 +812,7 @@ function updateElements(done) {
 }
 
 /**
- * @description Deletes an element using the element controller.
+ * @description Validates that the Element Controller can delete an element.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -844,7 +845,7 @@ function deleteElement(done) {
 }
 
 /**
- * @description Deletes multiple elements using the element controller.
+ * @description Validates that the Element Controller can delete multiple elements.
  *
  * @param {Function} done - The Mocha callback.
  */

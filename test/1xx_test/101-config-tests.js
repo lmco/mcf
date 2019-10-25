@@ -7,15 +7,15 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Leah De Laurell
  *
  * @description Tests the configuration was properly loaded into the global M
  * object. For now, it only tests the version number.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
 /* --------------------( Main )-------------------- */

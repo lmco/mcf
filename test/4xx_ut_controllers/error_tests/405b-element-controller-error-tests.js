@@ -3,14 +3,14 @@
  *
  * @module test.405b-element-controller-error-tests
  *
- * @copyright Copyright (C) 2019, Lockheed Martin Corporation
+ * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Austin Bieber
+ * @author Phillip Lee
  *
  * @description This tests for expected errors within the element controller.
  */
@@ -167,7 +167,7 @@ async function updateSourceToSelf() {
 }
 
 /**
- * @description Verifies that an elements target cannot be updated to its own
+ * @description Verifies that an element's target cannot be updated to its own
  * id.
  */
 async function updateTargetToSelf() {
@@ -186,7 +186,7 @@ async function updateTargetToSelf() {
 }
 
 /**
- * @description Verifies that an elements source cannot be updated to when the
+ * @description Verifies that an element's source cannot be updated when the
  * desired source does not exist.
  */
 async function updateNonExistentSource() {
@@ -205,7 +205,7 @@ async function updateNonExistentSource() {
 }
 
 /**
- * @description Verifies that an elements target cannot be updated to when the
+ * @description Verifies that an element's target cannot be updated when the
  * desired target does not exist.
  */
 async function updateNonExistentTarget() {
@@ -224,7 +224,7 @@ async function updateNonExistentTarget() {
 }
 
 /**
- * @description Verifies that an elements source cannot be updated to when the
+ * @description Verifies that an element's source cannot be updated when the
  * target is not currently set, and is also not being set.
  */
 async function updateSourceWithNoTarget() {
@@ -243,7 +243,7 @@ async function updateSourceWithNoTarget() {
 }
 
 /**
- * @description Verifies that an elements target cannot be updated to when the
+ * @description Verifies that an element's target cannot be updated when the
  * source is not currently set, and is also not being set.
  */
 async function updateTargetWithNoSource() {
@@ -262,8 +262,7 @@ async function updateTargetWithNoSource() {
 }
 
 /**
- * @description Verifies that the tag can not create
- * elements.
+ * @description Verifies that the tag can not create elements.
  */
 async function createInTag() {
   const elementObj = testData.elements[0];
@@ -275,8 +274,7 @@ async function createInTag() {
 }
 
 /**
- * @description Verifies that the tag can not update
- * elements.
+ * @description Verifies that the tag can not update elements.
  */
 async function updateInTag() {
   // Create the object to update element
@@ -293,8 +291,7 @@ async function updateInTag() {
 }
 
 /**
- * @description Verifies that the tag can not delete
- * elements.
+ * @description Verifies that the tag can not delete elements.
  */
 async function deleteInTag() {
   // Attempt deleting an element via controller; should be rejected with specific error message

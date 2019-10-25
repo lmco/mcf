@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
  * @description This renders the create page.
  */
@@ -17,7 +17,7 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import {
   Form,
@@ -29,7 +29,7 @@ import {
   UncontrolledAlert
 } from 'reactstrap';
 
-// MBEE Modules
+// MBEE modules
 import validators from '../../../../build/json/validators.json';
 
 /* eslint-enable no-unused-vars */
@@ -64,7 +64,7 @@ class Create extends Component {
 
   // Define the submit function
   onSubmit() {
-    // Initialize project data
+    // Initialize data
     const data = {
       id: this.state.id,
       name: this.state.name,

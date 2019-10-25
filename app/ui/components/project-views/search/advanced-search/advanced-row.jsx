@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner James Eckstein <james.eckstein@lmco.com>
+ * @owner James Eckstein
  *
- * @author James Eckstein <james.eckstein@lmco.com>
+ * @author James Eckstein
  *
  * @description This renders an advanced search row.
  */
@@ -18,7 +18,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable jsdoc/require-jsdoc */
 
-// React Modules
+// React modules
 import React from 'react';
 import { Button, Container, Row, Col, Input, InputGroup, Form } from 'reactstrap';
 

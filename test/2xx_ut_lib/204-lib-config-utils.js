@@ -1,21 +1,22 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module  test.204-lib-parse-json
+ * @module  test.204-lib-config-utils
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Connor Doyle
+ * @author Leah De Laurell
  *
- * @description Tests the parse-json module to verify successful parsing of
- * of JSON files with comments allowed.
+ * @description Tests the config utils functions, including the config validator module and the
+ * parse-json module to verify successful parsing of of JSON files with comments allowed.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 const should = chai.should(); // eslint-disable-line no-unused-vars
 
@@ -170,5 +171,14 @@ async function rejectInvalidConfigTest() {
   }
   catch (error) {
     error.message.should.equal('Configuration file: "test" is not defined.');
+  }
+
+  // Test rejection if artifact is not defined
+  invalidConfig.test = M.config.test;
+  try {
+    configUtils.validate(invalidConfig);
+  }
+  catch (error) {
+    error.message.should.equal('Configuration file: "artifact" is not defined.');
   }
 }

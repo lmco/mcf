@@ -1,15 +1,15 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module lib.controller-helper
+ * @module lib.controller-utils
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Connor Doyle
  *
  * @description Defines helper functions used by the controllers.
  */
@@ -21,16 +21,16 @@ const assert = require('assert');
 const utils = M.require('lib.utils');
 
 /**
- * @description A function that validates the parameters passed to the controllers.
+ * @description A function that validates the parameters passed to the
+ * controllers.
  *
  * @param {object} requestingUser - The user in the request.
  * @param {object} options - The options passed in with the request.
- * @param {string} [orgID=''] - An optional parameter for the organization ID. For example
- * this would not be used in the Org controller but would be in the Project, Branch, and Element
- * controller.
+ * @param {string} [orgID=''] - An optional parameter for the organization ID.
+ * For example this would not be used in the org controller but would be in the
+ * project, branch, and element controller.
  * @param {object} [projID=''] - An optional parameter for the project ID.
  * @param {object} [branchID=''] - An optional parameter for the branch ID.
- *
  */
 module.exports.checkParams = function(requestingUser, options, orgID = '', projID = '', branchID = '') {
   try {
@@ -52,13 +52,15 @@ module.exports.checkParams = function(requestingUser, options, orgID = '', projI
 };
 
 /**
- * @description A function that validates the parameters passed to the controllers.
+ * @description A function that validates data types of the parameters passed to
+ * the controllers.
  *
- * @param {object} dataTypes - The allowed data types for this particular operation.
- * @param {object} data - The data to be validated (could be an array of element ids,
- * an array of element objects, a single project id, etc).
- * @param {string} dataName - The type of model the data is ('element', 'branch', 'project',
- * etc) to be used in error messages.
+ * @param {object} dataTypes - The allowed data types for this particular
+ * operation.
+ * @param {object} data - The data to be validated (could be an array of element
+ * ids, an array of element objects, a single project id, etc).
+ * @param {string} dataName - The type of model the data is ('element',
+ * 'branch', 'project', etc) to be used in error messages.
  *
  */
 module.exports.checkParamsDataType = function(dataTypes, data, dataName) {
@@ -92,21 +94,23 @@ module.exports.checkParamsDataType = function(dataTypes, data, dataName) {
 };
 
 /**
- * @description Validates that an org/project/branch has been found, is not archived,
- * and that the user has appropriate permissions for the controller operation.  In the
- * case of a branch, also checks that the branch is not a tag.
+ * @description Validates that an org/project/branch has been found, is not
+ * archived, and that the user has appropriate permissions for the controller
+ * operation.
  *
  * @param {object} model - The model being validated: org/project/branch.
  * @param {string} id - The ID of the model being validated.
- * @param {boolean} [archived=false] - Specifies whether or not to allow archived results.
+ * @param {boolean} [archived=false] - Specifies whether or not to allow
+ * archived results.
  *
- * @returns {object} - An object containing the sanitized input parameters.
+ * @returns {object} An object containing the sanitized input parameters.
  */
 module.exports.findAndValidate = async function(model, id, archived = false) {
   // Perform the find operation on the model
   const query = { _id: id };
   const result = await model.findOne(query, null, { lean: true });
   // Get the name of the particular model
+  // TODO: This may need to be updated with the DB abstraction layer
   const name = model.modelName;
 
   // Check that the model object was found

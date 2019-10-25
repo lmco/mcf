@@ -214,6 +214,36 @@
       "archived": "true"
     }
   ],
+  "artifacts": [
+    {
+      "id": "artifact00",
+      "name": "logo image",
+      "filename": "logo.png",
+      "location": "/test/test_files/",
+      "custom": {
+        "custom_key": "custom_value"
+      }
+    },
+    {
+      "id": "artifact01",
+      "name": "concept image",
+      "filename": "mbee-concept.png",
+      "location": "/test/test_files/",
+      "custom": {
+        "custom_key": "custom_value"
+      }
+    },
+    {
+      "id": "artifact02",
+      "name": "hello world text",
+      "filename": "text.txt",
+      "location": "/test/test_files/",
+      "custom": {
+        "custom_key": "custom_value"
+      }
+    }
+
+  ],
   "jmi1": [
     { "id": "1",
       "parent": null,

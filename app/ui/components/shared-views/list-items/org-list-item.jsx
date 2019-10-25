@@ -7,10 +7,10 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Leah De Laurell
+ * @author Jake Ursetta
  *
  * @description This renders the organization list items.
  */
@@ -18,10 +18,10 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 
-// MBEE Modules
+// MBEE modules
 import StatsList from '../../general/stats/stats-list.jsx';
 import Stat from '../../general/stats/stat.jsx';
 /* eslint-enable no-unused-vars */

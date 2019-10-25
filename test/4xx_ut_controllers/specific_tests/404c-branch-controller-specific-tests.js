@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Connor Doyle
  *
  * @description These tests test for specific use cases within the branch
  * controller. The tests verify that operations can be done that are more
@@ -142,8 +142,21 @@ async function optionPopulateFind() {
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      chai.expect(typeof foundBranch[field] === 'object').to.equal(true);
-      chai.expect(foundBranch[field]).to.not.equal(null);
+      chai.expect(field in foundBranch).to.equal(true);
+      if (Array.isArray(foundBranch[field])) {
+        foundBranch[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (foundBranch[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof foundBranch[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in foundBranch[field]).to.equal(true);
+      }
     });
   }
   catch (error) {
@@ -154,7 +167,7 @@ async function optionPopulateFind() {
 }
 
 /**
- * @description Validates that the find results can be include archived results.
+ * @description Validates that the find results can include archived results.
  */
 async function optionIncludeArchivedFind() {
   try {
@@ -244,7 +257,7 @@ async function optionLimitFind() {
   try {
     // Create limit option
     const options = { limit: 3 };
-    // There should be seven branches, including the master branch
+    // There should be seven branches plus the master branch
     const numBranches = branches.length + 1;
 
     // Find all the branches just to check
@@ -271,7 +284,7 @@ async function optionSkipFind() {
   try {
     // Create limit option
     const options = { skip: 3 };
-    // There should be seven branches, including the master branch
+    // There should be seven branches, plus the master branch
     const numBranches = branches.length + 1;
 
     // Find all the branches just to check
@@ -571,7 +584,7 @@ async function optionArchivedByFind() {
     await BranchController.update(adminUser, org.id, projID, update);
 
     // Create archivedBy option
-    const options = { archivedBy: 'test_admin' };
+    const options = { archivedBy: 'test_admin', includeArchived: true };
 
     // Find the branch
     const foundBranches = await BranchController.find(adminUser, org.id, projID, options);
@@ -642,8 +655,21 @@ async function optionPopulateCreate() {
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      chai.expect(typeof createdBranch[field] === 'object').to.equal(true);
-      chai.expect(createdBranch[field]).to.not.equal(null);
+      chai.expect(field in createdBranch).to.equal(true);
+      if (Array.isArray(createdBranch[field])) {
+        createdBranch[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (createdBranch[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof createdBranch[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in createdBranch[field]).to.equal(true);
+      }
     });
   }
   catch (error) {
@@ -753,12 +779,25 @@ async function optionPopulateUpdate() {
       branchObj, options);
     // There should be one branch
     chai.expect(updatedBranches.length).to.equal(1);
-    const createdBranch = updatedBranches[0];
+    const updatedBranch = updatedBranches[0];
 
     // Check that each populated field was returned as an object
     fields.forEach((field) => {
-      chai.expect(typeof createdBranch[field] === 'object').to.equal(true);
-      chai.expect(createdBranch[field]).to.not.equal(null);
+      chai.expect(field in updatedBranch).to.equal(true);
+      if (Array.isArray(updatedBranch[field])) {
+        updatedBranch[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (updatedBranch[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof updatedBranch[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in updatedBranch[field]).to.equal(true);
+      }
     });
   }
   catch (error) {

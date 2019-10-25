@@ -7,9 +7,10 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Leah De Laurell
+ * @author Jake Ursetta
  *
  * @description This renders a stat.
  */
@@ -17,7 +18,7 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import { UncontrolledTooltip } from 'reactstrap';
 

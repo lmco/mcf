@@ -7,9 +7,13 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Phillip Lee
+ * @author Leah De Laurell
+ * @author Connor Doyle
+ * @author Jake Ursetta
+ * @author Austin Bieber
  *
  * @description Helper function for MBEE test.
  * Used to create users, organizations, projects, elements in the database.
@@ -27,12 +31,14 @@ const fs = require('fs');
 const chai = require('chai');
 
 // MBEE modules
+const Artifact = M.require('models.artifact');
 const Element = M.require('models.element');
 const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
 const utils = M.require('lib.utils');
+const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
 const testData = require(path.join(M.root, 'test', 'test_data.json'));
 delete require.cache[require.resolve(path.join(M.root, 'test', 'test_data.json'))];
 
@@ -171,7 +177,7 @@ module.exports.removeNonAdminUser = function() {
 /**
  * @description Helper function to delete test admin user in MBEE tests.
  *
- * @returns {Promise<User>} Returns the newly created user upon completion.
+ * @returns {Promise<string>} Returns the id of the deleted admin user.
  */
 module.exports.removeTestAdmin = function() {
   return new Promise((resolve, reject) => {
@@ -198,11 +204,12 @@ module.exports.removeTestAdmin = function() {
 };
 
 /**
- * @description Helper function to create organization in MBEE tests.
+ * @description Helper function to create a test organization in MBEE tests.
  *
  * @param {object} adminUser - The admin user to create the org with.
  *
- * @returns {Promise<Organization>} Returns the newly created org upon completion.
+ * @returns {Promise<Organization>} Returns the newly created org upon
+ * completion.
  */
 module.exports.createTestOrg = function(adminUser) {
   return new Promise((resolve, reject) => {
@@ -231,6 +238,13 @@ module.exports.removeTestOrg = async function() {
     null, { lean: true });
   const projectIDs = projectsToDelete.map(p => p._id);
 
+  // Delete any artifacts in the org
+  await Artifact.deleteMany({ project: { $in: projectIDs } });
+
+  ArtifactStrategy.clear({
+    orgID: testData.orgs[0].id
+  });
+
   // Delete any elements in the found projects
   await Element.deleteMany({ project: { $in: projectIDs } });
   // Delete any branches in the found projects
@@ -242,12 +256,13 @@ module.exports.removeTestOrg = async function() {
 };
 
 /**
- * @description Helper function to create project in MBEE tests.
+ * @description Helper function to create a test project in MBEE tests.
  *
  * @param {object} adminUser - The admin user to create the project with.
  * @param {string} orgID - The id of the org to create the project on.
  *
- * @returns {Promise<Project>} Returns the newly created project upon completion.
+ * @returns {Promise<Project>} Returns the newly created project upon
+ * completion.
  */
 module.exports.createTestProject = function(adminUser, orgID) {
   return new Promise((resolve, reject) => {
@@ -497,7 +512,7 @@ module.exports.readCaFile = function() {
  * @param {object} res - The response object.
  * @param {Function} done - The callback function to mark the end of the test.
  */
-module.exports.testResponseLogging = function(responseLength, req, res, done) {
+module.exports.testResponseLogging = async function(responseLength, req, res, done) {
   // Get the log file path
   const filePath = path.join(M.root, 'logs', M.config.log.file);
 
@@ -517,4 +532,26 @@ module.exports.testResponseLogging = function(responseLength, req, res, done) {
   chai.expect(content[6]).to.equal(responseLength.toString());
 
   done();
+};
+
+/**
+ * @description A helper function to parse the api endpoint string into a http method.
+ *
+ * @param {string} endpoint - The api endpoint string.
+ * @returns {string} Returns a REST method string such as GET or POST.
+ */
+module.exports.parseMethod = function(endpoint) {
+  const regex = /[A-Z]/g;
+  // Find the uppercase letter
+  const uppercase = endpoint.match(regex);
+  if (uppercase || endpoint.includes('search')) {
+    // Split the input based on where the uppercase letter is found
+    const segments = endpoint.split(uppercase);
+    // Return the first word of the input in all caps
+    return segments[0].toUpperCase();
+  }
+  else {
+    // The endpoint is for whoami or searchUsers; they use GET requests
+    return 'GET';
+  }
 };

@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Jake Ursetta
  *
  * @description This file implements authentication using LDAP Active Directory.
  */
@@ -27,6 +27,8 @@ module.exports = {
 // Node modules
 const fs = require('fs');
 const path = require('path');
+
+// NPM modules
 const ldap = require('ldapjs');
 
 // MBEE modules

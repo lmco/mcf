@@ -30,7 +30,7 @@ how to configure existing strategies, please visit
 [the README in app/db](app/db/README.md).
 
 **Source Code**
-1. Clone the MBEE code by running: `git clone https://gitlab.us.lmco.com/mbx/mbee/mcf.git`. 
+1. Clone the MBEE code by running: `git clone https://github.com/lmco/mbee.git`. 
 2. Enter the directory with `cd mbee`.
 
 ## Getting Started
@@ -53,13 +53,6 @@ Included documentation:
 
 ## Reporting Vulnerabilities and Bugs
 
-<!-- START LMPI -->
-
 If an issue is identified in MBEE, please email
-[mbee-software.fc-space@lmco.com](mailto:mbee-software.fc-space@lmco.com). If
-you are internal Lockheed Martin, please email the distribution list 
-[mbee-developers-dl-ssc@exch.ems.lmco.com](mailto:mbee-developers-dl-ssc@exch.ems.lmco.com).
+[mbee-software.fc-space@lmco.com](mailto:mbee-software.fc-space@lmco.com).
 Refer to **SECURITY.md** for more information as well as the PGP encryption key.
-
-
-<!-- END LMPI -->

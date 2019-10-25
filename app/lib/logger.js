@@ -7,9 +7,11 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
+ * @author Jake Ursetta
+ * @author Connor Doyle
  *
  * @description Defines the MBEE logger. The logger should be used instead of
  * using `console.log`. The logger adds the ability to write to log
@@ -27,9 +29,11 @@
 // Node modules
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
+
+// NPM modules
 const winston = require('winston');
 const { combine, timestamp, label, printf } = winston.format;
-const { execSync } = require('child_process');
 
 // This defines our log levels
 const levels = {
@@ -162,10 +166,11 @@ if (!fs.existsSync(path.join(M.root, 'logs'))) {
  * the console, an error file, a combined log, and a debug log.
  *
  * @param {string} subcommand - The subcommand used with 'node mbee'.
+ * @param {string} opts - The options used with 'node mbee {subcommand}'.
  *
  * @returns {object} Returns an instance of the winston logger.
  */
-function makeLogger(subcommand) {
+function makeLogger(subcommand, opts) {
   const loggerConfig = {
     level: M.config.log.level,
     levels: levels,
@@ -196,8 +201,10 @@ function makeLogger(subcommand) {
     ],
     exitOnError: false
   };
-  // Add in a transport to log to the console if the mbee is not running tests
-  if (subcommand !== 'test') loggerConfig.transports.push(new winston.transports.Console());
+  // Add in a transport to log to the console if not running tests
+  if (!(subcommand === 'test' && opts.includes('--suppress-console'))) {
+    loggerConfig.transports.push(new winston.transports.Console());
+  }
   return winston.createLogger(loggerConfig);
 }
 

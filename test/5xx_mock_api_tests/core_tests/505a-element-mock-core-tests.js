@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Austin Bieber
  *
  * @description This tests mock requests of the API controller functionality:
  * GET, POST, PATCH, and DELETE elements.
@@ -851,9 +851,9 @@ function patchElements(done) {
   ];
 
   // Create objects to update elements
-  const arrUpdateObjects = elemData.map(p => ({
-    name: `${p.name}_edit`,
-    id: p.id
+  const arrUpdateObjects = elemData.map(e => ({
+    name: `${e.name}_edit`,
+    id: e.id
   }));
 
   const params = { orgid: org.id, projectid: projID, branchid: branchID };

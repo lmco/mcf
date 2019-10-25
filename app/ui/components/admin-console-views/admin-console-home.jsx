@@ -1,15 +1,15 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.apps.admin-console-app
+ * @module ui.components.admin-console-views.admin-console-home
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
  * @description This renders the admin console page.
  */
@@ -17,11 +17,11 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
-// MBEE Modules
+// MBEE modules
 import Sidebar from '../general/sidebar/sidebar.jsx';
 import SidebarLink from '../general/sidebar/sidebar-link.jsx';
 import UserList from '../admin-console-views/user-list.jsx';

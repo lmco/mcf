@@ -7,13 +7,14 @@
  *
  * @license MIT
 
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
  * @description Defines the style for the list and list items.
  */
 
+// MBEE modules
 @import '../utils/_variables';
 
 @mixin grid-list-items($grid_temp, $grid_areas, $just_cont, $align_items) {

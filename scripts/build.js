@@ -8,9 +8,10 @@
  *
  * @license MIT
  *
- * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner Leah De Laurell
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
+ * @author Leah De Laurell
  *
  * @description Creates the necessary static assets used by the MBEE UI.
  */
@@ -39,6 +40,8 @@ const sass = require('gulp-sass');
 const markdown = require('gulp-markdown');
 const rename = require('gulp-rename');
 const webpack = require('webpack');
+
+// MBEE modules
 const validators = M.require('lib.validators');
 
 /**
@@ -197,11 +200,6 @@ function build(_args) {
 
       M.log.info(`  + Transpiling react in ${mode} mode...`);
       webpack({
-        externals: {
-          cheerio: 'window',
-          'react/lib/ExecutionEnvironment': true,
-          'react/lib/ReactContext': true
-        },
         mode: mode,
         entry: {
           navbar: path.join(M.root, 'app', 'ui', 'components', 'apps', 'nav-app.jsx'),

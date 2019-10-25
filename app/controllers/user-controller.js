@@ -7,12 +7,12 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Connor Doyle <connor.p.doyle@lmco.com>
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Josh Kaplan
+ * @author Austin Bieber
+ * @author Connor Doyle
+ * @author Phillip Lee
  *
  * @description Provides an abstraction layer on top of the User model that
  * implements controller logic and behavior for Users.
@@ -31,12 +31,12 @@ module.exports = {
   search
 };
 
-// Node.js Modules
+// Node modules
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 
-// MBEE Modules
+// MBEE modules
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
@@ -94,7 +94,7 @@ const permissions = M.require('lib.permissions');
  * You may also add a negative sign in front of the field to indicate sorting in
  * reverse order.
  *
- * @returns {Promise} Array of found users' public data objects.
+ * @returns {Promise<object[]>} Array of found users.
  *
  * @example
  * find({User}, ['user1', 'user2'], { populate: 'createdBy' })
@@ -220,7 +220,7 @@ async function find(requestingUser, users, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @returns {Promise} Array of created users' users' public data objects.
+ * @returns {Promise<object[]>} Array of created user objects.
  *
  * @example
  * create({User}, [{User1}, {User2}, ...], { populate: 'createdBy' })
@@ -237,7 +237,7 @@ async function create(requestingUser, users, options) {
     helper.checkParams(requestingUser, options);
     helper.checkParamsDataType('object', users, 'Users');
 
-    // For create user only: requesting user must be admin
+    // Ensure user has permission to create other users
     permissions.createUser(requestingUser);
 
     // Sanitize input parameters and create function-wide variables
@@ -340,6 +340,7 @@ async function create(requestingUser, users, options) {
     // Save the updated default org
     await defaultOrg.save();
 
+    // Find and return the created users
     return await User.find({ _id: { $in: arrUsernames } }, validatedOptions.fieldsString,
       { populate: validatedOptions.populateString,
         lean: validatedOptions.lean
@@ -387,7 +388,7 @@ async function create(requestingUser, users, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @returns {Promise} Array of updated users' public data objects.
+ * @returns {Promise<object[]>} Array of updated user objects.
  *
  * @example
  * update({User}, [{Updated User 1}, {Updated User 2}...], { populate: 'createdBy' })
@@ -476,9 +477,8 @@ async function update(requestingUser, users, options) {
     // Get array of editable parameters
     const validFields = User.getValidUpdateFields();
 
-    const promises = [];
     // For each found user
-    promises.push(foundUsers.forEach((user) => {
+    foundUsers.forEach((user) => {
       const updateUser = jmiType2[user._id];
       // Remove username and _id field from update object
       delete updateUser.username;
@@ -554,9 +554,7 @@ async function update(requestingUser, users, options) {
           update: updateUser
         }
       });
-    }));
-
-    await Promise.all(promises);
+    });
 
     // Update all users through a bulk write to the database
     await User.bulkWrite(bulkArray);
@@ -605,7 +603,7 @@ async function update(requestingUser, users, options) {
  * @param {boolean} [options.lean = false] - A boolean value that if true
  * returns raw JSON instead of converting the data to objects.
  *
- * @returns {Promise} Array of users' public data objects.
+ * @returns {Promise<object[]>} Array of created/replaced user objects.
  *
  * @example
  * createOrReplace({User}, [{User 1}, {User 2}...], { populate: 'createdBy' })
@@ -622,7 +620,7 @@ async function createOrReplace(requestingUser, users, options) {
     helper.checkParams(requestingUser, options);
     helper.checkParamsDataType('object', users, 'Users');
 
-    // createOrReplace function: requesting user must be admin
+    // Ensure user has permission to create or replace users
     permissions.createUser(requestingUser);
 
     // Sanitize input parameters and create function-wide variables
@@ -696,7 +694,7 @@ async function createOrReplace(requestingUser, users, options) {
     }
     // This will restore the original users if the new ones failed to create
     catch (error) {
-      const finalError = await new Promise(async (res) => {
+      throw await new Promise(async (res) => {
         // Reinsert original data
         try {
           await User.insertMany(foundUsers);
@@ -711,8 +709,6 @@ async function createOrReplace(requestingUser, users, options) {
           res(restoreError);
         }
       });
-      // Throw whichever error was passed
-      throw finalError;
     }
 
     EventEmitter.emit('users-created', createdUsers);
@@ -742,7 +738,7 @@ async function createOrReplace(requestingUser, users, options) {
  * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @returns {Promise} Array of deleted users' usernames.
+ * @returns {Promise<string[]>} Array of deleted users' usernames.
  *
  * @example
  * remove({User}, ['user1', 'user2'])
@@ -769,7 +765,7 @@ async function remove(requestingUser, users, options) {
     const searchQuery = {};
     const memberQuery = {};
 
-    // Permissions Check
+    // Ensure user has permission to delete users
     permissions.deleteUser(reqUser);
 
     // Check the type of the users parameter
@@ -827,6 +823,7 @@ async function remove(requestingUser, users, options) {
       org.markModified('permissions');
 
       // Add save operation to promise array
+      // TODO: Change to use updateOne()
       promises.push(org.save());
     });
 
@@ -846,6 +843,7 @@ async function remove(requestingUser, users, options) {
       proj.markModified('permissions');
 
       // Add save operation to promise array
+      // TODO: Change to use updateOne()
       promises2.push(proj.save());
     });
 
@@ -890,10 +888,10 @@ async function remove(requestingUser, users, options) {
  * You may also add a negative sign in front of the field to indicate sorting in
  * reverse order.
  *
- * @returns {Promise} An array of found users.
+ * @returns {Promise<object[]>} An array of found users.
  *
  * @example
- * search({User}, 'query', {'populate':'createdBy'})
+ * search({User}, 'query', { populate : 'createdBy' })
  * .then(function(users) {
  *   // Do something with the found users
  * })
@@ -985,7 +983,7 @@ async function search(requestingUser, query, options) {
  * @param {string} confirmPassword - The new password entered a second time
  * to confirm they match.
  *
- * @returns {Promise} The updated user public data object.
+ * @returns {Promise<object>} The updated user public data object.
  *
  * @example
  * updatePassword({User}, 'oldPass', 'newPass', 'newPass')
@@ -1038,6 +1036,7 @@ async function updatePassword(requestingUser, oldPassword, newPassword, confirmP
     foundUser.password = newPassword;
 
     // Save the requesting user, forcing pre-save middleware to hash new password
+    // TODO: Consider modifying to NOT use pre-save middleware for DB-abstraction
     return await foundUser.save();
   }
   catch (error) {

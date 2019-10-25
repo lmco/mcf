@@ -7,9 +7,10 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Austin Bieber
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
+ * @author Austin Bieber
  *
  * @description Defines the MBEE App. Allows MBEE app to be imported by other modules.
  * This app is imported by start.js script which then runs the server.

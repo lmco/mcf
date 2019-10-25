@@ -1,16 +1,15 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.apps.nav
+ * @module ui.components.apps.nav-app
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Leah De Laurell
  *
  * @description This renders the nav bar.
  */
@@ -18,7 +17,7 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React from 'react';
 import ReactDom from 'react-dom';
 

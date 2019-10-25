@@ -7,11 +7,10 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Leah De Laurell
+ * @author Josh Kaplan
  *
  * @description This renders a project's element page.
  */
@@ -19,11 +18,11 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import { Button } from 'reactstrap';
 
-// MBEE Modules
+// MBEE modules
 import ElementTree from './element-tree.jsx';
 import Element from './element.jsx';
 import ElementEdit from './element-edit.jsx';

@@ -7,14 +7,15 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
+ * @author Austin Bieber
  *
  * @description Tests the sanitization module and each of its functions.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
 // MBEE modules

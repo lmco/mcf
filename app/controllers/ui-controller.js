@@ -7,10 +7,11 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Leah De Laurell
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Leah De Laurell
+ * @author Josh Kaplan
+ * @author Jake Ursetta
  *
  * @description This implements the behavior and logic for the user interface.
  * All UI routes map to this controller which in turn uses other controllers to
@@ -38,6 +39,8 @@ module.exports = {
 // Node modules
 const fs = require('fs');
 const path = require('path');
+
+// NPM modules
 const swaggerJSDoc = require('swagger-jsdoc');
 
 // MBEE modules

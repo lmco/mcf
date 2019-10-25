@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner James Eckstein
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
  *
  * @description This renders a sidebar divider.
  */
@@ -18,6 +18,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable jsdoc/require-jsdoc */
 
+// React modules
 import React from 'react';
 
 /* eslint-enable no-unused-vars */
