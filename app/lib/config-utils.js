@@ -271,16 +271,46 @@ module.exports.validate = function(config) {
   // --------------------------- Verify validators -------------------------- //
   if (config.validators) {
     test(config, 'validators', 'object');
+    const rootIDs = ['model', '__mbee__', 'undefined', 'holding_bin'];
     if (config.validators.id) test(config, 'validators.id', 'string');
+    if (config.validators.id && !config.validators.element_id) {
+      // Check that custom id validators don't exclude root ids
+      rootIDs.forEach((id) => {
+        if (!RegExp(config.validators.id).test(id)) {
+          throw new Error(`Configuration file: custom id regex excludes root id "${id}".`);
+        }
+      });
+    }
     if (config.validators.id_length) test(config, 'validators.id_length', 'number');
+    if (config.validators.id_length && !config.validators.element_id_length) {
+      // Check that custom id validators don't exclude root ids
+      if (config.validators.id_length < 11) {
+        throw new Error(`Configuration file: custom id length "${config.validators.id_length}" is too short.`);
+      }
+    }
+    if (config.validators.element_id) {
+      test(config, 'validators.element_id', 'string');
+      // Check that custom id validators don't exclude root ids
+      console.log()
+      rootIDs.forEach((id) => {
+        if (!RegExp(config.validators.element_id).test(id)) {
+          throw new Error(`Configuration file: custom element id regex excludes root id "${id}".`);
+        }
+      });
+    }
+    if (config.validators.element_id_length) {
+      test(config, 'validators.element_id_length', 'number');
+      // Check that custom id validators don't exclude root ids
+      if (config.validators.element_id_length < 11) {
+        throw new Error(`Configuration file: custom element id length "${config.validators.id_length}" is too short.`);
+      }
+    }
     if (config.validators.org_id) test(config, 'validators.org_id', 'string');
     if (config.validators.org_id_length) test(config, 'validators.org_id_length', 'number');
     if (config.validators.project_id) test(config, 'validators.project_id', 'string');
     if (config.validators.project_id_length) test(config, 'validators.project_id_length', 'number');
     if (config.validators.branch_id) test(config, 'validators.branch_id', 'string');
     if (config.validators.branch_id_length) test(config, 'validators.branch_id_length', 'number');
-    if (config.validators.element_id) test(config, 'validators.element_id', 'string');
-    if (config.validators.element_id_length) test(config, 'validators.element_id_length', 'number');
     if (config.validators.user_username) test(config, 'validators.user_username', 'string');
     if (config.validators.user_username_length) test(config, 'validators.user_username_length', 'number');
     if (config.validators.user_email) test(config, 'validators.user_email', 'string');
