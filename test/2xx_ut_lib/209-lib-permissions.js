@@ -7,17 +7,18 @@
  *
  * @license MIT
  *
- * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author James Eckstein
+ * @author Josh Kaplan
  *
  * @description Tests the permissions library functions.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
-// MBEE Modules
+// MBEE modules
 const can = M.require('lib.permissions');
 
 /* --------------------( Test Data )-------------------- */

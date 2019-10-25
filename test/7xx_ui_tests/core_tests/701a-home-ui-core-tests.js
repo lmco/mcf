@@ -7,15 +7,16 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
  * @description This tests the app of the home to
  * verify the render works correctly.
  */
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
+
 // NPM modules
 import React from 'react';
 import chai from 'chai';

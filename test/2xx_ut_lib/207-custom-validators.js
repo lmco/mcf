@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
  *
  * @description This file tests that custom validators work as expected.
  * It is not a comprehensive set of tests and does not test every possible
@@ -17,7 +17,7 @@
  * development of custom validators.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
 // MBEE modules

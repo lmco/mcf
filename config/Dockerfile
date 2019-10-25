@@ -1,11 +1,15 @@
 ##
-# Classification: UNCLASSIFIED                                                                                                        #
+# @classification UNCLASSIFIED                                                                                                        #
 #
 # @module config.Dockerfile
 #
 # @copyright Copyright (C) 2018, Lockheed Martin Corporation
 #
 # @license LMPI - Lockheed Martin Proprietary Information
+#
+# @owner Leah De Laurell
+#
+# @author Leah De Laurell
 #
 # @description This Dockerfile defines the Docker build for MBEE.
 ##

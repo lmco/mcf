@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner James Eckstein <james.eckstein@lmco.com>
+ * @owner James Eckstein
  *
- * @author James Eckstein <james.eckstein@lmco.com>
+ * @author James Eckstein
  *
  * @description This renders the search form.
  */
@@ -17,7 +17,7 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import {
   Button,

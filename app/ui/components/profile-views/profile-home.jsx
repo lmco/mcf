@@ -1,27 +1,27 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.apps.profile-app
+ * @module ui.components.profile-views.profile-home
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
- * @description This renders a user's page.
+ * @description This renders a user's profile home page.
  */
 
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
-// MBEE Modules
+// MBEE modules
 import Sidebar from '../general/sidebar/sidebar.jsx';
 import SidebarLink from '../general/sidebar/sidebar-link.jsx';
 import Profile from '../profile-views/profile.jsx';

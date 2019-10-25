@@ -7,15 +7,15 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner James Eckstein
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
+ * @author Josh Kaplan
  *
  * @description Defines the MBEE routes mounted at '/'.
  */
 
-// Node modules
+// NPM modules
 const express = require('express');
 const router = express.Router();
 

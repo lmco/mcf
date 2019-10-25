@@ -7,19 +7,21 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle <connor.p.doyle@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Connor Doyle <connor.p.doyle@lmco.com>
+ * @author Connor Doyle
  *
  * @description This tests mock requests of the API controller functionality:
  * GET, POST, PATCH, and DELETE orgs.
  */
 
-// NPM modules
-const chai = require('chai');
+// Node modules
 const path = require('path');
 const fs = require('fs');
 const zlib = require('zlib');
+
+// NPM modules
+const chai = require('chai');
 
 // MBEE modules
 const OrgController = M.require('controllers.organization-controller');

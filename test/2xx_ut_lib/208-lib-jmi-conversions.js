@@ -7,18 +7,18 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
  * @description Tests the conversion of the MBEE JMI type conversion functions in
  * the library.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
-// MBEE Modules
+// MBEE modules
 const convertJMI = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */

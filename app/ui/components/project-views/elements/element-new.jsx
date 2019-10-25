@@ -1,23 +1,23 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.elements.element-new
+ * @module ui.components.project-views.elements.element-new
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner James Eckstein
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
  *
- * @description This renders create element component.
+ * @description This renders create element form.
  */
 
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import {
   Form,
@@ -30,7 +30,7 @@ import {
   UncontrolledAlert
 } from 'reactstrap';
 
-// MBEE Modules
+// MBEE modules
 import validators from '../../../../../build/json/validators';
 import ElementSelector from './element-selector.jsx';
 

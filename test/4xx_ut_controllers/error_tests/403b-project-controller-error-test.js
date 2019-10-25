@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Phillip Lee <phillip.lee@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Phillip Lee
  *
  * @description This tests for expected errors within the project controller.
  */

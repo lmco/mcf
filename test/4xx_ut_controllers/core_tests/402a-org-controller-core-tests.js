@@ -7,10 +7,11 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Austin Bieber
+ * @author Leah De Laurell
+ * @author Connor Doyle
  *
  * @description Tests the organization controller functionality: create,
  * delete, update, and find organizations.
@@ -96,7 +97,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates an organization using the org controller.
+ * @description Validates that the Org Controller can create an org.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -137,7 +138,7 @@ function createOrg(done) {
 }
 
 /**
- * @description Creates multiple organizations using the org controller.
+ * @description Validates that the Org Controller can create multiple orgs.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -188,7 +189,7 @@ function createOrgs(done) {
 }
 
 /**
- * @description Creates or replaces an organization using the org controller.
+ * @description Validates that the Org Controller can create or replace an org.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -229,7 +230,7 @@ function createOrReplaceOrg(done) {
 }
 
 /**
- * @description Creates and replaces multiple organizations using the org controller.
+ * @description Validates that the Org Controller can create or replace multiple orgs.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -280,7 +281,7 @@ function createOrReplaceOrgs(done) {
 }
 
 /**
- * @description Finds an organization using the org controller.
+ * @description Validates that the Org Controller can find an org.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -321,7 +322,7 @@ function findOrg(done) {
 }
 
 /**
- * @description Finds multiple organizations using the org controller.
+ * @description Validates that the Org Controller can find multiple orgs.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -375,7 +376,7 @@ function findOrgs(done) {
 }
 
 /**
- * @description Finds all organizations the user has access to using the org controller.
+ * @description Validates that the Org Controller can find all orgs a user has access to.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -440,7 +441,7 @@ function findAllOrgs(done) {
 }
 
 /**
- * @description Updates an organization using the org controller.
+ * @description Validates that the Org Controller can update an org.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -487,7 +488,7 @@ function updateOrg(done) {
 }
 
 /**
- * @description Updates multiple organizations using the org controller.
+ * @description Validates that the Org Controller can update multiple orgs.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -544,7 +545,7 @@ function updateOrgs(done) {
 }
 
 /**
- * @description Deletes an organization using the org controller.
+ * @description Validates that the Org Controller can delete an org.
  *
  * @param {Function} done - The Mocha callback.
  */
@@ -578,7 +579,7 @@ function deleteOrg(done) {
 }
 
 /**
- * @description Deletes multiple organizations using the org controller.
+ * @description Validates that the Org Controller can delete multiple orgs.
  *
  * @param {Function} done - The Mocha callback.
  */

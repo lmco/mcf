@@ -1,23 +1,24 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.303a-project-model-tests
+ * @module test.303a-project-model-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle
  *
- * @author  Josh Kaplan <joshua.d.kaplan@lmco.com>
- * @author  Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Josh Kaplan
+ * @author Leah De Laurell
+ * @author Austin Bieber
  *
  * @description This tests the Project Model functionality. The project
  * model tests, create, find, update, and delete projects. THe tests also
  * test the max character limit on the ID field.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
@@ -155,14 +156,21 @@ async function updateProject() {
  * @description Deletes the project previously created in createProject test.
  */
 async function deleteProject() {
-  const projID = utils.createID(org.id, testData.projects[0].id);
+  try {
+    const projID = utils.createID(org.id, testData.projects[0].id);
 
-  // Remove the project
-  await Project.deleteMany({ _id: projID });
+    // Remove the project
+    await Project.deleteMany({ _id: projID });
 
-  // Attempt to find the project
-  const foundProject = await Project.findOne({ _id: projID });
+    // Attempt to find the project
+    const foundProject = await Project.findOne({ _id: projID });
 
-  // foundProject should be null
-  should.not.exist(foundProject);
+    // foundProject should be null
+    should.not.exist(foundProject);
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
 }

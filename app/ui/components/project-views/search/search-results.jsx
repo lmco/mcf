@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner James Eckstein <james.eckstein@lmco.com>
+ * @owner James Eckstein
  *
- * @author James Eckstein <james.eckstein@lmco.com>
+ * @author James Eckstein
  *
  * @description This renders the search results table elements.
  */
@@ -17,8 +17,11 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
+// React modules
 import React, { Component } from 'react';
 import { Table, Row, Button } from 'reactstrap';
+
+// MBEE modules
 import SearchResult from './search-result.jsx';
 
 /* eslint-enable no-unused-vars */

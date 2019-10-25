@@ -7,10 +7,10 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Leah De Laurell
+ * @author Jake Ursetta
  *
  * @description This renders an organization's projects list.
  */
@@ -19,11 +19,11 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable jsdoc/require-jsdoc */
 
-// React Modules
+// React modules
 import React from 'react';
 import { Button, Modal, ModalBody } from 'reactstrap';
 
-// MBEE Modules
+// MBEE modules
 import ListItem from '../general/list/list-item.jsx';
 import List from '../general/list/list.jsx';
 import Create from '../shared-views/create.jsx';
@@ -46,7 +46,7 @@ function OrganizationProjects(props) {
                         </a>
                       </ListItem>);
       }
-      // Verify write permissions and not archived org
+      // Verify write permissions and not archived project
       else if (perm === 'write' && !project.archived) {
         listItems.push(<ListItem key={`proj-key-${project.id}`} className='proj-org-header'>
                         <a href={`/orgs/${org.id}/project/${project.id}/branches/master/elements`}>
@@ -54,7 +54,7 @@ function OrganizationProjects(props) {
                         </a>
                       </ListItem>);
       }
-      // Verify read permissions and not archived org
+      // Verify read permissions and not archived project
       else if (perm === 'read' && !project.archived) {
         listItems.push(<ListItem key={`proj-key-${project.id}`} className='proj-org-header'>
                         <a href={`/orgs/${org.id}/project/${project.id}/branches/master/elements`}>

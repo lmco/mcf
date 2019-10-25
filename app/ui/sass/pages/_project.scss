@@ -1,18 +1,20 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.sass.components.workspace-components._project
+ * @module ui.sass.pages._project
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
  * @description Defines the project page sass variables
  */
+
+// MBEE modules
 @import '../utils/_variables';
 
 .branch-link {

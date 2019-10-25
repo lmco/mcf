@@ -7,14 +7,14 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Austin Bieber <austin.j.bieber@lmco.com>
+ * @author Austin Bieber
  *
  * @description This file tests the utility functions.
  */
 
-// Node modules
+// NPM modules
 const chai = require('chai');
 
 // MBEE modules

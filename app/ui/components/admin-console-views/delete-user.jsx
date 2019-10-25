@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
  * @description This renders the delete user page.
  */
@@ -17,7 +17,7 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import {
   Form,
@@ -96,7 +96,6 @@ class DeleteUser extends Component {
   // Define update username
   updateUsername(event) {
     this.setState({ username: event.target.value });
-
     this.doSearch(event.target.value);
   }
 

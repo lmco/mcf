@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
+ * @author Josh Kaplan
  *
  * @description Removes directories and files created during npm/yarn install,
  * node mbee build, and all log files.
@@ -17,7 +17,7 @@
 /* eslint-disable jsdoc/require-description-complete-sentence */
 // Rule disabled to allow list in description
 
-// Node.js modules
+// Node modules
 const { execSync } = require('child_process');
 const path = require('path');
 

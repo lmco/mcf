@@ -9,10 +9,11 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber <austin.j.bieber@lmco.com>
+ * @owner Connor Doyle
  *
- * @author Josh Kaplan <joshua.d.kaplan@lmco.com>
- * @author Jake Ursetta <jake.j.ursetta@lmco.com>
+ * @author Josh Kaplan
+ * @author Jake Ursetta
+ * @author Austin Bieber
  *
  * @description
  * <p>This module defines the user data model. Users are the main operators of
@@ -47,7 +48,7 @@
 // Node Modules
 const crypto = require('crypto');
 
-// MBEE Modules
+// MBEE modules
 const db = M.require('lib.db');
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');

@@ -7,9 +7,9 @@
  *
  * @license MIT
  *
- * @owner James Eckstein <james.eckstein@lmco.com>
+ * @owner James Eckstein
  *
- * @author James Eckstein <james.eckstein@lmco.com>
+ * @author James Eckstein
  *
  * @description This renders the custom data edit view.
  */
@@ -17,7 +17,7 @@
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import {
   Row,
@@ -34,7 +34,7 @@ import {
 } from 'reactstrap';
 import classnames from 'classnames';
 
-// MBEE Modules
+// MBEE modules
 import CustomEditRow from './custom-edit-row.jsx';
 /* eslint-enable no-unused-vars */
 

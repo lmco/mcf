@@ -7,21 +7,22 @@
  *
  * @license MIT
  *
- * @owner Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @owner James Eckstein
  *
- * @author Leah De Laurell <leah.p.delaurell@lmco.com>
+ * @author Leah De Laurell
  *
- * @description This renders an organization or project home page.
+ * @description This renders an organization or project
+ * information page.
  */
 
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
 
-// React Modules
+// React modules
 import React, { Component } from 'react';
 import { Button, Modal, ModalBody, Badge } from 'reactstrap';
 
-// MBEE Modules
+// MBEE modules
 import EditPage from './edit-page.jsx';
 import CustomData from '../general/custom-data/custom-data.jsx';
 
