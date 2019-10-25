@@ -870,7 +870,27 @@ class Model {
    * operation.
    */
   async deleteMany(conditions, options, cb) {
-    const docs = await this.scan(conditions, null, options);
+    let docs = [];
+    let more = true;
+
+    // While there are no more docs to find
+    while (more) {
+      // Find the max number of documents
+      const result = await this.scan(conditions, null, options);
+      docs = docs.concat(result.Items);
+
+      // If there are no more documents to find, exit loop
+      if (!result.LastEvaluatedKey) {
+        more = false;
+      }
+      else {
+        // Set LastEvaluatedKey, used to paginate
+        options.LastEvaluatedKey = result.LastEvaluatedKey;
+      }
+    }
+
+    // Format the documents
+    docs = this.formatDocuments(docs, options);
 
     const tmpQuery = { _id: { $in: [] } };
     // For each of the found documents
@@ -931,7 +951,38 @@ class Model {
       return this.batchGetItem(filter, projection, options);
     }
     else {
-      return this.scan(filter, projection, options);
+      let docs = [];
+      let more = true;
+      let skipped = 0
+
+      // While there are no more docs to find
+      while (more) {
+        // Find the max number of documents
+        const result = await this.scan(filter, null, options);
+
+        // If there are no more documents to find, exit loop
+        // TODO: Figure this out
+        if (!result.LastEvaluatedKey) {
+          more = false;
+        }
+        // If ONLY the option limit is provided, once met, exit loop
+        else if (options.limit && !options.skip
+          && (docs.length + result.Items.length === options.limit)) {
+          more = false;
+        }
+        else if (options.skip) {
+        }
+        else {
+          // Set LastEvaluatedKey, used to paginate
+          options.LastEvaluatedKey = result.LastEvaluatedKey;
+        }
+
+        docs = docs.concat(result.Items);
+      }
+
+      // Format the documents
+      docs = this.formatDocuments(docs, options);
+      return docs;
     }
   }
 
@@ -1307,7 +1358,11 @@ class Model {
       M.log.debug(`DB OPERATION: ${this.TableName} scan`);
       connect()
       .then((conn) => conn.scan(scanObj).promise())
-      .then((data) => resolve(this.formatDocuments(data.Items, options)))
+      .then((data) => {
+        // console.log(data);
+        // return resolve(this.formatDocuments(data.Items, options))
+        return resolve(data)
+      })
       .catch((error) => {
         M.log.verbose('Failed in scan');
         M.log.error(error);
@@ -1401,6 +1456,7 @@ class Store extends DynamoDBStore {
 class Query {
   constructor(model, projection, options) {
     this.model = model;
+    this.options = options;
     this.ExpressionAttributeNames = {};
     this.ExpressionAttributeValues = {};
     this.ProjectionExpression = '';
@@ -1766,6 +1822,19 @@ class Query {
     if (Object.keys(this.ExpressionAttributeValues).length !== 0) {
       baseObj.ExpressionAttributeValues = this.ExpressionAttributeValues;
     }
+
+    // For each options
+    if (this.options) {
+      // If the limit option is provided and is greater than 0
+      if (this.options.limit && this.options.limit > 0) {
+        baseObj.Limit = this.options.limit;
+      }
+
+      // If the option LastEvaluatedKey is provided, set it for pagination
+      if (this.options.LastEvaluatedKey) {
+        baseObj.LastEvaluatedKey = this.options.LastEvaluatedKey;
+      }
+
 
     return baseObj;
   }
