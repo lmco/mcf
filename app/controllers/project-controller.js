@@ -753,7 +753,7 @@ async function update(requestingUser, organizationID, projects, options) {
           // Improperly formatted validator
           else {
             throw new M.ServerError(`Project validator [${key}] is neither a `
-              + 'function not a regex string.');
+              + 'function nor a regex string.');
           }
         }
 
