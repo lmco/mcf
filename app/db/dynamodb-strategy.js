@@ -18,6 +18,7 @@
 // NPM modules
 const AWS = require('aws-sdk');
 const DynamoDBStore = require('dynamodb-store');
+const async = require('async');
 
 // MBEE modules
 const utils = M.require('lib.utils');
@@ -43,10 +44,16 @@ async function connect() {
   });
 }
 
+/**
+ *
+ */
 function disconnect() {
 
 }
 
+/**
+ *
+ */
 async function clear() {
   return new Promise((resolve, reject) => {
     let conn;
@@ -66,11 +73,12 @@ async function clear() {
     .then(() => resolve())
     .catch((error) => reject(error));
   });
-
-
 }
 
 // TODO: Figure out which fields need to be sanitized
+/**
+ * @param data
+ */
 function sanitize(data) {
   return data;
 }
@@ -171,8 +179,8 @@ class Schema {
   /**
    * @description Registers a plugin for the schema.
    *
-   * @param {function} cb - A callback function to run.
-   * @param {Object} [options] - A object containing options.
+   * @param {Function} cb - A callback function to run.
+   * @param {object} [options] - A object containing options.
    */
   plugin(cb, options) {
     this.cb = cb;
@@ -184,11 +192,11 @@ class Schema {
    * @description Defines an index for the schema. Can support adding compound
    * or text indexes.
    *
-   * @param {Object} fields - A object containing the key/values pairs where the
+   * @param {object} fields - A object containing the key/values pairs where the
    * keys are the fields to add indexes to, and the values define the index type
    * where 1 defines an ascending index, -1 a descending index, and 'text'
    * defines a text index.
-   * @param {Object} [options] - An object containing options.
+   * @param {object} [options] - An object containing options.
    */
   index(fields, options) {
     // return super.index(fields, options);
@@ -198,10 +206,10 @@ class Schema {
    * @description Defines a function to be run prior to a certain event
    * occurring.
    *
-   * @param {(String|RegExp)} methodName - The event to run the callback
+   * @param {(string|RegExp)} methodName - The event to run the callback
    * function before.
-   * @param {Object} [options] - An object containing options.
-   * @param {function} cb - The callback function to run prior to the event
+   * @param {object} [options] - An object containing options.
+   * @param {Function} cb - The callback function to run prior to the event
    * occurring.
    */
   pre(methodName, options, cb) {
@@ -224,14 +232,14 @@ class Schema {
    * Organization Schema contains a virtual called "projects". This virtual
    * returns all projects who "org" field matches the organization's "_id".
    *
-   * @param {String} name - The name of the field to be added to the schema
+   * @param {string} name - The name of the field to be added to the schema
    * post-find.
-   * @param {Object} [options] - An object containing options.
-   * @param {(String|Model)} [options.ref] - The name of the model which the
+   * @param {object} [options] - An object containing options.
+   * @param {(string|Model)} [options.ref] - The name of the model which the
    * virtual references.
-   * @param {(String|Function)} [options.localField] - The field on the current
+   * @param {(string|Function)} [options.localField] - The field on the current
    * schema which is being used to match the foreignField.
-   * @param {(String|Function)} [options.foreignField] - The field on the
+   * @param {(string|Function)} [options.foreignField] - The field on the
    * referenced schema which is being used to match the localField.
    * @param {(boolean|Function)} [options.justOne] - If true, the virtual should
    * only return a single document. If false, the virtual will be an array of
@@ -368,7 +376,7 @@ class Model {
    */
   async listTables() {
     return new Promise((resolve, reject) => {
-      M.log.debug(`DB OPERATION: listTables`);
+      M.log.debug('DB OPERATION: listTables');
       // Find all tables
       this.connection.listTables({}).promise()
       .then((tables) => resolve(tables))
@@ -407,10 +415,9 @@ class Model {
   /**
    * @description Formats a single document and returns it in the proper format
    * expected in the controllers.
-   *
    * @param {object} document -  The documents to properly format.
    * @param {object} options - The options supplied to the function.
-   *
+   * @param recurse
    * @returns {object} - Modified documents.
    */
   async formatDocument(document, options = {}, recurse = false) {
@@ -537,7 +544,7 @@ class Model {
       .catch((error) => {
         M.log.error(error);
         M.log.verbose('Failed in batchWriteItem');
-        return reject(error)
+        return reject(error);
       });
     });
   }
@@ -639,7 +646,7 @@ class Model {
     });
 
     /**
-     *
+     * @param fields
      */
     doc.__proto__.validateSync = function(fields) { // eslint-disable-line no-proto
       let keys;
@@ -747,7 +754,7 @@ class Model {
 
     /**
      *
-     * @return {Promise<*|Promise<unknown>>}
+     * @returns {Promise<*|Promise<unknown>>}
      */
     doc.__proto__.save = async function() { // eslint-disable-line no-proto
       return new Promise((resolve, reject) => {
@@ -890,7 +897,7 @@ class Model {
     }
 
     // Format the documents
-    docs = this.formatDocuments(docs, options);
+    docs = await this.formatDocuments(docs, options);
 
     const tmpQuery = { _id: { $in: [] } };
     // For each of the found documents
@@ -953,7 +960,7 @@ class Model {
     else {
       let docs = [];
       let more = true;
-      let skipped = 0
+      const skipped = 0;
 
       // While there are no more docs to find
       while (more) {
@@ -970,8 +977,8 @@ class Model {
           && (docs.length + result.Items.length === options.limit)) {
           more = false;
         }
-        else if (options.skip) {
-        }
+        // else if (options.skip) {
+        //         // }
         else {
           // Set LastEvaluatedKey, used to paginate
           options.LastEvaluatedKey = result.LastEvaluatedKey;
@@ -1045,9 +1052,7 @@ class Model {
     return new Promise((resolve, reject) => {
       M.log.debug(`DB OPERATION: ${this.TableName} describeTable`);
       this.connection.describeTable({ TableName: this.TableName }).promise()
-      .then((table) => {
-        return resolve(table.Table.KeySchema);
-      })
+      .then((table) => resolve(table.Table.KeySchema))
       .catch((error) => {
         M.log.error('Failed to get indexes.');
         return reject(error);
@@ -1058,6 +1063,9 @@ class Model {
   /**
    * @description Gets a single item from a DynamoDB table. Helper function for
    * findOne().
+   * @param filter
+   * @param projection
+   * @param options
    */
   async getItem(filter, projection, options) {
     return new Promise((resolve, reject) => {
@@ -1124,9 +1132,7 @@ class Model {
           .then((foundDocs) => {
             foundDocuments = foundDocuments.concat(foundDocs.Responses[this.TableName]);
           })
-          .catch((error) => {
-            return reject(error);
-          })
+          .catch((error) => reject(error))
         );
       }
 
@@ -1193,9 +1199,7 @@ class Model {
             .then((formattedDocs) => {
               foundDocuments = foundDocuments.concat(formattedDocs);
             })
-            .catch((error) => {
-              return reject(error);
-            })
+            .catch((error) => reject(error))
           );
         }
 
@@ -1268,6 +1272,8 @@ class Model {
   /**
    * @description Creates or replaces a single item in the specified table in
    * the DynamoDB database.
+   * @param doc
+   * @param options
    */
   async putItem(doc, options) {
     return new Promise((resolve, reject) => {
@@ -1284,7 +1290,7 @@ class Model {
       this.connection.putItem(putObj).promise()
       .catch((error) => {
         M.log.verbose('Failed in putItem');
-        return reject(error)
+        return reject(error);
       });
     });
   }
@@ -1358,11 +1364,10 @@ class Model {
       M.log.debug(`DB OPERATION: ${this.TableName} scan`);
       connect()
       .then((conn) => conn.scan(scanObj).promise())
-      .then((data) => {
+      .then((data) =>
         // console.log(data);
         // return resolve(this.formatDocuments(data.Items, options))
-        return resolve(data)
-      })
+        resolve(data))
       .catch((error) => {
         M.log.verbose('Failed in scan');
         M.log.error(error);
@@ -1413,7 +1418,7 @@ class Model {
    * @param {Function} [cb] - A callback function to run.
    */
   async updateMany(filter, doc, options, cb) {
-   // return this.updateItem(filter, doc, options);
+    // return this.updateItem(filter, doc, options);
   }
 
   /**
@@ -1454,6 +1459,7 @@ class Store extends DynamoDBStore {
 
 
 class Query {
+
   constructor(model, projection, options) {
     this.model = model;
     this.options = options;
@@ -1525,7 +1531,7 @@ class Query {
 
       // Handle the special $in case
       if (typeof query[k] === 'object' && query[k] !== null
-        && Object.keys(query[k])[0] === '$in') {
+          && Object.keys(query[k])[0] === '$in') {
         // Init the filter string
         let filterString = '';
         const arr = Object.values(query[k])[0];
@@ -1554,16 +1560,19 @@ class Query {
       }
       else {
         switch (typeof query[k]) {
-          case 'string': this.ExpressionAttributeValues[`:${valueKey}`] = { S: query[k] };
+          case 'string':
+            this.ExpressionAttributeValues[`:${valueKey}`] = { S: query[k] };
             break;
-          case 'boolean': this.ExpressionAttributeValues[`:${valueKey}`] = { BOOL: query[k] };
+          case 'boolean':
+            this.ExpressionAttributeValues[`:${valueKey}`] = { BOOL: query[k] };
             break;
-          case 'number': this.ExpressionAttributeValues[`:${valueKey}`] = {
-            N: query[k].toString()
-          };
+          case 'number':
+            this.ExpressionAttributeValues[`:${valueKey}`] = {
+              N: query[k].toString()
+            };
             break;
           default: {
-            console.log(query)
+            console.log(query);
             throw new M.DatabaseError(
               `Query param type [${typeof query[k]}] is not supported`, 'critical'
             );
@@ -1603,9 +1612,15 @@ class Query {
     // For each key in the query
     Object.keys(query).forEach((key) => {
       switch (typeof query[key]) {
-        case 'string': base[key] = { S: query[key] }; break;
-        case 'number': base[key] = { N: query[key].toString() }; break;
-        case 'boolean': base[key] = { BOOL: query[key] }; break;
+        case 'string':
+          base[key] = { S: query[key] };
+          break;
+        case 'number':
+          base[key] = { N: query[key].toString() };
+          break;
+        case 'boolean':
+          base[key] = { BOOL: query[key] };
+          break;
         case 'object': {
           if (query[key] !== null) {
             // Handle the $in case
@@ -1615,7 +1630,8 @@ class Query {
           }
           break;
         }
-        default: throw new M.DataFormatError(`Invalid type in query ${typeof query[key]}.`);
+        default:
+          throw new M.DataFormatError(`Invalid type in query ${typeof query[key]}.`);
       }
     });
 
@@ -1629,9 +1645,14 @@ class Query {
         // For each item in the array to search through
         inVals[k].forEach((i) => {
           switch (typeof i) {
-            case 'string': base[k] = { S: i }; break;
-            case 'number': base[k] = { N: i.toString() }; break;
-            default: throw new M.DataFormatError(`Invalid type in $in array ${typeof i}.`);
+            case 'string':
+              base[k] = { S: i };
+              break;
+            case 'number':
+              base[k] = { N: i.toString() };
+              break;
+            default:
+              throw new M.DataFormatError(`Invalid type in $in array ${typeof i}.`);
           }
 
           // Add on query, using JSON parse/stringify
@@ -1665,20 +1686,24 @@ class Query {
         this.ExpressionAttributeNames[`#${keyName}`] = k;
       }
 
-      const valueKey = (k.includes('.')) ? k.split('.').join('_') : k;
+      const valueKey = (k.includes('.')) ? k.split('.')
+      .join('_') : k;
 
       // Perform operation based on the type of parameter being updated
       switch (typeof filter[k]) {
-        case 'string': this.ExpressionAttributeValues[`:${valueKey}`] = { S: filter[k] };
+        case 'string':
+          this.ExpressionAttributeValues[`:${valueKey}`] = { S: filter[k] };
           break;
-        case 'boolean': this.ExpressionAttributeValues[`:${valueKey}`] = { BOOL: filter[k] };
+        case 'boolean':
+          this.ExpressionAttributeValues[`:${valueKey}`] = { BOOL: filter[k] };
           break;
-        case 'number': this.ExpressionAttributeValues[`:${valueKey}`] = {
-          N: filter[k].toString()
-        };
+        case 'number':
+          this.ExpressionAttributeValues[`:${valueKey}`] = {
+            N: filter[k].toString()
+          };
           break;
         case 'object': {
-          console.log(keyName)
+          console.log(keyName);
           console.log(filter[k]);
         }
           break;
@@ -1834,7 +1859,7 @@ class Query {
       if (this.options.LastEvaluatedKey) {
         baseObj.LastEvaluatedKey = this.options.LastEvaluatedKey;
       }
-
+    }
 
     return baseObj;
   }
