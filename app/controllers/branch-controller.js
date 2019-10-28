@@ -695,7 +695,7 @@ async function update(requestingUser, organizationID, projectID, branches, optio
           // Improperly formatted validator
           else {
             throw new M.ServerError(`Branch validator [${key}] is neither a `
-              + 'function not a regex string.');
+              + 'function nor a regex string.');
           }
         }
 
