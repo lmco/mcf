@@ -510,7 +510,7 @@ async function update(requestingUser, users, options) {
               );
             }
           }
-          // If the validator is a functions
+          // If the validator is a function
           else if (typeof validators.user[key] === 'function') {
             if (!validators.user[key](updateUser[key])) {
               throw new M.DataFormatError(
