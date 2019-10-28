@@ -581,7 +581,7 @@ async function update(requestingUser, orgs, options) {
           // Improperly formatted validator
           else {
             throw new M.ServerError(`Org validator [${key}] is neither a `
-              + 'function not a regex string.');
+              + 'function nor a regex string.');
           }
         }
 
