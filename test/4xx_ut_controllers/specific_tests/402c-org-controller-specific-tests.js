@@ -342,7 +342,7 @@ async function optionSortFind() {
 
     // Validate that the sort option is working
     chai.expect(foundOrgs[0].name).to.equal('a');
-    chai.expect(foundOrgs[0]._id).to.equal('testorg002')
+    chai.expect(foundOrgs[0]._id).to.equal('testorg002');
     chai.expect(foundOrgs[1].name).to.equal('b');
     chai.expect(foundOrgs[1]._id).to.equal('testorg000');
     chai.expect(foundOrgs[2].name).to.equal('c');
