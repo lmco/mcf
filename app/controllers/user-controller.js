@@ -521,7 +521,7 @@ async function update(requestingUser, users, options) {
           // Improperly formatted validator
           else {
             throw new M.ServerError(`User validator [${key}] is neither a `
-              + 'function not a regex string.');
+              + 'function nor a regex string.');
           }
         }
 
