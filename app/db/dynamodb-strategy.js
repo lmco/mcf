@@ -85,9 +85,14 @@ async function clear() {
   }
 }
 
-// TODO: Figure out which fields need to be sanitized
+// TODO: Figure out if any data needs to be sanitized
 /**
- * @param data
+ * @description Sanitizes the data to protect against database injections or
+ * unauthorized access to data.
+ *
+ * @param {*} data - The data to be sanitized.
+ *
+ * @returns {*} The sanitized data.
  */
 function sanitize(data) {
   return data;
@@ -95,7 +100,19 @@ function sanitize(data) {
 
 class Schema {
 
+  /**
+   * @description The Schema constructor. Accepts a definition object and
+   * options, and converts to definition into a DynamoDB friendly schema. Stores
+   * hooks, methods, statics and fields that can be populated on the definition.
+   *
+   * @param {object} definition - The schema definition object. Specifies fields
+   * which can be defined on a document, indexes on those fields, validators
+   * and other properties on each field.
+   * @param {object} options - An object containing schema options.
+   */
   constructor(definition, options) {
+    // Define the main schema. The _id field is the unique identifier of each
+    // document, and therefore is included in the KeySchema
     this.schema = {
       AttributeDefinitions: [{
         AttributeName: '_id',
@@ -107,17 +124,20 @@ class Schema {
       }],
       GlobalSecondaryIndexes: []
     };
+
+    // Define the definition and populate object
     this.definition = definition;
     this.definition.populate = {};
     this.add(definition);
 
+    // Define the definition hooks, methods and statics
     this.definition.hooks = { pre: [], post: [] };
     this.definition.methods = [];
     this.definition.statics = [];
 
-    // Remove GlobalSecondaryIndex array if empty
+    // Remove GlobalSecondaryIndex array if empty, meaning there are no additional indexes
     if (this.schema.GlobalSecondaryIndexes.length === 0) {
-      this.schema.GlobalSecondaryIndexes = undefined;
+      delete this.schema.GlobalSecondaryIndexes;
     }
   }
 
@@ -129,11 +149,14 @@ class Schema {
    * @param {string} [prefix] - The optional prefix to add to the paths in obj.
    */
   add(obj, prefix) {
+    // For each field defined in the object
     Object.keys(obj).forEach((key) => {
+      // If the field has not already been added to the definition, add it
       if (!this.definition.hasOwnProperty(key)) {
         this.definition[key] = obj[key];
       }
 
+      // Set the correct DynamoDB type based on the type provided
       switch (obj[key].type) {
         case 'S':
         case 'String': this.definition[key].type = 'S'; break;
@@ -144,16 +167,18 @@ class Schema {
         case 'Date': this.definition[key].type = 'N'; break;
         case 'BOOL':
         case 'Boolean': this.definition[key].type = 'BOOL'; break;
-        default: break;
+        // Default type is a string
+        default: this.definition[key].type = 'S';
       }
 
-      // Handle indexes
+      // If the field has an index defined
       if (obj[key].index) {
         // Create attribute object
         const attributeObj = {
           AttributeName: key,
           AttributeType: obj[key].type
         };
+        // Add the the schema AttributeDefinitions
         this.schema.AttributeDefinitions.push(attributeObj);
 
         // Create index object
@@ -170,12 +195,13 @@ class Schema {
             ProjectionType: 'INCLUDE'
           }
         };
+        // Add to the schema GlobalSecondaryIndexes
         this.schema.GlobalSecondaryIndexes.push(indexObj);
       }
 
-      // Handle references
+      // If the field references a document in another model
       if (obj[key].ref) {
-        // Add reference object to populate
+        // Add reference object to the schema populate object
         this.definition.populate[key] = {
           ref: obj[key].ref,
           localField: key,
@@ -194,8 +220,10 @@ class Schema {
    */
   plugin(cb, options) {
     this.cb = cb;
+    // Call the plugin with, passing in "this" as the only parameter
     this.cb(this);
-    this.cb = undefined;
+    // Remove the plugin from this
+    delete this.cb;
   }
 
   /**
@@ -208,6 +236,7 @@ class Schema {
    * defines a text index.
    * @param {object} [options] - An object containing options.
    */
+  // TODO
   index(fields, options) {
     // return super.index(fields, options);
   }
@@ -229,6 +258,7 @@ class Schema {
       cb = options; // eslint-disable-line no-param-reassign
     }
 
+    // Add the pre-hook to the hooks object
     obj[methodName] = cb;
     this.definition.hooks.pre.push(obj);
   }
@@ -239,7 +269,7 @@ class Schema {
    * generally will require a second request to retrieve referenced documents.
    * Populated virtuals contains a localField and foreignField which must match
    * for a document to be added to the virtual collection. For example, the
-   * Organization Schema contains a virtual called "projects". This virtual
+   * organization schema contains a virtual called "projects". This virtual
    * returns all projects who "org" field matches the organization's "_id".
    *
    * @param {string} name - The name of the field to be added to the schema
@@ -273,6 +303,7 @@ class Schema {
   static(name, fn) {
     const obj = {};
     obj[name] = fn;
+    // Add the static function onto the schema statics array
     this.definition.statics.push(obj);
   }
 
@@ -286,6 +317,7 @@ class Schema {
   method(name, fn) {
     const obj = {};
     obj[name] = fn;
+    // Add the method onto the schema methods array
     this.definition.methods.push(obj);
   }
 
@@ -304,8 +336,8 @@ class Schema {
 class Model {
 
   /**
-   * @description Class constructor. Calls parent constructor, and ensures that
-   * each of the required functions is defined in the parent class.
+   * @description Class constructor. Sets class variables, defines indexes and
+   * adds the class static methods defined in the Schema onto the Model class.
    *
    * @param {string} name - The name of the model being created. This name is
    * used to create the collection name in the database.
@@ -325,9 +357,11 @@ class Model {
     .map(i => i.IndexName.substr(0, i.IndexName.length - 2)) : [];
     this.indexes.push('_id');
 
-    // Add on methods
+    // Add on statics
     if (Array.isArray(this.definition.statics)) {
+      // For each static defined
       this.definition.statics.forEach((method) => {
+        // Add method to the Model class
         this[Object.keys(method)[0]] = Object.values(method)[0]; // eslint-disable-line
       });
     }
@@ -346,36 +380,37 @@ class Model {
     if (!tables.TableNames.includes(this.TableName)) {
       await this.createTable();
     }
+    else {
+      // TODO: We should update the table in case fields/indexes have been added
+    }
 
     // Add the model to the file-wide model object
+    // This is used later for population
     models[this.modelName] = this;
   }
 
   /**
    * @description Creates a table in the database based on the local schema and
    * tableName variables.
+   * @async
    *
-   * @returns {Promise}
+   * @returns {Promise} Resolves upon successful creation of the table.
    */
   async createTable() {
-    return new Promise((resolve, reject) => {
+    try {
       // Set the TableName and BillingMode
       this.schema.TableName = this.TableName;
       this.schema.BillingMode = 'PAY_PER_REQUEST';
 
       M.log.debug(`DB OPERATION: ${this.TableName} createTable`);
       // Create the actual table
-      this.connection.createTable(this.schema, (err) => {
-        // If an error occurred, reject it
-        if (err) {
-          M.log.error(`Failed to create the table ${this.schema.TableName}.`);
-          return reject(err);
-        }
-        else {
-          return resolve();
-        }
-      });
-    });
+      await this.connection.createTable(this.schema).promise();
+    }
+    catch (error) {
+      M.log.verbose(`Failed to create the table ${this.schema.TableName}.`);
+      // If an error occurred, throw it
+      throw errors.captureError(error);
+    }
   }
 
   /**
