@@ -1115,9 +1115,28 @@ class Model {
 
       // If all fields are indexed, use getItem
       if (allIndexed) {
-        return await this.getItem(conditions, projection, options);
+        // Create a new query object
+        const query = new Query(this, projection, options);
+        // Get a formatted getItem query
+        const getObj = query.getItem(conditions);
+
+        // Connect to the database
+        const conn = await connect();
+
+        // Make the getItem request
+        M.log.debug(`DB OPERATION: ${this.TableName} getItem`);
+        const result = await conn.getItem(getObj).promise();
+
+        // If no document is found, return null
+        if (Object.keys(result).length === 0) {
+          return null;
+        }
+        else {
+          // Return the document
+          return await this.formatDocument(result.Item, options);
+        }
       }
-      // Use scan to find the document
+      // Not all fields have indexes, use scan to find the document
       else {
         // Find the document
         const result = await this.scan(conditions, projection, options);
@@ -1138,55 +1157,29 @@ class Model {
   }
 
   /**
-   * @description Returns an array of indexes for the given model.
+   * @description Returns an array of indexes for the given model. See the
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#deleteTable-property describeTable}
+   * documentation for more information.
    * @async
    *
    * @returns {Promise<object[]>} Array of index objects.
    */
+  // TODO: We might have to include the GlobalSecondaryIndexes in here
   async getIndexes() {
-    return new Promise((resolve, reject) => {
+    try {
+      // Connect to the database
+      const conn = await connect();
+
+      // Get the table information, which includes indexes
       M.log.debug(`DB OPERATION: ${this.TableName} describeTable`);
-      this.connection.describeTable({ TableName: this.TableName }).promise()
-      .then((table) => resolve(table.Table.KeySchema))
-      .catch((error) => {
-        M.log.error('Failed to get indexes.');
-        return reject(error);
-      });
-    });
-  }
-
-  /**
-   * @description Gets a single item from a DynamoDB table. Helper function for
-   * findOne().
-   * @param filter
-   * @param projection
-   * @param options
-   */
-  async getItem(filter, projection, options) {
-    return new Promise((resolve, reject) => {
-      const query = new Query(this, projection, options);
-      const getObj = query.getItem(filter);
-
-      M.log.debug(`DB OPERATION: ${this.TableName} getItem`);
-      // Make the getItem request
-      connect()
-      .then((connection) => connection.getItem(getObj).promise())
-      .then((foundItem) => {
-        // If no document is found, return null
-        if (Object.keys(foundItem).length === 0) {
-          return null;
-        }
-        else {
-          // Return the document
-          return this.formatDocument(foundItem.Item, options);
-        }
-      })
-      .then((doc) => resolve(doc))
-      .catch((error) => {
-        M.log.verbose('Failed in getItem');
-        return reject(error);
-      });
-    });
+      const table = await conn.describeTable({ TableName: this.TableName }).promise();
+      // Return the index info
+      return table.Table.KeySchema;
+    }
+    catch (error) {
+      M.log.error(`Failed in ${this.modelName}.getIndexes().`);
+      throw errors.captureError(error);
+    }
   }
 
   /**
