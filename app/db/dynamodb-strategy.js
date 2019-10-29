@@ -1457,16 +1457,24 @@ class Model {
 
 class Store extends DynamoDBStore {
 
+  /**
+   * @description Creates the DynamoDB store object and calls the parent
+   * constructor with the store object.
+   *
+   * @param {object} [options] - An object containing options.
+   */
   constructor(options) {
     const obj = {
       dynamoConfig: {
-        accessKeyId: 'fake',
-        secretAccessKey: 'alsofake',
-        region: 'US',
-        endpoint: 'http://localhost:8000'
+        accessKeyId: M.config.db.accessKeyId,
+        secretAccessKey: M.config.db.secretAccessKey,
+        region: M.config.db.region,
+        endpoint: `${M.config.db.url}:${M.config.db.port}`
       },
       ttl: utils.timeConversions[M.config.auth.session.units] * M.config.auth.session.expires
     };
+
+    // Call parent constructor
     super(obj);
   }
 
