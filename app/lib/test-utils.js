@@ -374,13 +374,14 @@ module.exports.createTag = function(adminUser, orgID, projID) {
  * @returns {object} Returns the imported test data.
  */
 module.exports.importTestData = function(filename) {
-  // eslint-disable-next-line no-param-reassign
-  filename = M.config.validators ? 'custom_test_data.json' : filename;
-  // Clear require cache so a new copy is imported
-  delete require.cache[require.resolve(path.join(M.root, 'test', filename))];
-  // Import a copy of the data.json
-  // eslint-disable-next-line global-require
-  const testDataFresh = require(path.join(M.root, 'test', filename));
+  let testDataFresh;
+  if (M.config.validators) {
+    testDataFresh = generateCustomTestData();
+  }
+  else {
+    // Import a copy of the data.json
+    testDataFresh = JSON.parse(fs.readFileSync(path.join(M.root, 'test', filename)).toString());
+  }
   // Return a newly assigned copy of the fresh data
   if (Array.isArray(testDataFresh)) {
     return Object.assign([], testDataFresh);
@@ -560,8 +561,10 @@ module.exports.parseMethod = function(endpoint) {
 /**
  * @description A function that generates a new custom_test_data.json file based on custom
  * id validators if they exist in the config.
+ *
+ * @returns {object} A new set of data customized towards the custom validators.
  */
-module.exports.generateCustomTestData = async function() {
+function generateCustomTestData() {
   const testDataRaw = fs.readFileSync(path.join(M.root, 'test', 'test_data.json'));
   const customTestData = JSON.parse(testDataRaw.toString());
   const v = M.config.validators;
@@ -624,17 +627,7 @@ module.exports.generateCustomTestData = async function() {
       // Only validators is necessary here since usernames are not concatenated ids
       user.username = generateID(validators.user.username, validators.user.usernameLength, 3);
     });
-    // Get the admin user too
-    customTestData.adminUser.username = generateID(validators.user.username,
-      validators.user.usernameLength);
   }
-
-  // Create the custom_test_data.json file
-  if (fs.existsSync(path.join(M.root, 'test', 'custom_test_data.json'))) {
-    fs.unlinkSync(path.join(M.root, 'test', 'custom_test_data.json'));
-  }
-  fs.writeFileSync(path.join(M.root, 'test', 'custom_test_data.json'),
-    JSON.stringify(customTestData, null, 2));
 
   /**
    * @description A helper function for generating a custom id that accounts for minimum id length
@@ -664,5 +657,7 @@ module.exports.generateCustomTestData = async function() {
   }
 
   // Reset the global testData variable
-  testData = JSON.parse(fs.readFileSync(path.join(M.root, 'test', 'custom_test_data.json')).toString());
-};
+  testData = customTestData;
+
+  return customTestData;
+}

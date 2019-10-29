@@ -275,7 +275,7 @@ module.exports.validate = function(config) {
       config.defaultOrganizationId, config.defaultAdminUsername];
     const elemIDs = ['model', '__mbee__', 'undefined', 'holding_bin'];
     if (config.validators.id) test(config, 'validators.id', 'string');
-    if (config.validators.id && !config.validators.element_id) {
+    if (config.validators.id) {
       // Check that custom id validators don't exclude root ids
       rootIDs.forEach((id) => {
         if (!RegExp(config.validators.id).test(id)) {

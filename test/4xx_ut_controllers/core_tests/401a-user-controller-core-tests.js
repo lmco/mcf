@@ -452,6 +452,7 @@ function findAllUsers(done) {
 
     // Convert foundUsers to JMI type 2 for easier lookup
     const jmi2Users = jmi.convertJMI(1, 2, foundUsers);
+
     // Loop through each user data object
     userDataObjects.forEach((userDataObject) => {
       const foundUser = jmi2Users[userDataObject.username];
