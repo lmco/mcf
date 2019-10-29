@@ -648,11 +648,17 @@ class Model {
   }
 
   /**
-   * @description Creates a document based on the model's schema.
+   * @description Creates a document based on the model's schema. Sets defaults
+   * if the schema definition has a default defined for the field, and the field
+   * is not set. Defines the prototype functions validateSync, save, remove,
+   * markModified (which is unused) and hooks/methods defined by the schema
+   * definition.
    *
    * @param {object} doc - The JSON to be converted into a document. Should
    * roughly align with the model's schema. Each document created should at
    * least contain an _id, as well as the methods defined in the schema.
+   *
+   * @returns {object} The document object.
    */
   createDocument(doc) {
     // Create a copy of the JSON
@@ -692,22 +698,24 @@ class Model {
      */
     doc.__proto__.validateSync = function(fields) { // eslint-disable-line no-proto
       let keys;
-      // If fields provided and is an array , set equal to keys
+      // If fields is provided and is an array, set equal to keys
       if (Array.isArray(fields)) {
         keys = fields;
       }
-      // If only a single field is provided, ad to array
+      // If only a single field is provided, add to array
       else if (typeof fields === 'string') {
         keys = [fields];
       }
+      // Validate every key in the document
       else {
         keys = Object.keys(doc);
       }
 
-      // Loop over each valid parameter
+      // Loop over each valid parameter in the definition
       Object.keys(def).forEach((param) => {
-        // If a default exists and the value isn't set
+        // If a default exists and the value isn't set, and no specific fields are provided
         if (def[param].hasOwnProperty('default') && !keys.includes(param) && !fields) {
+          // If the default is a function, call it
           if (typeof def[param].default === 'function') {
             doc[param] = def[param].default();
           }
@@ -715,7 +723,7 @@ class Model {
             // Do nothing, empty strings cannot be saved in DynamoDB
           }
           else {
-            // Set the value equal to th default
+            // Set the value equal to the default
             doc[param] = def[param].default;
           }
         }
@@ -737,10 +745,11 @@ class Model {
               throw new M.DataFormatError(`Invalid DynamoDB type: ${def[param].type}`);
           }
 
-          // Run validators
+          // If validators are defined on the field
           if (def[param].hasOwnProperty('validate')) {
+            // For each validator defined
             def[param].validate.forEach((v) => {
-              // Call each validator, binding the document to "this"
+              // Call the validator, binding the document to "this"
               if (!v.validator.call(doc, doc[param])) {
                 // If the validator fails, throw an error
                 throw new M.DataFormatError(`${modelName} validation failed: `
@@ -757,7 +766,7 @@ class Model {
               + `for value "${JSON.stringify(doc[param])}" at path "${param}"`);
           }
 
-          // If not in enum list, throw an error
+          // If an array of enums exists, and the value is not in it, throw an error
           if (def[param].hasOwnProperty('enum') && !def[param].enum.includes(doc[param])) {
             throw new M.DataFormatError(`${modelName} validation failed: `
               + `${param}: \`${doc[param]}\` is not a valid enum value for path`
@@ -795,71 +804,85 @@ class Model {
     };
 
     /**
+     * @description Validates and saves a document to the database.
+     * @async
      *
-     * @returns {Promise<*|Promise<unknown>>}
+     * @returns {Promise<object>} The saved document.
      */
     doc.__proto__.save = async function() { // eslint-disable-line no-proto
-      return new Promise((resolve, reject) => {
+      try {
         // Ensure the document is valid
         this.validateSync();
         const promises = [];
+        // If pre-save hooks exist, call them
         if ('presave' in this) {
           promises.push(this.presave());
         }
-        // If a pre hook is defined, it is run async
-        Promise.all(promises)
-        // Retrieve connection object
-        .then(() => connect())
-        .then((localConn) => {
-          const putObj = {
-            TableName: table,
-            Item: {}
-          };
 
-          // Format the document object
-          putObj.Item = model.formatObject(this);
+        // Wait for any pre-save promises to resolve
+        await Promise.all(promises);
 
-          M.log.debug(`DB OPERATION: ${table} putItem`);
-          // Save the document
-          return localConn.putItem(putObj).promise();
-        })
-        .then(() => model.findOne({ _id: doc._id }))
-        .then((foundDoc) => resolve(foundDoc))
-        .catch((error) => reject(error));
-      });
-    };
+        // Connect to the database
+        const conn = await connect();
 
-    doc.__proto__.remove = function() { // eslint-disable-line no-proto
-      return new Promise((resolve, reject) => {
-        model.deleteMany({ _id: this._id })
-        .then(() => resolve())
-        .catch((error) => {
-          M.log.verbose('Failed in doc.remove');
-          return reject(error);
-        });
-      });
+        const putObj = {
+          TableName: table,
+          Item: {}
+        };
+        // Format the document object
+        putObj.Item = model.formatObject(this);
+
+        M.log.debug(`DB OPERATION: ${table} putItem`);
+        // Save the document
+        await conn.putItem(putObj).promise();
+        // Find and return the saved document
+        return await model.findOne({ _id: doc._id });
+      }
+      catch (error) {
+        M.log.verbose(`Failed in ${modelName}.doc.save().`);
+        throw errors.captureError(error);
+      }
     };
 
     /**
+     * @description Deletes the document from the database.
+     * @async
      *
-     * @param field
+     * @returns {Promise} Resolves upon completion.
+     */
+    doc.__proto__.remove = async function() { // eslint-disable-line no-proto
+      try {
+        await model.deleteMany({ _id: this._id });
+      }
+      catch (error) {
+        M.log.verbose(`Failed in ${modelName}.doc.remove().`);
+        throw errors.captureError(error);
+      }
+    };
+
+    /**
+     * @description Unused function called when a field whose value is a JSON
+     * object is modified.
+     *
+     * @param {string} field - The field which was modified.
      */
     doc.__proto__.markModified = function(field) {}; // eslint-disable-line no-proto
 
-    // Add on methods
+    // Add on object methods, defined in schema definition
     if (Array.isArray(def.methods)) {
       def.methods.forEach((method) => {
         doc.__proto__[Object.keys(method)[0]] = Object.values(method)[0]; // eslint-disable-line
       });
     }
 
-    // Add on pre-hooks
+    // Add on pre-hooks, defined in schema definition
     if (Array.isArray(def.hooks.pre)) {
       def.hooks.pre.forEach((hook) => {
         doc.__proto__[`pre${Object.keys(hook)[0]}`] = Object.values(hook)[0]; // eslint-disable-line
       });
     }
 
+    // Return the document containing the prototype functions
     return doc;
   }
 
@@ -871,27 +894,31 @@ class Model {
    * find query by.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @returns {Promise<number>} The number of documents which matched the filter.
+   * @returns {Promise<number>} The number of documents which matched the
+   * filter.
    */
   async countDocuments(filter, cb) {
-    return new Promise((resolve, reject) => {
-      // Create a new DynamoDB query
+    try {
+      // Create a new query object
       const query = new Query(this, null, {});
+      // Get a formatted scan query
       const scanObj = query.scan(filter);
 
       // Tell the query to only return the count
       scanObj.Select = 'COUNT';
 
+      // Connect to the database
+      const conn = await connect();
+
+      // Perform the scan query and return the count
       M.log.debug(`DB OPERATION: ${this.TableName} countDocuments`);
-      connect()
-      .then((conn) => conn.scan(scanObj).promise())
-      .then((data) => resolve(data.Count))
-      .catch((error) => {
-        M.log.verbose('Failed in countDocuments');
-        M.log.error(error);
-        return reject(error);
-      });
-    });
+      const data = await conn.scan(scanObj).promise();
+      return data.Count;
+    }
+    catch (error) {
+      M.log.verbose(`Failed in ${this.modelName}.countDocuments().`);
+      throw errors.captureError(error);
+    }
   }
 
   /**
