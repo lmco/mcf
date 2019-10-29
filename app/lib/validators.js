@@ -37,6 +37,12 @@ const reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
   'whoami', 'profile', 'edit', 'proj', 'elements', 'branch', 'anonymous',
   'blob', 'artifact', 'artifacts'];
 
+// The custom data validator used in all models
+const customDataValidator = function(v) {
+  // Must be an object and not null
+  return (typeof v === 'object' && v !== null);
+};
+
 /**
  * @description Regular Expressions to validate organization data.
  *
@@ -54,7 +60,8 @@ const org = {
   id: customValidators.org_id
     ? `^${customValidators.org_id}$`
     : `^${id}$`,
-  idLength: customValidators.org_id_length || idLength
+  idLength: customValidators.org_id_length || idLength,
+  custom: customDataValidator
 };
 
 /**
@@ -77,7 +84,8 @@ const project = {
     ? `${org.id.slice(0, -1)}${utils.ID_DELIMITER}${customValidators.project_id}$`
     : `${org.id.slice(0, -1)}${utils.ID_DELIMITER}${id}$`,
   idLength: org.idLength + utils.ID_DELIMITER.length
-  + (customValidators.project_id_length ? customValidators.project_id_length : idLength)
+  + (customValidators.project_id_length ? customValidators.project_id_length : idLength),
+  custom: customDataValidator
 };
 
 /**
@@ -100,7 +108,8 @@ const branch = {
     ? `${project.id.slice(0, -1)}${utils.ID_DELIMITER}${customValidators.branch_id}$`
     : `${project.id.slice(0, -1)}${utils.ID_DELIMITER}${id}$`,
   idLength: project.idLength + utils.ID_DELIMITER.length
-    + (customValidators.branch_id_length ? customValidators.branch_id_length : idLength)
+    + (customValidators.branch_id_length ? customValidators.branch_id_length : idLength),
+  custom: customDataValidator
 };
 
 /**
@@ -126,7 +135,8 @@ const artifact = {
     + (customValidators.artifact_id_length ? customValidators.artifact_id_length : idLength),
   location: (artifactVal.location) ? artifactVal.location : '^[^.]+$',
   filename: (artifactVal.filename) ? artifactVal.filename : '^[^!\\<>:"\'|?*]+$',
-  extension: (artifactVal.extension) ? artifactVal.extension : '^[\\w]+[.][\\w]+$'
+  extension: (artifactVal.extension) ? artifactVal.extension : '^[\\w]+[.][\\w]+$',
+  custom: customDataValidator
 };
 
 /**
@@ -149,7 +159,8 @@ const element = {
     ? `${branch.id.slice(0, -1)}${utils.ID_DELIMITER}${customValidators.element_id}$`
     : `${branch.id.slice(0, -1)}${utils.ID_DELIMITER}${id}$`,
   idLength: branch.idLength + utils.ID_DELIMITER.length
-  + (customValidators.element_id_length ? customValidators.element_id_length : idLength)
+  + (customValidators.element_id_length ? customValidators.element_id_length : idLength),
+  custom: customDataValidator
 };
 
 /**
@@ -174,7 +185,8 @@ const user = {
   provider: function(v) {
     // If the use provider is defined and does not include value, return false
     return !(customValidators.user_provider && !customValidators.user_provider.includes(v));
-  }
+  },
+  custom: customDataValidator
 };
 
 /**
