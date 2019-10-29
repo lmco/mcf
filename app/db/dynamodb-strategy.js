@@ -11,16 +11,16 @@
  *
  * @author Austin Bieber
  *
- * @description This file defines the schema strategy for using MBEE with
- * Amazon's DynamoDB.
+ * @description This file defines the schema strategy for using MBEE with the
+ * database DynamoDB.
  */
 
 // NPM modules
 const AWS = require('aws-sdk');
 const DynamoDBStore = require('dynamodb-store');
-const async = require('async');
 
 // MBEE modules
+const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 
 // Define a function wide variable models, which stores each model
@@ -29,50 +29,60 @@ const models = {};
 /**
  * @description Creates the connection to the DynamoDB instance.
  *
- * @returns {Promise<*|Promise<unknown>>}
+ * @returns {Promise<object>} The DynamoDB connection object.
  */
 async function connect() {
   return new Promise((resolve, reject) => {
+    // Create database connection
     const dynamoDB = new AWS.DynamoDB({
       apiVersion: '2012-08-10',
-      endpoint: 'http://localhost:8000',
-      accessKeyId: 'fake',
-      secretAccessKey: 'alsofake',
-      region: 'US'
+      endpoint: `${M.config.db.url}:${M.config.db.port}`,
+      accessKeyId: M.config.db.accessKeyId,
+      secretAccessKey: M.config.db.secretAccessKey,
+      region: M.config.db.region
     });
+
+    // Return the database connection
     return resolve(dynamoDB);
   });
 }
 
 /**
+ * @description Disconnects from the database. This function is not necessary
+ * for DynamoDB.
  *
+ * @returns {Promise} Resolves every time.
  */
 function disconnect() {
-
+  return new Promise((resolve) => resolve());
 }
 
 /**
+ * @description Deletes all tables and the documents in them from the database.
+ * @async
  *
+ * @returns {Promise} Resolves upon completion.
  */
 async function clear() {
-  return new Promise((resolve, reject) => {
-    let conn;
-    connect()
-    .then((connection) => {
-      conn = connection;
-      return conn.listTables({}).promise();
-    })
-    .then((tables) => {
-      const promises = [];
-      tables.TableNames.forEach((table) => {
-        promises.push(conn.deleteTable({ TableName: table }).promise());
-      });
+  try {
+    // Create the connection to the database
+    const conn = await connect();
+    // List all of the tables in the database
+    const tables = await conn.listTables({}).promise();
 
-      return Promise.all(promises);
-    })
-    .then(() => resolve())
-    .catch((error) => reject(error));
-  });
+    const promises = [];
+    // For each existing table
+    tables.TableNames.forEach((table) => {
+      // Delete the table
+      promises.push(conn.deleteTable({ TableName: table }).promise());
+    });
+
+    // Wait for all promises to complete
+    await Promise.all(promises);
+  }
+  catch (error) {
+    throw errors.captureError(error);
+  }
 }
 
 // TODO: Figure out which fields need to be sanitized
@@ -646,7 +656,15 @@ class Model {
     });
 
     /**
-     * @param fields
+     * @description Synchronously validates a document. Runs validator
+     * functions, validates the type, sets defaults if no value is provided, and
+     * if the field is required and no default is provided, and error is thrown.
+     *
+     * @param {string[]|string|undefined} fields - The fields to validate on the
+     * document. Can either be an array of string, a single string, or
+     * undefined. If undefined, all fields defined in the Schema are validated.
+     *
+     * @throws {DataFormatError}
      */
     doc.__proto__.validateSync = function(fields) { // eslint-disable-line no-proto
       let keys;
@@ -1033,8 +1051,8 @@ class Model {
     }
     else {
       const result = await this.scan(conditions, projection, options);
-      if (Array.isArray(result) && result.length !== 0) {
-        return result[0];
+      if (Array.isArray(result.Items) && result.Items.length !== 0) {
+        return this.formatDocument(result.Items[0]);
       }
       else {
         return null;
