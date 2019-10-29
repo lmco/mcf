@@ -533,7 +533,7 @@ class Model {
    * documentation for more information.
    *
    * @param {object} filter - The query to parse and send.
-   * @param {string} projection - A space separated string of fields to return
+   * @param {string|null} projection - A space separated string of fields to return
    * from the database.
    * @param {object} options - An object containing valid options.
    *
@@ -945,46 +945,52 @@ class Model {
    * operation.
    */
   async deleteMany(conditions, options, cb) {
-    let docs = [];
-    let more = true;
+    try {
+      let docs = [];
+      let more = true;
 
-    // Find all documents which match the provided conditions
-    while (more) {
-      // Find the max number of documents
-      const result = await this.scan(conditions, null, options); // eslint-disable-line
-      docs = docs.concat(result.Items);
+      // Find all documents which match the provided conditions
+      while (more) {
+        // Find the max number of documents
+        const result = await this.scan(conditions, null, options); // eslint-disable-line
+        docs = docs.concat(result.Items);
 
-      // If there are no more documents to find, exit loop
-      if (!result.LastEvaluatedKey) {
-        more = false;
+        // If there are no more documents to find, exit loop
+        if (!result.LastEvaluatedKey) {
+          more = false;
+        }
+        else {
+          // Set LastEvaluatedKey, used to paginate
+          options.LastEvaluatedKey = result.LastEvaluatedKey;
+        }
       }
-      else {
-        // Set LastEvaluatedKey, used to paginate
-        options.LastEvaluatedKey = result.LastEvaluatedKey;
+
+      // Format the documents
+      docs = await this.formatDocuments(docs, options);
+
+      // Create a query containing all ids to delete
+      const tmpQuery = { _id: { $in: docs.map(d => d._id) } };
+
+      // Create a new query object
+      const query = new Query(this, null, options);
+      // Get the formatted batchWriteItem query, used for deletion
+      const deleteQuery = query.deleteMany(tmpQuery);
+
+      // If there are items to delete
+      if (deleteQuery.RequestItems[this.TableName].length > 0) {
+        // Connect to the database
+        const conn = await connect();
+        // Delete the documents
+        await conn.batchWriteItem(deleteQuery, options).promise();
       }
+
+      // Return an object specifying the success of the delete operation
+      return { n: tmpQuery._id.$in.length, ok: 1 };
     }
-
-    // Format the documents
-    docs = await this.formatDocuments(docs, options);
-
-    // Create a query containing all ids to delete
-    const tmpQuery = { _id: { $in: docs.map(d => d._id) } };
-
-    // Create a new query object
-    const query = new Query(this, null, options);
-    // Get the formatted batchWriteItem query, used for deletion
-    const deleteQuery = query.deleteMany(tmpQuery);
-
-    // If there are items to delete
-    if (deleteQuery.RequestItems[this.TableName].length > 0) {
-      // Connect to the database
-      const conn = await connect();
-      // Delete the documents
-      await conn.batchWriteItem(deleteQuery, options);
+    catch (error) {
+      M.log.verbose(`Failed in ${this.modelName}.deleteMany().`);
+      throw errors.captureError(error);
     }
-
-    // Return an object specifying the success of the delete operation
-    return { n: tmpQuery._id.$in.length, ok: 1 };
   }
 
   /**
@@ -1198,107 +1204,60 @@ class Model {
    * @returns {Promise<object[]>} The created documents.
    */
   async insertMany(docs, options, cb) {
-    return new Promise((resolve, reject) => {
-      const promises = [];
-      let foundDocuments = [];
-      // Loop through all docs in batches of 100
-      for (let i = 0; i < docs.length / 100; i++) {
-        const batch = docs.slice(i * 100, i * 100 + 100);
-        const batchGetObj = {
-          RequestItems: {}
-        };
-        batchGetObj.RequestItems[this.TableName] = { Keys: [] };
-        batch.forEach((doc) => {
-          batchGetObj.RequestItems[this.TableName].Keys.push(
-            { _id: { S: doc._id } }
-          );
-        });
-        M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
-        promises.push(
-          connect()
-          .then((conn) => conn.batchGetItem(batchGetObj).promise())
-          .then((foundDocs) => {
-            foundDocuments = foundDocuments.concat(foundDocs.Responses[this.TableName]);
-          })
-          .catch((error) => reject(error))
-        );
+    try {
+      // Create a query, searching for existing documents by _id
+      const query = { _id: { $in: docs.map(d => d._id) } };
+      // Attempt to find any existing documents
+      const conflictingDocs = await this.batchGetItem(query, null, options);
+
+      // If documents with matching _ids exist, throw an error
+      if (conflictingDocs.length > 0) {
+        throw new M.PermissionError('Documents with the following _ids already'
+          + `exist: ${conflictingDocs.map(d => utils.parseID(d._id).pop())}.`, 'warn');
       }
+      else {
+        const promises2 = [];
+        // Format and validate documents
+        const formattedDocs = docs.map(d => this.createDocument(d));
+        formattedDocs.forEach(d => d.validateSync());
 
-      Promise.all(promises)
-      .then(() => {
-        // If documents with matching _ids exist, throw an error
-        if (foundDocuments.length > 0) {
-          return reject(new M.DatabaseError('Documents already exist with '
-            + 'matching _ids.', 'warn'));
-        }
-        else {
-          const promises2 = [];
-          // Format and validate documents
-          const formattedDocs = docs.map(d => this.createDocument(d));
-          formattedDocs.forEach(d => d.validateSync());
-          // Loop through all docs in batches of 25
-          for (let i = 0; i < formattedDocs.length / 25; i++) {
-            const batch = formattedDocs.slice(i * 25, i * 25 + 25);
-            const batchWriteObj = {
-              RequestItems: {}
-            };
-            batchWriteObj.RequestItems[this.TableName] = [];
-            batch.forEach((doc) => {
-              const putObj = {
-                PutRequest: {
-                  Item: {}
-                }
-              };
+        // Connect to the database
+        const conn = await connect();
 
-              putObj.PutRequest.Item = this.formatObject(doc);
-
-              batchWriteObj.RequestItems[this.TableName].push(putObj);
-            });
-
-            M.log.debug(`DB OPERATION: ${this.TableName} batchWriteItem`);
-            promises2.push(
-              connect()
-              .then((conn) => conn.batchWriteItem(batchWriteObj).promise())
-            );
-          }
-
-          return Promise.all(promises2);
-        }
-      })
-      .then(() => {
-        const promises3 = [];
-        foundDocuments = [];
-        // Loop through all docs in batches of 100
-        for (let i = 0; i < docs.length / 100; i++) {
-          const batch = docs.slice(i * 100, i * 100 + 100);
-          const batchGetObj = {
+        // TODO: Improve the batchWriteItem code by adding a Query function
+        // Loop through all docs in batches of 25
+        for (let i = 0; i < formattedDocs.length / 25; i++) {
+          const batch = formattedDocs.slice(i * 25, i * 25 + 25);
+          const batchWriteObj = {
             RequestItems: {}
           };
-          batchGetObj.RequestItems[this.TableName] = { Keys: [] };
+          batchWriteObj.RequestItems[this.TableName] = [];
           batch.forEach((doc) => {
-            batchGetObj.RequestItems[this.TableName].Keys.push({ _id: { S: doc._id } });
+            const putObj = {
+              PutRequest: {
+                Item: {}
+              }
+            };
+
+            putObj.PutRequest.Item = this.formatObject(doc);
+
+            batchWriteObj.RequestItems[this.TableName].push(putObj);
           });
 
-          M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
-          promises3.push(
-            connect()
-            .then((conn) => conn.batchGetItem(batchGetObj).promise())
-            .then((foundDocs) => this.formatDocuments(foundDocs.Responses[this.TableName], options))
-            .then((formattedDocs) => {
-              foundDocuments = foundDocuments.concat(formattedDocs);
-            })
-            .catch((error) => reject(error))
-          );
+          M.log.debug(`DB OPERATION: ${this.TableName} batchWriteItem`);
+          promises2.push(conn.batchWriteItem(batchWriteObj).promise());
         }
 
-        return Promise.all(promises3);
-      })
-      .then(() => resolve(foundDocuments))
-      .catch((error) => {
-        M.log.verbose('Failed in insertMany');
-        return reject(error);
-      });
-    });
+        await Promise.all(promises2);
+      }
+
+      // Find and return the newly created documents
+      return await this.batchGetItem(query, null, options);
+    }
+    catch (error) {
+      M.log.verbose(`Failed in ${this.modelName}.insertMany().`);
+      throw errors.captureError(error);
+    }
   }
 
   /**
