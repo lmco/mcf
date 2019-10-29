@@ -83,17 +83,24 @@ describe(M.getModuleName(module.filename), () => {
  * @description Attempts to create a user with a username that is too short.
  */
 async function usernameTooShort() {
-  const userData = Object.assign({}, testData.users[0]);
+  try {
+    const userData = Object.assign({}, testData.users[0]);
 
-  // Change username to be too short.
-  userData._id = 'ab';
+    // Change username to be too short.
+    userData._id = 'ab';
 
-  // Create user object
-  const userObject = User.createDocument(userData);
+    // Create user object
+    const userObject = User.createDocument(userData);
 
-  // Save user
-  await userObject.save().should.eventually.be.rejectedWith('User validation failed: '
-    + `_id: Username length [${userData._id.length}] must not be less than 3 characters.`);
+    // Save user
+    await userObject.save().should.eventually.be.rejectedWith('User validation failed: '
+      + `_id: Username length [${userData._id.length}] must not be less than 3 characters.`);
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
 }
 
 /**
