@@ -926,9 +926,8 @@ class Model {
    * @async
    *
    * @param {string} name - The name of the index.
-   *
-   * @returns {Promise<*>}
    */
+  // TODO
   async deleteIndex(name) {
     // return super.deleteIndex(name);
   }
@@ -949,10 +948,10 @@ class Model {
     let docs = [];
     let more = true;
 
-    // While there are no more docs to find
+    // Find all documents which match the provided conditions
     while (more) {
       // Find the max number of documents
-      const result = await this.scan(conditions, null, options);
+      const result = await this.scan(conditions, null, options); // eslint-disable-line
       docs = docs.concat(result.Items);
 
       // If there are no more documents to find, exit loop
@@ -968,22 +967,23 @@ class Model {
     // Format the documents
     docs = await this.formatDocuments(docs, options);
 
-    const tmpQuery = { _id: { $in: [] } };
-    // For each of the found documents
-    docs.forEach((doc) => {
-      tmpQuery._id.$in.push(doc._id);
-    });
+    // Create a query containing all ids to delete
+    const tmpQuery = { _id: { $in: docs.map(d => d._id) } };
 
+    // Create a new query object
     const query = new Query(this, null, options);
+    // Get the formatted batchWriteItem query, used for deletion
     const deleteQuery = query.deleteMany(tmpQuery);
 
     // If there are items to delete
     if (deleteQuery.RequestItems[this.TableName].length > 0) {
-      // Call batchWriteItem
+      // Connect to the database
       const conn = await connect();
+      // Delete the documents
       await conn.batchWriteItem(deleteQuery, options);
     }
 
+    // Return an object specifying the success of the delete operation
     return { n: tmpQuery._id.$in.length, ok: 1 };
   }
 
@@ -1020,46 +1020,60 @@ class Model {
    * @param {Function} [cb] - A callback function to run.
    *
    * @returns {Promise<object[]>} An array containing the found documents, if
-   * any.
+   * any. Defaults to an empty array if no documents are found.
    */
   async find(filter, projection, options, cb) {
-    // Use batchGetItem only if the only parameter being searched is the _id
-    if (Object.keys(filter).length === 1 && Object.keys(filter)[0] === '_id') {
-      return this.batchGetItem(filter, projection, options);
-    }
-    else {
-      let docs = [];
-      let more = true;
-      const skipped = 0;
-
-      // While there are no more docs to find
-      while (more) {
-        // Find the max number of documents
-        const result = await this.scan(filter, null, options);
-
-        // If there are no more documents to find, exit loop
-        // TODO: Figure this out
-        if (!result.LastEvaluatedKey) {
-          more = false;
-        }
-        // If ONLY the option limit is provided, once met, exit loop
-        else if (options.limit && !options.skip
-          && (docs.length + result.Items.length === options.limit)) {
-          more = false;
-        }
-        // else if (options.skip) {
-        //         // }
-        else {
-          // Set LastEvaluatedKey, used to paginate
-          options.LastEvaluatedKey = result.LastEvaluatedKey;
-        }
-
-        docs = docs.concat(result.Items);
+    try {
+      // Use batchGetItem only iff the only parameter being searched is the _id
+      if (Object.keys(filter).length === 1 && Object.keys(filter)[0] === '_id') {
+        return await this.batchGetItem(filter, projection, options);
       }
+      else {
+        let docs = [];
+        let more = true;
 
-      // Format the documents
-      docs = this.formatDocuments(docs, options);
-      return docs;
+        // Find all documents which match the query
+        while (more) {
+          // Find the max number of documents
+          const result = await this.scan(filter, null, options); // eslint-disable-line
+
+          // If there are no more documents to find, exit loop
+          if (!result.LastEvaluatedKey) {
+            more = false;
+          }
+          // If ONLY the option limit is provided and not skip
+          else if (options.limit && !options.skip) {
+            // The correct number of documents has been found
+            if (docs.length + result.Items.length === options.limit) {
+              more = false;
+            }
+            // Too many docs found, should never happen
+            else if (docs.length + result.Items.length > options.limit) {
+              throw new M.ServerError('Too many documents found using limit option.');
+            }
+            // Still not enough documents found, reduce options.limit and et LastEvaluatedKey
+            else {
+              options.LastEvaluatedKey = result.LastEvaluatedKey;
+              options.limit -= result.Items.length;
+            }
+          }
+          // Still more documents to be found
+          else {
+            // Set LastEvaluatedKey, used to paginate
+            options.LastEvaluatedKey = result.LastEvaluatedKey;
+          }
+
+          // Append found documents to the running array
+          docs = docs.concat(result.Items);
+        }
+
+        // Format and return the documents
+        return await this.formatDocuments(docs, options);
+      }
+    }
+    catch (error) {
+      M.log.verbose(`Failed in ${this.modelName}.find().`);
+      throw errors.captureError(error);
     }
   }
 
@@ -1083,32 +1097,43 @@ class Model {
    * just the raw JSON will be returned from the database.
    * @param {Function} [cb] - A callback function to run.
    *
-   * @returns {Promise<object>} The found document, if any.
+   * @returns {Promise<object|null>} The found document, if any. Returns null if
+   * no document is found.
    */
   async findOne(conditions, projection, options, cb) {
-    // Loop through each field in the conditions object
-    let allIndexed = true;
-    Object.keys(conditions).forEach((key) => {
-      // If the field is not indexed, set allIndexed to false
-      if ((!this.definition[key].hasOwnProperty('index')
-        || this.definition[key].index === false)
-        && key !== '_id') {
-        allIndexed = false;
-      }
-    });
+    try {
+      let allIndexed = true;
+      // Loop through each field in the conditions object
+      Object.keys(conditions).forEach((key) => {
+        // If the field is not indexed, set allIndexed to false
+        if ((!this.definition[key].hasOwnProperty('index')
+          || this.definition[key].index === false)
+          && key !== '_id') {
+          allIndexed = false;
+        }
+      });
 
-    // If all fields are indexes, use getItem
-    if (allIndexed) {
-      return this.getItem(conditions, projection, options);
-    }
-    else {
-      const result = await this.scan(conditions, projection, options);
-      if (Array.isArray(result.Items) && result.Items.length !== 0) {
-        return this.formatDocument(result.Items[0]);
+      // If all fields are indexed, use getItem
+      if (allIndexed) {
+        return await this.getItem(conditions, projection, options);
       }
+      // Use scan to find the document
       else {
-        return null;
+        // Find the document
+        const result = await this.scan(conditions, projection, options);
+        // If there were documents found, return the first one
+        if (Array.isArray(result.Items) && result.Items.length !== 0) {
+          return await this.formatDocument(result.Items[0]);
+        }
+        // No document found, return null
+        else {
+          return null;
+        }
       }
+    }
+    catch (error) {
+      M.log.verbose(`Failed in ${this.modelName}.findOne().`);
+      throw errors.captureError(error);
     }
   }
 
@@ -1420,7 +1445,7 @@ class Model {
    * @async
    *
    * @param {object} filter - A list of fields to query.
-   * @param {string} projection - The specific fields to return.
+   * @param {string|null} projection - The specific fields to return.
    * @param {object} options - A list of provided options.
    *
    * @returns {Promise<object[]>} The found documents.
