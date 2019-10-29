@@ -636,7 +636,7 @@ class Model {
         const update = Object.values(op)[0].update;
 
         // Perform the updateOne operation
-        promises.push(this.updateItem(filter, update, options));
+        promises.push(this.updateOne(filter, update, options));
       }
       // TODO: Handle insertOne
       // TODO: Handle deleteOne
@@ -1402,35 +1402,6 @@ class Model {
   }
 
   /**
-   * @description Updates a single item in the database, matched by the fields
-   * in the filter, and updated with the changes in doc.
-   * @async
-   *
-   * @param {object} filter - The query used to find the document.
-   * @param {object} doc - An object containing changes to the found document.
-   * @param {object} options - An object containing options.
-   *
-   * @returns {Promise<object>} The updated document.
-   */
-  async updateItem(filter, doc, options) {
-    return new Promise((resolve, reject) => {
-      // Create Query object and retrieve update object
-      const query = new Query(this, null, options);
-      const updateObj = query.updateItem(filter, doc);
-
-      M.log.debug(`DB OPERATION: ${this.TableName} updateItem`);
-      // Update the single item
-      connect()
-      .then((conn) => conn.updateItem(updateObj).promise())
-      .then((updatedItem) => resolve(this.formatDocument(updatedItem.Attributes, options)))
-      .catch((error) => {
-        M.log.verbose('Failed in updateItem');
-        return reject(error);
-      });
-    });
-  }
-
-  /**
    * @description Updates multiple documents matched by the filter with the same
    * changes in the provided doc.
    * @async
@@ -1447,7 +1418,9 @@ class Model {
 
   /**
    * @description Updates a single document which is matched by the filter, and
-   * is updated with the doc provided.
+   * is updated with the doc provided. See the
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#updateItem-property updateItem}
+   * documentation for more information.
    * @async
    *
    * @param {object} filter - An object containing parameters to filter the
@@ -1459,7 +1432,25 @@ class Model {
    * @returns {Promise<object>} The updated document.
    */
   async updateOne(filter, doc, options, cb) {
-    return this.updateItem(filter, doc, options);
+    try {
+      // Create a new query object
+      const query = new Query(this, null, options);
+      // Get the properly formatted updateItem query
+      const updateObj = query.updateItem(filter, doc);
+
+      // Connect to the database
+      const conn = await connect();
+
+      M.log.debug(`DB OPERATION: ${this.TableName} updateItem`);
+      // Update the single item
+      const updatedItem = await conn.updateItem(updateObj).promise();
+      // Return the properly formatted, newly updated document
+      return await this.formatDocument(updatedItem.Attributes, options);
+    }
+    catch (error) {
+      M.log.verbose(`Failed in ${this.modelName}.updateOne().`);
+      throw error.captureError(error);
+    }
   }
 
 }
