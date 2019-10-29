@@ -397,31 +397,34 @@ class Model {
 
   /**
    * @description Finds and returns an object containing a list of existing
-   * table's names in the database.
+   * table's names in the database. See the
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#listTables-property listTables}
+   * documentation for more information.
    *
-   * @returns {Promise<object>} An object containing table names.
+   * @returns {Promise<object>} An object containing table names. The single key
+   * in the object is TableNames and the value is an array of strings.
    */
   async listTables() {
-    return new Promise((resolve, reject) => {
+    try {
       M.log.debug('DB OPERATION: listTables');
       // Find all tables
-      this.connection.listTables({}).promise()
-      .then((tables) => resolve(tables))
-      .catch((err) => {
-        M.log.error('Failed to find tables.');
-        return reject(err);
-      });
-    });
+      return this.connection.listTables({}).promise();
+    }
+    catch (error) {
+      M.log.verbose(`Failed to ${this.modelName}.findTables().`);
+      throw errors.captureError(error);
+    }
   }
 
   /**
    * @description Formats documents to return them in the proper format
    * expected in controllers.
+   * @async
    *
    * @param {object[]} documents -  The documents to properly format.
    * @param {object} options - The options supplied to the function.
    *
-   * @returns {object[]} - Modified documents.
+   * @returns {object[]} - An array of properly formatted documents.
    */
   async formatDocuments(documents, options) {
     // Loop through each document
@@ -433,6 +436,7 @@ class Model {
       }));
     }
 
+    // Wait for all promises to complete
     await Promise.all(promises);
 
     // Return modified documents
@@ -442,40 +446,48 @@ class Model {
   /**
    * @description Formats a single document and returns it in the proper format
    * expected in the controllers.
+   * @async
+   *
    * @param {object} document -  The documents to properly format.
-   * @param {object} options - The options supplied to the function.
-   * @param recurse
-   * @returns {object} - Modified documents.
+   * @param {object} [options={}] - The options supplied to the function.
+   * @param {boolean} [recurse=false] - A boolean value which if true, specifies
+   * that this function was called recursively.
+   *
+   * @returns {object} - The properly formatted document.
    */
   async formatDocument(document, options = {}, recurse = false) {
     const promises = [];
+    // For each field in the document
     Object.keys(document).forEach((field) => {
-      // If the string null, convert to actual value
+      // If the string null, convert to actual value. The value null is allowed
+      // in MBEE for strings, but not supported in DynamoDB on a string field
       if (Object.values(document[field])[0] === 'null') {
         document[field][Object.keys(document[field])[0]] = null;
       }
 
-      // Go through each type
+      // If the field type is 'M', meaning a JSON object/map
       if (Object.keys(document[field])[0] === 'M') {
+        // Recursively call this function with the field contents and no options
         promises.push(this.formatDocument(document[field].M, {}, true)
         .then((retDoc) => {
           document[field] = retDoc;
         }));
       }
+      // If the field type is 'N', meaning a number and its not null
       else if (Object.keys(document[field])[0] === 'N'
         && Object.values(document[field])[0] !== null) {
-        // Change the value of each key from { type: value} to simply the value
-        // and convert to Number
+        // Convert the field to a Number, and remove the type
         document[field] = Number(Object.values(document[field])[0]);
       }
       else {
-        // Change the value of each key from { type: value} to simply the value
+        // Remove the type from the value, ex: hello: { S: 'world' } --> hello: 'world'
         document[field] = Object.values(document[field])[0];
       }
 
       // Handle the special case where the type is a string, it defaults to null,
       // and the value in the database is the string null. This was done to work
       // around the existence of a NULL type in DynamoDB
+      // TODO: is this still needed? We have a similar case above
       if (this.definition[field]
         && this.definition[field].hasOwnProperty('default')
         && this.definition[field].default === null
@@ -489,33 +501,36 @@ class Model {
     // Wait for any recursive portions to complete
     await Promise.all(promises);
 
-    // If the top level
+    // If the top level, and not a recursive call of this function
     if (!recurse) {
       // Loop through all keys in definition
       Object.keys(this.definition).forEach((k) => {
         // If the key is not in the document
         if (!document.hasOwnProperty(k)) {
-          // If the key has a default
+          // If the key has a default, set it
           if (this.definition[k].hasOwnProperty('default')) {
             document[k] = this.definition[k].default;
           }
         }
       });
 
+      // Populate any fields specified in the options object
       await this.populate(document, options);
-    }
 
-    // If the lean option is NOT supplied, add on document functions
-    if (!options.lean && !recurse) {
-      document = this.createDocument(document); // eslint-disable-line no-param-reassign
+      // If the lean option is NOT supplied, add on document functions
+      if (!options.lean) {
+        document = this.createDocument(document); // eslint-disable-line no-param-reassign
+      }
     }
 
     return document;
   }
 
   /**
-   * @description Finds multiple documents from the database. Each field being
-   * requested MUST be indexed.
+   * @description Finds multiple documents from the database. Each field
+   * specified in the filter MUST be indexed. See the
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#batchGetItem-property batchGetItem}
+   * documentation for more information.
    *
    * @param {object} filter - The query to parse and send.
    * @param {string} projection - A space separated string of fields to return
@@ -525,55 +540,42 @@ class Model {
    * @returns {Promise<object[]>} - An array of found documents.
    */
   async batchGetItem(filter, projection, options) {
-    return new Promise((resolve, reject) => {
+    try {
+      // Create the new query object
       const query = new Query(this, projection, options);
+      // Get an array of properly formatted batchGetItem queries
       const queriesToMake = query.batchGetItem(filter);
 
-      // If there are actually query parameters
-      if (queriesToMake.length > 0) {
-        let foundDocs = [];
-        const promises = [];
-        // For each query
-        queriesToMake.forEach((q) => {
-          // Log the database operation
-          M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
-          // Append operation to promises array
-          promises.push(
-            connect()
-            .then((conn) => conn.batchGetItem(q).promise())
-            .then((found) => {
-              foundDocs = foundDocs.concat(found.Responses[this.TableName]);
-            })
-            .catch((e) => M.log.error(e))
-          );
-        });
-
-        // Wait for completion of all promises, and return formatted docs
-        Promise.all(promises)
-        .then(() => this.formatDocuments(foundDocs, options))
-        .then((docs) => resolve(docs))
-        .catch((error) => {
-          M.log.verbose('Failed in batchGetItem');
-          return reject(error);
-        });
-      }
-      else {
-        return resolve([]);
-      }
-    });
-  }
-
-  async batchWriteItem(params, options) {
-    return new Promise((resolve, reject) => {
-      connect()
-      .then((conn) => conn.batchWriteItem(params).promise())
-      .then(() => resolve())
-      .catch((error) => {
-        M.log.error(error);
-        M.log.verbose('Failed in batchWriteItem');
-        return reject(error);
+      let foundDocs = [];
+      const promises = [];
+      // For each query
+      queriesToMake.forEach((q) => {
+        // Log the database operation
+        M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
+        // Append operation to promises array
+        promises.push(
+          // Connect to the database
+          connect()
+          // Make the batchGetItem request
+          .then((conn) => conn.batchGetItem(q).promise())
+          .then((found) => {
+            // Append the found documents to the function-global array
+            foundDocs = foundDocs.concat(found.Responses[this.TableName]);
+          })
+        );
       });
-    });
+
+      // Wait for completion of all promises
+      await Promise.all(promises);
+
+      // Return the properly formatted documents
+      return await this.formatDocuments(foundDocs, options);
+    }
+    catch (error) {
+      // Log failure of the function and return and throw an MBEE CustomError
+      M.log.verbose(`Failed in ${this.modelName}.batchGetItem().`);
+      throw errors.captureError(error);
+    }
   }
 
   /**
@@ -946,7 +948,8 @@ class Model {
     // If there are items to delete
     if (deleteQuery.RequestItems[this.TableName].length > 0) {
       // Call batchWriteItem
-      await this.batchWriteItem(deleteQuery, options);
+      const conn = await connect();
+      await conn.batchWriteItem(deleteQuery, options);
     }
 
     return { n: tmpQuery._id.$in.length, ok: 1 };
