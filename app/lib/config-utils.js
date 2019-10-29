@@ -161,6 +161,14 @@ module.exports.validate = function(config) {
       }
     }
   }
+  // Test DynamoDB strategy
+  else if (config.db.strategy === 'dynamodb-strategy') {
+    test(config, 'db.url', 'string');
+    test(config, 'db.port', 'number');
+    test(config, 'db.accessKeyId', 'string');
+    test(config, 'db.secretAccessKey', 'string');
+    test(config, 'db.region', 'string');
+  }
 
 
   // ----------------------------- Verify docker ----------------------------- //
