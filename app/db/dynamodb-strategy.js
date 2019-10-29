@@ -378,26 +378,6 @@ class Model {
     const tables = await this.listTables();
     // If the table does not currently exist
     if (!tables.TableNames.includes(this.TableName)) {
-      await this.createTable();
-    }
-    else {
-      // TODO: We should update the table in case fields/indexes have been added
-    }
-
-    // Add the model to the file-wide model object
-    // This is used later for population
-    models[this.modelName] = this;
-  }
-
-  /**
-   * @description Creates a table in the database based on the local schema and
-   * tableName variables.
-   * @async
-   *
-   * @returns {Promise} Resolves upon successful creation of the table.
-   */
-  async createTable() {
-    try {
       // Set the TableName and BillingMode
       this.schema.TableName = this.TableName;
       this.schema.BillingMode = 'PAY_PER_REQUEST';
@@ -406,11 +386,13 @@ class Model {
       // Create the actual table
       await this.connection.createTable(this.schema).promise();
     }
-    catch (error) {
-      M.log.verbose(`Failed to create the table ${this.schema.TableName}.`);
-      // If an error occurred, throw it
-      throw errors.captureError(error);
+    else {
+      // TODO: We should update the table in case fields/indexes have been added
     }
+
+    // Add the model to the file-wide model object
+    // This is used later for population
+    models[this.modelName] = this;
   }
 
   /**
