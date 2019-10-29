@@ -631,14 +631,19 @@ class Model {
     ops.forEach((op) => {
       // If it is an updateOne operation
       if (Object.keys(op)[0] === 'updateOne') {
+        // Grab the filter and update object
         const filter = Object.values(op)[0].filter;
         const update = Object.values(op)[0].update;
 
         // Perform the updateOne operation
         promises.push(this.updateItem(filter, update, options));
       }
+      // TODO: Handle insertOne
+      // TODO: Handle deleteOne
+      // TODO: Handle deleteMany
     });
 
+    // Wait for promises to complete
     await Promise.all(promises);
   }
 
