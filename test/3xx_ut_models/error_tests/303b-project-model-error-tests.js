@@ -59,7 +59,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after(async () => {
     try {
-      db.disconnect()
+      db.disconnect();
     }
     catch (error) {
       chai.expect(error.message).to.equal(null);

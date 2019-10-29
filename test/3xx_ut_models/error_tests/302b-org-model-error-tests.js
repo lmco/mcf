@@ -44,7 +44,7 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * Before: runs before all tests. Open database connection.
    */
-  before( async() => {
+  before(async () => {
     try {
       db.connect();
     }
@@ -57,8 +57,8 @@ describe(M.getModuleName(module.filename), () => {
    * After: runs after all tests. Close database connection.
    */
   after(async () => {
-    try{
-      db.disconnect()
+    try {
+      db.disconnect();
     }
     catch (error) {
       chai.expect(error.message).to.equal(null);
