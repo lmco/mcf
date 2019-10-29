@@ -926,7 +926,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
               );
             }
           }
-          // If the validator is a functions
+          // If the validator is a function
           else if (typeof validators.element[key] === 'function') {
             if (!validators.element[key](updateElement[key])) {
               throw new M.DataFormatError(
@@ -937,7 +937,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
           // Improperly formatted validator
           else {
             throw new M.ServerError(`Element validator [${key}] is neither a `
-              + 'function not a regex string.');
+              + 'function nor a regex string.');
           }
         }
 

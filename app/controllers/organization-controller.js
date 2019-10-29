@@ -570,7 +570,7 @@ async function update(requestingUser, orgs, options) {
               );
             }
           }
-          // If the validator is a functions
+          // If the validator is a function
           else if (typeof validators.org[key] === 'function') {
             if (!validators.org[key](updateOrg[key])) {
               throw new M.DataFormatError(
@@ -581,7 +581,7 @@ async function update(requestingUser, orgs, options) {
           // Improperly formatted validator
           else {
             throw new M.ServerError(`Org validator [${key}] is neither a `
-              + 'function not a regex string.');
+              + 'function nor a regex string.');
           }
         }
 
