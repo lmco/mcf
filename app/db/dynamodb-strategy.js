@@ -1316,32 +1316,7 @@ class Model {
     return doc;
   }
 
-  /**
-   * @description Creates or replaces a single item in the specified table in
-   * the DynamoDB database.
-   * @param doc
-   * @param options
-   */
-  async putItem(doc, options) {
-    return new Promise((resolve, reject) => {
-      const putObj = {
-        TableName: this.TableName,
-        ReturnValues: 'ALL_NEW',
-        Item: {}
-      };
-
-      putObj.Item = this.formatObject(doc);
-
-      M.log.debug(`DB OPERATION: ${this.TableName} putItem`);
-      // Save the document
-      this.connection.putItem(putObj).promise()
-      .catch((error) => {
-        M.log.verbose('Failed in putItem');
-        return reject(error);
-      });
-    });
-  }
-
+  // TODO: Come back to this function, we SHOULDNT need this after making the Query class better
   /**
    * @description Formats a document or query to support DynamoDB's structure.
    *
@@ -1393,35 +1368,37 @@ class Model {
   }
 
   /**
-   * @description Scans and returns every document in the specified table.
+   * @description Scans every document in the specified table, and returns the
+   * documents which match the filter. This function is used to find documents
+   * when not every parameter in the filter is indexed. See the
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#scan-property scan}
+   * documentation for more information.
    * @async
    *
    * @param {object} filter - A list of fields to query.
    * @param {string|null} projection - The specific fields to return.
    * @param {object} options - A list of provided options.
    *
-   * @returns {Promise<object[]>} The found documents.
+   * @returns {Promise<object>} The results of the scan query.
    */
   async scan(filter, projection, options) {
-    return new Promise((resolve, reject) => {
+    try {
       // Create a new DynamoDB query
       const query = new Query(this, projection, options);
+      // Get the formatted scan query
       const scanObj = query.scan(filter);
 
+      // Connect to the database
+      const conn = await connect();
+
       M.log.debug(`DB OPERATION: ${this.TableName} scan`);
-      connect()
-      .then((conn) => conn.scan(scanObj).promise())
-      .then((data) =>
-        // console.log(data);
-        // return resolve(this.formatDocuments(data.Items, options))
-        resolve(data))
-      .catch((error) => {
-        M.log.verbose('Failed in scan');
-        M.log.error(error);
-        console.log(JSON.stringify(scanObj, null, 1));
-        return reject(error);
-      });
-    });
+      // Find the documents
+      return await conn.scan(scanObj).promise();
+    }
+    catch (error) {
+      M.log.verbose(`Failed in ${this.modelName}.scan().`);
+      throw errors.captureError(error);
+    }
   }
 
   /**
