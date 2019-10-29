@@ -1503,4 +1503,3 @@ async function optionSortSearch() {
     chai.expect(error.message).to.equal(null);
   }
 }
-
