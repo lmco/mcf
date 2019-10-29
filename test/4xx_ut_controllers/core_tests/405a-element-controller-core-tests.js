@@ -867,7 +867,8 @@ function deleteElements(done) {
     });
 
     // Attempt to find the deleted elements
-    return ElementController.find(adminUser, org._id, projID, branchID, elemIDs, { archived: true });
+    return ElementController.find(adminUser, org._id, projID, branchID,
+      elemIDs, { archived: true });
   })
   .then((foundElements) => {
     // Expect foundElements array to be empty
