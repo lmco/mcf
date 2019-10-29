@@ -342,11 +342,11 @@ async function optionSortFind() {
 
     // Validate that the sort option is working
     chai.expect(foundOrgs[0].name).to.equal('a');
-    chai.expect(foundOrgs[0].id).to.equal('testorg002');
+    chai.expect(foundOrgs[0]._id).to.equal('testorg002');
     chai.expect(foundOrgs[1].name).to.equal('b');
-    chai.expect(foundOrgs[1].id).to.equal('testorg000');
+    chai.expect(foundOrgs[1]._id).to.equal('testorg000');
     chai.expect(foundOrgs[2].name).to.equal('c');
-    chai.expect(foundOrgs[2].id).to.equal('testorg001');
+    chai.expect(foundOrgs[2]._id).to.equal('testorg001');
 
     // Find the orgs and return them sorted in reverse
     const reverseOrgs = await OrgController.find(adminUser, [testOrg0.id, testOrg1.id, testOrg2.id],
@@ -356,11 +356,11 @@ async function optionSortFind() {
 
     // Validate that the sort option is working
     chai.expect(reverseOrgs[0].name).to.equal('c');
-    chai.expect(reverseOrgs[0].id).to.equal('testorg001');
+    chai.expect(reverseOrgs[0]._id).to.equal('testorg001');
     chai.expect(reverseOrgs[1].name).to.equal('b');
-    chai.expect(reverseOrgs[1].id).to.equal('testorg000');
+    chai.expect(reverseOrgs[1]._id).to.equal('testorg000');
     chai.expect(reverseOrgs[2].name).to.equal('a');
-    chai.expect(reverseOrgs[2].id).to.equal('testorg002');
+    chai.expect(reverseOrgs[2]._id).to.equal('testorg002');
 
     await OrgController.remove(adminUser, [testOrg0.id, testOrg1.id, testOrg2.id]);
   }

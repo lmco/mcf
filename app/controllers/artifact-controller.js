@@ -187,7 +187,7 @@ async function find(requestingUser, organizationID, projectID, branchID, artifac
   // Check the type of the artifact parameter
   if (Array.isArray(saniArtifacts)) {
     // An array of artifact ids, find all
-    searchQuery._id = saniArtifacts.map(a => utils.createID(orgID, projID, branchID, a));
+    searchQuery._id = { $in: saniArtifacts.map(a => utils.createID(orgID, projID, branchID, a)) };
   }
   else if (typeof saniArtifacts === 'string') {
     // A single artifact id
@@ -552,11 +552,27 @@ async function update(requestingUser, organizationID, projectID, branchID,
 
         // Get validator for field if one exists
         if (validators.artifact.hasOwnProperty(key)) {
-          // If validation fails, throw error
-          if (!RegExp(validators.artifact[key]).test(updateArtifact[key])) {
-            throw new M.DataFormatError(
-              `Invalid ${key}: [${updateArtifact[key]}]`, 'warn'
-            );
+          // If the validator is a regex string
+          if (typeof validators.artifact[key] === 'string') {
+            // If validation fails, throw error
+            if (!RegExp(validators.artifact[key]).test(updateArtifact[key])) {
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateArtifact[key]}]`, 'warn'
+              );
+            }
+          }
+          // If the validator is a function
+          else if (typeof validators.artifact[key] === 'function') {
+            if (!validators.artifact[key](updateArtifact[key])) {
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateArtifact[key]}]`, 'warn'
+              );
+            }
+          }
+          // Improperly formatted validator
+          else {
+            throw new M.ServerError(`Artifact validator [${key}] is neither a `
+              + 'function nor a regex string.');
           }
         }
 

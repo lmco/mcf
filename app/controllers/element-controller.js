@@ -850,9 +850,9 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
     const sourceTargetQuery = { _id: { $in: sourceTargetIDs } };
 
     // Find elements in batches
-    for (let i = 0; i < elementsToUpdate.length / 50000; i++) {
+    for (let i = 0; i < arrIDs.length / 50000; i++) {
       // Split elementIDs list into batches of 50000
-      searchQuery._id = { $in: elementsToUpdate.slice(i * 50000, i * 50000 + 50000) };
+      searchQuery._id = { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) };
 
       // Add find operation to promises array
       promises2.push(Element.find(searchQuery, null, { lean: true })
@@ -917,11 +917,27 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
 
         // Get validator for field if one exists
         if (validators.element.hasOwnProperty(key)) {
-          // If validation fails, throw error
-          if (!RegExp(validators.element[key]).test(updateElement[key])) {
-            throw new M.DataFormatError(
-              `Invalid ${key}: [${updateElement[key]}]`, 'warn'
-            );
+          // If the validator is a regex string
+          if (typeof validators.element[key] === 'string') {
+            // If validation fails, throw error
+            if (!RegExp(validators.element[key]).test(updateElement[key])) {
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateElement[key]}]`, 'warn'
+              );
+            }
+          }
+          // If the validator is a function
+          else if (typeof validators.element[key] === 'function') {
+            if (!validators.element[key](updateElement[key])) {
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateElement[key]}]`, 'warn'
+              );
+            }
+          }
+          // Improperly formatted validator
+          else {
+            throw new M.ServerError(`Element validator [${key}] is neither a `
+              + 'function nor a regex string.');
           }
         }
 

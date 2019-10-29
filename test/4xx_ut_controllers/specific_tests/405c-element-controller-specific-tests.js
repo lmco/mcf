@@ -60,25 +60,25 @@ describe(M.getModuleName(module.filename), () => {
       org = await testUtils.createTestOrg(adminUser);
 
       // Create project
-      const retProj = await testUtils.createTestProject(adminUser, org.id);
+      const retProj = await testUtils.createTestProject(adminUser, org._id);
       branchID = testData.branches[0].id;
 
       // Add project to array of created projects
-      projIDs.push(utils.parseID(retProj.id).pop());
+      projIDs.push(utils.parseID(retProj._id).pop());
 
       // Create an additional project with visibility of internal to be used
       // for testing the ability to reference elements on another project
       const internalProject = testData.projects[1];
       internalProject.visibility = 'internal';
 
-      const intProj = await ProjectController.create(adminUser, org.id, internalProject);
+      const intProj = await ProjectController.create(adminUser, org._id, internalProject);
 
       // Add project to array of created projects
-      projIDs.push(utils.parseID(intProj[0].id).pop());
+      projIDs.push(utils.parseID(intProj[0]._id).pop());
 
       // Create test elements for the main project
       const elems = testData.elements;
-      elements = await ElementController.create(adminUser, org.id, projIDs[0], branchID, elems);
+      elements = await ElementController.create(adminUser, org._id, projIDs[0], branchID, elems);
     }
     catch (error) {
       M.log.error(error);
@@ -176,7 +176,7 @@ async function createArchivedElement() {
     };
 
     // Create the element
-    const createdElements = await ElementController.create(adminUser, org.id, projIDs[0],
+    const createdElements = await ElementController.create(adminUser, org._id, projIDs[0],
       branchID, elemObj);
     // Verify that only one element was created
     chai.expect(createdElements.length).to.equal(1);
@@ -208,7 +208,7 @@ async function archiveElement() {
     };
 
     // Update the element with archived: true
-    const updatedElements = await ElementController.update(adminUser, org.id, projIDs[0],
+    const updatedElements = await ElementController.update(adminUser, org._id, projIDs[0],
       branchID, updateObj);
 
     // Verify the array length is exactly 1
@@ -238,7 +238,7 @@ async function createExternalSource() {
       id: 'external-source',
       source: 'model',
       sourceNamespace: {
-        org: org.id,
+        org: org._id,
         project: projIDs[1],
         branch: branchID
       },
@@ -246,11 +246,11 @@ async function createExternalSource() {
     };
 
     // Create the element using the element controller
-    const createdElements = await ElementController.create(adminUser, org.id, projIDs[0],
+    const createdElements = await ElementController.create(adminUser, org._id, projIDs[0],
       branchID, newElement);
     const elem = createdElements[0];
     // Create the concatenated ID of the referenced element
-    const referencedID = utils.createID(org.id, projIDs[1], branchID, 'model');
+    const referencedID = utils.createID(org._id, projIDs[1], branchID, 'model');
     // Verify the source is equal to the referencedID
     chai.expect(elem.source).to.equal(referencedID);
   }
@@ -273,18 +273,18 @@ async function createExternalTarget() {
       source: 'model',
       target: 'model',
       targetNamespace: {
-        org: org.id,
+        org: org._id,
         project: projIDs[1],
         branch: branchID
       }
     };
 
     // Create the element using the element controller
-    const createdElements = await ElementController.create(adminUser, org.id, projIDs[0],
+    const createdElements = await ElementController.create(adminUser, org._id, projIDs[0],
       branchID, newElement);
     const elem = createdElements[0];
     // Create the concatenated ID of the referenced element
-    const referencedID = utils.createID(org.id, projIDs[1], branchID, 'model');
+    const referencedID = utils.createID(org._id, projIDs[1], branchID, 'model');
     // Verify the target is equal to the referencedID
     chai.expect(elem.target).to.equal(referencedID);
   }
@@ -306,18 +306,18 @@ async function updateExternalSource() {
       id: 'external-source',
       source: 'undefined',
       sourceNamespace: {
-        org: org.id,
+        org: org._id,
         project: projIDs[1],
         branch: branchID
       }
     };
 
     // Update the element using the element controller
-    const updatedElements = await ElementController.update(adminUser, org.id, projIDs[0],
+    const updatedElements = await ElementController.update(adminUser, org._id, projIDs[0],
       branchID, updateObj);
     const elem = updatedElements[0];
     // Create the concatenated ID of the referenced element
-    const referencedID = utils.createID(org.id, projIDs[1], branchID, 'undefined');
+    const referencedID = utils.createID(org._id, projIDs[1], branchID, 'undefined');
     // Verify the source is equal to the referencedID
     chai.expect(elem.source).to.equal(referencedID);
   }
@@ -339,18 +339,18 @@ async function updateExternalTarget() {
       id: 'external-target',
       target: 'undefined',
       targetNamespace: {
-        org: org.id,
+        org: org._id,
         project: projIDs[1],
         branch: branchID
       }
     };
 
     // Update the element using the element controller
-    const updatedElements = await ElementController.update(adminUser, org.id, projIDs[0],
+    const updatedElements = await ElementController.update(adminUser, org._id, projIDs[0],
       branchID, updateObj);
     const elem = updatedElements[0];
     // Create the concatenated ID of the referenced element
-    const referencedID = utils.createID(org.id, projIDs[1], branchID, 'undefined');
+    const referencedID = utils.createID(org._id, projIDs[1], branchID, 'undefined');
     // Verify the target is equal to the referencedID
     chai.expect(elem.target).to.equal(referencedID);
   }
@@ -374,8 +374,8 @@ async function deleteRelElement() {
     const delElem = utils.parseID(elements[8]._id).pop();
 
     // Remove element
-    await ElementController.remove(adminUser, org.id, projIDs[0], branchID, delElem);
-    const foundElements = await ElementController.find(adminUser, org.id, projIDs[0],
+    await ElementController.remove(adminUser, org._id, projIDs[0], branchID, delElem);
+    const foundElements = await ElementController.find(adminUser, org._id, projIDs[0],
       branchID, rel);
     // Verify relationship updated
     const relationship = foundElements[0];
@@ -404,7 +404,7 @@ async function optionPopulateFind() {
 
   try {
     // Find a relationship element so source and target can be populated
-    const foundElements = await ElementController.find(adminUser, org.id, projIDs[0],
+    const foundElements = await ElementController.find(adminUser, org._id, projIDs[0],
       branchID, elemID, options);
 
     // Verify the array length is exactly 1
@@ -449,13 +449,13 @@ async function optionArchivedFind() {
     const options = { archived: true };
 
     // Attempt to find the element without providing options
-    const notFoundElements = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
+    const notFoundElements = await ElementController.find(adminUser, org._id, projIDs[0], branchID,
       elemID);
     // Expect the array to be empty since the option archived: true was not provided
     chai.expect(notFoundElements.length).to.equal(0);
 
     // Attempt the find the element WITH providing the archived option
-    const foundElements = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
+    const foundElements = await ElementController.find(adminUser, org._id, projIDs[0], branchID,
       elemID, options);
 
     // Expect the array to be of length 1
@@ -488,7 +488,7 @@ async function optionSubtreeFind() {
     const options = { subtree: true, includeArchived: true, lean: true };
 
     // Find the element and its subtree
-    const foundElements = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
+    const foundElements = await ElementController.find(adminUser, org._id, projIDs[0], branchID,
       elemID, options);
 
     // Expect there to be 6 elements found, the searched element and 5 in subtree
@@ -527,7 +527,7 @@ async function optionFieldsFind() {
     const fieldsAlwaysProvided = ['_id'];
 
     // Find the element only with specific fields.
-    const foundElements = await ElementController.find(adminUser, org.id, projIDs[0],
+    const foundElements = await ElementController.find(adminUser, org._id, projIDs[0],
       branchID, elemID, findOptions);
     // Expect there to be exactly 1 element found
     chai.expect(foundElements.length).to.equal(1);
@@ -543,7 +543,7 @@ async function optionFieldsFind() {
     chai.expect(visibleFields).to.have.members(expectedFields);
 
     // Find the element without the notFind fields
-    const notFindElements = await ElementController.find(adminUser, org.id, projIDs[0],
+    const notFindElements = await ElementController.find(adminUser, org._id, projIDs[0],
       branchID, elemID, notFindOptions);
     // Expect there to be exactly 1 element found
     chai.expect(notFindElements.length).to.equal(1);
@@ -572,7 +572,7 @@ async function optionLimitFind() {
     const options = { limit: 2 };
 
     // Find all elements on a given project
-    const foundElements = await ElementController.find(adminUser, org.id, projIDs[0],
+    const foundElements = await ElementController.find(adminUser, org._id, projIDs[0],
       branchID, options);
     // Verify that no more than 2 elements were found
     chai.expect(foundElements).to.have.lengthOf.at.most(2);
@@ -598,7 +598,7 @@ async function optionSkipFind() {
     const secondOptions = { limit: 2, skip: 2 };
 
     // Find all elements on a given project
-    const foundElements = await ElementController.find(adminUser, org.id, projIDs[0],
+    const foundElements = await ElementController.find(adminUser, org._id, projIDs[0],
       branchID, firstOptions);
     // Verify that no more than 2 elements were found
     chai.expect(foundElements).to.have.lengthOf.at.most(2);
@@ -606,7 +606,7 @@ async function optionSkipFind() {
     firstBatchIDs = foundElements.map(e => e._id);
 
     // Find the next batch of elements
-    const secondElements = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
+    const secondElements = await ElementController.find(adminUser, org._id, projIDs[0], branchID,
       secondOptions);
     // Verify that no more than 2 elements were found
     chai.expect(secondElements).to.have.lengthOf.at.most(2);
@@ -633,7 +633,7 @@ async function optionLeanFind() {
     const options = { lean: true };
 
     // Find the element without the lean option
-    const notLeanELems = await ElementController.find(adminUser, org.id, projIDs[0],
+    const notLeanELems = await ElementController.find(adminUser, org._id, projIDs[0],
       branchID, elemID);
     // Expect there to be exactly 1 element found
     chai.expect(notLeanELems.length).to.equal(1);
@@ -643,7 +643,7 @@ async function optionLeanFind() {
     chai.expect(typeof elem.getValidUpdateFields).to.equal('function');
 
     // Find the element WITH the lean option
-    const leanElems = await ElementController.find(adminUser, org.id, projIDs[0],
+    const leanElems = await ElementController.find(adminUser, org._id, projIDs[0],
       branchID, elemID, options);
     // Expect there to be exactly 1 element found
     chai.expect(leanElems.length).to.equal(1);
@@ -678,7 +678,7 @@ async function optionPopulateCreate() {
     };
 
     // Create the element
-    const createdElements = await ElementController.create(adminUser, org.id, projIDs[0],
+    const createdElements = await ElementController.create(adminUser, org._id, projIDs[0],
       branchID, elemObj, options);
     // Verify the array length is exactly 1
     chai.expect(createdElements.length).to.equal(1);
@@ -733,7 +733,7 @@ async function optionFieldsCreate() {
     const fieldsAlwaysProvided = ['_id'];
 
     // Create the element only with specific fields returned
-    const createdElements = await ElementController.create(adminUser, org.id, projIDs[0],
+    const createdElements = await ElementController.create(adminUser, org._id, projIDs[0],
       branchID, elemObjFind, findOptions);
     // Expect there to be exactly 1 element created
     chai.expect(createdElements.length).to.equal(1);
@@ -749,7 +749,7 @@ async function optionFieldsCreate() {
     chai.expect(visibleFields).to.have.members(expectedFields);
 
     // Create the element without the notFind fields
-    const notFindElements = await ElementController.create(adminUser, org.id, projIDs[0], branchID,
+    const notFindElements = await ElementController.create(adminUser, org._id, projIDs[0], branchID,
       elemObjNotFind, notFindOptions);
     // Expect there to be exactly 1 element created
     chai.expect(notFindElements.length).to.equal(1);
@@ -788,7 +788,7 @@ async function optionLeanCreate() {
 
   try {
     // Create the element without the lean option
-    const createdElements = await ElementController.create(adminUser, org.id, projIDs[0],
+    const createdElements = await ElementController.create(adminUser, org._id, projIDs[0],
       branchID, notLeanElemObj);
     // Expect there to be exactly 1 element created
     chai.expect(createdElements.length).to.equal(1);
@@ -798,7 +798,7 @@ async function optionLeanCreate() {
     chai.expect(typeof elem.getValidUpdateFields).to.equal('function');
 
     // Create the element WITH the lean option
-    const createdElements2 = await ElementController.create(adminUser, org.id, projIDs[0],
+    const createdElements2 = await ElementController.create(adminUser, org._id, projIDs[0],
       branchID, leanElemObj, options);
     // Expect there to be exactly 1 element created
     chai.expect(createdElements2.length).to.equal(1);
@@ -832,7 +832,7 @@ async function optionPopulateUpdate() {
     };
 
     // Update the element
-    const updatedElements = await ElementController.update(adminUser, org.id, projIDs[0],
+    const updatedElements = await ElementController.update(adminUser, org._id, projIDs[0],
       branchID, updateObj, options);
     // Verify the array length is exactly 1
     chai.expect(updatedElements.length).to.equal(1);
@@ -887,7 +887,7 @@ async function optionFieldsUpdate() {
     const fieldsAlwaysProvided = ['_id'];
 
     // Update the element only with specific fields returned
-    const updatedElements = await ElementController.update(adminUser, org.id, projIDs[0],
+    const updatedElements = await ElementController.update(adminUser, org._id, projIDs[0],
       branchID, updateObjFind, findOptions);
     // Expect there to be exactly 1 element updated
     chai.expect(updatedElements.length).to.equal(1);
@@ -903,7 +903,7 @@ async function optionFieldsUpdate() {
     chai.expect(visibleFields).to.have.members(expectedFields);
 
     // Update the element without the notFind fields
-    const notFindElements = await ElementController.update(adminUser, org.id, projIDs[0], branchID,
+    const notFindElements = await ElementController.update(adminUser, org._id, projIDs[0], branchID,
       updateObjNotFind, notFindOptions);
     // Expect there to be exactly 1 element updated
     chai.expect(notFindElements.length).to.equal(1);
@@ -938,7 +938,7 @@ async function optionLeanUpdate() {
     // Create the options object with lean: true
     const options = { lean: true };
     // Update the element without the lean option
-    const updatedElements = await ElementController.update(adminUser, org.id, projIDs[0], branchID,
+    const updatedElements = await ElementController.update(adminUser, org._id, projIDs[0], branchID,
       elem0);
 
     // Expect there to be exactly 1 element updated
@@ -953,7 +953,7 @@ async function optionLeanUpdate() {
     elem0.name = 'Batch Element 0';
 
     // Update the element WITH the lean option
-    const leanUpdatedElements = await ElementController.update(adminUser, org.id, projIDs[0],
+    const leanUpdatedElements = await ElementController.update(adminUser, org._id, projIDs[0],
       branchID, elem0, options);
 
     // Expect there to be exactly 1 element updated
@@ -991,7 +991,7 @@ async function optionPopulateReplace() {
     };
 
     // Replace the element
-    const replacedElems = await ElementController.createOrReplace(adminUser, org.id, projIDs[0],
+    const replacedElems = await ElementController.createOrReplace(adminUser, org._id, projIDs[0],
       branchID, elemObj, options);
     // Verify the array length is exactly 1
     chai.expect(replacedElems.length).to.equal(1);
@@ -1046,7 +1046,7 @@ async function optionFieldsReplace() {
     const fieldsAlwaysProvided = ['_id'];
 
     // Replace the element only with specific fields returned
-    const fieldsElems = await ElementController.createOrReplace(adminUser, org.id, projIDs[0],
+    const fieldsElems = await ElementController.createOrReplace(adminUser, org._id, projIDs[0],
       branchID, elemObjFind, findOptions);
     // Expect there to be exactly 1 element replaced
     chai.expect(fieldsElems.length).to.equal(1);
@@ -1062,7 +1062,7 @@ async function optionFieldsReplace() {
     chai.expect(visibleFields).to.have.members(expectedFields);
 
     // Replace the element without the notFind fields
-    const notFieldsElems = await ElementController.createOrReplace(adminUser, org.id, projIDs[0],
+    const notFieldsElems = await ElementController.createOrReplace(adminUser, org._id, projIDs[0],
       branchID, elemObjNotFind, notFindOptions);
     // Expect there to be exactly 1 element replaced
     chai.expect(notFieldsElems.length).to.equal(1);
@@ -1101,7 +1101,7 @@ async function optionLeanReplace() {
     const options = { lean: true };
 
     // Replace the element without the lean option
-    const leanElems = await ElementController.createOrReplace(adminUser, org.id, projIDs[0],
+    const leanElems = await ElementController.createOrReplace(adminUser, org._id, projIDs[0],
       branchID, notLeanElemObj);
     // Expect there to be exactly 1 element replaced
     chai.expect(leanElems.length).to.equal(1);
@@ -1111,7 +1111,7 @@ async function optionLeanReplace() {
     chai.expect(typeof elem.getValidUpdateFields).to.equal('function');
 
     // Replace the element WITH the lean option
-    const notLeanElems = await ElementController.createOrReplace(adminUser, org.id, projIDs[0],
+    const notLeanElems = await ElementController.createOrReplace(adminUser, org._id, projIDs[0],
       branchID, leanElemObj, options);
     // Expect there to be exactly 1 element replaced
     chai.expect(notLeanElems.length).to.equal(1);
@@ -1142,7 +1142,7 @@ async function optionPopulateSearch() {
     const query = '"Element #1"';
 
     // Search for elements
-    const foundElements = await ElementController.search(adminUser, org.id, projIDs[0],
+    const foundElements = await ElementController.search(adminUser, org._id, projIDs[0],
       branchID, query, options);
     // Verify the array length is exactly 1
     chai.expect(foundElements.length).to.equal(1);
@@ -1186,13 +1186,13 @@ async function optionArchivedSearch() {
     const query = `"${elements[6].name}"`;
 
     // Search for the element, expecting no results back
-    const notFoundElements = await ElementController.search(adminUser, org.id, projIDs[0],
+    const notFoundElements = await ElementController.search(adminUser, org._id, projIDs[0],
       branchID, query);
     // Expect the array to be empty since the option archived: true was not provided
     chai.expect(notFoundElements.length).to.equal(0);
 
     // Attempt the find the element WITH providing the archived option
-    const foundElements = await ElementController.search(adminUser, org.id, projIDs[0],
+    const foundElements = await ElementController.search(adminUser, org._id, projIDs[0],
       branchID, query, options);
     // Expect the array to be of length 1
     chai.expect(foundElements.length).to.equal(1);
@@ -1222,7 +1222,7 @@ async function optionLimitSearch() {
     const query = 'model';
 
     // Search for elements
-    const foundElements = await ElementController.search(adminUser, org.id, projIDs[0],
+    const foundElements = await ElementController.search(adminUser, org._id, projIDs[0],
       branchID, query, options);
     // Verify that no more than 2 elements were found
     chai.expect(foundElements).to.have.lengthOf.at.most(2);
@@ -1250,7 +1250,7 @@ async function optionSkipSearch() {
     const query = 'model';
 
     // Search for elements
-    const firstElements = await ElementController.search(adminUser, org.id, projIDs[0],
+    const firstElements = await ElementController.search(adminUser, org._id, projIDs[0],
       branchID, query, firstOptions);
     // Verify that no more than 2 elements were found
     chai.expect(firstElements).to.have.lengthOf.at.most(2);
@@ -1258,7 +1258,7 @@ async function optionSkipSearch() {
     firstBatchIDs = firstElements.map(e => e._id);
 
     // Search for next batch of elements
-    const secondElements = await ElementController.search(adminUser, org.id, projIDs[0], branchID,
+    const secondElements = await ElementController.search(adminUser, org._id, projIDs[0], branchID,
       query, secondOptions);
     // Verify that no more than 2 elements were found
     chai.expect(secondElements).to.have.lengthOf.at.most(2);
@@ -1286,7 +1286,7 @@ async function optionLeanSearch() {
     const options = { lean: true };
 
     // Search for elements
-    const foundElements = await ElementController.search(adminUser, org.id, projIDs[0],
+    const foundElements = await ElementController.search(adminUser, org._id, projIDs[0],
       branchID, query);
     // Expect there to be exactly 1 element found
     chai.expect(foundElements.length).to.equal(1);
@@ -1296,7 +1296,7 @@ async function optionLeanSearch() {
     chai.expect(typeof elem.getValidUpdateFields).to.equal('function');
 
     // Search for elements WITH the lean option
-    const leanElements = await ElementController.search(adminUser, org.id, projIDs[0],
+    const leanElements = await ElementController.search(adminUser, org._id, projIDs[0],
       branchID, query, options);
     // Expect there to be exactly 1 element found
     chai.expect(leanElements.length).to.equal(1);
@@ -1335,13 +1335,13 @@ async function optionSortFind() {
     const sortOptionReverse = { sort: '-name' };
 
     // Create the test elements
-    const createdElems = await ElementController.create(adminUser, org.id, projIDs[0],
+    const createdElems = await ElementController.create(adminUser, org._id, projIDs[0],
       branchID, testElems);
     // Validate that 3 elements were created
     chai.expect(createdElems.length).to.equal(3);
 
     // Find the elements and return them sorted
-    const foundElems = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
+    const foundElems = await ElementController.find(adminUser, org._id, projIDs[0], branchID,
       testElems.map((e) => e.id),
       sortOption);
 
@@ -1350,14 +1350,14 @@ async function optionSortFind() {
 
     // Validate that the sort option is working
     chai.expect(foundElems[0].name).to.equal('a');
-    chai.expect(foundElems[0].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem02'));
+    chai.expect(foundElems[0]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem02'));
     chai.expect(foundElems[1].name).to.equal('b');
-    chai.expect(foundElems[1].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem00'));
+    chai.expect(foundElems[1]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem00'));
     chai.expect(foundElems[2].name).to.equal('c');
-    chai.expect(foundElems[2].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem01'));
+    chai.expect(foundElems[2]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem01'));
 
     // Find the elements and return them sorted in reverse
-    const reverseElems = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
+    const reverseElems = await ElementController.find(adminUser, org._id, projIDs[0], branchID,
       testElems.map((e) => e.id),
       sortOptionReverse);
     // Expect to find all three elements
@@ -1365,13 +1365,13 @@ async function optionSortFind() {
 
     // Validate that the sort option is working
     chai.expect(reverseElems[0].name).to.equal('c');
-    chai.expect(reverseElems[0].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem01'));
+    chai.expect(reverseElems[0]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem01'));
     chai.expect(reverseElems[1].name).to.equal('b');
-    chai.expect(reverseElems[1].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem00'));
+    chai.expect(reverseElems[1]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem00'));
     chai.expect(reverseElems[2].name).to.equal('a');
-    chai.expect(reverseElems[2].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem02'));
+    chai.expect(reverseElems[2]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem02'));
 
-    await ElementController.remove(adminUser, org.id, projIDs[0], branchID,
+    await ElementController.remove(adminUser, org._id, projIDs[0], branchID,
       testElems.map((e) => e.id));
   }
   catch (error) {
@@ -1415,40 +1415,40 @@ async function optionSortSearch() {
     const searchQuery = 'searchme';
 
     // Create the test elements
-    const createdElems = await ElementController.create(adminUser, org.id, projIDs[0],
+    const createdElems = await ElementController.create(adminUser, org._id, projIDs[0],
       branchID, testElems);
     // Validate that 4 elements were created
     chai.expect(createdElems.length).to.equal(4);
 
     // Search the elements and return them sorted
-    const sortedElems = await ElementController.search(adminUser, org.id, projIDs[0], branchID,
+    const sortedElems = await ElementController.search(adminUser, org._id, projIDs[0], branchID,
       searchQuery, sortOption);
     // Expect to only find three elements
     chai.expect(sortedElems.length).to.equal(3);
 
     // Validate that the sort option is working
     chai.expect(sortedElems[0].name).to.equal('a');
-    chai.expect(sortedElems[0].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem02'));
+    chai.expect(sortedElems[0]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem02'));
     chai.expect(sortedElems[1].name).to.equal('b');
-    chai.expect(sortedElems[1].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem00'));
+    chai.expect(sortedElems[1]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem00'));
     chai.expect(sortedElems[2].name).to.equal('c');
-    chai.expect(sortedElems[2].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem01'));
+    chai.expect(sortedElems[2]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem01'));
 
     // Search the elements and return them sorted in reverse
-    const reverseElems = await ElementController.search(adminUser, org.id, projIDs[0], branchID,
+    const reverseElems = await ElementController.search(adminUser, org._id, projIDs[0], branchID,
       searchQuery, sortOptionReverse);
     // Expect to find three elements
     chai.expect(reverseElems.length).to.equal(3);
 
     // Validate that the sort option is working
     chai.expect(reverseElems[0].name).to.equal('c');
-    chai.expect(reverseElems[0].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem01'));
+    chai.expect(reverseElems[0]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem01'));
     chai.expect(reverseElems[1].name).to.equal('b');
-    chai.expect(reverseElems[1].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem00'));
+    chai.expect(reverseElems[1]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem00'));
     chai.expect(reverseElems[2].name).to.equal('a');
-    chai.expect(reverseElems[2].id).to.equal(utils.createID(org.id, projIDs[0], branchID, 'testelem02'));
+    chai.expect(reverseElems[2]._id).to.equal(utils.createID(org._id, projIDs[0], branchID, 'testelem02'));
 
-    await ElementController.remove(adminUser, org.id, projIDs[0], branchID,
+    await ElementController.remove(adminUser, org._id, projIDs[0], branchID,
       testElems.map((e) => e.id));
   }
   catch (error) {
@@ -1468,7 +1468,7 @@ async function optionRootpathFind() {
     const option = { rootpath: true };
 
     // Return a search on the furthest nested element with the rootpath option
-    const foundElements = await ElementController.find(adminUser, org.id, projIDs[0], branchID,
+    const foundElements = await ElementController.find(adminUser, org._id, projIDs[0], branchID,
       elemID, option);
 
     // Expect to find 3 elements
@@ -1477,7 +1477,7 @@ async function optionRootpathFind() {
     const foundIDs = foundElements.map(e => e.id);
 
     // Expect to find the model element and two test elements
-    chai.expect(foundIDs).to.include(utils.createID(org.id, projIDs[0], branchID, 'model'));
+    chai.expect(foundIDs).to.include(utils.createID(org._id, projIDs[0], branchID, 'model'));
     chai.expect(foundIDs).to.include(elements[1].id);
     chai.expect(foundIDs).to.include(elements[2].id);
     chai.expect(foundIDs).to.include(elements[4].id);
