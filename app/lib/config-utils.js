@@ -318,7 +318,8 @@ module.exports.validate = function(config) {
     if (config.validators.org_id_length) {
       test(config, 'validators.org_id_length', 'number');
       if (config.validators.org_id_length < config.server.defaultOrganizationId.length) {
-        throw new Error(`Configuration file: custom org id length "${config.validators.org_id_length}" is too short.`);
+        throw new Error('Configuration file: custom org id length '
+        + `"${config.validators.org_id_length}" is shorter than the length of the default org id.`);
       }
     }
     if (config.validators.project_id) test(config, 'validators.project_id', 'string');
@@ -334,7 +335,8 @@ module.exports.validate = function(config) {
     if (config.validators.user_username_length) {
       test(config, 'validators.user_username_length', 'number');
       if (config.validators.user_username_length < config.server.defaultAdminUsername.length) {
-        throw new Error(`Configuration file: custom username length "${config.validators.user_username_length}" is too short.`);
+        throw new Error('Configuration file: custom username length '
+        + `"${config.validators.user_username_length}" is shorter than the length of the default admin username.`);
       }
     }
     if (config.validators.user_email) test(config, 'validators.user_email', 'string');

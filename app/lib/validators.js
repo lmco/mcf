@@ -134,7 +134,7 @@ const artifact = {
     ? `${branch.id.slice(0, -1)}${utils.ID_DELIMITER}${customValidators.artifact_id}$`
     : `${branch.id.slice(0, -1)}${utils.ID_DELIMITER}${id}$`,
   idLength: branch.idLength + utils.ID_DELIMITER.length
-    + (customValidators.artifact_id_length ? parseInt(customValidators.artifact_id_length,10)
+    + (customValidators.artifact_id_length ? parseInt(customValidators.artifact_id_length, 10)
       : idLength),
   location: (artifactVal.location) ? artifactVal.location : '^[^.]+$',
   filename: (artifactVal.filename) ? artifactVal.filename : '^[^!\\<>:"\'|?*]+$',
