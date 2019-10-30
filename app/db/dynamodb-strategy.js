@@ -968,24 +968,26 @@ class Model {
       // Format the documents
       docs = await this.formatDocuments(docs, options);
 
-      // Create a query containing all ids to delete
-      const tmpQuery = { _id: { $in: docs.map(d => d._id) } };
-
       // Create a new query object
       const query = new Query(this, options);
       // Get the formatted batchWriteItem query, used for deletion
-      const deleteQuery = query.deleteMany(tmpQuery);
+      const deleteQueries = query.batchWriteItem(docs, 'delete');
 
-      // If there are items to delete
-      if (deleteQuery.RequestItems[this.TableName].length > 0) {
-        // Connect to the database
-        const conn = await connect();
-        // Delete the documents
-        await conn.batchWriteItem(deleteQuery, options).promise();
-      }
+      // Connect to the database
+      const conn = await connect();
+      const promises = [];
+
+      // For each delete query
+      deleteQueries.forEach((q) => {
+        // Perform the batchWriteItem operation
+        promises.push(conn.batchWriteItem(q, options).promise());
+      });
+
+      // Wait for all batchWriteItem operations to complete
+      await Promise.all(promises);
 
       // Return an object specifying the success of the delete operation
-      return { n: tmpQuery._id.$in.length, ok: 1 };
+      return { n: docs.length, ok: 1 };
     }
     catch (error) {
       M.log.verbose(`Failed in ${this.modelName}.deleteMany().`);
@@ -1206,9 +1208,9 @@ class Model {
   async insertMany(docs, options, cb) {
     try {
       // Create a query, searching for existing documents by _id
-      const query = { _id: { $in: docs.map(d => d._id) } };
+      const findQuery = { _id: { $in: docs.map(d => d._id) } };
       // Attempt to find any existing documents
-      const conflictingDocs = await this.batchGetItem(query, null, options);
+      const conflictingDocs = await this.batchGetItem(findQuery, null, options);
 
       // If documents with matching _ids exist, throw an error
       if (conflictingDocs.length > 0) {
@@ -1216,7 +1218,7 @@ class Model {
           + `exist: ${conflictingDocs.map(d => utils.parseID(d._id).pop())}.`, 'warn');
       }
       else {
-        const promises2 = [];
+        const promises = [];
         // Format and validate documents
         const formattedDocs = docs.map(d => this.createDocument(d));
         formattedDocs.forEach(d => d.validateSync());
@@ -1224,35 +1226,23 @@ class Model {
         // Connect to the database
         const conn = await connect();
 
-        // TODO: Improve the batchWriteItem code by adding a Query function
-        // Loop through all docs in batches of 25
-        for (let i = 0; i < formattedDocs.length / 25; i++) {
-          const batch = formattedDocs.slice(i * 25, i * 25 + 25);
-          const batchWriteObj = {
-            RequestItems: {}
-          };
-          batchWriteObj.RequestItems[this.TableName] = [];
-          batch.forEach((doc) => {
-            const putObj = {
-              PutRequest: {
-                Item: {}
-              }
-            };
+        // Create a new query object
+        const query = new Query(this, options);
+        // Get the formatted batchWriteItem queries
+        const batchWriteQueries = query.batchWriteItem(formattedDocs, 'insert');
 
-            putObj.PutRequest.Item = this.formatObject(doc);
+        // For each query
+        batchWriteQueries.forEach((q) => {
+          // Perform the batchWriteItem operation
+          promises.push(conn.batchWriteItem(q).promise());
+        });
 
-            batchWriteObj.RequestItems[this.TableName].push(putObj);
-          });
-
-          M.log.debug(`DB OPERATION: ${this.TableName} batchWriteItem`);
-          promises2.push(conn.batchWriteItem(batchWriteObj).promise());
-        }
-
-        await Promise.all(promises2);
+        // Wait for batchWriteItem operations to complete
+        await Promise.all(promises);
       }
 
       // Find and return the newly created documents
-      return await this.batchGetItem(query, null, options);
+      return await this.batchGetItem(findQuery, null, options);
     }
     catch (error) {
       M.log.verbose(`Failed in ${this.modelName}.insertMany().`);
@@ -1775,6 +1765,50 @@ class Query {
     return queries;
   }
 
+  /**
+   * @description Creates a query formatted to be used in batchWriteItem calls.
+   */
+  batchWriteItem(docs, operation) {
+    const queries = [];
+    const baseObj = {
+      RequestItems: {}
+    };
+    baseObj.RequestItems[this.model.TableName] = [];
+
+    // Determine if array of PutRequests or DeleteRequests
+    const op = (operation === 'insert') ? 'PutRequest' : 'DeleteRequest';
+
+    // Perform in batches of 25, the max number per request
+    for (let i = 0; i < docs.length / 25; i++) {
+      const batch = docs.slice(i * 25, i * 25 + 25);
+      const tmpQuery = JSON.parse(JSON.stringify(baseObj));
+
+      batch.forEach((doc) => {
+        if (op === 'PutRequest') {
+          const putObj = {
+            PutRequest: {
+              Item: {}
+            }
+          };
+          putObj.PutRequest.Item = this.model.formatObject(doc);
+          tmpQuery.RequestItems[this.model.TableName].push(putObj);
+        }
+        else {
+          const deleteObj = {
+            DeleteRequest: {
+              Key: { _id: { S: doc._id } }
+            }
+          };
+          tmpQuery.RequestItems[this.model.TableName].push(deleteObj);
+        }
+      });
+
+      queries.push(tmpQuery);
+    }
+
+    return queries;
+  }
+
   getItem(filter, projection) {
     // Parse the projection
     this.parseProjection(projection);
@@ -1822,28 +1856,6 @@ class Query {
     if (Object.keys(this.ExpressionAttributeValues).length !== 0) {
       baseObj.ExpressionAttributeValues = this.ExpressionAttributeValues;
     }
-
-    return baseObj;
-  }
-
-  deleteMany(filter) {
-    this.parseRequestItemsKeys(filter);
-
-    // Create batchWriteObj
-    const baseObj = { RequestItems: {} };
-
-    // Set table and DeleteRequest object
-    baseObj.RequestItems[this.model.TableName] = [];
-
-    // Loop over each query parameter
-    this.RequestItemsKeys.forEach((k) => {
-      // Create new delete request for each
-      baseObj.RequestItems[this.model.TableName].push({
-        DeleteRequest: {
-          Key: k
-        }
-      });
-    });
 
     return baseObj;
   }
