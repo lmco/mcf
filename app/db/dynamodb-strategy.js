@@ -527,58 +527,6 @@ class Model {
   }
 
   /**
-   * @description Finds multiple documents from the database. Each field
-   * specified in the filter MUST be indexed. See the
-   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#batchGetItem-property batchGetItem}
-   * documentation for more information.
-   *
-   * @param {object} filter - The query to parse and send.
-   * @param {string|null} projection - A space separated string of fields to return
-   * from the database.
-   * @param {object} options - An object containing valid options.
-   *
-   * @returns {Promise<object[]>} - An array of found documents.
-   */
-  async batchGetItem(filter, projection, options) {
-    try {
-      // Create the new query object
-      const query = new Query(this, options);
-      // Get an array of properly formatted batchGetItem queries
-      const queriesToMake = query.batchGetItem(filter, projection);
-
-      let foundDocs = [];
-      const promises = [];
-      // For each query
-      queriesToMake.forEach((q) => {
-        // Log the database operation
-        M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
-        // Append operation to promises array
-        promises.push(
-          // Connect to the database
-          connect()
-          // Make the batchGetItem request
-          .then((conn) => conn.batchGetItem(q).promise())
-          .then((found) => {
-            // Append the found documents to the function-global array
-            foundDocs = foundDocs.concat(found.Responses[this.TableName]);
-          })
-        );
-      });
-
-      // Wait for completion of all promises
-      await Promise.all(promises);
-
-      // Return the properly formatted documents
-      return await this.formatDocuments(foundDocs, options);
-    }
-    catch (error) {
-      // Log failure of the function and return and throw an MBEE CustomError
-      M.log.verbose(`Failed in ${this.modelName}.batchGetItem().`);
-      throw errors.captureError(error);
-    }
-  }
-
-  /**
    * @description Performs a large write operation on a collection. Can create,
    * update, or delete multiple documents.
    * @async
@@ -1032,12 +980,37 @@ class Model {
    */
   async find(filter, projection, options, cb) {
     try {
+      let docs = [];
+
       // Use batchGetItem only iff the only parameter being searched is the _id
       if (Object.keys(filter).length === 1 && Object.keys(filter)[0] === '_id') {
-        return await this.batchGetItem(filter, projection, options);
+        // Create the new query object
+        const query = new Query(this, options);
+        // Get an array of properly formatted batchGetItem queries
+        const queriesToMake = query.batchGetItem(filter, projection);
+
+        const promises = [];
+        // For each query
+        queriesToMake.forEach((q) => {
+          // Log the database operation
+          M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
+          // Append operation to promises array
+          promises.push(
+            // Connect to the database
+            connect()
+            // Make the batchGetItem request
+            .then((conn) => conn.batchGetItem(q).promise())
+            .then((found) => {
+              // Append the found documents to the function-global array
+              docs = docs.concat(found.Responses[this.TableName]);
+            })
+          );
+        });
+
+        // Wait for completion of all promises
+        await Promise.all(promises);
       }
       else {
-        let docs = [];
         let more = true;
 
         // Find all documents which match the query
@@ -1074,10 +1047,10 @@ class Model {
           // Append found documents to the running array
           docs = docs.concat(result.Items);
         }
-
-        // Format and return the documents
-        return await this.formatDocuments(docs, options);
       }
+
+      // Format and return the documents
+      return await this.formatDocuments(docs, options);
     }
     catch (error) {
       M.log.verbose(`Failed in ${this.modelName}.find().`);
@@ -1210,7 +1183,7 @@ class Model {
       // Create a query, searching for existing documents by _id
       const findQuery = { _id: { $in: docs.map(d => d._id) } };
       // Attempt to find any existing documents
-      const conflictingDocs = await this.batchGetItem(findQuery, null, options);
+      const conflictingDocs = await this.find(findQuery, null, options);
 
       // If documents with matching _ids exist, throw an error
       if (conflictingDocs.length > 0) {
@@ -1242,7 +1215,7 @@ class Model {
       }
 
       // Find and return the newly created documents
-      return await this.batchGetItem(findQuery, null, options);
+      return await this.find(findQuery, null, options);
     }
     catch (error) {
       M.log.verbose(`Failed in ${this.modelName}.insertMany().`);
@@ -1478,8 +1451,6 @@ class Query {
     this.options = options;
     this.ExpressionAttributeNames = {};
     this.ExpressionAttributeValues = {};
-    this.ProjectionExpression = '';
-    this.FilterExpression = '';
     this.RequestItemsKeys = [];
     this.UpdateExpression = '';
   }
@@ -1857,10 +1828,7 @@ class Query {
       Key: this.RequestItemsKeys[0]
     };
 
-    // Add on the ProjectionExpression and ExpressionAttributeNames if defined
-    if (this.ProjectionExpression.length) {
-      baseObj.ProjectionExpression = this.ProjectionExpression;
-    }
+    // Add on the ExpressionAttributeNames if defined
     if (Object.keys(this.ExpressionAttributeNames).length !== 0) {
       baseObj.ExpressionAttributeNames = this.ExpressionAttributeNames;
     }
