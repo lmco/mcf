@@ -45,25 +45,25 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * Before: runs before all tests. Open database connection.
    */
-  before((done) => {
-    db.connect()
-    .then(() => done())
-    .catch((error) => {
+  before(async () => {
+    try {
+      db.connect();
+    }
+    catch (error) {
       chai.expect(error.message).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**
    * After: runs after all tests. Close database connection.
    */
-  after((done) => {
-    db.disconnect()
-    .then(() => done())
-    .catch((error) => {
+  after(async () => {
+    try {
+      db.disconnect();
+    }
+    catch (error) {
       chai.expect(error.message).to.equal(null);
-      done();
-    });
+    }
   });
 
   /* Execute the tests */
@@ -83,55 +83,76 @@ describe(M.getModuleName(module.filename), () => {
  * @description Attempts to create a project with an id that is too short.
  */
 async function idTooShort() {
-  const projData = Object.assign({}, testData.projects[0]);
-  projData.org = 'org';
+  try {
+    const projData = Object.assign({}, testData.projects[0]);
+    projData.org = 'org';
 
-  // Change id to be too short.
-  projData._id = '01:0';
+    // Change id to be too short.
+    projData._id = '01:0';
 
-  // Create project object
-  const projObject = Project.createDocument(projData);
+    // Create project object
+    const projObject = Project.createDocument(projData);
 
-  // Expect save() to fail with specific error message
-  await projObject.save().should.eventually.be.rejectedWith('Project validation failed: _id: '
-    + `Project ID length [${utils.parseID(projData._id).pop().length}] must not`
-    + ' be less than 2 characters.');
+    // Expect save() to fail with specific error message
+    await projObject.save().should.eventually.be.rejectedWith('Project validation failed: _id: '
+      + `Project ID length [${utils.parseID(projData._id).pop().length}] must not`
+      + ' be less than 2 characters.');
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
 }
 
 /**
  * @description Attempts to create a project with an id that is too long.
  */
 async function idTooLong() {
-  const projData = Object.assign({}, testData.projects[0]);
-  projData.org = 'org';
+  try {
+    const projData = Object.assign({}, testData.projects[0]);
+    projData.org = 'org';
 
-  // Change id to be too long.
-  projData._id = '012345678901234567890123456789012345:01234567890123456789'
-    + '01234567890123456';
+    // Change id to be too long.
+    projData._id = '012345678901234567890123456789012345:01234567890123456789'
+      + '01234567890123456';
 
-  // Create project object
-  const projObject = Project.createDocument(projData);
+    // Create project object
+    const projObject = Project.createDocument(projData);
 
-  // Expect save() to fail with specific error message
-  await projObject.save().should.eventually.be.rejectedWith('Project validation failed: _id: '
-    + `Project ID length [${projData._id.length - validators.org.idLength - 1}]`
-    + ` must not be more than ${validators.project.idLength - validators.org.idLength - 1}`
-    + ' characters.');
+    // Expect save() to fail with specific error message
+    await projObject.save().should.eventually.be.rejectedWith('Project validation failed: _id: '
+      + `Project ID length [${projData._id.length - validators.org.idLength - 1}]`
+      + ` must not be more than ${validators.project.idLength - validators.org.idLength - 1}`
+      + ' characters.');
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
 }
 
 /**
  * @description Attempts to create a project with no id.
  */
 async function idNotProvided() {
-  const projData = Object.assign({}, testData.projects[0]);
-  projData.org = 'org';
+  try {
+    const projData = Object.assign({}, testData.projects[0]);
+    projData.org = 'org';
 
-  // Create project object
-  const projObject = Project.createDocument(projData);
+    // Create project object
+    const projObject = Project.createDocument(projData);
 
-  // Expect save() to fail with specific error message
-  await projObject.save().should.eventually.be.rejectedWith('Project validation failed: _id: '
-    + 'Path `_id` is required.');
+    // Expect save() to fail with specific error message
+    await projObject.save().should.eventually.be.rejectedWith('Project validation failed: _id: '
+      + 'Path `_id` is required.');
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
 }
 
 /**
@@ -143,33 +164,47 @@ async function invalidID() {
       + ' validator.');
     this.skip();
   }
-  const projData = Object.assign({}, testData.projects[0]);
-  projData.org = 'org';
+  try {
+    const projData = Object.assign({}, testData.projects[0]);
+    projData.org = 'org';
 
-  // Change id to be invalid
-  projData._id = '!!';
+    // Change id to be invalid
+    projData._id = '!!';
 
-  // Create project object
-  const projObject = Project.createDocument(projData);
+    // Create project object
+    const projObject = Project.createDocument(projData);
 
-  // Expect save() to fail with specific error message
-  await projObject.save().should.eventually.be.rejectedWith('Project validation failed: '
-    + `_id: Invalid project ID [${projData._id}].`);
+    // Expect save() to fail with specific error message
+    await projObject.save().should.eventually.be.rejectedWith('Project validation failed: '
+      + `_id: Invalid project ID [${projData._id}].`);
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
 }
 
 /**
  * @description Attempts to create a project with no org.
  */
 async function orgNotProvided() {
-  const projData = Object.assign({}, testData.projects[0]);
-  projData._id = `org:${projData.id}`;
+  try {
+    const projData = Object.assign({}, testData.projects[0]);
+    projData._id = `org:${projData.id}`;
 
-  // Create project object
-  const projObject = Project.createDocument(projData);
+    // Create project object
+    const projObject = Project.createDocument(projData);
 
-  // Expect save() to fail with specific error message
-  await projObject.save().should.eventually.be.rejectedWith('Project validation failed: org: '
-    + 'Path `org` is required.');
+    // Expect save() to fail with specific error message
+    await projObject.save().should.eventually.be.rejectedWith('Project validation failed: org: '
+      + 'Path `org` is required.');
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
 }
 
 /**
@@ -181,79 +216,106 @@ async function orgInvalid() {
       + ' validator.');
     this.skip();
   }
+  try {
+    const projData = Object.assign({}, testData.projects[0]);
+    projData._id = `org:${projData.id}`;
+    projData.org = '!!';
 
-  const projData = Object.assign({}, testData.projects[0]);
-  projData._id = `org:${projData.id}`;
-  projData.org = '!!';
+    // Create project object
+    const projObject = Project.createDocument(projData);
 
-  // Create project object
-  const projObject = Project.createDocument(projData);
-
-  // Expect save() to fail with specific error message
-  await projObject.save().should.eventually.be.rejectedWith(
-    `Project validation failed: org: ${projData.org} is not a valid org ID.`
-  );
+    // Expect save() to fail with specific error message
+    await projObject.save().should.eventually.be.rejectedWith(
+      `Project validation failed: org: ${projData.org} is not a valid org ID.`
+    );
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
 }
 
 /**
  * @description Attempts to create a project with no name.
  */
 async function nameNotProvided() {
-  const projData = Object.assign({}, testData.projects[0]);
-  projData._id = `org:${projData.id}`;
-  projData.org = 'org';
+  try {
+    const projData = Object.assign({}, testData.projects[0]);
+    projData._id = `org:${projData.id}`;
+    projData.org = 'org';
 
-  // Delete name key
-  delete projData.name;
+    // Delete name key
+    delete projData.name;
 
-  // Create project object
-  const projObject = Project.createDocument(projData);
+    // Create project object
+    const projObject = Project.createDocument(projData);
 
-  // Expect save() to fail with specific error message
-  projObject.save().should.eventually.be.rejectedWith('Project validation failed: '
-    + 'name: Path `name` is required.');
+    // Expect save() to fail with specific error message
+    projObject.save().should.eventually.be.rejectedWith('Project validation failed: '
+      + 'name: Path `name` is required.');
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
 }
 
 /**
  * @description Attempts to create a project with an invalid permissions object.
  */
 async function permissionsInvalid() {
-  const projData = Object.assign({}, testData.projects[0]);
-  projData._id = `org:${projData.id}`;
-  projData.org = 'org';
+  try {
+    const projData = Object.assign({}, testData.projects[0]);
+    projData._id = `org:${projData.id}`;
+    projData.org = 'org';
 
-  // Set invalid permissions
-  projData.permissions = {
-    invalid: 'permissions'
-  };
+    // Set invalid permissions
+    projData.permissions = {
+      invalid: 'permissions'
+    };
 
-  // Create project object
-  const projObject = Project.createDocument(projData);
+    // Create project object
+    const projObject = Project.createDocument(projData);
 
-  // Expect save() to fail with specific error message
-  await projObject.save().should.eventually.be.rejectedWith(
-    'Project validation failed: permissions: The project permissions object is '
-    + 'not properly formatted.'
-  );
+    // Expect save() to fail with specific error message
+    await projObject.save().should.eventually.be.rejectedWith(
+      'Project validation failed: permissions: The project permissions object is '
+      + 'not properly formatted.'
+    );
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
 }
 
 /**
  * @description Attempts to create a project with an invalid visibility.
  */
 async function visibilityInvalid() {
-  const projData = Object.assign({}, testData.projects[0]);
-  projData._id = `org:${projData.id}`;
-  projData.org = 'org';
+  try {
+    const projData = Object.assign({}, testData.projects[0]);
+    projData._id = `org:${projData.id}`;
+    projData.org = 'org';
 
-  // Set invalid visibility
-  projData.visibility = 'public';
+    // Set invalid visibility
+    projData.visibility = 'public';
 
-  // Create project object
-  const projObject = Project.createDocument(projData);
+    // Create project object
+    const projObject = Project.createDocument(projData);
 
-  // Expect save() to fail with specific error message
-  await projObject.save().should.eventually.be.rejectedWith(
-    `Project validation failed: visibility: \`${projData.visibility}\` is not a`
-    + ' valid enum value for path `visibility`.'
-  );
+    // Expect save() to fail with specific error message
+    await projObject.save().should.eventually.be.rejectedWith(
+      `Project validation failed: visibility: \`${projData.visibility}\` is not a`
+      + ' valid enum value for path `visibility`.'
+    );
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
 }
