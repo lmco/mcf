@@ -177,7 +177,7 @@ async function invalidID() {
     branchData.project = 'org:proj';
 
     // Change id to be invalid.
-    branchData._id = '!!';
+    branchData._id = '!!!!!!!!';
 
     // Create branch object
     const branchObject = Branch.createDocument(branchData);
@@ -261,7 +261,7 @@ async function sourceInvalid() {
     branchData.project = 'org:proj';
 
     // Set invalid source
-    branchData.source = '!!';
+    branchData.source = '!!!!!!!!';
 
     // Create branch object
     const branchObject = Branch.createDocument(branchData);

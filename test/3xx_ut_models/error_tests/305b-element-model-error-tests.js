@@ -194,7 +194,7 @@ async function invalidID() {
     elemData.parent = 'org:proj:branch:model';
 
     // Change id to be invalid
-    elemData._id = '!!';
+    elemData._id = '!!!!!!!!!!!';
 
     // Create element object
     const elemObject = Element.createDocument(elemData);
