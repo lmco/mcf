@@ -1493,6 +1493,11 @@ class Query {
    * of a document.
    */
   parseProjection(projection) { // eslint-disable-line class-methods-use-this
+    const returnObj = {
+      ExpressionAttributeNames: {},
+      ProjectionExpression: ''
+    };
+
     // Handle projections
     if (projection) {
       const fields = projection.split(' ');
@@ -1502,21 +1507,29 @@ class Query {
         const keyName = (f === '_id') ? 'id' : f;
 
         // Create unique key for field
-        this.ExpressionAttributeNames[`#${keyName}`] = f;
+        returnObj.ExpressionAttributeNames[`#${keyName}`] = f;
 
         // If ProjectionExpression is not defined, init it
-        if (!this.ProjectionExpression) {
-          this.ProjectionExpression = `#${keyName}`;
+        if (!returnObj.ProjectionExpression) {
+          returnObj.ProjectionExpression = `#${keyName}`;
         }
         // Add onto ProjectionExpression with leading comma
         else {
-          this.ProjectionExpression += `,#${keyName}`;
+          returnObj.ProjectionExpression += `,#${keyName}`;
         }
       });
     }
+
+    return returnObj;
   }
 
-  parseFilterExpression(query) {
+  parseFilterExpression(query, expAttNames) {
+    const returnObj = {
+      ExpressionAttributeNames: expAttNames,
+      ExpressionAttributeValues: {},
+      FilterExpression: ''
+    };
+
     // Handle filter expression
     Object.keys(query).forEach((k) => {
       // Handle special case where key name starts with an underscore
@@ -1528,13 +1541,13 @@ class Query {
         split.forEach((s) => {
           const kName = (s === '_id') ? 'id' : s;
           // Add key to ExpressionAttributeNames
-          this.ExpressionAttributeNames[`#${kName}`] = s;
+          returnObj.ExpressionAttributeNames[`#${kName}`] = s;
         });
         keyName = split.join('.#');
       }
       else {
         // Add key to ExpressionAttributeNames
-        this.ExpressionAttributeNames[`#${keyName}`] = k;
+        returnObj.ExpressionAttributeNames[`#${keyName}`] = k;
       }
 
       const valueKey = (k.includes('.')) ? k.split('.').join('_') : k;
@@ -1550,10 +1563,10 @@ class Query {
           // Loop over each item in arr
           for (let i = 0; i < arr.length; i++) {
             // Add value to ExpressionAttributeValues
-            this.ExpressionAttributeValues[`:${valueKey}${i}`] = { S: arr[i] };
+            returnObj.ExpressionAttributeValues[`:${valueKey}${i}`] = { S: arr[i] };
 
             // If FilterExpression is empty, init it
-            if (!this.FilterExpression && !filterString) {
+            if (!returnObj.FilterExpression && !filterString) {
               filterString = `( #${keyName} = :${valueKey}${i}`;
             }
             else if (!filterString) {
@@ -1565,19 +1578,19 @@ class Query {
           }
 
           filterString += ' )';
-          this.FilterExpression += filterString;
+          returnObj.FilterExpression += filterString;
         }
       }
       else {
         switch (typeof query[k]) {
           case 'string':
-            this.ExpressionAttributeValues[`:${valueKey}`] = { S: query[k] };
+            returnObj.ExpressionAttributeValues[`:${valueKey}`] = { S: query[k] };
             break;
           case 'boolean':
-            this.ExpressionAttributeValues[`:${valueKey}`] = { BOOL: query[k] };
+            returnObj.ExpressionAttributeValues[`:${valueKey}`] = { BOOL: query[k] };
             break;
           case 'number':
-            this.ExpressionAttributeValues[`:${valueKey}`] = {
+            returnObj.ExpressionAttributeValues[`:${valueKey}`] = {
               N: query[k].toString()
             };
             break;
@@ -1592,26 +1605,28 @@ class Query {
         // Handle special case where searching an array of permissions
         if (keyName.startsWith('permissions.')) {
           // If FilterExpression is not defined yet, define it
-          if (this.FilterExpression === '') {
-            this.FilterExpression = `contains (#${keyName}, :${valueKey})`;
+          if (returnObj.FilterExpression === '') {
+            returnObj.FilterExpression = `contains (#${keyName}, :${valueKey})`;
           }
           else {
             // Append on condition
-            this.FilterExpression += ` AND  contains (#${keyName}, :${valueKey})`;
+            returnObj.FilterExpression += ` AND  contains (#${keyName}, :${valueKey})`;
           }
         }
         else {
           // If FilterExpression is not defined yet, define it
-          if (this.FilterExpression === '') {
-            this.FilterExpression = `#${keyName} = :${valueKey}`;
+          if (returnObj.FilterExpression === '') {
+            returnObj.FilterExpression = `#${keyName} = :${valueKey}`;
           }
           else {
             // Append on condition
-            this.FilterExpression += ` AND #${keyName} = :${valueKey}`;
+            returnObj.FilterExpression += ` AND #${keyName} = :${valueKey}`;
           }
         }
       }
     });
+
+    return returnObj;
   }
 
   parseRequestItemsKeys(query) {
@@ -1737,7 +1752,7 @@ class Query {
 
   batchGetItem(filter, projection) {
     // Parse the projection
-    this.parseProjection(projection);
+    const projectionObj = this.parseProjection(projection);
 
     this.parseRequestItemsKeys(filter);
     const queries = [];
@@ -1748,12 +1763,13 @@ class Query {
     baseObj.RequestItems[this.model.TableName] = { Keys: [] };
 
     // Add on the ProjectionExpression and ExpressionAttributeNames if defined
-    if (this.ProjectionExpression.length) {
-      baseObj.RequestItems[this.model.TableName].ProjectionExpression = this.ProjectionExpression;
-    }
-    if (Object.keys(this.ExpressionAttributeNames).length !== 0) {
+    if (projectionObj.ProjectionExpression.length) {
       baseObj.RequestItems[this.model.TableName]
-      .ExpressionAttributeNames = this.ExpressionAttributeNames;
+      .ProjectionExpression = projectionObj.ProjectionExpression;
+    }
+    if (Object.keys(projectionObj.ExpressionAttributeNames).length !== 0) {
+      baseObj.RequestItems[this.model.TableName]
+      .ExpressionAttributeNames = projectionObj.ExpressionAttributeNames;
     }
 
     for (let i = 0; i < this.RequestItemsKeys.length / 25; i++) {
@@ -1811,7 +1827,7 @@ class Query {
 
   getItem(filter, projection) {
     // Parse the projection
-    this.parseProjection(projection);
+    const projectionObj = this.parseProjection(projection);
 
     this.parseRequestItemsKeys(filter);
 
@@ -1821,11 +1837,11 @@ class Query {
     };
 
     // Add on the ProjectionExpression and ExpressionAttributeNames if defined
-    if (this.ProjectionExpression.length) {
-      baseObj.ProjectionExpression = this.ProjectionExpression;
+    if (projectionObj.ProjectionExpression.length) {
+      baseObj.ProjectionExpression = projectionObj.ProjectionExpression;
     }
-    if (Object.keys(this.ExpressionAttributeNames).length !== 0) {
-      baseObj.ExpressionAttributeNames = this.ExpressionAttributeNames;
+    if (Object.keys(projectionObj.ExpressionAttributeNames).length !== 0) {
+      baseObj.ExpressionAttributeNames = projectionObj.ExpressionAttributeNames;
     }
 
     return baseObj;
@@ -1862,31 +1878,31 @@ class Query {
 
   scan(query, projection = null) {
     // Parse the projection
-    this.parseProjection(projection);
+    const projectionObj = this.parseProjection(projection);
 
-    this.parseFilterExpression(query);
+    const filterObj = this.parseFilterExpression(query, projectionObj.ExpressionAttributeNames);
     const baseObj = {
       TableName: this.model.TableName
     };
 
     // Add on the ProjectionExpression and ExpressionAttributeNames if defined
-    if (this.ProjectionExpression.length) {
-      baseObj.ProjectionExpression = this.ProjectionExpression;
+    if (projectionObj.ProjectionExpression.length) {
+      baseObj.ProjectionExpression = projectionObj.ProjectionExpression;
     }
-    if (Object.keys(this.ExpressionAttributeNames).length !== 0) {
-      baseObj.ExpressionAttributeNames = this.ExpressionAttributeNames;
+    if (Object.keys(filterObj.ExpressionAttributeNames).length !== 0) {
+      baseObj.ExpressionAttributeNames = filterObj.ExpressionAttributeNames;
     }
 
     // Add on ExpressionAttributeValues and FilterExpression if defined
-    if (this.FilterExpression.length > 0) {
-      baseObj.FilterExpression = this.FilterExpression;
+    if (filterObj.FilterExpression.length > 0) {
+      baseObj.FilterExpression = filterObj.FilterExpression;
     }
     // If not FilterExpression is defined, remove the ExpressionAttributeNames
     else if (!baseObj.hasOwnProperty('ProjectionExpression')) {
       delete baseObj.ExpressionAttributeNames;
     }
-    if (Object.keys(this.ExpressionAttributeValues).length !== 0) {
-      baseObj.ExpressionAttributeValues = this.ExpressionAttributeValues;
+    if (Object.keys(filterObj.ExpressionAttributeValues).length !== 0) {
+      baseObj.ExpressionAttributeValues = filterObj.ExpressionAttributeValues;
     }
 
     // For each options
