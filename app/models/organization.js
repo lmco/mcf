@@ -90,8 +90,13 @@ const OrganizationSchema = new db.Schema({
         + ' than 2 characters.'
     }, {
       validator: function(v) {
-        // If the ID is invalid, reject
-        return RegExp(validators.org.id).test(v);
+        if (typeof validators.org.id === 'string') {
+          // If the ID is invalid, reject
+          return RegExp(validators.org.id).test(v);
+        }
+        else {
+          return validators.org.id(v);
+        }
       },
       message: props => `Invalid org ID [${props.value}].`
     }]

@@ -569,6 +569,7 @@ function getAllProjects(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Parse the JSON response
+
     const foundProjects = JSON.parse(_data);
     chai.expect(Array.isArray(foundProjects)).to.equal(true);
     chai.expect(foundProjects.length).to.be.at.least(projData.length);
@@ -576,7 +577,7 @@ function getAllProjects(done) {
     // Account for other projects on different orgs that may exist in the database.
     // This mitigates collisions in the jmi converter between projects of the same name.
     foundProjects.forEach((p) => {
-      if (p.org !== testData.orgs[0].id) {
+      if (p.org !== org.id) {
         p.id = utils.createID(p.org, p.id);
       }
     });
