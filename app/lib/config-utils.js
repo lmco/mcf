@@ -272,7 +272,7 @@ module.exports.validate = function(config) {
   if (config.validators) {
     test(config, 'validators', 'object');
     const rootIDs = ['model', '__mbee__', 'undefined', 'holding_bin', 'master',
-      config.defaultOrganizationId, config.defaultAdminUsername];
+      config.server.defaultOrganizationId, config.server.defaultAdminUsername];
     const elemIDs = ['model', '__mbee__', 'undefined', 'holding_bin'];
     if (config.validators.id) test(config, 'validators.id', 'string');
     if (config.validators.id) {
@@ -283,21 +283,15 @@ module.exports.validate = function(config) {
         }
       });
     }
-    if (config.validators.id_length) test(config, 'validators.id_length', 'number');
-    // Check that custom id validators don't exclude root element ids
-    if (config.validators.id_length && !config.validators.element_id_length
-      && config.validators.id_length < 11) {
-      throw new Error(`Configuration file: custom id length "${config.validators.id_length}" is too short.`);
-    }
-    // Check that custom id validators don't exclude default org
-    if (config.validators.id_length && !config.validators.org_id_length
-      && config.validators.id_length < config.server.defaultOrganizationId.length) {
-      throw new Error(`Configuration file: custom id length "${config.validators.id_length}" is too short.`);
-    }
-    // Check that custom id validators don't exclude default admin
-    if (config.validators.id_length && !config.validators.user_username_length
-      && config.validators.id_length < config.server.defaultAdminUsername.length) {
-      throw new Error(`Configuration file: custom id length "${config.validators.id_length}" is too short.`);
+    if (config.validators.id_length) {
+      test(config, 'validators.id_length', 'number');
+      const minLength = rootIDs.map((id) => id.length).reduce((a, b) => Math.max(a, b));
+      if (config.validators.id_length < minLength) {
+        // Check that custom id validators don't exclude root ids
+        throw new Error(`Configuration file: custom id length "${config.validators.id_length}" is `
+        + `too short.  The minimum length must be ${minLength} to account for root element ids, `
+        + 'the default org id, and/or the default admin username.');
+      }
     }
     if (config.validators.element_id) {
       test(config, 'validators.element_id', 'string');

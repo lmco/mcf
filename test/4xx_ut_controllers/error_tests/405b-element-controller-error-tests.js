@@ -312,7 +312,7 @@ async function putInvalidId() {
   // Create the test element objects
   const testElemObj0 = testData.elements[7];
   const testElemObj1 = testData.elements[8];
-  const invalidElemObj = { id: '☹', name: 'element name' };
+  const invalidElemObj = { id: '!!', name: 'element name' };
 
   await ElementController.createOrReplace(adminUser, org._id, projID, branchID,
     [testElemObj0, testElemObj1, invalidElemObj])

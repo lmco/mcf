@@ -155,7 +155,7 @@ async function invalidID() {
   branchData.project = 'org:proj';
 
   // Change id to be invalid.
-  branchData._id = 'INVALID_ID';
+  branchData._id = '!!';
 
   // Create branch object
   const branchObject = Branch.createDocument(branchData);
@@ -184,7 +184,7 @@ async function projectNotProvided() {
  * @description Attempts to create a branch with an invalid project.
  */
 async function projectInvalid() {
-  if (customValidators.hasOwnProperty('id')) {
+  if (customValidators.hasOwnProperty('id') || customValidators.hasOwnProperty('project_id')) {
     M.log.verbose('Skipping valid branch project test due to an existing custom'
       + ' validator.');
     this.skip();
@@ -194,7 +194,7 @@ async function projectInvalid() {
   branchData._id = `org:proj:${branchData.id}`;
 
   // Set invalid project
-  branchData.project = 'invalid_project';
+  branchData.project = '!!';
 
   // Create branch object
   const branchObject = Branch.createDocument(branchData);
@@ -209,7 +209,7 @@ async function projectInvalid() {
  * @description Attempts to create a branch with an invalid source.
  */
 async function sourceInvalid() {
-  if (customValidators.hasOwnProperty('id')) {
+  if (customValidators.hasOwnProperty('id') || customValidators.hasOwnProperty('branch_id')) {
     M.log.verbose('Skipping valid branch source test due to an existing custom'
       + ' validator.');
     this.skip();
@@ -220,7 +220,7 @@ async function sourceInvalid() {
   branchData.project = 'org:proj';
 
   // Set invalid source
-  branchData.source = '☹☹';
+  branchData.source = '!!';
 
   // Create branch object
   const branchObject = Branch.createDocument(branchData);

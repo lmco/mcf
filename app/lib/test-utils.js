@@ -600,6 +600,7 @@ function generateCustomTestData() {
       });
       branch.id = customID;
     });
+    customTestData.invalidBranchID = generateID(`${v.branch_id}`, v.branch_id_length || validators.idLength, 2);
   }
   if (v.hasOwnProperty('project_id') || v.hasOwnProperty('project_id_length')
     || v.hasOwnProperty('id') || v.hasOwnProperty('id_length')) {
@@ -615,8 +616,8 @@ function generateCustomTestData() {
     // Set new custom org ids
     customTestData.orgs.forEach((org) => {
       // Generate new custom id
-      // Only validators is necessary here since org ids are not concatenated ids
-      org.id = generateID(validators.org.id, validators.org.idLength);
+      org.id = generateID(v.org_id || validators.id,
+        v.org_id_length || validators.org.idLength);
     });
   }
   if (v.hasOwnProperty('user_username') || v.hasOwnProperty('user_username_length')

@@ -40,7 +40,7 @@ if (module.parent == null) {
  *
  * @param {string} _args - Options from the user for how to run the tests.
  */
-async function test(_args) {
+function test(_args) {
   printHeader();
   M.log.verbose(`Running tests with DB strategy: ${M.config.db.strategy}`);
 

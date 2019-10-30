@@ -147,7 +147,7 @@ async function invalidID() {
   projData.org = 'org';
 
   // Change id to be invalid
-  projData._id = 'INVALID_ID';
+  projData._id = '!!';
 
   // Create project object
   const projObject = Project.createDocument(projData);
@@ -184,7 +184,7 @@ async function orgInvalid() {
 
   const projData = Object.assign({}, testData.projects[0]);
   projData._id = `org:${projData.id}`;
-  projData.org = 'INVALID';
+  projData.org = '!!';
 
   // Create project object
   const projObject = Project.createDocument(projData);
