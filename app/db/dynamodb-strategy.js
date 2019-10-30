@@ -542,9 +542,9 @@ class Model {
   async batchGetItem(filter, projection, options) {
     try {
       // Create the new query object
-      const query = new Query(this, projection, options);
+      const query = new Query(this, options);
       // Get an array of properly formatted batchGetItem queries
-      const queriesToMake = query.batchGetItem(filter);
+      const queriesToMake = query.batchGetItem(filter, projection);
 
       let foundDocs = [];
       const promises = [];
@@ -900,7 +900,7 @@ class Model {
   async countDocuments(filter, cb) {
     try {
       // Create a new query object
-      const query = new Query(this, null, {});
+      const query = new Query(this, {});
       // Get a formatted scan query
       const scanObj = query.scan(filter);
 
@@ -972,7 +972,7 @@ class Model {
       const tmpQuery = { _id: { $in: docs.map(d => d._id) } };
 
       // Create a new query object
-      const query = new Query(this, null, options);
+      const query = new Query(this, options);
       // Get the formatted batchWriteItem query, used for deletion
       const deleteQuery = query.deleteMany(tmpQuery);
 
@@ -1122,9 +1122,9 @@ class Model {
       // If all fields are indexed, use getItem
       if (allIndexed) {
         // Create a new query object
-        const query = new Query(this, projection, options);
+        const query = new Query(this, options);
         // Get a formatted getItem query
-        const getObj = query.getItem(conditions);
+        const getObj = query.getItem(conditions, projection);
 
         // Connect to the database
         const conn = await connect();
@@ -1384,9 +1384,9 @@ class Model {
   async scan(filter, projection, options) {
     try {
       // Create a new DynamoDB query
-      const query = new Query(this, projection, options);
+      const query = new Query(this, options);
       // Get the formatted scan query
-      const scanObj = query.scan(filter);
+      const scanObj = query.scan(filter, projection);
 
       // Connect to the database
       const conn = await connect();
@@ -1434,7 +1434,7 @@ class Model {
   async updateOne(filter, doc, options, cb) {
     try {
       // Create a new query object
-      const query = new Query(this, null, options);
+      const query = new Query(this, options);
       // Get the properly formatted updateItem query
       const updateObj = query.updateItem(filter, doc);
 
@@ -1483,7 +1483,7 @@ class Store extends DynamoDBStore {
 
 class Query {
 
-  constructor(model, projection, options) {
+  constructor(model, options) {
     this.model = model;
     this.options = options;
     this.ExpressionAttributeNames = {};
@@ -1492,9 +1492,6 @@ class Query {
     this.FilterExpression = '';
     this.RequestItemsKeys = [];
     this.UpdateExpression = '';
-
-    // Parse the projection
-    this.parseProjection(projection);
   }
 
 
@@ -1748,7 +1745,10 @@ class Query {
     });
   }
 
-  batchGetItem(filter) {
+  batchGetItem(filter, projection) {
+    // Parse the projection
+    this.parseProjection(projection);
+
     this.parseRequestItemsKeys(filter);
     const queries = [];
 
@@ -1775,7 +1775,10 @@ class Query {
     return queries;
   }
 
-  getItem(filter) {
+  getItem(filter, projection) {
+    // Parse the projection
+    this.parseProjection(projection);
+
     this.parseRequestItemsKeys(filter);
 
     const baseObj = {
@@ -1845,7 +1848,10 @@ class Query {
     return baseObj;
   }
 
-  scan(query) {
+  scan(query, projection = null) {
+    // Parse the projection
+    this.parseProjection(projection);
+
     this.parseFilterExpression(query);
     const baseObj = {
       TableName: this.model.TableName
