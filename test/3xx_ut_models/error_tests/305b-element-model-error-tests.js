@@ -117,6 +117,13 @@ async function idTooShort() {
  * @description Attempts to create an element with an id that is too long.
  */
 async function idTooLong() {
+  if (customValidators.hasOwnProperty('element_id') || customValidators.hasOwnProperty('id')
+    || customValidators.hasOwnProperty('element_id_length')
+    || customValidators.hasOwnProperty('id_length')) {
+    M.log.verbose('Skipping valid element id test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
   try {
     const elemData = Object.assign({}, testData.elements[0]);
     elemData.project = 'org:proj';
@@ -175,19 +182,19 @@ async function idNotProvided() {
  * @description Attempts to create an element with an invalid id.
  */
 async function invalidID() {
+  if (customValidators.hasOwnProperty('element_id') || customValidators.hasOwnProperty('id')) {
+    M.log.verbose('Skipping valid element id test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
   try {
-    if (customValidators.hasOwnProperty('element_id') || customValidators.hasOwnProperty('id')) {
-      M.log.verbose('Skipping valid element id test due to an existing custom'
-        + ' validator.');
-      this.skip();
-    }
     const elemData = Object.assign({}, testData.elements[0]);
     elemData.project = 'org:proj';
     elemData.branch = 'org:proj:branch';
     elemData.parent = 'org:proj:branch:model';
 
     // Change id to be invalid
-    elemData._id = 'INVALID_ELEM_ID';
+    elemData._id = '!!!!!!!!!!!';
 
     // Create element object
     const elemObject = Element.createDocument(elemData);
@@ -231,7 +238,7 @@ async function projectNotProvided() {
  * @description Attempts to create an element with an invalid project.
  */
 async function projectInvalid() {
-  if (customValidators.hasOwnProperty('id')) {
+  if (customValidators.hasOwnProperty('id') || customValidators.hasOwnProperty('project_id')) {
     M.log.verbose('Skipping valid element project test due to an existing custom'
       + ' validator.');
     this.skip();
@@ -243,7 +250,7 @@ async function projectInvalid() {
     elemData.parent = 'org:proj:branch:model';
 
     // Set invalid project
-    elemData.project = 'invalid_project';
+    elemData.project = '!!';
 
     // Create element object
     const elemObject = Element.createDocument(elemData);
@@ -288,7 +295,7 @@ async function branchNotProvided() {
  * @description Attempts to create an element with an invalid branch.
  */
 async function branchInvalid() {
-  if (customValidators.hasOwnProperty('id')) {
+  if (customValidators.hasOwnProperty('id') || customValidators.hasOwnProperty('branch_id')) {
     M.log.verbose('Skipping valid element branch test due to an existing custom'
       + ' validator.');
     this.skip();
@@ -300,7 +307,7 @@ async function branchInvalid() {
     elemData.parent = 'org:proj:branch:model';
 
     // Set invalid branch
-    elemData.branch = 'invalid_branch';
+    elemData.branch = '!!';
 
     // Create element object
     const elemObject = Element.createDocument(elemData);
@@ -321,7 +328,7 @@ async function branchInvalid() {
  * @description Attempts to create an element with an invalid parent.
  */
 async function parentInvalid() {
-  if (customValidators.hasOwnProperty('id')) {
+  if (customValidators.hasOwnProperty('id') || customValidators.hasOwnProperty('element_id')) {
     M.log.verbose('Skipping valid element parent test due to an existing custom'
       + ' validator.');
     this.skip();
@@ -333,7 +340,7 @@ async function parentInvalid() {
     elemData.branch = 'org:proj:branch';
 
     // Set invalid parent
-    elemData.parent = 'invalid_parent';
+    elemData.parent = '!!';
 
     // Create element object
     const elemObject = Element.createDocument(elemData);
@@ -354,7 +361,7 @@ async function parentInvalid() {
  * @description Attempts to create an element with an invalid source.
  */
 async function sourceInvalid() {
-  if (customValidators.hasOwnProperty('id')) {
+  if (customValidators.hasOwnProperty('id') || customValidators.hasOwnProperty('element_id')) {
     M.log.verbose('Skipping valid element source test due to an existing custom'
       + ' validator.');
     this.skip();
@@ -367,7 +374,7 @@ async function sourceInvalid() {
     elemData.parent = 'org:proj:branch:model';
 
     // Set invalid source
-    elemData.source = 'invalid_source';
+    elemData.source = '!!';
 
     // Create element object
     const elemObject = Element.createDocument(elemData);
@@ -418,7 +425,7 @@ async function sourceWithNoTarget() {
  * @description Attempts to create an element with an invalid target.
  */
 async function targetInvalid() {
-  if (customValidators.hasOwnProperty('id')) {
+  if (customValidators.hasOwnProperty('id') || customValidators.hasOwnProperty('element_id')) {
     M.log.verbose('Skipping valid element target test due to an existing custom'
       + ' validator.');
     this.skip();
@@ -431,7 +438,7 @@ async function targetInvalid() {
     elemData.parent = 'org:proj:branch:model';
 
     // Set invalid target
-    elemData.target = 'invalid_target';
+    elemData.target = '!!';
 
     // Create element object
     const elemObject = Element.createDocument(elemData);

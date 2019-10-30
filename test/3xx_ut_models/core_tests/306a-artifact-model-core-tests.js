@@ -107,17 +107,14 @@ async function createArtifact() {
     const createdArtifact = await artifact.save();
 
     // Verify output
-    chai.expect(createdArtifact._id).to.equal(
-      utils.createID(org.id, project.id, branch.id, artData.id)
-    );
+    chai.expect(createdArtifact._id).to.equal(utils.createID(org.id, project.id, branch.id,
+      artData.id));
     chai.expect(createdArtifact.filename).to.equal(artData.filename);
     chai.expect(createdArtifact.project).to.equal(utils.createID(org.id, project.id));
     chai.expect(createdArtifact.branch).to.equal(utils.createID(org.id, project.id, branch.id));
     chai.expect(createdArtifact.location).to.equal(artData.location);
     chai.expect(createdArtifact.strategy).to.equal(M.config.artifact.strategy);
-    chai.expect(createdArtifact.custom || {}).to.deep.equal(
-      artData.custom
-    );
+    chai.expect(createdArtifact.custom || {}).to.deep.equal(artData.custom);
   }
   catch (error) {
     M.log.error(error);
