@@ -114,7 +114,7 @@ async function putInvalidId() {
   // Create the test project objects
   const testProjObj0 = testData.projects[0];
   const testProjObj1 = testData.projects[1];
-  const invalidProjObj = { id: 'INVALID_ID', name: 'proj name' };
+  const invalidProjObj = { id: '!!', name: 'proj name' };
 
   await ProjectController.createOrReplace(adminUser, org._id,
     [testProjObj0, testProjObj1, invalidProjObj])

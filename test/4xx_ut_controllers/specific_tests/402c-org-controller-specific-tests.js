@@ -52,6 +52,11 @@ describe(M.getModuleName(module.filename), () => {
 
       // Create orgs for the tests to utilize
       orgs = await OrgController.create(adminUser, testData.orgs);
+      // Sort the orgs; they will be returned out of order if custom id validators are used
+      orgs = orgs.sort((a, b) => {
+        if (Number(a.name.slice(-2)) > Number(b.name.slice(-2))) return 1;
+        else return -1;
+      });
     }
     catch (error) {
       M.log.error(error);
@@ -61,11 +66,10 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Delete admin user.
+   * After: Remove the orgs and admin user.
    */
   after(async () => {
     try {
-      // Removing admin user
       await Organization.deleteMany({ _id: orgs.map((o) => o._id) });
       await testUtils.removeTestAdmin();
       await db.disconnect();
@@ -86,13 +90,13 @@ describe(M.getModuleName(module.filename), () => {
   it('should skip over find results', optionSkipFind);
   it('should return a raw JSON version of an org instead of a document with'
     + ' instance methods from find()', optionLeanFind);
-  it('should sort find results', optionSortFind);
   it('should find an org with a specific name', optionNameFind);
   it('should find an org created by a specific user', optionCreatedByFind);
   it('should find an org last modified by a specific user', optionLastModifiedByFind);
   it('should only find archived orgs', optionArchivedFind);
   it('should find an org archived by a specific user', optionArchivedByFind);
   it('should find an org based on its custom data', optionCustomFind);
+  it('should sort find results', optionSortFind);
   // ------------- Create -------------
   it('should populate the return object from create', optionPopulateCreate);
   it('should only return specified fields from create', optionFieldsCreate);
@@ -309,69 +313,6 @@ async function optionLeanFind() {
 }
 
 /**
- * @description Validates that the returned search results from findOrg can be sorted.
- */
-async function optionSortFind() {
-  try {
-    // Create the test org objects
-    const testOrg0 = {
-      id: 'testorg000',
-      name: 'b'
-    };
-    const testOrg1 = {
-      id: 'testorg001',
-      name: 'c'
-    };
-    const testOrg2 = {
-      id: 'testorg002',
-      name: 'a'
-    };
-    // Create sort options
-    const sortOption = { sort: 'name' };
-    const sortOptionReverse = { sort: '-name' };
-
-    // Create the orgs
-    const createdOrgs = await OrgController.create(adminUser, [testOrg0, testOrg1, testOrg2]);
-    // Expect createdOrgs array to contain 3 orgs
-    chai.expect(createdOrgs.length).to.equal(3);
-
-    const foundOrgs = await OrgController.find(adminUser, [testOrg0.id, testOrg1.id, testOrg2.id],
-      sortOption);
-    // Expect to find 3 orgs
-    chai.expect(foundOrgs.length).to.equal(3);
-
-    // Validate that the sort option is working
-    chai.expect(foundOrgs[0].name).to.equal('a');
-    chai.expect(foundOrgs[0]._id).to.equal('testorg002');
-    chai.expect(foundOrgs[1].name).to.equal('b');
-    chai.expect(foundOrgs[1]._id).to.equal('testorg000');
-    chai.expect(foundOrgs[2].name).to.equal('c');
-    chai.expect(foundOrgs[2]._id).to.equal('testorg001');
-
-    // Find the orgs and return them sorted in reverse
-    const reverseOrgs = await OrgController.find(adminUser, [testOrg0.id, testOrg1.id, testOrg2.id],
-      sortOptionReverse);
-    // Expect to find 3 orgs
-    chai.expect(foundOrgs.length).to.equal(3);
-
-    // Validate that the sort option is working
-    chai.expect(reverseOrgs[0].name).to.equal('c');
-    chai.expect(reverseOrgs[0]._id).to.equal('testorg001');
-    chai.expect(reverseOrgs[1].name).to.equal('b');
-    chai.expect(reverseOrgs[1]._id).to.equal('testorg000');
-    chai.expect(reverseOrgs[2].name).to.equal('a');
-    chai.expect(reverseOrgs[2]._id).to.equal('testorg002');
-
-    await OrgController.remove(adminUser, [testOrg0.id, testOrg1.id, testOrg2.id]);
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no errors
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
  * @description Validates that orgs with a specific name can be found.
  */
 async function optionNameFind() {
@@ -512,6 +453,10 @@ async function optionArchivedByFind() {
     foundOrgs.forEach((org) => {
       chai.expect(org.archivedBy).to.equal('test_admin');
     });
+
+    // Clean up for the following tests
+    update.archived = false;
+    await OrgController.update(adminUser, update);
   }
   catch (error) {
     M.log.error(error.message);
@@ -540,6 +485,67 @@ async function optionCustomFind() {
   catch (error) {
     M.log.error(error.message);
     // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that the returned search results from findOrg can be sorted.
+ */
+async function optionSortFind() {
+  try {
+    // Update the test org objects
+    const testOrg0 = {
+      id: orgs[0].id,
+      name: 'b'
+    };
+    const testOrg1 = {
+      id: orgs[1].id,
+      name: 'c'
+    };
+    const testOrg2 = {
+      id: orgs[2].id,
+      name: 'a'
+    };
+    // Create sort options
+    const sortOption = { sort: 'name' };
+    const sortOptionReverse = { sort: '-name' };
+
+    // Update the orgs
+    const updatedOrgs = await OrgController.update(adminUser, [testOrg0, testOrg1, testOrg2]);
+    // Expect createdOrgs array to contain 3 orgs
+    chai.expect(updatedOrgs.length).to.equal(3);
+
+    const foundOrgs = await OrgController.find(adminUser, [testOrg0.id, testOrg1.id, testOrg2.id],
+      sortOption);
+    // Expect to find 3 orgs
+    chai.expect(foundOrgs.length).to.equal(3);
+
+    // Validate that the sort option is working
+    chai.expect(foundOrgs[0].name).to.equal('a');
+    chai.expect(foundOrgs[0].id).to.equal(orgs[2].id);
+    chai.expect(foundOrgs[1].name).to.equal('b');
+    chai.expect(foundOrgs[1].id).to.equal(orgs[0].id);
+    chai.expect(foundOrgs[2].name).to.equal('c');
+    chai.expect(foundOrgs[2].id).to.equal(orgs[1].id);
+
+    // Find the orgs and return them sorted in reverse
+    const reverseOrgs = await OrgController.find(adminUser, [testOrg0.id, testOrg1.id, testOrg2.id],
+      sortOptionReverse);
+    // Expect to find 3 orgs
+    chai.expect(foundOrgs.length).to.equal(3);
+
+    // Validate that the sort option is working
+    chai.expect(reverseOrgs[0].name).to.equal('c');
+    chai.expect(reverseOrgs[0].id).to.equal(orgs[1].id);
+    chai.expect(reverseOrgs[1].name).to.equal('b');
+    chai.expect(reverseOrgs[1].id).to.equal(orgs[0].id);
+    chai.expect(reverseOrgs[2].name).to.equal('a');
+    chai.expect(reverseOrgs[2].id).to.equal(orgs[2].id);
+  }
+  catch (error) {
+    M.log.error(error.message);
+    // Expect no errors
     chai.expect(error.message).to.equal(null);
   }
 }

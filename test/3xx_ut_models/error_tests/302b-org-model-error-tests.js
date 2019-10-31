@@ -137,7 +137,7 @@ async function invalidID() {
     const orgData = Object.assign({}, testData.orgs[0]);
 
     // Change id to be invalid
-    orgData._id = 'INVALID_ID';
+    orgData._id = '!!';
 
     // Create org object
     const orgObject = Org.createDocument(orgData);

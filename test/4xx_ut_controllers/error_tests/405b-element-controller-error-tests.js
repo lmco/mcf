@@ -201,7 +201,7 @@ async function updateNonExistentSource() {
   // Attempt to update the element; should be rejected with specific error message
   await ElementController.update(adminUser, org._id, projID, branchID, update)
   .should.eventually.be.rejectedWith('The source element '
-    + '[NonExistentElement] was not found in the project [project00].');
+    + `[NonExistentElement] was not found in the project [${projID}].`);
 }
 
 /**
@@ -220,7 +220,7 @@ async function updateNonExistentTarget() {
   // Attempt to update the element; should be rejected with specific error message
   await ElementController.update(adminUser, org._id, projID, branchID, update)
   .should.eventually.be.rejectedWith('The target element '
-    + '[NonExistentElement] was not found in the project [project00].');
+    + `[NonExistentElement] was not found in the project [${projID}].`);
 }
 
 /**
@@ -304,10 +304,15 @@ async function deleteInTag() {
  * @description Verifies invalid Id PUT call does not delete existing elements.
  */
 async function putInvalidId() {
+  if (M.config.validators && M.config.validators.hasOwnProperty('element_id')) {
+    M.log.verbose('Skipping valid element project test due to an existing custom'
+      + ' validator.');
+    this.skip();
+  }
   // Create the test element objects
   const testElemObj0 = testData.elements[7];
   const testElemObj1 = testData.elements[8];
-  const invalidElemObj = { id: 'INVALID_ID', name: 'element name' };
+  const invalidElemObj = { id: '!!', name: 'element name' };
 
   await ElementController.createOrReplace(adminUser, org._id, projID, branchID,
     [testElemObj0, testElemObj1, invalidElemObj])
