@@ -209,8 +209,8 @@ module.exports.removeTestAdmin = async function() {
  * @returns {Promise<Organization>} Returns the newly created org upon
  * completion.
  */
-module.exports.createTestOrg = function(adminUser) {
-  return new Promise((resolve, reject) => {
+module.exports.createTestOrg = async function(adminUser) {
+  try {
     // Create the new organization
     const newOrg = Organization.createDocument({
       _id: testData.orgs[0].id,
@@ -219,10 +219,11 @@ module.exports.createTestOrg = function(adminUser) {
     });
     newOrg.permissions[adminUser._id] = ['read', 'write', 'admin'];
 
-    newOrg.save()
-    .then((_newOrg) => resolve(_newOrg))
-    .catch((error) => reject(error));
-  });
+    return (await Organization.insertMany(newOrg))[0];
+  }
+  catch (error) {
+    throw errors.captureError(error);
+  }
 };
 
 /**
@@ -262,10 +263,9 @@ module.exports.removeTestOrg = async function() {
  * @returns {Promise<Project>} Returns the newly created project upon
  * completion.
  */
-module.exports.createTestProject = function(adminUser, orgID) {
-  return new Promise((resolve, reject) => {
-    let createdProject = {};
-    // Create the new project
+module.exports.createTestProject = async function(adminUser, orgID) {
+  try {
+    // Create the new project object
     const newProject = Project.createDocument({
       _id: utils.createID(orgID, testData.projects[0].id),
       org: orgID,
@@ -274,41 +274,67 @@ module.exports.createTestProject = function(adminUser, orgID) {
       custom: null
     });
     newProject.permissions[adminUser._id] = ['read', 'write', 'admin'];
+    // Save the project
+    const createdProject = (await Project.insertMany(newProject))[0];
 
-    newProject.save()
-    .then((_newProj) => {
-      createdProject = _newProj;
+    // Create the master branch for the project
+    const newBranch = Branch.createDocument({
+      _id: utils.createID(orgID, testData.projects[0].id, testData.branches[0].id),
+      project: createdProject._id,
+      createdBy: adminUser._id,
+      createdOn: Date.now(),
+      lasModifiedBy: adminUser._id,
+      updatedOn: Date.now(),
+      name: testData.branches[0].name,
+      source: null
+    });
+    // Save the branch
+    const createdBranch = (await Branch.insertMany(newBranch))[0];
 
-      const newBranch = Branch.createDocument({
-        _id: utils.createID(orgID, testData.projects[0].id, testData.branches[0].id),
-        project: _newProj._id,
-        createdBy: adminUser._id,
-        createdOn: Date.now(),
-        lasModifiedBy: adminUser._id,
-        updatedOn: Date.now(),
-        name: testData.branches[0].name,
-        source: null
-      });
+    // Create root elements
+    const elementsToCreate = [];
+    const baseElement = {
+      project: createdProject._id,
+      branch: createdBranch._id,
+      createdBy: adminUser._id,
+      createdOn: Date.now(),
+      lasModifiedBy: adminUser._id,
+      updatedOn: Date.now(),
+    };
 
-      return newBranch.save();
-    })
-    .then((_newBranch) => {
-      const newElement = Element.createDocument({
-        _id: utils.createID(orgID, testData.projects[0].id, testData.branches[0].id, 'model'),
-        project: createdProject._id,
-        branch: _newBranch._id,
-        createdBy: adminUser._id,
-        createdOn: Date.now(),
-        lasModifiedBy: adminUser._id,
-        updatedOn: Date.now(),
-        name: 'Model'
-      });
+    // For each of the valid root elements
+    Element.getValidRootElements().forEach((e) => {
+      // Clone the base object to avoid modifying if
+      const obj = JSON.parse(JSON.stringify(baseElement));
+      obj._id = utils.createID(createdBranch._id, e);
 
-      return newElement.save();
-    })
-    .then(() => resolve(createdProject))
-    .catch((error) => reject(error));
-  });
+      // Handle setting each different name/parent
+      if (e === 'model') {
+        // Root model element, no parent
+        obj.parent = null;
+        obj.name = 'Model';
+      }
+      else if (e === '__mbee__') {
+        obj.parent = utils.createID(createdBranch._id, 'model');
+        obj.name = '__mbee__';
+      }
+      else {
+        obj.parent = utils.createID(createdBranch._id, '__mbee__');
+        obj.name = (e === 'undefined') ? 'undefined element' : 'holding bin';
+      }
+      // Append element object onto array of elements to create
+      elementsToCreate.push(obj);
+    });
+
+    // Create the root model elements
+    await Element.insertMany(elementsToCreate);
+
+    // Return the created project
+    return createdProject;
+  }
+  catch (error) {
+    throw errors.captureError(error);
+  }
 };
 
 /**
