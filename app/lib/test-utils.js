@@ -152,28 +152,26 @@ module.exports.createTestAdmin = async function() {
  *
  * @returns {Promise<string>} Returns the id of the deleted user.
  */
-module.exports.removeNonAdminUser = function() {
-  return new Promise((resolve, reject) => {
-    // Define user id
-    let userToDelete = null;
+module.exports.removeNonAdminUser = async function() {
+  try {
+    // Find non-admin user
+    const foundUser = await User.findOne({ _id: testData.users[1].username });
+    // Delete the non-admin user
+    await User.deleteMany({ _id: testData.users[1].username });
 
-    // Find admin user
-    User.findOne({ _id: testData.users[1].username })
-    .then((foundUser) => {
-      // Save user and remove user
-      userToDelete = foundUser;
-      return User.deleteMany({ _id: testData.users[1].username });
-    })
-    .then(() => Organization.find({ _id: M.config.server.defaultOrganizationId }))
-    .then((orgs) => {
-      // Remove user from permissions list in each project
-      delete orgs[0].permissions[userToDelete._id];
-      orgs[0].markModified('permissions');
-      return orgs[0].save();
-    })
-    .then(() => resolve(userToDelete._id))
-    .catch((error) => reject(error));
-  });
+    // Fine the default org
+    const defaultOrg = await Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+    // Remove the non-admin user from the default org
+    delete defaultOrg.permissions[foundUser._id];
+    // Save the updated default org
+    await Organization.updateOne({ _id: defaultOrg._id }, { permissions: defaultOrg.permissions });
+
+    // Return the _id of the deleted non-admin user
+    return foundUser._id;
+  }
+  catch (error) {
+    throw errors.captureError(error);
+  }
 };
 
 /**
@@ -181,28 +179,26 @@ module.exports.removeNonAdminUser = function() {
  *
  * @returns {Promise<string>} Returns the id of the deleted admin user.
  */
-module.exports.removeTestAdmin = function() {
-  return new Promise((resolve, reject) => {
-    // Define user id
-    let userToDelete = null;
+module.exports.removeTestAdmin = async function() {
+  try {
+    // Find the admin user
+    const foundUser = await User.findOne({ _id: testData.adminUser.username });
+    // Delete the admin user
+    await User.deleteMany({ _id: testData.adminUser.username });
 
-    // Find admin user
-    User.findOne({ _id: testData.adminUser.username })
-    .then((foundUser) => {
-      // Save user and remove user
-      userToDelete = foundUser;
-      return User.deleteMany({ _id: testData.adminUser.username });
-    })
-    .then(() => Organization.find({ _id: M.config.server.defaultOrganizationId }))
-    .then((orgs) => {
-      // Remove user from permissions list in each project
-      delete orgs[0].permissions[userToDelete._id];
-      orgs[0].markModified('permissions');
-      return orgs[0].save();
-    })
-    .then(() => resolve(userToDelete._id))
-    .catch((error) => reject(error));
-  });
+    // Find the default org
+    const defaultOrg = await Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+    // Remove the admin user from the default org
+    delete defaultOrg.permissions[foundUser._id];
+    // Save the updated default org
+    await Organization.updateOne({ _id: defaultOrg._id }, { permissions: defaultOrg.permissions });
+
+    // Return the _id of the deleted admin user
+    return foundUser._id;
+  }
+  catch (error) {
+    throw errors.captureError(error);
+  }
 };
 
 /**
