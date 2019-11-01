@@ -104,18 +104,17 @@ module.exports.createNonAdminUser = async function() {
  *
  * @returns {Promise<User>} Returns the newly created admin user upon completion.
  */
-module.exports.createTestAdmin = function() {
-  return new Promise((resolve, reject) => {
-    // Define new user
-    let newAdminUser = null;
-    // Check if the test admin user already exists
-    User.findOne({ _id: testData.adminUser.username })
-    .then((foundUser) => {
-      if (foundUser !== null) {
-        // Admin already exists, return it
-        return resolve(foundUser);
-      }
+module.exports.createTestAdmin = async function() {
+  try {
+    // Attempt to find the admin user
+    const foundUser = await User.findOne({ _id: testData.adminUser.username });
 
+    // If the admin user is found, return them
+    if (foundUser !== null) {
+      return foundUser;
+    }
+    // Admin user not found, create them
+    else {
       // Create user
       const user = User.createDocument({
         _id: testData.adminUser.username,
@@ -124,28 +123,28 @@ module.exports.createTestAdmin = function() {
         admin: true
       });
 
+      user.hashPassword();
+
       // Save user object to the database
-      return user.save();
-    })
-    .then((user) => {
-      // Set new admin user
-      newAdminUser = user;
+      const newAdminUser = (await User.insertMany(user))[0];
 
       // Find the default organization
-      return Organization.find({ _id: M.config.server.defaultOrganizationId });
-    })
-    .then((orgs) => {
+      const defaultOrg = await Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+
       // Add user to default org read/write permissions
-      orgs[0].permissions[newAdminUser._id] = ['read', 'write'];
+      defaultOrg.permissions[newAdminUser._id] = ['read', 'write'];
 
-      orgs[0].markModified('permissions');
+      // Save the updated default org
+      await Organization.updateOne({ _id: defaultOrg._id },
+        { permissions: defaultOrg.permissions });
 
-      // Save the updated org
-      return orgs[0].save();
-    })
-    .then(() => resolve(newAdminUser))
-    .catch((error) => reject(error));
-  });
+      // Return the newly created user
+      return newAdminUser;
+    }
+  }
+  catch (error) {
+    return errors.captureError(error);
+  }
 };
 
 /**
