@@ -159,7 +159,7 @@ module.exports.removeNonAdminUser = function() {
     .then((foundUser) => {
       // Save user and remove user
       userToDelete = foundUser;
-      return foundUser.remove();
+      return User.deleteMany({ _id: testData.users[1].username });
     })
     .then(() => Organization.find({ _id: M.config.server.defaultOrganizationId }))
     .then((orgs) => {
@@ -188,7 +188,7 @@ module.exports.removeTestAdmin = function() {
     .then((foundUser) => {
       // Save user and remove user
       userToDelete = foundUser;
-      return foundUser.remove();
+      return User.deleteMany({ _id: testData.adminUser.username });
     })
     .then(() => Organization.find({ _id: M.config.server.defaultOrganizationId }))
     .then((orgs) => {
