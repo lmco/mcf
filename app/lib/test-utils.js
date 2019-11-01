@@ -38,6 +38,7 @@ const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
+const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
 const validators = M.require('lib.validators');
@@ -48,20 +49,17 @@ let testData = JSON.parse(fs.readFileSync(path.join(M.root, 'test', 'test_data.j
  *
  * @returns {Promise<User>} Returns the newly created user upon completion.
  */
-module.exports.createNonAdminUser = function() {
-  return new Promise((resolve, reject) => {
-    // Define new user
-    let newUser = null;
+module.exports.createNonAdminUser = async function() {
+  try {
+    // Attempt to find the non-admin user
+    const foundUser = await User.findOne({ _id: testData.users[1].username });
 
-    // Check any admin exist
-    User.findOne({ _id: testData.users[1].username })
-    .then((foundUser) => {
-      // Check user found
-      if (foundUser !== null) {
-        // User found, return it
-        return resolve(foundUser);
-      }
-
+    // If the user was found, return them
+    if (foundUser !== null) {
+      return foundUser;
+    }
+    // User not found, create them
+    else {
       // Create user
       const user = User.createDocument({
         _id: testData.users[1].username,
@@ -71,28 +69,34 @@ module.exports.createNonAdminUser = function() {
         admin: false
       });
 
+      // Hash the user password
+      user.hashPassword();
+
       // Save user object to the database
-      return user.save();
-    })
-    .then((user) => {
-      // Set new user
-      newUser = user;
+      const newUser = (await User.insertMany(user))[0];
 
       // Find the default organization
-      return Organization.find({ _id: M.config.server.defaultOrganizationId });
-    })
-    .then((orgs) => {
-      // Add user to default org read/write permissions
-      orgs[0].permissions[newUser._id] = ['read', 'write'];
+      const defaultOrg = await Organization.findOne({ _id: M.config.server.defaultOrganizationId });
 
-      orgs[0].markModified('permissions');
+      // If the default org is not found, throw an error... this is a big problem if this occurs
+      if (defaultOrg === null) {
+        throw new M.ServerError('Default org not found during unit tests.', 'error');
+      }
+
+      // Add user to default org read/write permissions
+      defaultOrg.permissions[newUser._id] = ['read', 'write'];
 
       // Save the updated org
-      return orgs[0].save();
-    })
-    .then(() => resolve(newUser))
-    .catch((error) => reject(error));
-  });
+      await Organization.updateOne({ _id: defaultOrg._id },
+        { permissions: defaultOrg.permissions });
+
+      // Return the newly created user
+      return newUser;
+    }
+  }
+  catch (error) {
+    throw errors.captureError(error);
+  }
 };
 
 /**
