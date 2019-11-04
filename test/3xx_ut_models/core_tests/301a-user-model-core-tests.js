@@ -100,7 +100,6 @@ async function createUser() {
     savedUser.password.should.equal(derivedKey.toString('hex'));
   }
   catch (error) {
-    console.log(error)
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
