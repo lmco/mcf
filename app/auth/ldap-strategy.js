@@ -426,11 +426,9 @@ async function ldapSync(ldapUserObj) {
     // Add the user to the default org
     defaultOrg.permissions[userObject._id] = ['read', 'write'];
 
-    // Mark permissions as modified, required for 'mixed' fields
-    defaultOrg.markModified('permissions');
-
     // Save the updated default org
-    await defaultOrg.save();
+    await Organization.updateOne({ _id: M.config.server.defaultOrganizationId },
+      { permissions: defaultOrg.permissions });
   }
   catch (saveErr) {
     M.log.error(saveErr.message);
