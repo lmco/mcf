@@ -299,7 +299,7 @@ module.exports.createTestProject = async function(adminUser, orgID) {
       createdBy: adminUser._id,
       createdOn: Date.now(),
       lasModifiedBy: adminUser._id,
-      updatedOn: Date.now(),
+      updatedOn: Date.now()
     };
 
     // For each of the valid root elements
