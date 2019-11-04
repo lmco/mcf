@@ -94,10 +94,10 @@ async function idTooShort() {
     // Create branch object
     const branchObject = Branch.createDocument(branchData);
 
-    // Expect save() to fail with specific error message
-    await branchObject.save().should.eventually.be.rejectedWith('Branch validation failed: _id: '
-      + `Branch ID length [${utils.parseID(branchData._id).pop().length}] must`
-      + ' not be less than 2 characters.');
+    // Expect insertMany() to fail with specific error message
+    await Branch.insertMany(branchObject).should.eventually.be.rejectedWith('Branch '
+      + `validation failed: _id: Branch ID length [${utils.parseID(branchData._id).pop().length}] `
+      + 'must not be less than 2 characters.');
   }
   catch (error) {
     M.log.error(error);
@@ -128,9 +128,9 @@ async function idTooLong() {
     // Create branch object
     const branchObject = Branch.createDocument(branchData);
 
-    // Expect save() to fail with specific error message
-    await branchObject.save().should.eventually.be.rejectedWith('Branch validation failed: _id: '
-      + `Branch ID length [${branchData._id.length - validators.project.idLength - 1}]`
+    // Expect insertMany() to fail with specific error message
+    await Branch.insertMany(branchObject).should.eventually.be.rejectedWith('Branch validation '
+      + `failed: _id: Branch ID length [${branchData._id.length - validators.project.idLength - 1}]`
       + ` must not be more than ${validators.branch.idLength - validators.project.idLength - 1}`
       + ' characters.');
   }
@@ -152,9 +152,9 @@ async function idNotProvided() {
     // Create branch object
     const branchObject = Branch.createDocument(branchData);
 
-    // Expect save() to fail with specific error message
-    await branchObject.save().should.eventually.be.rejectedWith('Branch validation failed: _id: '
-      + 'Path `_id` is required.');
+    // Expect insertMany() to fail with specific error message
+    await Branch.insertMany(branchObject).should.eventually.be.rejectedWith('Branch'
+      + ' validation failed: _id: Path `_id` is required.');
   }
   catch (error) {
     M.log.error(error);
@@ -182,9 +182,9 @@ async function invalidID() {
     // Create branch object
     const branchObject = Branch.createDocument(branchData);
 
-    // Expect save() to fail with specific error message
-    await branchObject.save().should.eventually.be.rejectedWith('Branch validation failed: '
-      + `_id: Invalid branch ID [${branchData._id}].`);
+    // Expect insertMany() to fail with specific error message
+    await Branch.insertMany(branchObject).should.eventually.be.rejectedWith('Branch'
+      + ` validation failed: _id: Invalid branch ID [${branchData._id}].`);
   }
   catch (error) {
     M.log.error(error);
@@ -204,9 +204,9 @@ async function projectNotProvided() {
     // Create branch object
     const branchObject = Branch.createDocument(branchData);
 
-    // Expect save() to fail with specific error message
-    await branchObject.save().should.eventually.be.rejectedWith('Branch validation failed: project: '
-      + 'Path `project` is required.');
+    // Expect insertMany() to fail with specific error message
+    await Branch.insertMany(branchObject).should.eventually.be.rejectedWith('Branch'
+      + ' validation failed: project: Path `project` is required.');
   }
   catch (error) {
     M.log.error(error);
@@ -234,9 +234,10 @@ async function projectInvalid() {
     // Create branch object
     const branchObject = Branch.createDocument(branchData);
 
-    // Expect save() to fail with specific error message
-    await branchObject.save().should.eventually.be.rejectedWith(
-      `Branch validation failed: project: ${branchData.project} is not a valid project ID.`
+    // Expect insertMany() to fail with specific error message
+    await Branch.insertMany(branchObject).should.eventually.be.rejectedWith(
+      `Branch validation failed: project: ${branchData.project} is not a valid `
+      + 'project ID.'
     );
   }
   catch (error) {
@@ -266,9 +267,10 @@ async function sourceInvalid() {
     // Create branch object
     const branchObject = Branch.createDocument(branchData);
 
-    // Expect save() to fail with specific error message
-    await branchObject.save().should.eventually.be.rejectedWith(
-      `Branch validation failed: source: ${branchData.source} is not a valid source ID.`
+    // Expect insertMany() to fail with specific error message
+    await Branch.insertMany(branchObject).should.eventually.be.rejectedWith(
+      `Branch validation failed: source: ${branchData.source} is not a valid `
+      + 'source ID.'
     );
   }
   catch (error) {

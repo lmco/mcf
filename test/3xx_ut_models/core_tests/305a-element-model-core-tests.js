@@ -96,7 +96,7 @@ async function createElement() {
   });
 
   // Save element object to database
-  const createdElement = await newElement.save();
+  const createdElement = (await Element.insertMany(newElement))[0];
   // Check element object saved correctly
   createdElement._id.should.equal(
     utils.createID(org.id, project.id, branch.id, testData.elements[0].id)

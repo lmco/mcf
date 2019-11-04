@@ -104,7 +104,7 @@ async function createArtifact() {
 
   try {
     // Save artifact object to the database
-    const createdArtifact = await artifact.save();
+    const createdArtifact = (await Artifact.insertMany(artifact))[0];
 
     // Verify output
     chai.expect(createdArtifact._id).to.equal(utils.createID(org.id, project.id, branch.id,

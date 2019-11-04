@@ -101,7 +101,7 @@ async function createProject() {
 
   try {
     // Save project model object to database
-    await newProject.save();
+    await Project.insertMany(newProject);
   }
   catch (error) {
     M.log.error(error);
