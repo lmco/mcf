@@ -160,7 +160,7 @@ async function createDefaultOrganization() {
         }
       });
 
-      // Save the update organization
+      // Save the updated organization
       await Organization.updateOne(defaultOrgQuery, { permissions: org.permissions });
     }
     else {
