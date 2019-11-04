@@ -360,7 +360,7 @@ module.exports.createTag = async function(adminUser, orgID, projID) {
     });
 
     // Save the tag
-    const createdTag = await Branch.insertMany(newTag);
+    const createdTag = (await Branch.insertMany(newTag))[0];
 
     // Create root elements
     const elementsToCreate = [];
