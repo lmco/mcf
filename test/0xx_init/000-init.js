@@ -142,7 +142,7 @@ async function createDefaultOrg() {
     });
 
     // Save the default org
-    await defOrg.save();
+    await Organization.insertMany(defOrg);
   }
   catch (error) {
     M.log.error(error);
