@@ -134,43 +134,36 @@ function initApp() {
 
 /**
  * @description Creates a default organization if one does not already exist.
+ * @async
  *
  * @returns {Promise} Resolves an empty promise upon completion.
  */
-function createDefaultOrganization() {
-  return new Promise((resolve, reject) => {
-    // Initialize createdOrg
-    let createdOrg = false;
-    // Initialize userIDs
-    let userIDs = null;
-
+async function createDefaultOrganization() {
+  try {
     // Find all users
-    User.find({})
-    .then(users => {
-      // Set userIDs to the _id of the users array
-      userIDs = users.map(u => u._id);
-      // Find the default organization
-      return Organization.findOne({ _id: M.config.server.defaultOrganizationId });
-    })
-    .then(org => {
-      // Check if org is NOT null
-      if (org !== null) {
-        // Default organization exists, prune user permissions to only include
-        // users currently in the database.
-        Object.keys(org.permissions).forEach((user) => {
-          if (!userIDs.includes(user)) {
-            delete org.permissions.user;
-          }
-        });
+    const users = await User.find({});
+    // Set userIDs to the _id of the users array
+    const userIDs = users.map(u => u._id);
 
-        // Mark the permissions field modified, require for 'mixed' fields
-        org.markModified('permissions');
+    // Find the default organization
+    const defaultOrgQuery = { _id: M.config.server.defaultOrganizationId };
+    const org = await Organization.findOne(defaultOrgQuery);
 
-        // Save the update organization
-        return org.save();
-      }
-      // Set createdOrg to true
-      createdOrg = true;
+    // Check if org is NOT null
+    if (org !== null) {
+      // Default organization exists, prune user permissions to only include
+      // users currently in the database.
+      Object.keys(org.permissions)
+      .forEach((user) => {
+        if (!userIDs.includes(user)) {
+          delete org.permissions.user;
+        }
+      });
+
+      // Save the update organization
+      await Organization.updateOne(defaultOrgQuery, { permissions: org.permissions });
+    }
+    else {
       // Default organization does NOT exist, create it and add all active users
       // to permissions list
       const defaultOrg = Organization.createDocument({
@@ -184,18 +177,14 @@ function createDefaultOrganization() {
       });
 
       // Save new default organization
-      return defaultOrg.save();
-    })
-    // Resolve on success of saved organization
-    .then(() => {
-      if (createdOrg) {
-        M.log.info('Default Organization Created');
-      }
-      return resolve();
-    })
-    // Catch and reject error
-    .catch(error => reject(error));
-  });
+      await Organization.insertMany(defaultOrg);
+
+      M.log.info('Default Organization Created');
+    }
+  }
+  catch (error) {
+    throw new M.ServerError('Failed to create the default organization.', 'error');
+  }
 }
 
 /**
