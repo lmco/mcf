@@ -200,23 +200,17 @@ function createDefaultOrganization() {
 
 /**
  * @description Creates a default admin if a global admin does not already exist.
+ * @async
  *
  * @returns {Promise} Resolves an empty promise upon completion.
  */
-function createDefaultAdmin() {
-  return new Promise((resolve, reject) => {
-    // Initialize userCreated
-    let userCreated = false;
+async function createDefaultAdmin() {
+  try {
     // Search for a user who is a global admin
-    User.findOne({ admin: true })
-    .then(user => {
-      // Check if the user is NOT null
-      if (user !== null) {
-        // Global admin already exists, resolve
-        return resolve();
-      }
-      // set userCreated to true
-      userCreated = true;
+    const user = await User.findOne({ admin: true });
+
+    // If user is null, create the admin user
+    if (user === null) {
       // No global admin exists, create local user as global admin
       const adminUserData = User.createDocument({
         // Set username and password of global admin user from configuration.
@@ -225,29 +219,26 @@ function createDefaultAdmin() {
         provider: 'local',
         admin: true
       });
-      // Save new global admin user
-      return adminUserData.save();
-    })
-    .then(() => Organization.findOne({ _id: M.config.server.defaultOrganizationId }))
-    .then((defaultOrg) => {
+
+      // Save the admin user
+      await User.insertMany(adminUserData);
+
+      // Find the default org
+      const defaultOrgQuery = { _id: M.config.server.defaultOrganizationId };
+      const defaultOrg = await Organization.findOne(defaultOrgQuery);
+
       // Add default admin to default org
       defaultOrg.permissions[M.config.server.defaultAdminUsername] = ['read', 'write'];
 
-      defaultOrg.markModified('permissions');
-
       // Save the updated default org
-      return defaultOrg.save();
-    })
-    // Resolve on success of saved admin
-    .then(() => {
-      if (userCreated) {
-        M.log.info('Default Admin Created');
-      }
-      return resolve();
-    })
-    // Catch and reject error
-    .catch(error => reject(error));
-  });
+      await Organization.updateOne(defaultOrgQuery, { permissions: defaultOrg.permissions });
+
+      M.log.info('Default Admin Created');
+    }
+  }
+  catch (error) {
+    throw new M.ServerError('Failed to create the default admin.', 'error');
+  }
 }
 
 /**

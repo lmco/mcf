@@ -328,17 +328,15 @@ async function create(requestingUser, users, options) {
     EventEmitter.emit('users-created', createdUsers);
 
     // Find the default organization
-    const defaultOrg = await Organization.findOne({ _id: M.config.server.defaultOrganizationId });
+    const defaultOrgQuery = { _id: M.config.server.defaultOrganizationId };
+    const defaultOrg = await Organization.findOne(defaultOrgQuery);
     // Add each created user to the default org with read/write
     createdUsers.forEach((user) => {
       defaultOrg.permissions[user._id] = ['read', 'write'];
     });
 
-    // Mark the default orgs permissions as modified
-    defaultOrg.markModified('permissions');
-
     // Save the updated default org
-    await defaultOrg.save();
+    await Organization.updateOne(defaultOrgQuery, { permissions: defaultOrg.permissions });
 
     // Find and return the created users
     return await User.find({ _id: { $in: arrUsernames } }, validatedOptions.fieldsString,
@@ -828,11 +826,8 @@ async function remove(requestingUser, users, options) {
         delete org.permissions[user];
       });
 
-      org.markModified('permissions');
-
-      // Add save operation to promise array
-      // TODO: Change to use updateOne()
-      promises.push(org.save());
+      // Update each org
+      promises.push(Organization.updateOne({ _id: org._id }, { permissions: org.permissions }));
     });
 
     // Save all orgs and return once all are saved
@@ -848,11 +843,8 @@ async function remove(requestingUser, users, options) {
         delete proj.permissions[user];
       });
 
-      proj.markModified('permissions');
-
-      // Add save operation to promise array
-      // TODO: Change to use updateOne()
-      promises2.push(proj.save());
+      // Update each project
+      promises2.push(Project.updateOne({ _id: proj._id }, { permissions: proj.permissions }));
     });
 
     // Save all projects and return once all are saved
@@ -1025,7 +1017,8 @@ async function updatePassword(requestingUser, oldPassword, newPassword, confirmP
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
 
     // Find the requesting user
-    const foundUser = await User.findOne({ _id: reqUser._id });
+    const userQuery = { _id: reqUser._id };
+    const foundUser = await User.findOne(userQuery);
 
     // Ensure the user was found
     if (foundUser === null) {
@@ -1042,10 +1035,14 @@ async function updatePassword(requestingUser, oldPassword, newPassword, confirmP
 
     // Update password on requesting user
     foundUser.password = newPassword;
+    // Hash the user password
+    User.hashPassword(foundUser);
 
-    // Save the requesting user, forcing pre-save middleware to hash new password
-    // TODO: Consider modifying to NOT use pre-save middleware for DB-abstraction
-    return await foundUser.save();
+    // Save the user with the updated password
+    await User.updateOne(userQuery, { password: foundUser.password });
+
+    // Find and return the updated user
+    return await User.findOne(userQuery);
   }
   catch (error) {
     throw errors.captureError(error);
