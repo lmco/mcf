@@ -89,8 +89,9 @@ async function idTooShort() {
     const orgObject = Org.createDocument(orgData);
 
     // Save org
-    await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed:'
-      + ` _id: Org ID length [${orgData._id.length}] must not be less than 2 characters.`);
+    await Org.insertMany(orgObject).should.eventually.be.rejectedWith('Organization '
+      + `validation failed: _id: Org ID length [${orgData._id.length}] must not`
+      + ' be less than 2 characters.');
   }
   catch (error) {
     M.log.error(error);
@@ -113,9 +114,9 @@ async function idTooLong() {
     const orgObject = Org.createDocument(orgData);
 
     // Save org
-    await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed: '
-      + `_id: Org ID length [${orgData._id.length}] must not be more than `
-      + `${validators.org.idLength} characters.`);
+    await Org.insertMany(orgObject).should.eventually.be.rejectedWith('Organization'
+      + ` validation failed: _id: Org ID length [${orgData._id.length}] must `
+      + `not be more than ${validators.org.idLength} characters.`);
   }
   catch (error) {
     M.log.error(error);
@@ -143,8 +144,8 @@ async function invalidID() {
     const orgObject = Org.createDocument(orgData);
 
     // Save org
-    await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed: '
-      + `_id: Invalid org ID [${orgData._id}].`);
+    await Org.insertMany(orgObject).should.eventually.be.rejectedWith('Organization'
+      + ` validation failed: _id: Invalid org ID [${orgData._id}].`);
   }
   catch (error) {
     M.log.error(error);
@@ -164,8 +165,8 @@ async function idNotProvided() {
     const orgObject = Org.createDocument(orgData);
 
     // Save org
-    await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed: '
-      + '_id: Path `_id` is required.');
+    await Org.insertMany(orgObject).should.eventually.be.rejectedWith('Organization'
+      + ' validation failed: _id: Path `_id` is required.');
   }
   catch (error) {
     M.log.error(error);
@@ -189,8 +190,8 @@ async function nameNotProvided() {
     const orgObject = Org.createDocument(orgData);
 
     // Save org
-    await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed: '
-      + 'name: Path `name` is required.');
+    await Org.insertMany(orgObject).should.eventually.be.rejectedWith('Organization'
+      + ' validation failed: name: Path `name` is required.');
   }
   catch (error) {
     M.log.error(error);
@@ -216,9 +217,9 @@ async function permissionsInvalid() {
     const orgObject = Org.createDocument(orgData);
 
     // Expect save() to fail with specific error message
-    await orgObject.save().should.eventually.be.rejectedWith(
-      'Organization validation failed: permissions: The organization permissions '
-      + 'object is not properly formatted.'
+    await Org.insertMany(orgObject).should.eventually.be.rejectedWith(
+      'Organization validation failed: permissions: The organization '
+      + 'permissions object is not properly formatted.'
     );
   }
   catch (error) {
