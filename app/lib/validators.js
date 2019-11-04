@@ -12,6 +12,7 @@
  * @author Josh Kaplan
  * @author Austin Bieber
  * @author Connor Doyle
+ * @author Phillip Lee
  *
  * @description This file defines validators - common regular expressions and
  * helper functions - used to validate data within MBEE.
@@ -138,8 +139,7 @@ const artifact = {
       : idLength),
   location: (artifactVal.location) ? artifactVal.location : '^[^.]+$',
   filename: (artifactVal.filename) ? artifactVal.filename : '^[^!\\<>:"\'|?*]+$',
-  extension: (artifactVal.extension) ? artifactVal.extension : '^[\\w]+[.][\\w]+$',
-  custom: customDataValidator
+  extension: (artifactVal.extension) ? artifactVal.extension : '^[^!\\<>:"\'|?*]+[.][\\w]+$'
 };
 
 /**
