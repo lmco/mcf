@@ -128,8 +128,11 @@ async function find(requestingUser, organizationID, projectID, branchID, artifac
   // Ensure input parameters are correct type
   helper.checkParams(requestingUser, options, organizationID, projectID, branchID);
   helper.checkParamsDataType(['undefined', 'object', 'string'], artifacts, 'Artifacts');
-  // Sanitize input parameters
-  const saniArtifacts = sani.db(JSON.parse(JSON.stringify(artifacts)));
+
+  // Sanitize input parameters and create function-wide variables
+  const saniArtifacts = (artifacts !== undefined)
+    ? sani.db(JSON.parse(JSON.stringify(artifacts)))
+    : undefined;
   const reqUser = JSON.parse(JSON.stringify(requestingUser));
   const orgID = sani.db(organizationID);
   const projID = sani.db(projectID);
@@ -152,8 +155,12 @@ async function find(requestingUser, organizationID, projectID, branchID, artifac
     Object.keys(options).forEach((o) => {
       // If the provided option is a valid search option
       if (validSearchOptions.includes(o) || o.startsWith('custom.')) {
+        // Ensure the archived search option is a boolean
+        if (o === 'archived' && typeof options[o] !== 'boolean') {
+          throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
+        }
         // Ensure the search option is a string
-        if (typeof options[o] !== 'string') {
+        else if (typeof options[o] !== 'string' && o !== 'archived') {
           throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
         }
 
@@ -289,16 +296,17 @@ async function create(requestingUser, organizationID, projectID, branchID,
       throw new M.DataFormatError('Invalid input for creating artifacts.', 'warn');
     }
 
-    // Find the organization and validate that it was found and not archived
-    const organization = await helper.findAndValidate(Org, orgID, reqUser);
+    // Find the organization and validate that it was found and not archived (unless specified)
+    const organization = await helper.findAndValidate(Org, orgID,
+      ((options && options.archived) || validatedOptions.includeArchived));
 
-    // Find the project and validate that it was found and not archived
-    const project = await helper.findAndValidate(Project,
-      utils.createID(orgID, projID), reqUser);
+    // Find the project and validate that it was found and not archived (unless specified)
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
+      ((options && options.archived) || validatedOptions.includeArchived));
 
-    // Find the branch and validate that it was found and not archived
-    const branch = await helper.findAndValidate(Branch,
-      utils.createID(orgID, projID, branID), reqUser);
+    // Find the branch and validate that it was found and not archived (unless specified)
+    const branch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
+      ((options && options.archived) || validatedOptions.includeArchived));
 
     // Check that the branch is is not a tag
     if (branch.tag) {
