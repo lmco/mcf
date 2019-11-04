@@ -91,12 +91,16 @@ async function createUser() {
     const derivedKey = crypto.pbkdf2Sync(userData.password, userData._id.toString(), 1000, 32, 'sha256');
     // Create a new User object
     const user = User.createDocument(userData);
+    // Hash the user password
+    User.hashPassword(user);
+
     // Save user object to the database
-    const savedUser = await user.save();
+    const savedUser = (await User.insertMany(user))[0];
     // Ensure that the user password is stored as a hash
     savedUser.password.should.equal(derivedKey.toString('hex'));
   }
   catch (error) {
+    console.log(error)
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
