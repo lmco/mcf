@@ -20,7 +20,7 @@ const validator = {
   location: '^[^.]+$',
   filename: '^[^!\\<>:"\'|?*]+$',
   // Matches filename + extensions
-  extension: '^[\\w]+[.][\\w]+$'
+  extension: '^[^!\\<>:"\'|?*]+[.][\\w]+$'
 };
 
 // Define the root storage path for blobs
