@@ -7,7 +7,7 @@
 #
 # @license LMPI - Lockheed Martin Proprietary Information
 #
-# @owner Leah De Laurell
+# @owner Connor Doyle
 #
 # @author Leah De Laurell
 #
