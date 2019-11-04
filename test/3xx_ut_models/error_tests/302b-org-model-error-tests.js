@@ -88,7 +88,7 @@ async function idTooShort() {
     // Create org object
     const orgObject = Org.createDocument(orgData);
 
-    // Save org
+    // Expect insertMany() to fail with specific error message
     await Org.insertMany(orgObject).should.eventually.be.rejectedWith('Organization '
       + `validation failed: _id: Org ID length [${orgData._id.length}] must not`
       + ' be less than 2 characters.');
@@ -113,7 +113,7 @@ async function idTooLong() {
     // Create org object
     const orgObject = Org.createDocument(orgData);
 
-    // Save org
+    // Expect insertMany() to fail with specific error message
     await Org.insertMany(orgObject).should.eventually.be.rejectedWith('Organization'
       + ` validation failed: _id: Org ID length [${orgData._id.length}] must `
       + `not be more than ${validators.org.idLength} characters.`);
@@ -143,7 +143,7 @@ async function invalidID() {
     // Create org object
     const orgObject = Org.createDocument(orgData);
 
-    // Save org
+    // Expect insertMany() to fail with specific error message
     await Org.insertMany(orgObject).should.eventually.be.rejectedWith('Organization'
       + ` validation failed: _id: Invalid org ID [${orgData._id}].`);
   }
@@ -164,7 +164,7 @@ async function idNotProvided() {
     // Create org object
     const orgObject = Org.createDocument(orgData);
 
-    // Save org
+    // Expect insertMany() to fail with specific error message
     await Org.insertMany(orgObject).should.eventually.be.rejectedWith('Organization'
       + ' validation failed: _id: Path `_id` is required.');
   }
@@ -189,7 +189,7 @@ async function nameNotProvided() {
     // Create org object
     const orgObject = Org.createDocument(orgData);
 
-    // Save org
+    // Expect insertMany() to fail with specific error message
     await Org.insertMany(orgObject).should.eventually.be.rejectedWith('Organization'
       + ' validation failed: name: Path `name` is required.');
   }
@@ -216,7 +216,7 @@ async function permissionsInvalid() {
     // Create org object
     const orgObject = Org.createDocument(orgData);
 
-    // Expect save() to fail with specific error message
+    // Expect insertMany() to fail with specific error message
     await Org.insertMany(orgObject).should.eventually.be.rejectedWith(
       'Organization validation failed: permissions: The organization '
       + 'permissions object is not properly formatted.'

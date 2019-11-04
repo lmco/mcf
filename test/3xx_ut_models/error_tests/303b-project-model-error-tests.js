@@ -93,7 +93,7 @@ async function idTooShort() {
     // Create project object
     const projObject = Project.createDocument(projData);
 
-    // Expect save() to fail with specific error message
+    // Expect insertMany() to fail with specific error message
     await Project.insertMany(projObject).should.eventually.be.rejectedWith('Project'
       + ` validation failed: _id: Project ID length [${utils.parseID(projData._id).pop().length}]`
       + ' must not be less than 2 characters.');
@@ -120,7 +120,7 @@ async function idTooLong() {
     // Create project object
     const projObject = Project.createDocument(projData);
 
-    // Expect save() to fail with specific error message
+    // Expect insertMany() to fail with specific error message
     await Project.insertMany(projObject).should.eventually.be.rejectedWith('Project validation'
       + ` failed: _id: Project ID length [${projData._id.length - validators.org.idLength - 1}]`
       + ` must not be more than ${validators.project.idLength - validators.org.idLength - 1}`
@@ -144,7 +144,7 @@ async function idNotProvided() {
     // Create project object
     const projObject = Project.createDocument(projData);
 
-    // Expect save() to fail with specific error message
+    // Expect insertMany() to fail with specific error message
     await Project.insertMany(projObject).should.eventually.be.rejectedWith('Project'
       + ' validation failed: _id: Path `_id` is required.');
   }
@@ -174,7 +174,7 @@ async function invalidID() {
     // Create project object
     const projObject = Project.createDocument(projData);
 
-    // Expect save() to fail with specific error message
+    // Expect insertMany() to fail with specific error message
     await Project.insertMany(projObject).should.eventually.be.rejectedWith('Project'
       + ` validation failed: _id: Invalid project ID [${projData._id}].`);
   }
@@ -196,7 +196,7 @@ async function orgNotProvided() {
     // Create project object
     const projObject = Project.createDocument(projData);
 
-    // Expect save() to fail with specific error message
+    // Expect insertMany() to fail with specific error message
     await Project.insertMany(projObject).should.eventually.be.rejectedWith('Project'
       + ' validation failed: org: Path `org` is required.');
   }
@@ -224,7 +224,7 @@ async function orgInvalid() {
     // Create project object
     const projObject = Project.createDocument(projData);
 
-    // Expect save() to fail with specific error message
+    // Expect insertMany() to fail with specific error message
     await Project.insertMany(projObject).should.eventually.be.rejectedWith(
       `Project validation failed: org: ${projData.org} is not a valid org ID.`
     );
@@ -251,7 +251,7 @@ async function nameNotProvided() {
     // Create project object
     const projObject = Project.createDocument(projData);
 
-    // Expect save() to fail with specific error message
+    // Expect insertMany() to fail with specific error message
     await Project.insertMany(projObject).should.eventually.be.rejectedWith('Project'
       + ' validation failed: name: Path `name` is required.');
   }
@@ -279,7 +279,7 @@ async function permissionsInvalid() {
     // Create project object
     const projObject = Project.createDocument(projData);
 
-    // Expect save() to fail with specific error message
+    // Expect insertMany() to fail with specific error message
     await Project.insertMany(projObject).should.eventually.be.rejectedWith(
       'Project validation failed: permissions: The project permissions object '
       + 'is not properly formatted.'
@@ -307,7 +307,7 @@ async function visibilityInvalid() {
     // Create project object
     const projObject = Project.createDocument(projData);
 
-    // Expect save() to fail with specific error message
+    // Expect insertMany() to fail with specific error message
     await Project.insertMany(projObject).should.eventually.be.rejectedWith(
       `Project validation failed: visibility: \`${projData.visibility}\` is not`
       + ' a valid enum value for path `visibility`.'
