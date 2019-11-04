@@ -561,78 +561,85 @@ async function update(requestingUser, orgs, options) {
 
         // Get validator for field if one exists
         if (validators.org.hasOwnProperty(key)) {
-          // If validation fails, throw error
-          if (!RegExp(validators.org[key]).test(updateOrg[key])) {
-            throw new M.DataFormatError(
-              `Invalid ${key}: [${updateOrg[key]}]`, 'warn'
-            );
+          // If the validator is a regex string
+          if (typeof validators.org[key] === 'string') {
+            // If validation fails, throw error
+            if (!RegExp(validators.org[key]).test(updateOrg[key])) {
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateOrg[key]}]`, 'warn'
+              );
+            }
+          }
+          // If the validator is a function
+          else if (typeof validators.org[key] === 'function') {
+            if (!validators.org[key](updateOrg[key])) {
+              throw new M.DataFormatError(
+                `Invalid ${key}: [${updateOrg[key]}]`, 'warn'
+              );
+            }
+          }
+          // Improperly formatted validator
+          else {
+            throw new M.ServerError(`Org validator [${key}] is neither a `
+              + 'function nor a regex string.');
           }
         }
 
-        // If the type of field is mixed
-        if (Organization.schema.obj[key]
-          && Organization.schema.obj[key].type.schemaName === 'Mixed') {
-          // Only objects should be passed into mixed data
-          if (typeof updateOrg !== 'object') {
-            throw new M.DataFormatError(`${key} must be an object`, 'warn');
-          }
+        // If the user is updating permissions
+        if (key === 'permissions') {
+          // Loop through each user provided
+          Object.keys(updateOrg[key]).forEach((user) => {
+            let permValue = updateOrg[key][user];
+            // Ensure user is not updating own permissions
+            if (user === reqUser._id) {
+              throw new M.OperationError('User cannot update own permissions.', 'warn');
+            }
 
-          // If the user is updating permissions
-          if (key === 'permissions') {
-            // Loop through each user provided
-            Object.keys(updateOrg[key]).forEach((user) => {
-              let permValue = updateOrg[key][user];
-              // Ensure user is not updating own permissions
-              if (user === reqUser._id) {
-                throw new M.OperationError('User cannot update own permissions.', 'warn');
-              }
+            // If user does not exist, throw an error
+            if (!existingUsers.includes(user)) {
+              throw new M.NotFoundError(`User [${user}] not found.`, 'warn');
+            }
 
-              // If user does not exist, throw an error
-              if (!existingUsers.includes(user)) {
-                throw new M.NotFoundError(`User [${user}] not found.`, 'warn');
-              }
+            // Value must be an string containing highest permissions
+            if (typeof permValue !== 'string') {
+              throw new M.DataFormatError(`Permission for ${user} must be a string.`, 'warn');
+            }
 
-              // Value must be an string containing highest permissions
-              if (typeof permValue !== 'string') {
-                throw new M.DataFormatError(`Permission for ${user} must be a string.`, 'warn');
-              }
+            // Lowercase the permission value
+            permValue = permValue.toLowerCase();
 
-              // Lowercase the permission value
-              permValue = permValue.toLowerCase();
+            // Set stored permissions value based on provided permValue
+            switch (permValue) {
+              case 'read':
+                org.permissions[user] = ['read'];
+                break;
+              case 'write':
+                org.permissions[user] = ['read', 'write'];
+                break;
+              case 'admin':
+                org.permissions[user] = ['read', 'write', 'admin'];
+                break;
+              case 'remove_all':
+                // If user is still on a project within the org, throw error
+                org.projects.forEach((p) => {
+                  if (p.permissions.hasOwnProperty(user)) {
+                    throw new M.OperationError('User must be removed from '
+                      + `the project [${utils.parseID(p._id).pop()}] prior`
+                      + ` to being removed from the org [${org._id}].`, 'warn');
+                  }
+                });
+                delete org.permissions[user];
+                break;
+              // Default case, invalid permission
+              default:
+                throw new M.DataFormatError(
+                  `${permValue} is not a valid permission`, 'warn'
+                );
+            }
+          });
 
-              // Set stored permissions value based on provided permValue
-              switch (permValue) {
-                case 'read':
-                  org.permissions[user] = ['read'];
-                  break;
-                case 'write':
-                  org.permissions[user] = ['read', 'write'];
-                  break;
-                case 'admin':
-                  org.permissions[user] = ['read', 'write', 'admin'];
-                  break;
-                case 'remove_all':
-                  // If user is still on a project within the org, throw error
-                  org.projects.forEach((p) => {
-                    if (p.permissions.hasOwnProperty(user)) {
-                      throw new M.OperationError('User must be removed from '
-                        + `the project [${utils.parseID(p._id).pop()}] prior`
-                        + ` to being removed from the org [${org._id}].`, 'warn');
-                    }
-                  });
-                  delete org.permissions[user];
-                  break;
-                // Default case, invalid permission
-                default:
-                  throw new M.DataFormatError(
-                    `${permValue} is not a valid permission`, 'warn'
-                  );
-              }
-            });
-
-            // Copy permissions from org to update object
-            updateOrg.permissions = org.permissions;
-          }
+          // Copy permissions from org to update object
+          updateOrg.permissions = org.permissions;
         }
         // Set archivedBy if archived field is being changed
         else if (key === 'archived') {
@@ -886,12 +893,12 @@ async function remove(requestingUser, orgs, options) {
     if (Array.isArray(saniOrgs)) {
       // An array of org ids, remove all
       searchedIDs = saniOrgs;
-      searchQuery._id = { $in: saniOrgs };
+      searchQuery._id = { $in: searchedIDs };
     }
     else if (typeof saniOrgs === 'string') {
       // A single org id
       searchedIDs = [saniOrgs];
-      searchQuery._id = { $in: saniOrgs };
+      searchQuery._id = { $in: searchedIDs };
     }
     else {
       // Invalid parameter, throw an error
@@ -923,7 +930,7 @@ async function remove(requestingUser, orgs, options) {
     }
 
     // Find all projects to delete
-    const projectsToDelete = await Project.find({ org: { $in: saniOrgs } },
+    const projectsToDelete = await Project.find({ org: { $in: searchedIDs } },
       null, { lean: true });
 
     const projectIDs = projectsToDelete.map(p => p._id);
@@ -945,8 +952,7 @@ async function remove(requestingUser, orgs, options) {
     await Branch.deleteMany({ project: { $in: projectIDs } });
 
     // Delete any projects in the org
-    await Project.deleteMany({ org: { $in: saniOrgs } });
-
+    await Project.deleteMany({ org: { $in: searchedIDs } });
     // Delete the orgs
     const retQuery = await Organization.deleteMany(searchQuery);
     // Emit the event orgs-deleted

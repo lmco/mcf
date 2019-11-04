@@ -110,7 +110,7 @@ async function putInvalidId() {
   // Create the test org objects
   const testOrgObj0 = testData.orgs[0];
   const testOrgObj1 = testData.orgs[1];
-  const invalidOrgObj = { id: 'INVALID_ID', name: 'org name' };
+  const invalidOrgObj = { id: '!!', name: 'org name' };
 
   await OrgController.createOrReplace(adminUser, [testOrgObj0, testOrgObj1, invalidOrgObj])
   .should.eventually.be.rejectedWith(

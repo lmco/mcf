@@ -101,8 +101,13 @@ const UserSchema = new db.Schema({
         + ' less than 3 characters.'
     }, {
       validator: function(v) {
-        // If the username is invalid, reject
-        return RegExp(validators.user.username).test(v);
+        if (typeof validators.user.username === 'string') {
+          // If the username is invalid, reject
+          return RegExp(validators.user.username).test(v);
+        }
+        else {
+          return validators.user.username(v);
+        }
       },
       message: props => `Invalid username [${props.value}].`
     }]
@@ -116,8 +121,13 @@ const UserSchema = new db.Schema({
     default: '',
     validate: [{
       validator: function(v) {
-        // If the email is invalid and provided, reject
-        return !(!RegExp(validators.user.email).test(v) && v);
+        if (typeof validators.user.email === 'string') {
+          // If the email is invalid and provided, reject
+          return !(!RegExp(validators.user.email).test(v) && v);
+        }
+        else {
+          return !(!validators.user.email(v) && v);
+        }
       },
       message: props => `Invalid email [${props.value}].`
     }]
@@ -127,8 +137,13 @@ const UserSchema = new db.Schema({
     default: '',
     validate: [{
       validator: function(v) {
-        // If the fname is invalid and provided, reject
-        return !(!RegExp(validators.user.fname).test(v) && v);
+        if (typeof validators.user.fname === 'string') {
+          // If the fname is invalid and provided, reject
+          return !(!RegExp(validators.user.fname).test(v) && v);
+        }
+        else {
+          return !(!validators.user.fname(v) && v);
+        }
       },
       message: props => `Invalid first name [${props.value}].`
     }]
@@ -138,8 +153,13 @@ const UserSchema = new db.Schema({
     default: '',
     validate: [{
       validator: function(v) {
-        // If the preferredName is invalid and provided, reject
-        return !(!RegExp(validators.user.fname).test(v) && v);
+        if (typeof validators.user.fname === 'string') {
+          // If the preferredName is invalid and provided, reject
+          return !(!RegExp(validators.user.fname).test(v) && v);
+        }
+        else {
+          return !(!validators.user.fname(v) && v);
+        }
       },
       message: props => `Invalid preferred name [${props.value}].`
     }]
@@ -149,8 +169,13 @@ const UserSchema = new db.Schema({
     default: '',
     validate: [{
       validator: function(v) {
-        // If the lname is invalid and provided, reject
-        return !(!RegExp(validators.user.lname).test(v) && v);
+        if (typeof validators.user.lname === 'string') {
+          // If the lname is invalid and provided, reject
+          return !(!RegExp(validators.user.lname).test(v) && v);
+        }
+        else {
+          return !(!validators.user.lname(v) && v);
+        }
       },
       message: props => `Invalid last name [${props.value}].`
     }]
