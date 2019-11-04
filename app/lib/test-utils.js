@@ -339,6 +339,7 @@ module.exports.createTestProject = async function(adminUser, orgID) {
 
 /**
  * @description Helper function to create a tag in MBEE tests.
+ * @async
  *
  * @param {object} adminUser - The admin user to create the branch with.
  * @param {string} orgID - The org to create the branch on.
@@ -346,10 +347,9 @@ module.exports.createTestProject = async function(adminUser, orgID) {
  *
  * @returns {Promise<Branch>} Returns a tagged branch.
  */
-module.exports.createTag = function(adminUser, orgID, projID) {
-  return new Promise((resolve, reject) => {
-    // Create a new tag
-    let createdTag;
+module.exports.createTag = async function(adminUser, orgID, projID) {
+  try {
+    // Create a new branch object, with tag: true
     const newTag = Branch.createDocument({
       _id: utils.createID(orgID, projID, 'tag'),
       project: utils.createID(orgID, projID),
@@ -359,36 +359,61 @@ module.exports.createTag = function(adminUser, orgID, projID) {
       source: utils.createID(orgID, projID, 'master')
     });
 
-    return newTag.save()
-    .then((_newBranch) => {
-      createdTag = _newBranch;
+    // Save the tag
+    const createdTag = await Branch.insertMany(newTag);
 
-      // Create a root element for tag
-      const newElement = Element.createDocument({
-        _id: utils.createID(_newBranch._id, 'model'),
-        project: utils.createID(orgID, projID),
-        branch: _newBranch._id,
-        createdBy: adminUser._id,
-        name: 'Model'
-      });
+    // Create root elements
+    const elementsToCreate = [];
+    const baseElement = {
+      project: utils.createID(orgID, projID),
+      branch: createdTag._id,
+      createdBy: adminUser._id,
+      createdOn: Date.now(),
+      lasModifiedBy: adminUser._id,
+      updatedOn: Date.now()
+    };
 
-      return newElement.save();
-    })
-    .then(() => {
-      // Create a non root element in the tag
-      const newElement = Element.createDocument({
-        _id: utils.createID(createdTag._id, testData.elements[1].id),
-        project: utils.createID(orgID, projID),
-        branch: createdTag._id,
-        createdBy: adminUser._id,
-        name: 'Model'
-      });
+    // For each of the valid root elements
+    Element.getValidRootElements().forEach((e) => {
+      // Clone the base object to avoid modifying if
+      const obj = JSON.parse(JSON.stringify(baseElement));
+      obj._id = utils.createID(createdTag._id, e);
 
-      return newElement.save();
-    })
-    .then(() => resolve(createdTag))
-    .catch((error) => reject(error));
-  });
+      // Handle setting each different name/parent
+      if (e === 'model') {
+        // Root model element, no parent
+        obj.parent = null;
+        obj.name = 'Model';
+      }
+      else if (e === '__mbee__') {
+        obj.parent = utils.createID(createdTag._id, 'model');
+        obj.name = '__mbee__';
+      }
+      else {
+        obj.parent = utils.createID(createdTag._id, '__mbee__');
+        obj.name = (e === 'undefined') ? 'undefined element' : 'holding bin';
+      }
+      // Append element object onto array of elements to create
+      elementsToCreate.push(obj);
+    });
+
+    // Create a non root element in the tag
+    elementsToCreate.push(Element.createDocument({
+      _id: utils.createID(createdTag._id, testData.elements[1].id),
+      project: utils.createID(orgID, projID),
+      branch: createdTag._id,
+      createdBy: adminUser._id,
+      name: testData.elements[1].name
+    }));
+
+    // Create the root model elements and single extra element
+    await Element.insertMany(elementsToCreate);
+
+    return createdTag;
+  }
+  catch (error) {
+    throw errors.captureError(error);
+  }
 };
 
 /**
