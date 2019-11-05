@@ -398,14 +398,14 @@ async function ldapSync(ldapUserObj) {
     else {
       // User not found, create a new one
       // Initialize userData with LDAP information
-      const initData = User.createDocument({
+      const initData = {
         _id: ldapUserObj[ldapConfig.attributes.username],
         fname: ldapUserObj[ldapConfig.attributes.firstName],
         preferredName: ldapUserObj[ldapConfig.attributes.preferredName],
         lname: ldapUserObj[ldapConfig.attributes.lastName],
         email: ldapUserObj[ldapConfig.attributes.email],
         provider: 'ldap'
-      });
+      };
 
       // Save ldap user
       userObject = (await User.insertMany(initData))[0];

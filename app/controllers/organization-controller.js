@@ -319,37 +319,36 @@ async function create(requestingUser, orgs, options) {
     const foundUsernames = foundUsers.map(u => u._id);
     // For each object of org data, create the org object
     const orgObjects = orgsToCreate.map((o) => {
-      const orgObj = Organization.createDocument(o);
       // Set permissions
-      Object.keys(orgObj.permissions).forEach((u) => {
+      Object.keys(o.permissions).forEach((u) => {
         // If user does not exist, throw an error
         if (!foundUsernames.includes(u)) {
           throw new M.NotFoundError(`User [${u}] not found.`, 'warn');
         }
 
-        const permission = orgObj.permissions[u];
+        const permission = o.permissions[u];
 
         // Change permission level to array of permissions
         switch (permission) {
           case 'read':
-            orgObj.permissions[u] = ['read'];
+            o.permissions[u] = ['read'];
             break;
           case 'write':
-            orgObj.permissions[u] = ['read', 'write'];
+            o.permissions[u] = ['read', 'write'];
             break;
           case 'admin':
-            orgObj.permissions[u] = ['read', 'write', 'admin'];
+            o.permissions[u] = ['read', 'write', 'admin'];
             break;
           default:
             throw new M.DataFormatError(`Invalid permission [${permission}].`, 'warn');
         }
       });
-      orgObj.lastModifiedBy = reqUser._id;
-      orgObj.createdBy = reqUser._id;
-      orgObj.updatedOn = Date.now();
-      orgObj.archivedBy = (orgObj.archived) ? reqUser._id : null;
-      orgObj.archivedOn = (orgObj.archived) ? Date.now() : null;
-      return orgObj;
+      o.lastModifiedBy = reqUser._id;
+      o.createdBy = reqUser._id;
+      o.updatedOn = Date.now();
+      o.archivedBy = (o.archived) ? reqUser._id : null;
+      o.archivedOn = (o.archived) ? Date.now() : null;
+      return o;
     });
 
     // Create the organizations

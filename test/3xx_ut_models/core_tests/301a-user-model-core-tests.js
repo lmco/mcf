@@ -85,12 +85,10 @@ describe(M.getModuleName(module.filename), () => {
  */
 async function createUser() {
   try {
-    const userData = testData.users[1];
-    userData._id = userData.username;
+    const user = JSON.parse(JSON.stringify(testData.users[1]));
+    user._id = user.username;
     // Create a hash of the password
-    const derivedKey = crypto.pbkdf2Sync(userData.password, userData._id.toString(), 1000, 32, 'sha256');
-    // Create a new User object
-    const user = User.createDocument(userData);
+    const derivedKey = crypto.pbkdf2Sync(user.password, user._id.toString(), 1000, 32, 'sha256');
     // Hash the user password
     User.hashPassword(user);
 

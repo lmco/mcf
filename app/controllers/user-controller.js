@@ -305,14 +305,13 @@ async function create(requestingUser, users, options) {
 
     // For each object of user data, create the user object
     const userObjects = usersToCreate.map((u) => {
-      const userObj = User.createDocument(u);
-      userObj.lastModifiedBy = reqUser._id;
-      userObj.createdBy = reqUser._id;
-      userObj.updatedOn = Date.now();
-      userObj.archivedBy = (userObj.archived) ? reqUser._id : null;
-      userObj.archivedOn = (userObj.archived) ? Date.now() : null;
-      User.hashPassword(userObj);
-      return userObj;
+      u.lastModifiedBy = reqUser._id;
+      u.createdBy = reqUser._id;
+      u.updatedOn = Date.now();
+      u.archivedBy = (u.archived) ? reqUser._id : null;
+      u.archivedOn = (u.archived) ? Date.now() : null;
+      User.hashPassword(u);
+      return u;
     });
 
     // Create the users

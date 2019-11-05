@@ -96,12 +96,10 @@ async function idTooShort() {
 
   // Change id to be too short.
   artData._id = '01:01:01:0';
-
-  // Create artifact object
-  const artObject = Artifact.createDocument(artData);
+  delete artData.id;
 
   // Expect insertMany() to fail with specific error message
-  await Artifact.insertMany(artObject).should.eventually.be.rejectedWith('Artifact'
+  await Artifact.insertMany(artData).should.eventually.be.rejectedWith('Artifact'
     + ' validation failed: _id: Artifact ID length'
     + ` [${utils.parseID(artData._id).pop().length}] `
     + 'must not be less than 2 characters.');
@@ -123,13 +121,10 @@ async function idTooLong() {
     + '67890123456789012345678901234567890123456789012345678901234567890123456'
     + '789012345678901234567890123456789012345678901234567890123456789012345678'
     + '901234567890123456789012';
-
-
-  // Create artifact object
-  const artObject = Artifact.createDocument(artData);
+  delete artData.id;
 
   // Expect insertMany() to fail with specific error message
-  await Artifact.insertMany(artObject).should.eventually.be.rejectedWith('Artifact validation '
+  await Artifact.insertMany(artData).should.eventually.be.rejectedWith('Artifact validation '
     + `failed: _id: Artifact ID length [${artData._id.length - validators.branch.idLength - 1}]`
     + ` must not be more than ${validators.artifact.idLength - validators.branch.idLength - 1}`
     + ' characters.');
@@ -144,12 +139,10 @@ async function idNotProvided() {
   artData.branch = 'org:proj:branch';
   artData.location = 'org:proj:branch:model';
   artData.strategy = M.config.artifact.strategy;
-
-  // Create artifact object
-  const artObject = Artifact.createDocument(artData);
+  delete artData.id;
 
   // Expect insertMany() to fail with specific error message
-  await Artifact.insertMany(artObject).should.eventually.be.rejectedWith('Artifact'
+  await Artifact.insertMany(artData).should.eventually.be.rejectedWith('Artifact'
     + ' validation failed: _id: Path `_id` is required.');
 }
 
@@ -170,12 +163,10 @@ async function invalidID() {
 
   // Change id to be invalid
   artData._id = 'INVALID_ART_ID';
-
-  // Create artifact object
-  const artObject = Artifact.createDocument(artData);
+  delete artData.id;
 
   // Expect insertMany() to fail with specific error message
-  await Artifact.insertMany(artObject).should.eventually.be.rejectedWith('Artifact'
+  await Artifact.insertMany(artData).should.eventually.be.rejectedWith('Artifact'
     + ` validation failed: _id: Invalid artifact ID [${artData._id}].`);
 }
 
@@ -188,12 +179,10 @@ async function projectNotProvided() {
   artData.branch = 'org:proj:branch';
   artData.location = 'org:proj:branch:model';
   artData.strategy = M.config.artifact.strategy;
-
-  // Create artifact object
-  const artObject = Artifact.createDocument(artData);
+  delete artData.id;
 
   // Expect insertMany() to fail with specific error message
-  await Artifact.insertMany(artObject).should.eventually.be.rejectedWith('Artifact'
+  await Artifact.insertMany(artData).should.eventually.be.rejectedWith('Artifact'
     + ' validation failed: project: Path `project` is required.');
 }
 
@@ -215,12 +204,10 @@ async function projectInvalid() {
 
   // Set invalid project
   artData.project = 'invalid_project';
-
-  // Create artifact object
-  const artObject = Artifact.createDocument(artData);
+  delete artData.id;
 
   // Expect insertMany() to fail with specific error message
-  await Artifact.insertMany(artObject).should.eventually.be.rejectedWith(
+  await Artifact.insertMany(artData).should.eventually.be.rejectedWith(
     `Artifact validation failed: project: ${artData.project} is not a valid `
     + 'project ID.'
   );
@@ -235,12 +222,10 @@ async function branchNotProvided() {
   artData.project = 'org:proj';
   artData.location = 'org:proj:branch:model';
   artData.strategy = M.config.artifact.strategy;
-
-  // Create artifact object
-  const artObject = Artifact.createDocument(artData);
+  delete artData.id;
 
   // Expect insertMany() to fail with specific error message
-  await Artifact.insertMany(artObject).should.eventually.be.rejectedWith('Artifact '
+  await Artifact.insertMany(artData).should.eventually.be.rejectedWith('Artifact '
     + 'validation failed: branch: Path `branch` is required.');
 }
 
@@ -262,12 +247,10 @@ async function branchInvalid() {
 
   // Set invalid branch
   artData.branch = 'invalid_branch';
-
-  // Create artifact object
-  const artObject = Artifact.createDocument(artData);
+  delete artData.id;
 
   // Expect insertMany() to fail with specific error message
-  await Artifact.insertMany(artObject).should.eventually.be.rejectedWith(
+  await Artifact.insertMany(artData).should.eventually.be.rejectedWith(
     `Artifact validation failed: branch: ${artData.branch} is not a valid `
     + 'branch ID.'
   );
@@ -285,12 +268,10 @@ async function locationInvalid() {
 
   // Set invalid location
   artData.location = 'invalid.location.';
-
-  // Create artifact object
-  const artObject = Artifact.createDocument(artData);
+  delete artData.id;
 
   // Expect insertMany() to fail with specific error message
-  await Artifact.insertMany(artObject).should.eventually.be.rejectedWith(
+  await Artifact.insertMany(artData).should.eventually.be.rejectedWith(
     'Artifact validation failed: location: Artifact location '
     + `[${artData.location}] is improperly formatted.`
   );
@@ -309,12 +290,10 @@ async function filenameInvalid() {
 
   // Set invalid filename
   artData.filename = 'invalid_filename><!?^|:"';
-
-  // Create artifact object
-  const artObject = Artifact.createDocument(artData);
+  delete artData.id;
 
   // Expect insertMany() to fail with specific error message
-  await Artifact.insertMany(artObject).should.eventually.be.rejectedWith(
+  await Artifact.insertMany(artData).should.eventually.be.rejectedWith(
     'Artifact validation failed: filename: Artifact filename'
      + ` [${artData.filename}] is improperly formatted.`
   );
@@ -332,12 +311,10 @@ async function filenameWithNoLocation() {
   artData.strategy = M.config.artifact.strategy;
 
   delete artData.location;
-
-  // Create artifact object
-  const artObject = Artifact.createDocument(artData);
+  delete artData.id;
 
   // Expect insertMany() to fail with specific error message
-  await Artifact.insertMany(artObject).should.eventually.be.rejectedWith(
+  await Artifact.insertMany(artData).should.eventually.be.rejectedWith(
     'Artifact validation failed: location: Path `location` is required.'
   );
 }
@@ -353,12 +330,10 @@ async function locationWithNofilename() {
   artData.strategy = M.config.artifact.strategy;
 
   delete artData.filename;
-
-  // Create artifact object
-  const artObject = Artifact.createDocument(artData);
+  delete artData.id;
 
   // Expect insertMany() to fail with specific error message
-  await Artifact.insertMany(artObject).should.eventually.be.rejectedWith(
+  await Artifact.insertMany(artData).should.eventually.be.rejectedWith(
     'Artifact validation failed: filename: Path `filename` is required.'
   );
 }

@@ -348,17 +348,16 @@ async function create(requestingUser, organizationID, projectID, branchID,
     }
 
     const artObjects = artsToCreate.map((a) => {
-      const artObj = Artifact.createDocument(a);
-      artObj.project = project._id;
-      artObj.branch = branch._id;
-      artObj.strategy = M.config.artifact.strategy;
-      artObj.lastModifiedBy = reqUser._id;
-      artObj.createdBy = reqUser._id;
-      artObj.updatedOn = Date.now();
-      artObj.archivedBy = (a.archived) ? reqUser._id : null;
-      artObj.archivedOn = (a.archived) ? Date.now() : null;
+      a.project = project._id;
+      a.branch = branch._id;
+      a.strategy = M.config.artifact.strategy;
+      a.lastModifiedBy = reqUser._id;
+      a.createdBy = reqUser._id;
+      a.updatedOn = Date.now();
+      a.archivedBy = (a.archived) ? reqUser._id : null;
+      a.archivedOn = (a.archived) ? Date.now() : null;
 
-      return artObj;
+      return a;
     });
 
     // Save artifact object to the database

@@ -86,11 +86,11 @@ describe(M.getModuleName(module.filename), () => {
  */
 async function createOrg() {
   // Create an organization from the Organization model object
-  const org = Org.createDocument({
+  const org = {
     _id: testData.orgs[0].id,
     name: testData.orgs[0].name,
     permissions: {}
-  });
+  };
 
   // Add the admin user to the permissions
   org.permissions[adminUser.username] = ['read', 'write', 'admin'];

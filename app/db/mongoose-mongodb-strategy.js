@@ -285,18 +285,6 @@ class Model {
   }
 
   /**
-   * @description Creates a mongoose Document based on the model's schema.
-   * Creates a new instance of the mongoose Model.
-   *
-   * @param {object} doc - The object to convert to a Document.
-   *
-   * @returns {Document} Returns a database document.
-   */
-  createDocument(doc) {
-    return new this.model(doc); // eslint-disable-line new-cap
-  }
-
-  /**
    * @description Counts the number of documents that matches a filter. Calls
    * the mongoose countDocuments() function.
    * @async
@@ -447,33 +435,20 @@ class Model {
   async insertMany(docs, options, cb) {
     let useCollection = false;
 
-    // // Set the rawResult option
-    // if (!options) {
-    //   options = { rawResult: true }; // eslint-disable-line no-param-reassign
-    // }
-    // else {
-    //   options.rawResult = true;
-    // }
-
     // Set useCollection if skipValidation is true
     if (options && options.skipValidation) {
       useCollection = true;
       delete options.skipValidation;
     }
 
-    let responseQuery = {};
-
     // If useCollection is true, use the MongoDB function directly
     if (useCollection) {
-      responseQuery = await this.model.collection.insertMany(docs);
+      return this.model.collection.insertMany(docs);
     }
     else {
       // Insert the documents
-      responseQuery = await this.model.insertMany(docs, options, cb);
+      return this.model.insertMany(docs, options, cb);
     }
-
-    // Since using rawResult, the documents are stored in responseQuery.ops
-    return responseQuery;
   }
 
   /**

@@ -61,13 +61,13 @@ module.exports.createNonAdminUser = async function() {
     // User not found, create them
     else {
       // Create user
-      const user = User.createDocument({
+      const user = {
         _id: testData.users[1].username,
         password: testData.users[1].password,
         fname: testData.users[1].fname,
         lname: testData.users[1].lname,
         admin: false
-      });
+      };
 
       // Hash the user password
       User.hashPassword(user);
@@ -116,12 +116,12 @@ module.exports.createTestAdmin = async function() {
     // Admin user not found, create them
     else {
       // Create user
-      const user = User.createDocument({
+      const user = {
         _id: testData.adminUser.username,
         password: testData.adminUser.password,
         provider: 'local',
         admin: true
-      });
+      };
 
       User.hashPassword(user);
 
@@ -212,11 +212,12 @@ module.exports.removeTestAdmin = async function() {
 module.exports.createTestOrg = async function(adminUser) {
   try {
     // Create the new organization
-    const newOrg = Organization.createDocument({
+    const newOrg = {
       _id: testData.orgs[0].id,
       name: testData.orgs[0].name,
-      custom: null
-    });
+      custom: null,
+      permissions: {}
+    };
     newOrg.permissions[adminUser._id] = ['read', 'write', 'admin'];
 
     return (await Organization.insertMany(newOrg))[0];
@@ -265,19 +266,20 @@ module.exports.removeTestOrg = async function() {
 module.exports.createTestProject = async function(adminUser, orgID) {
   try {
     // Create the new project object
-    const newProject = Project.createDocument({
+    const newProject = {
       _id: utils.createID(orgID, testData.projects[0].id),
       org: orgID,
       name: testData.projects[0].name,
       createdBy: adminUser._id,
-      custom: null
-    });
+      custom: null,
+      permissions: {}
+    };
     newProject.permissions[adminUser._id] = ['read', 'write', 'admin'];
     // Save the project
     const createdProject = (await Project.insertMany(newProject))[0];
 
     // Create the master branch for the project
-    const newBranch = Branch.createDocument({
+    const newBranch = {
       _id: utils.createID(orgID, testData.projects[0].id, testData.branches[0].id),
       project: createdProject._id,
       createdBy: adminUser._id,
@@ -286,7 +288,7 @@ module.exports.createTestProject = async function(adminUser, orgID) {
       updatedOn: Date.now(),
       name: testData.branches[0].name,
       source: null
-    });
+    };
     // Save the branch
     const createdBranch = (await Branch.insertMany(newBranch))[0];
 
@@ -349,14 +351,14 @@ module.exports.createTestProject = async function(adminUser, orgID) {
 module.exports.createTag = async function(adminUser, orgID, projID) {
   try {
     // Create a new branch object, with tag: true
-    const newTag = Branch.createDocument({
+    const newTag = {
       _id: utils.createID(orgID, projID, 'tag'),
       project: utils.createID(orgID, projID),
       createdBy: adminUser._id,
       name: 'Tagged Branch',
       tag: true,
       source: utils.createID(orgID, projID, 'master')
-    });
+    };
 
     // Save the tag
     const createdTag = (await Branch.insertMany(newTag))[0];
@@ -397,13 +399,13 @@ module.exports.createTag = async function(adminUser, orgID, projID) {
     });
 
     // Create a non root element in the tag
-    elementsToCreate.push(Element.createDocument({
+    elementsToCreate.push({
       _id: utils.createID(createdTag._id, testData.elements[1].id),
       project: utils.createID(orgID, projID),
       branch: createdTag._id,
       createdBy: adminUser._id,
       name: testData.elements[1].name
-    }));
+    });
 
     // Create the root model elements and single extra element
     await Element.insertMany(elementsToCreate);

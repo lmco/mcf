@@ -88,12 +88,10 @@ async function usernameTooShort() {
 
     // Change username to be too short.
     userData._id = 'ab';
-
-    // Create user object
-    const userObject = User.createDocument(userData);
+    delete userData.id;
 
     // Expect insertMany() to fail with specific error message
-    await User.insertMany(userObject).should.eventually.be.rejectedWith('User '
+    await User.insertMany(userData).should.eventually.be.rejectedWith('User '
       + `validation failed: _id: Username length [${userData._id.length}] must `
       + 'not be less than 3 characters.');
   }
@@ -113,12 +111,10 @@ async function usernameTooLong() {
 
     // Change username to be too long.
     userData._id = 'usernamewiththirtysevencharacters1234';
-
-    // Create user object
-    const userObject = User.createDocument(userData);
+    delete userData.id;
 
     // Expect insertMany() to fail with specific error message
-    await User.insertMany(userObject).should.eventually.be.rejectedWith('User '
+    await User.insertMany(userData).should.eventually.be.rejectedWith('User '
       + `validation failed: _id: Username length [${userData._id.length}] must `
       + `not be more than ${validators.user.usernameLength} characters.`);
   }
@@ -143,12 +139,10 @@ async function usernameInvalid() {
 
     // Change username to be invalid
     userData._id = 'Inva3l!d_UserN&me';
-
-    // Create user object
-    const userObject = User.createDocument(userData);
+    delete userData.id;
 
     // Expect insertMany() to fail with specific error message
-    await User.insertMany(userObject).should.eventually.be.rejectedWith('User '
+    await User.insertMany(userData).should.eventually.be.rejectedWith('User '
       + `validation failed: _id: Invalid username [${userData._id}].`);
   }
   catch (error) {
@@ -173,12 +167,10 @@ async function fnameInvalid() {
 
     // Change first name to be invalid
     userData.fname = 'Inva3l!d_FirstN&me';
-
-    // Create user object
-    const userObject = User.createDocument(userData);
+    delete userData.id;
 
     // Expect insertMany() to fail with specific error message
-    await User.insertMany(userObject).should.eventually.be.rejectedWith('User '
+    await User.insertMany(userData).should.eventually.be.rejectedWith('User '
       + `validation failed: fname: Invalid first name [${userData.fname}].`);
   }
   catch (error) {
@@ -204,12 +196,10 @@ async function lnameInvalid() {
 
     // Change last name to be invalid
     userData.lname = 'Inva3l!d_LastN&me';
-
-    // Create user object
-    const userObject = User.createDocument(userData);
+    delete userData.id;
 
     // Expect insertMany() to fail with specific error message
-    await User.insertMany(userObject).should.eventually.be.rejectedWith('User '
+    await User.insertMany(userData).should.eventually.be.rejectedWith('User '
       + `validation failed: lname: Invalid last name [${userData.lname}].`);
   }
   catch (error) {
@@ -235,12 +225,10 @@ async function preferredNameInvalid() {
 
     // Change preferred name to be invalid
     userData.preferredName = 'Inva3l!d_PreferredN&me';
-
-    // Create user object
-    const userObject = User.createDocument(userData);
+    delete userData.id;
 
     // Expect insertMany() to fail with specific error message
-    await User.insertMany(userObject).should.eventually.be.rejectedWith('User '
+    await User.insertMany(userData).should.eventually.be.rejectedWith('User '
       + 'validation failed: preferredName: Invalid preferred name '
       + `[${userData.preferredName}].`);
   }
@@ -262,12 +250,10 @@ async function adminNotBoolean() {
 
     // Change admin to not be a boolean.
     userData.admin = 123;
-
-    // Create user object
-    const userObject = User.createDocument(userData);
+    delete userData.id;
 
     // Expect insertMany() to fail with specific error message
-    await User.insertMany(userObject).should.eventually.be.rejectedWith('User '
+    await User.insertMany(userData).should.eventually.be.rejectedWith('User '
       + 'validation failed: admin: Cast to Boolean failed for value "123" at '
       + 'path "admin"');
   }
@@ -288,12 +274,10 @@ async function providerNotString() {
 
     // Change provider to not be a string.
     userData.provider = {};
-
-    // Create user object
-    const userObject = User.createDocument(userData);
+    delete userData.id;
 
     // Expect insertMany() to fail with specific error message
-    await User.insertMany(userObject).should.eventually.be.rejectedWith('User '
+    await User.insertMany(userData).should.eventually.be.rejectedWith('User '
       + 'validation failed: provider: Cast to String failed for value "{}" at '
       + 'path "provider"');
   }
@@ -310,12 +294,10 @@ async function providerNotString() {
 async function usernameNotProvided() {
   try {
     const userData = Object.assign({}, testData.users[0]);
-
-    // Create user object
-    const userObject = User.createDocument(userData);
+    delete userData.id;
 
     // Expect insertMany() to fail with specific error message
-    await User.insertMany(userObject).should.eventually.be.rejectedWith('User '
+    await User.insertMany(userData).should.eventually.be.rejectedWith('User '
       + 'validation failed: _id: Username is required.');
   }
   catch (error) {
@@ -340,12 +322,10 @@ async function emailInvalid() {
 
     // Change email to be invalid
     userData.email = 'invalid_email';
-
-    // Create user object
-    const userObject = User.createDocument(userData);
+    delete userData.id;
 
     // Expect insertMany() to fail with specific error message
-    await User.insertMany(userObject).should.eventually.be.rejectedWith('User '
+    await User.insertMany(userData).should.eventually.be.rejectedWith('User '
       + `validation failed: email: Invalid email [${userData.email}].`);
   }
   catch (error) {
