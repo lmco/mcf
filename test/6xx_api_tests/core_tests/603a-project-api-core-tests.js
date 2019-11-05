@@ -100,7 +100,7 @@ describe(M.getModuleName(module.filename), () => {
 function postProject(done) {
   const projData = testData.projects[0];
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}`,
+    url: `${test.url}/api/orgs/${org._id}/projects/${projData.id}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'POST',
@@ -119,7 +119,7 @@ function postProject(done) {
     chai.expect(createdProj.name).to.equal(projData.name);
     chai.expect(createdProj.custom).to.deep.equal(projData.custom || {});
     chai.expect(createdProj.permissions[adminUser._id]).to.equal('admin');
-    chai.expect(createdProj.org).to.equal(org.id);
+    chai.expect(createdProj.org).to.equal(org._id);
     chai.expect(createdProj.visibility).to.equal(projData.visibility || 'private');
 
     // Verify additional properties
@@ -149,7 +149,7 @@ function postProjects(done) {
     testData.projects[3]
   ];
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects`,
+    url: `${test.url}/api/orgs/${org._id}/projects`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'POST',
@@ -175,7 +175,7 @@ function postProjects(done) {
       chai.expect(createdProj.name).to.equal(projDataObject.name);
       chai.expect(createdProj.custom).to.deep.equal(projDataObject.custom || {});
       chai.expect(createdProj.permissions[adminUser._id]).to.equal('admin');
-      chai.expect(createdProj.org).to.equal(org.id);
+      chai.expect(createdProj.org).to.equal(org._id);
       chai.expect(createdProj.visibility).to.equal(projDataObject.visibility || 'private');
 
       // Verify additional properties
@@ -202,7 +202,7 @@ function postProjects(done) {
 function putProject(done) {
   const projData = testData.projects[0];
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}`,
+    url: `${test.url}/api/orgs/${org._id}/projects/${projData.id}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'PUT',
@@ -221,7 +221,7 @@ function putProject(done) {
     chai.expect(replacedProj.name).to.equal(projData.name);
     chai.expect(replacedProj.custom).to.deep.equal(projData.custom || {});
     chai.expect(replacedProj.permissions[adminUser._id]).to.equal('admin');
-    chai.expect(replacedProj.org).to.equal(org.id);
+    chai.expect(replacedProj.org).to.equal(org._id);
     chai.expect(replacedProj.visibility).to.equal(projData.visibility || 'private');
 
     // Verify additional properties
@@ -252,7 +252,7 @@ function putProjects(done) {
     testData.projects[4]
   ];
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects`,
+    url: `${test.url}/api/orgs/${org._id}/projects`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'PUT',
@@ -278,7 +278,7 @@ function putProjects(done) {
       chai.expect(replacedProj.name).to.equal(projDataObject.name);
       chai.expect(replacedProj.custom).to.deep.equal(projDataObject.custom || {});
       chai.expect(replacedProj.permissions[adminUser._id]).to.equal('admin');
-      chai.expect(replacedProj.org).to.equal(org.id);
+      chai.expect(replacedProj.org).to.equal(org._id);
       chai.expect(replacedProj.visibility).to.equal(projDataObject.visibility || 'private');
 
       // Verify additional properties
@@ -305,7 +305,7 @@ function putProjects(done) {
 function getProject(done) {
   const projData = testData.projects[0];
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}`,
+    url: `${test.url}/api/orgs/${org._id}/projects/${projData.id}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'GET'
@@ -323,7 +323,7 @@ function getProject(done) {
     chai.expect(foundProj.name).to.equal(projData.name);
     chai.expect(foundProj.custom).to.deep.equal(projData.custom || {});
     chai.expect(foundProj.permissions[adminUser._id]).to.equal('admin');
-    chai.expect(foundProj.org).to.equal(org.id);
+    chai.expect(foundProj.org).to.equal(org._id);
     chai.expect(foundProj.visibility).to.equal(projData.visibility || 'private');
 
     // Verify additional properties
@@ -356,7 +356,7 @@ function getProjects(done) {
   ];
   const projIDs = projData.map(p => p.id).join(',');
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects?ids=${projIDs}`,
+    url: `${test.url}/api/orgs/${org._id}/projects?ids=${projIDs}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'GET'
@@ -381,7 +381,7 @@ function getProjects(done) {
       chai.expect(foundProj.name).to.equal(projDataObject.name);
       chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom || {});
       chai.expect(foundProj.permissions[adminUser._id]).to.equal('admin');
-      chai.expect(foundProj.org).to.equal(org.id);
+      chai.expect(foundProj.org).to.equal(org._id);
       chai.expect(foundProj.visibility).to.equal(projDataObject.visibility || 'private');
 
       // Verify additional properties
@@ -414,7 +414,7 @@ function getAllProjectsOnOrg(done) {
     testData.projects[4]
   ];
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects`,
+    url: `${test.url}/api/orgs/${org._id}/projects`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'GET'
@@ -439,7 +439,7 @@ function getAllProjectsOnOrg(done) {
       chai.expect(foundProj.name).to.equal(projDataObject.name);
       chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom || {});
       chai.expect(foundProj.permissions[adminUser._id]).to.equal('admin');
-      chai.expect(foundProj.org).to.equal(org.id);
+      chai.expect(foundProj.org).to.equal(org._id);
       chai.expect(foundProj.visibility).to.equal(projDataObject.visibility || 'private');
 
       // Verify additional properties
@@ -497,7 +497,7 @@ function getAllProjects(done) {
       chai.expect(foundProj.name).to.equal(projDataObject.name);
       chai.expect(foundProj.custom).to.deep.equal(projDataObject.custom || {});
       chai.expect(foundProj.permissions[adminUser._id]).to.equal('admin');
-      chai.expect(foundProj.org).to.equal(org.id);
+      chai.expect(foundProj.org).to.equal(org._id);
       chai.expect(foundProj.visibility).to.equal(projDataObject.visibility || 'private');
 
       // Verify additional properties
@@ -528,7 +528,7 @@ function patchProject(done) {
     name: 'Updated Name'
   };
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}`,
+    url: `${test.url}/api/orgs/${org._id}/projects/${projData.id}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'PATCH',
@@ -547,7 +547,7 @@ function patchProject(done) {
     chai.expect(updatedProj.name).to.equal(updateObj.name);
     chai.expect(updatedProj.custom).to.deep.equal(projData.custom || {});
     chai.expect(updatedProj.permissions[adminUser._id]).to.equal('admin');
-    chai.expect(updatedProj.org).to.equal(org.id);
+    chai.expect(updatedProj.org).to.equal(org._id);
     chai.expect(updatedProj.visibility).to.equal(projData.visibility || 'private');
 
     // Verify additional properties
@@ -583,7 +583,7 @@ function patchProjects(done) {
     name: 'Updated Name'
   }));
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects`,
+    url: `${test.url}/api/orgs/${org._id}/projects`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'PATCH',
@@ -609,7 +609,7 @@ function patchProjects(done) {
       chai.expect(updatedProj.name).to.equal('Updated Name');
       chai.expect(updatedProj.custom).to.deep.equal(projDataObject.custom || {});
       chai.expect(updatedProj.permissions[adminUser._id]).to.equal('admin');
-      chai.expect(updatedProj.org).to.equal(org.id);
+      chai.expect(updatedProj.org).to.equal(org._id);
       chai.expect(updatedProj.visibility).to.equal(projDataObject.visibility || 'private');
 
       // Verify additional properties
@@ -636,7 +636,7 @@ function patchProjects(done) {
 function deleteProject(done) {
   const projData = testData.projects[0];
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects/${projData.id}`,
+    url: `${test.url}/api/orgs/${org._id}/projects/${projData.id}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'DELETE'
@@ -669,7 +669,7 @@ function deleteProjects(done) {
     testData.projects[4]
   ];
   request({
-    url: `${test.url}/api/orgs/${org.id}/projects`,
+    url: `${test.url}/api/orgs/${org._id}/projects`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'DELETE',

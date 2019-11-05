@@ -226,7 +226,7 @@ function patchGzip(done) {
   const elementData = testData.elements[2];
 
   // Create the element to be patched
-  ElementController.create(adminUser, org.id, projID, branchID, elementData)
+  ElementController.create(adminUser, org._id, projID, branchID, elementData)
   .then(() => {
     // Create a gzip file for testing
     const zippedData = zlib.gzipSync(JSON.stringify(elementData));
@@ -234,7 +234,7 @@ function patchGzip(done) {
 
     // Initialize the request attributes
     const params = {
-      orgid: org.id,
+      orgid: org._id,
       projectid: projID,
       branchid: branchID
     };
