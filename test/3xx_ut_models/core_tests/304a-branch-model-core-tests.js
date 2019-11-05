@@ -91,7 +91,7 @@ async function createBranch() {
   });
 
   // Save branch object to database
-  const createdBranch = await newBranch.save();
+  const createdBranch = (await Branch.insertMany(newBranch))[0];
   // Check branch object saved correctly
   createdBranch._id.should.equal(utils.createID(org.id, project.id, testData.branches[0].id));
   createdBranch.name.should.equal(testData.branches[0].name);

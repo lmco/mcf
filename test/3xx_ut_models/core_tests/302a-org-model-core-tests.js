@@ -97,7 +97,7 @@ async function createOrg() {
 
   try {
     // Save the Organization model object to the database
-    await org.save();
+    await Org.insertMany(org);
   }
   catch (error) {
     M.log.error(error);

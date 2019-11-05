@@ -229,7 +229,7 @@
   "artifacts": [
     {
       "id": "artifact00",
-      "name": "logo image",
+      "name": "artifact 00",
       "filename": "logo.png",
       "location": "/test/test_files/",
       "custom": {
@@ -238,7 +238,7 @@
     },
     {
       "id": "artifact01",
-      "name": "concept image",
+      "name": "artifact 01",
       "filename": "mbee-concept.png",
       "location": "/test/test_files/",
       "custom": {
@@ -247,7 +247,24 @@
     },
     {
       "id": "artifact02",
-      "name": "hello world text",
+      "name": "artifact 02",
+      "filename": "text.txt",
+      "location": "/test/test_files/",
+      "custom": {
+        "custom_key": "custom_value"
+      }
+    },
+    {
+      "id": "artifact03",
+      "name": "artifact 03",
+      "filename": "text.txt",
+      "location": "/test/test_files/",
+      "custom": {
+        "custom_key": "custom_value"
+      }
+    },{
+      "id": "artifact04",
+      "name": "artifact 04",
       "filename": "text.txt",
       "location": "/test/test_files/",
       "custom": {

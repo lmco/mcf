@@ -382,13 +382,18 @@ async function ldapSync(ldapUserObj) {
     // If the user was found, update with LDAP info
     if (foundUser) {
       // User exists, update database with LDAP information
-      foundUser.fname = ldapUserObj[ldapConfig.attributes.firstName];
-      foundUser.preferredName = ldapUserObj[ldapConfig.attributes.preferredName];
-      foundUser.lname = ldapUserObj[ldapConfig.attributes.lastName];
-      foundUser.email = ldapUserObj[ldapConfig.attributes.email];
+      const update = {
+        fname: ldapUserObj[ldapConfig.attributes.firstName],
+        preferredName: ldapUserObj[ldapConfig.attributes.preferredName],
+        lname: ldapUserObj[ldapConfig.attributes.lastName],
+        email: ldapUserObj[ldapConfig.attributes.email]
+      };
 
       // Save updated user to database
-      userObject = await foundUser.save();
+      await User.updateOne({ _id: ldapUserObj[ldapConfig.attributes.username] }, update);
+
+      // Find the updated user
+      userObject = await User.findOne({ _id: ldapUserObj[ldapConfig.attributes.username] });
     }
     else {
       // User not found, create a new one
@@ -403,7 +408,7 @@ async function ldapSync(ldapUserObj) {
       });
 
       // Save ldap user
-      userObject = await initData.save();
+      userObject = (await User.insertMany(initData))[0];
     }
   }
   catch (error) {
@@ -426,11 +431,9 @@ async function ldapSync(ldapUserObj) {
     // Add the user to the default org
     defaultOrg.permissions[userObject._id] = ['read', 'write'];
 
-    // Mark permissions as modified, required for 'mixed' fields
-    defaultOrg.markModified('permissions');
-
     // Save the updated default org
-    await defaultOrg.save();
+    await Organization.updateOne({ _id: M.config.server.defaultOrganizationId },
+      { permissions: defaultOrg.permissions });
   }
   catch (saveErr) {
     M.log.error(saveErr.message);

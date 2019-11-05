@@ -297,8 +297,9 @@ module.exports.validateOptions = function(options, validOptions, model) {
       validatedOptions.populateString = 'contains sourceOf targetOf ';
       break;
     case 'Artifact':
-      validSearchOptions = ['filename', 'name', 'createdBy', 'lastModifiedBy',
-        'archivedBy'];
+      validSearchOptions = ['name', 'createdBy', 'archived',
+        'lastModifiedBy', 'archivedBy'];
+
       break;
     case 'User':
       validSearchOptions = ['fname', 'preferredName', 'lname', 'email', 'createdBy',
