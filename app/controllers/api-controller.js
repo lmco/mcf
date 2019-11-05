@@ -4711,7 +4711,6 @@ async function getArtifacts(req, res) {
     fields: 'array',
     limit: 'number',
     skip: 'number',
-    lean: 'boolean',
     sort: 'string',
     ids: 'array',
     format: 'string',
@@ -4771,9 +4770,6 @@ async function getArtifacts(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   try {
     // Find the artifacts
@@ -4875,9 +4871,6 @@ async function postArtifacts(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   // Get the artifact data
   let artifactData;
   if (req.headers['content-type'] === 'application/gzip') {
@@ -4958,9 +4951,6 @@ async function patchArtifacts(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   // Get the artifact data
   let artifactData;
