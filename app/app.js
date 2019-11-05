@@ -166,10 +166,10 @@ async function createDefaultOrganization() {
     else {
       // Default organization does NOT exist, create it and add all active users
       // to permissions list
-      const defaultOrg = Organization.createDocument({
+      const defaultOrg = {
         _id: M.config.server.defaultOrganizationId,
         name: M.config.server.defaultOrganizationName
-      });
+      };
 
       // Add each existing user to default org
       userIDs.forEach((user) => {
@@ -201,13 +201,13 @@ async function createDefaultAdmin() {
     // If user is null, create the admin user
     if (user === null) {
       // No global admin exists, create local user as global admin
-      const adminUserData = User.createDocument({
+      const adminUserData = {
         // Set username and password of global admin user from configuration.
         _id: M.config.server.defaultAdminUsername,
         password: M.config.server.defaultAdminPassword,
         provider: 'local',
         admin: true
-      });
+      };
 
       // Save the admin user
       await User.insertMany(adminUserData);

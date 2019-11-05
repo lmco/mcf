@@ -88,8 +88,6 @@ if (!ArtifactStrategy.hasOwnProperty('clear')) {
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  * @param {string} [options.sort] - Provide a particular field to sort the results by.
  * You may also add a negative sign in front of the field to indicate sorting in
  * reverse order.
@@ -143,7 +141,7 @@ async function find(requestingUser, organizationID, projectID, branchID, artifac
 
   // Initialize and ensure options are valid
   const validatedOptions = utils.validateOptions(options, ['includeArchived', 'populate',
-    'fields', 'limit', 'skip', 'lean', 'sort'], Artifact);
+    'fields', 'limit', 'skip', 'sort'], Artifact);
 
   // Ensure options are valid
   if (options) {
@@ -212,8 +210,7 @@ async function find(requestingUser, organizationID, projectID, branchID, artifac
       { limit: validatedOptions.limit,
         skip: validatedOptions.skip,
         sort: validatedOptions.sort,
-        populate: validatedOptions.populateString,
-        lean: validatedOptions.lean
+        populate: validatedOptions.populateString
       });
   }
   catch (error) {
@@ -242,8 +239,6 @@ async function find(requestingUser, organizationID, projectID, branchID, artifac
  * of the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. To NOT
  * include a field, provide a '-' in front.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  *
  * @returns {Promise<object[]>} Array of created artifact objects.
  *
@@ -273,8 +268,7 @@ async function create(requestingUser, organizationID, projectID, branchID,
     const branID = sani.db(branchID);
 
     // Initialize and ensure options are valid
-    const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
-      'lean'], Artifact);
+    const validatedOptions = utils.validateOptions(options, ['populate', 'fields'], Artifact);
 
     // Define array to store artifact data
     let artsToCreate = [];
@@ -350,7 +344,7 @@ async function create(requestingUser, organizationID, projectID, branchID,
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Check if the artifacts already exists
-    const existingArtifact = await Artifact.find(searchQuery, '_id', { lean: true });
+    const existingArtifact = await Artifact.find(searchQuery, '_id');
 
     // Ensure no artifacts were found
     if (existingArtifact.length > 0) {
@@ -362,17 +356,16 @@ async function create(requestingUser, organizationID, projectID, branchID,
     }
 
     const artObjects = artsToCreate.map((a) => {
-      const artObj = Artifact.createDocument(a);
-      artObj.project = project._id;
-      artObj.branch = branch._id;
-      artObj.strategy = M.config.artifact.strategy;
-      artObj.lastModifiedBy = reqUser._id;
-      artObj.createdBy = reqUser._id;
-      artObj.updatedOn = Date.now();
-      artObj.archivedBy = (a.archived) ? reqUser._id : null;
-      artObj.archivedOn = (a.archived) ? Date.now() : null;
+      a.project = project._id;
+      a.branch = branch._id;
+      a.strategy = M.config.artifact.strategy;
+      a.lastModifiedBy = reqUser._id;
+      a.createdBy = reqUser._id;
+      a.updatedOn = Date.now();
+      a.archivedBy = (a.archived) ? reqUser._id : null;
+      a.archivedOn = (a.archived) ? Date.now() : null;
 
-      return artObj;
+      return a;
     });
 
     // Save artifact object to the database
@@ -382,9 +375,7 @@ async function create(requestingUser, organizationID, projectID, branchID,
     EventEmitter.emit('artifacts-created', createdArtifacts);
 
     return await Artifact.find(searchQuery, validatedOptions.fieldsString,
-      { populate: validatedOptions.populateString,
-        lean: validatedOptions.lean
-      });
+      { populate: validatedOptions.populateString });
   }
   catch (error) {
     throw errors.captureError(error);
@@ -413,8 +404,6 @@ async function create(requestingUser, organizationID, projectID, branchID,
  * of the found objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. To NOT
  * include a field, provide a '-' in front.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  *
  * @returns {Promise<object[]>} Array of updated artifact objects.
  *
@@ -444,8 +433,7 @@ async function update(requestingUser, organizationID, projectID, branchID,
     const branID = sani.db(branchID);
 
     // Initialize and ensure options are valid
-    const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
-      'lean'], Artifact);
+    const validatedOptions = utils.validateOptions(options, ['populate', 'fields'], Artifact);
 
     // Define array to store artifact data
     let artsToUpdate = [];
@@ -519,7 +507,7 @@ async function update(requestingUser, organizationID, projectID, branchID,
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find existing artifacts
-    const foundArtifact = await Artifact.find(searchQuery, null, { lean: true });
+    const foundArtifact = await Artifact.find(searchQuery, null);
     // Verify the same number of artifacts are found as desired
     if (foundArtifact.length !== arrIDs.length) {
       const foundIDs = foundArtifact.map(a => a._id);
@@ -614,9 +602,7 @@ async function update(requestingUser, organizationID, projectID, branchID,
     await Artifact.bulkWrite(bulkArray);
 
     const foundArtifacts = await Artifact.find(searchQuery, validatedOptions.fieldsString,
-      { populate: validatedOptions.populateString,
-        lean: validatedOptions.lean
-      });
+      { populate: validatedOptions.populateString });
 
     // Emit the event artifacts-updated
     EventEmitter.emit('artifacts-updated', foundArtifacts);
@@ -705,7 +691,7 @@ async function remove(requestingUser, organizationID, projectID, branchID,
     const searchQuery = { _id: { $in: artifactsToFind } };
 
     // Find the artifacts to delete
-    const foundArtifacts = await Artifact.find(searchQuery, null, { lean: true });
+    const foundArtifacts = await Artifact.find(searchQuery, null);
     const foundArtifactIDs = foundArtifacts.map(a => a._id);
 
     // Check if all artifacts were found

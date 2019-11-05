@@ -471,17 +471,6 @@ module.exports.validateOptions = function(options, validOptions, model) {
       // Return the parsed sort option in the format {sort_field: order}
       validatedOptions.sort[val] = order;
     }
-
-    // Handle the lean option
-    if (opt === 'lean') {
-      // Ensure the value is a boolean
-      if (typeof options.lean !== 'boolean') {
-        throw new M.DataFormatError('The option \'lean\' is not a boolean.', 'warn');
-      }
-
-      // Set the lean option in the returnObject
-      validatedOptions.lean = val;
-    }
   });
 
   return validatedOptions;

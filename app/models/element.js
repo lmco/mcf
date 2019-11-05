@@ -290,11 +290,6 @@ ElementSchema.plugin(extensions);
  * @description Returns element fields that can be changed
  * @memberOf ElementSchema
  */
-ElementSchema.method('getValidUpdateFields', function() {
-  return ['name', 'documentation', 'custom', 'archived', 'parent', 'type',
-    'source', 'target'];
-});
-
 ElementSchema.static('getValidUpdateFields', function() {
   return ['name', 'documentation', 'custom', 'archived', 'parent', 'type',
     'source', 'target'];
@@ -304,11 +299,6 @@ ElementSchema.static('getValidUpdateFields', function() {
  * @description Returns element fields that can be changed in bulk
  * @memberOf ElementSchema
  */
-ElementSchema.method('getValidBulkUpdateFields', function() {
-  return ['name', 'documentation', 'custom', 'archived', 'type', 'source',
-    'target'];
-});
-
 ElementSchema.static('getValidBulkUpdateFields', function() {
   return ['name', 'documentation', 'custom', 'archived', 'type', 'source',
     'target'];
@@ -318,11 +308,6 @@ ElementSchema.static('getValidBulkUpdateFields', function() {
  * @description Returns a list of fields a requesting user can populate
  * @memberOf ElementSchema
  */
-ElementSchema.method('getValidPopulateFields', function() {
-  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'parent', 'source',
-    'target', 'project', 'branch', 'sourceOf', 'targetOf', 'contains'];
-});
-
 ElementSchema.static('getValidPopulateFields', function() {
   return ['archivedBy', 'lastModifiedBy', 'createdBy', 'parent', 'source',
     'target', 'project', 'branch', 'sourceOf', 'targetOf', 'contains'];
@@ -332,10 +317,6 @@ ElementSchema.static('getValidPopulateFields', function() {
  * @description Returns a list of valid root elements
  * @memberOf ElementSchema
  */
-ElementSchema.method('getValidRootElements', function() {
-  return ['model', '__mbee__', 'holding_bin', 'undefined'];
-});
-
 ElementSchema.static('getValidRootElements', function() {
   return ['model', '__mbee__', 'holding_bin', 'undefined'];
 });

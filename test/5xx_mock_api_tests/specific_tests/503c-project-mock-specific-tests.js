@@ -106,7 +106,7 @@ function postGzip(done) {
 
   // Initialize the request attributes
   const params = {
-    orgid: org.id
+    orgid: org._id
   };
   const body = {};
   const method = 'POST';
@@ -161,7 +161,7 @@ function putGzip(done) {
 
   // Initialize the request attributes
   const params = {
-    orgid: org.id
+    orgid: org._id
   };
   const body = {};
   const method = 'PUT';
@@ -211,7 +211,7 @@ function patchGzip(done) {
   const projectData = testData.projects[2];
 
   // Create the project to be patched
-  ProjectController.create(adminUser, org.id, projectData)
+  ProjectController.create(adminUser, org._id, projectData)
   .then(() => {
     projectData.name = 'updated';
 
@@ -221,7 +221,7 @@ function patchGzip(done) {
 
     // Initialize the request attributes
     const params = {
-      orgid: org.id
+      orgid: org._id
     };
     const body = {};
     const method = 'PATCH';

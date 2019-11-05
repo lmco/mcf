@@ -21,6 +21,7 @@
 const chai = require('chai');
 
 // MBEE modules
+const User = M.require('models.user');
 const UserController = M.require('controllers.user-controller');
 const Organization = M.require('models.organization');
 const db = M.require('lib.db');
@@ -699,7 +700,7 @@ function updateUserPassword(done) {
     chai.expect(updatedUser.archivedOn).to.equal(null);
 
     // Verify the new password is correct
-    return updatedUser.verifyPassword(newPassword);
+    return User.verifyPassword(updatedUser, newPassword);
   })
   .then((success) => {
     // Expect success to be true, meaning password is correct

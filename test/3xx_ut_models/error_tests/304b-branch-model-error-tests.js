@@ -90,12 +90,10 @@ async function idTooShort() {
 
     // Change id to be too short.
     branchData._id = '01:01:0';
-
-    // Create branch object
-    const branchObject = Branch.createDocument(branchData);
+    delete branchData.id;
 
     // Expect insertMany() to fail with specific error message
-    await Branch.insertMany(branchObject).should.eventually.be.rejectedWith('Branch '
+    await Branch.insertMany(branchData).should.eventually.be.rejectedWith('Branch '
       + `validation failed: _id: Branch ID length [${utils.parseID(branchData._id).pop().length}] `
       + 'must not be less than 2 characters.');
   }
@@ -124,12 +122,10 @@ async function idTooLong() {
     // Change id to be too long.
     branchData._id = '012345678901234567890123456789012345:01234567890123456789'
       + '0123456789012345:0123456789012345678901234567890123456';
-
-    // Create branch object
-    const branchObject = Branch.createDocument(branchData);
+    delete branchData.id;
 
     // Expect insertMany() to fail with specific error message
-    await Branch.insertMany(branchObject).should.eventually.be.rejectedWith('Branch validation '
+    await Branch.insertMany(branchData).should.eventually.be.rejectedWith('Branch validation '
       + `failed: _id: Branch ID length [${branchData._id.length - validators.project.idLength - 1}]`
       + ` must not be more than ${validators.branch.idLength - validators.project.idLength - 1}`
       + ' characters.');
@@ -148,12 +144,10 @@ async function idNotProvided() {
   try {
     const branchData = Object.assign({}, testData.branches[0]);
     branchData.project = 'org:proj';
-
-    // Create branch object
-    const branchObject = Branch.createDocument(branchData);
+    delete branchData.id;
 
     // Expect insertMany() to fail with specific error message
-    await Branch.insertMany(branchObject).should.eventually.be.rejectedWith('Branch'
+    await Branch.insertMany(branchData).should.eventually.be.rejectedWith('Branch'
       + ' validation failed: _id: Path `_id` is required.');
   }
   catch (error) {
@@ -178,12 +172,10 @@ async function invalidID() {
 
     // Change id to be invalid.
     branchData._id = '!!!!!!!!';
-
-    // Create branch object
-    const branchObject = Branch.createDocument(branchData);
+    delete branchData.id;
 
     // Expect insertMany() to fail with specific error message
-    await Branch.insertMany(branchObject).should.eventually.be.rejectedWith('Branch'
+    await Branch.insertMany(branchData).should.eventually.be.rejectedWith('Branch'
       + ` validation failed: _id: Invalid branch ID [${branchData._id}].`);
   }
   catch (error) {
@@ -200,12 +192,10 @@ async function projectNotProvided() {
   try {
     const branchData = Object.assign({}, testData.branches[0]);
     branchData._id = `org:proj:${branchData.id}`;
-
-    // Create branch object
-    const branchObject = Branch.createDocument(branchData);
+    delete branchData.id;
 
     // Expect insertMany() to fail with specific error message
-    await Branch.insertMany(branchObject).should.eventually.be.rejectedWith('Branch'
+    await Branch.insertMany(branchData).should.eventually.be.rejectedWith('Branch'
       + ' validation failed: project: Path `project` is required.');
   }
   catch (error) {
@@ -230,12 +220,10 @@ async function projectInvalid() {
 
     // Set invalid project
     branchData.project = '!!';
-
-    // Create branch object
-    const branchObject = Branch.createDocument(branchData);
+    delete branchData.id;
 
     // Expect insertMany() to fail with specific error message
-    await Branch.insertMany(branchObject).should.eventually.be.rejectedWith(
+    await Branch.insertMany(branchData).should.eventually.be.rejectedWith(
       `Branch validation failed: project: ${branchData.project} is not a valid `
       + 'project ID.'
     );
@@ -263,12 +251,10 @@ async function sourceInvalid() {
 
     // Set invalid source
     branchData.source = '!!!!!!!!';
-
-    // Create branch object
-    const branchObject = Branch.createDocument(branchData);
+    delete branchData.id;
 
     // Expect insertMany() to fail with specific error message
-    await Branch.insertMany(branchObject).should.eventually.be.rejectedWith(
+    await Branch.insertMany(branchData).should.eventually.be.rejectedWith(
       `Branch validation failed: source: ${branchData.source} is not a valid `
       + 'source ID.'
     );

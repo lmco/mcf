@@ -88,13 +88,13 @@ describe(M.getModuleName(module.filename), () => {
  */
 async function createProject() {
   // Create a project model object
-  const newProject = Project.createDocument({
+  const newProject = {
     _id: utils.createID(org.id, testData.projects[0].id),
     name: testData.projects[0].name,
     org: org.id,
     permissions: {},
     visibility: 'private'
-  });
+  };
 
   // Add the admin user to the permissions
   newProject.permissions[adminUser.username] = ['read', 'write', 'admin'];

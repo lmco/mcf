@@ -174,15 +174,15 @@ async function createArtifacts() {
 
     // Loop through each artifact data object
     artData.forEach((artObj) => {
-      const artifactID = utils.createID(org.id, projectID, branchID, artObj.id);
+      const artifactID = utils.createID(orgID, projectID, branchID, artObj.id);
       const createdArt = jmi2Artifacts[artifactID];
 
       // Verify artifacts created properly
       chai.expect(createdArt._id).to.equal(artifactID);
       chai.expect(createdArt.name).to.equal(artObj.name);
       chai.expect(createdArt.custom || {}).to.deep.equal(artObj.custom);
-      chai.expect(createdArt.project).to.equal(utils.createID(org.id, projectID));
-      chai.expect(createdArt.branch).to.equal(utils.createID(org.id, projectID, branchID));
+      chai.expect(createdArt.project).to.equal(utils.createID(orgID, projectID));
+      chai.expect(createdArt.branch).to.equal(utils.createID(orgID, projectID, branchID));
 
       chai.expect(createdArt.filename).to.equal(artObj.filename);
       chai.expect(createdArt.location).to.equal(artObj.location);
@@ -266,15 +266,15 @@ async function getArtifacts() {
 
     // Loop through each artifact data object
     artData.forEach((artObj) => {
-      const artifactID = utils.createID(org.id, projectID, branchID, artObj.id);
+      const artifactID = utils.createID(orgID, projectID, branchID, artObj.id);
       const foundArt = jmi2Artifacts[artifactID];
 
       // Verify artifacts created properly
       chai.expect(foundArt._id).to.equal(artifactID);
       chai.expect(foundArt.name).to.equal(artObj.name);
       chai.expect(foundArt.custom || {}).to.deep.equal(artObj.custom);
-      chai.expect(foundArt.project).to.equal(utils.createID(org.id, projectID));
-      chai.expect(foundArt.branch).to.equal(utils.createID(org.id, projectID, branchID));
+      chai.expect(foundArt.project).to.equal(utils.createID(orgID, projectID));
+      chai.expect(foundArt.branch).to.equal(utils.createID(orgID, projectID, branchID));
 
       chai.expect(foundArt.filename).to.equal(artObj.filename);
       chai.expect(foundArt.location).to.equal(artObj.location);
@@ -372,7 +372,7 @@ async function updateArtifacts() {
 
     // Loop through each artifact data object
     artUpdateData.forEach((artObj) => {
-      const artifactID = utils.createID(org.id, projectID, branchID, artObj.id);
+      const artifactID = utils.createID(orgID, projectID, branchID, artObj.id);
       const updatedArt = jmi2Artifacts[artifactID];
 
       // Verify artifacts updated properly
@@ -458,7 +458,7 @@ async function deleteArtifacts() {
 
     // Loop through each artifact data object
     artData.forEach((artDataObject) => {
-      const artifactID = utils.createID(org.id, projectID, branchID, artDataObject.id);
+      const artifactID = utils.createID(orgID, projectID, branchID, artDataObject.id);
       // Verify correct artifact deleted
       chai.expect(deletedArtifacts).to.include(artifactID);
     });
