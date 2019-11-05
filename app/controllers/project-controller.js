@@ -453,91 +453,81 @@ async function create(requestingUser, organizationID, projects, options) {
     EventEmitter.emit('projects-created', projObjects);
 
     // Create a branch for each project
-    const branchObjects = projObjects.map((p) => {
-      return {
-        _id: utils.createID(p._id, 'master'),
-        name: 'Master',
-        project: p._id,
-        tag: false,
-        lastModifiedBy: reqUser._id,
-        createdBy: reqUser._id,
-        createdOn: Date.now(),
-        updatedOn: Date.now(),
-        archived: p.archived,
-        archivedBy: (p.archived) ? reqUser._id : null
-      };
-    });
+    const branchObjects = projObjects.map((p) => ({
+      _id: utils.createID(p._id, 'master'),
+      name: 'Master',
+      project: p._id,
+      tag: false,
+      lastModifiedBy: reqUser._id,
+      createdBy: reqUser._id,
+      createdOn: Date.now(),
+      updatedOn: Date.now(),
+      archived: p.archived,
+      archivedBy: (p.archived) ? reqUser._id : null
+    }));
 
     // Create the branch
     await Branch.insertMany(branchObjects);
 
     // Create a root model element for each project
-    const elemModelObj = projObjects.map((p) => {
-      return {
-        _id: utils.createID(p._id, 'master', 'model'),
-        name: 'Model',
-        parent: null,
-        project: p._id,
-        branch: utils.createID(p._id, 'master'),
-        lastModifiedBy: reqUser._id,
-        createdBy: reqUser._id,
-        createdOn: Date.now(),
-        updatedOn: Date.now(),
-        archived: p.archived,
-        archivedBy: (p.archived) ? reqUser._id : null
-      }
-    });
+    const elemModelObj = projObjects.map((p) => ({
+      _id: utils.createID(p._id, 'master', 'model'),
+      name: 'Model',
+      parent: null,
+      project: p._id,
+      branch: utils.createID(p._id, 'master'),
+      lastModifiedBy: reqUser._id,
+      createdBy: reqUser._id,
+      createdOn: Date.now(),
+      updatedOn: Date.now(),
+      archived: p.archived,
+      archivedBy: (p.archived) ? reqUser._id : null
+    }));
 
     // Create a __MBEE__ element for each project
-    const elemMBEEObj = projObjects.map((p) => {
-      return {
-        _id: utils.createID(p._id, 'master', '__mbee__'),
-        name: '__mbee__',
-        parent: utils.createID(p._id, 'master', 'model'),
-        project: p._id,
-        branch: utils.createID(p._id, 'master'),
-        lastModifiedBy: reqUser._id,
-        createdBy: reqUser._id,
-        createdOn: Date.now(),
-        updatedOn: Date.now(),
-        archived: p.archived,
-        archivedBy: (p.archived) ? reqUser._id : null
-      };
-    });
+    const elemMBEEObj = projObjects.map((p) => ({
+      _id: utils.createID(p._id, 'master', '__mbee__'),
+      name: '__mbee__',
+      parent: utils.createID(p._id, 'master', 'model'),
+      project: p._id,
+      branch: utils.createID(p._id, 'master'),
+      lastModifiedBy: reqUser._id,
+      createdBy: reqUser._id,
+      createdOn: Date.now(),
+      updatedOn: Date.now(),
+      archived: p.archived,
+      archivedBy: (p.archived) ? reqUser._id : null
+    }));
 
     // Create a holding bin element for each project
-    const elemHoldingBinObj = projObjects.map((p) => {
-      return {
-        _id: utils.createID(p._id, 'master', 'holding_bin'),
-        name: 'holding bin',
-        parent: utils.createID(p._id, 'master', '__mbee__'),
-        project: p._id,
-        branch: utils.createID(p._id, 'master'),
-        lastModifiedBy: reqUser._id,
-        createdBy: reqUser._id,
-        createdOn: Date.now(),
-        updatedOn: Date.now(),
-        archived: p.archived,
-        archivedBy: (p.archived) ? reqUser._id : null
-      };
-    });
+    const elemHoldingBinObj = projObjects.map((p) => ({
+      _id: utils.createID(p._id, 'master', 'holding_bin'),
+      name: 'holding bin',
+      parent: utils.createID(p._id, 'master', '__mbee__'),
+      project: p._id,
+      branch: utils.createID(p._id, 'master'),
+      lastModifiedBy: reqUser._id,
+      createdBy: reqUser._id,
+      createdOn: Date.now(),
+      updatedOn: Date.now(),
+      archived: p.archived,
+      archivedBy: (p.archived) ? reqUser._id : null
+    }));
 
     // Create an undefined element for each project
-    const elemUndefinedBinObj = projObjects.map((p) => {
-      return {
-        _id: utils.createID(p._id, 'master', 'undefined'),
-        name: 'undefined element',
-        parent: utils.createID(p._id, 'master', '__mbee__'),
-        project: p._id,
-        branch: utils.createID(p._id, 'master'),
-        lastModifiedBy: reqUser._id,
-        createdBy: reqUser._id,
-        createdOn: Date.now(),
-        updatedOn: Date.now(),
-        archived: p.archived,
-        archivedBy: (p.archived) ? reqUser._id : null
-      }
-    });
+    const elemUndefinedBinObj = projObjects.map((p) => ({
+      _id: utils.createID(p._id, 'master', 'undefined'),
+      name: 'undefined element',
+      parent: utils.createID(p._id, 'master', '__mbee__'),
+      project: p._id,
+      branch: utils.createID(p._id, 'master'),
+      lastModifiedBy: reqUser._id,
+      createdBy: reqUser._id,
+      createdOn: Date.now(),
+      updatedOn: Date.now(),
+      archived: p.archived,
+      archivedBy: (p.archived) ? reqUser._id : null
+    }));
 
     // Concatenate all element arrays
     const conCatElemObj = elemModelObj.concat(elemMBEEObj) // eslint-disable-next-line indent
