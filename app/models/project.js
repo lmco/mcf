@@ -183,9 +183,6 @@ ProjectSchema.plugin(extensions);
  * @description Returns supported permission levels
  * @memberOf ProjectSchema
  */
-ProjectSchema.method('getPermissionLevels', function() {
-  return ['remove_all', 'read', 'write', 'admin'];
-});
 ProjectSchema.static('getPermissionLevels', function() {
   return ['remove_all', 'read', 'write', 'admin'];
 });
@@ -194,9 +191,6 @@ ProjectSchema.static('getPermissionLevels', function() {
  * @description Returns project fields that can be changed
  * @memberOf ProjectSchema
  */
-ProjectSchema.method('getValidUpdateFields', function() {
-  return ['name', 'custom', 'archived', 'permissions', 'visibility'];
-});
 ProjectSchema.static('getValidUpdateFields', function() {
   return ['name', 'custom', 'archived', 'permissions', 'visibility'];
 });
@@ -205,9 +199,6 @@ ProjectSchema.static('getValidUpdateFields', function() {
  * @description Returns supported visibility levels
  * @memberOf ProjectSchema
  */
-ProjectSchema.method('getVisibilityLevels', function() {
-  return ['internal', 'private'];
-});
 ProjectSchema.static('getVisibilityLevels', function() {
   return ['internal', 'private'];
 });
@@ -216,9 +207,6 @@ ProjectSchema.static('getVisibilityLevels', function() {
  * @description Returns a list of fields a requesting user can populate
  * @memberOf ProjectSchema
  */
-ProjectSchema.method('getValidPopulateFields', function() {
-  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'org'];
-});
 ProjectSchema.static('getValidPopulateFields', function() {
   return ['archivedBy', 'lastModifiedBy', 'createdBy', 'org'];
 });
