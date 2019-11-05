@@ -130,9 +130,7 @@ class Schema {
     this.definition.populate = {};
     this.add(definition);
 
-    // Define the definition hooks, methods and statics
-    this.definition.hooks = { pre: [], post: [] };
-    this.definition.methods = [];
+    // Define statics
     this.definition.statics = [];
 
     // Remove GlobalSecondaryIndex array if empty, meaning there are no additional indexes
@@ -242,28 +240,6 @@ class Schema {
   }
 
   /**
-   * @description Defines a function to be run prior to a certain event
-   * occurring.
-   *
-   * @param {(string|RegExp)} methodName - The event to run the callback
-   * function before.
-   * @param {object} [options] - An object containing options.
-   * @param {Function} cb - The callback function to run prior to the event
-   * occurring.
-   */
-  pre(methodName, options, cb) {
-    const obj = {};
-    // No options provided
-    if (typeof options === 'function') {
-      cb = options; // eslint-disable-line no-param-reassign
-    }
-
-    // Add the pre-hook to the hooks object
-    obj[methodName] = cb;
-    this.definition.hooks.pre.push(obj);
-  }
-
-  /**
    * @description Defines a virtual field for the schema. Virtuals are not
    * stored in the database and rather are calculated post-find. Virtuals
    * generally will require a second request to retrieve referenced documents.
@@ -292,7 +268,6 @@ class Schema {
     delete this.definition.populate[name].default;
   }
 
-
   /**
    * @description Adds a static method to the schema. This method should later
    * be an accessible static method on the model.
@@ -305,20 +280,6 @@ class Schema {
     obj[name] = fn;
     // Add the static function onto the schema statics array
     this.definition.statics.push(obj);
-  }
-
-  /**
-   * @description Adds a non-static method to the schema, which later will be an
-   * instance method on the model.
-   *
-   * @param {string} name - The name of the non-static function.
-   * @param {Function} fn - The function to be added to the model.
-   */
-  method(name, fn) {
-    const obj = {};
-    obj[name] = fn;
-    // Add the method onto the schema methods array
-    this.definition.methods.push(obj);
   }
 
 }
@@ -516,11 +477,6 @@ class Model {
 
       // Populate any fields specified in the options object
       await this.populate(document, options);
-
-      // If the lean option is NOT supplied, add on document functions
-      if (!options.lean) {
-        document = this.createDocument(document); // eslint-disable-line no-param-reassign
-      }
     }
 
     return document;
@@ -750,85 +706,6 @@ class Model {
         }
       });
     };
-
-    /**
-     * @description Validates and saves a document to the database.
-     * @async
-     *
-     * @returns {Promise<object>} The saved document.
-     */
-    doc.__proto__.save = async function() { // eslint-disable-line no-proto
-      try {
-        // Ensure the document is valid
-        this.validateSync();
-        const promises = [];
-        // If pre-save hooks exist, call them
-        if ('presave' in this) {
-          promises.push(this.presave());
-        }
-
-        // Wait for any pre-save promises to resolve
-        await Promise.all(promises);
-
-        // Connect to the database
-        const conn = await connect();
-
-        const putObj = {
-          TableName: table,
-          Item: {}
-        };
-        // Format the document object
-        putObj.Item = model.formatObject(this);
-
-        M.log.debug(`DB OPERATION: ${table} putItem`);
-        // Save the document
-        await conn.putItem(putObj).promise();
-        // Find and return the saved document
-        return await model.findOne({ _id: doc._id });
-      }
-      catch (error) {
-        M.log.verbose(`Failed in ${modelName}.doc.save().`);
-        throw errors.captureError(error);
-      }
-    };
-
-    /**
-     * @description Deletes the document from the database.
-     * @async
-     *
-     * @returns {Promise} Resolves upon completion.
-     */
-    doc.__proto__.remove = async function() { // eslint-disable-line no-proto
-      try {
-        await model.deleteMany({ _id: this._id });
-      }
-      catch (error) {
-        M.log.verbose(`Failed in ${modelName}.doc.remove().`);
-        throw errors.captureError(error);
-      }
-    };
-
-    /**
-     * @description Unused function called when a field whose value is a JSON
-     * object is modified.
-     *
-     * @param {string} field - The field which was modified.
-     */
-    doc.__proto__.markModified = function(field) {}; // eslint-disable-line no-proto
-
-    // Add on object methods, defined in schema definition
-    if (Array.isArray(def.methods)) {
-      def.methods.forEach((method) => {
-        doc.__proto__[Object.keys(method)[0]] = Object.values(method)[0]; // eslint-disable-line
-      });
-    }
-
-    // Add on pre-hooks, defined in schema definition
-    if (Array.isArray(def.hooks.pre)) {
-      def.hooks.pre.forEach((hook) => {
-        doc.__proto__[`pre${Object.keys(hook)[0]}`] = Object.values(hook)[0]; // eslint-disable-line
-      });
-    }
 
     // Return the document containing the prototype functions
     return doc;
