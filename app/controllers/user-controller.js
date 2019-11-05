@@ -317,7 +317,7 @@ async function create(requestingUser, users, options) {
       userObj.updatedOn = Date.now();
       userObj.archivedBy = (userObj.archived) ? reqUser._id : null;
       userObj.archivedOn = (userObj.archived) ? Date.now() : null;
-      userObj.hashPassword();
+      User.hashPassword(userObj);
       return userObj;
     });
 
@@ -1026,7 +1026,7 @@ async function updatePassword(requestingUser, oldPassword, newPassword, confirmP
     }
 
     // Verify the old password matches
-    const verified = await foundUser.verifyPassword(oldPassword);
+    const verified = await User.verifyPassword(foundUser, oldPassword);
 
     // Ensure old password was verified
     if (!verified) {

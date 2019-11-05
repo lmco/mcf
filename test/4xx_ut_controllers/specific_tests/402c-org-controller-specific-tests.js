@@ -88,8 +88,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should only return the specified fields', optionFieldsFind);
   it('should limit the number of search results', optionLimitFind);
   it('should skip over find results', optionSkipFind);
-  it('should return a raw JSON version of an org instead of a document with'
-    + ' instance methods from find()', optionLeanFind);
   it('should find an org with a specific name', optionNameFind);
   it('should find an org created by a specific user', optionCreatedByFind);
   it('should find an org last modified by a specific user', optionLastModifiedByFind);
@@ -100,18 +98,12 @@ describe(M.getModuleName(module.filename), () => {
   // ------------- Create -------------
   it('should populate the return object from create', optionPopulateCreate);
   it('should only return specified fields from create', optionFieldsCreate);
-  it('should return a raw JSON version of an org instead of a document with'
-    + ' instance methods from create()', optionLeanCreate);
   // ------------- Update -------------
   it('should populate the return object from update', optionPopulateUpdate);
   it('should only return specified fields from update', optionFieldsUpdate);
-  it('should return a raw JSON version of an org instead of a document with'
-    + ' instance methods from update()', optionLeanUpdate);
   // ------------- Replace ------------
   it('should populate the return object from createOrReplace', optionPopulateReplace);
   it('should only return specified fields from createOrReplace', optionFieldsReplace);
-  it('should return a raw JSON version of an org instead of a document with'
-    + ' instance methods from createOrReplace()', optionLeanReplace);
   // ------------- Remove -------------
 });
 
@@ -279,31 +271,6 @@ async function optionSkipFind() {
 
     // Check that the first 3 orgs were skipped
     chai.expect(skipOrgs[0]._id).to.equal(allOrgs[3]._id);
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Validates that find results can return raw JSON rather than models.
- */
-async function optionLeanFind() {
-  try {
-    // Create lean option
-    const options = { lean: true };
-
-    // Find the orgs without lean to check that they are models
-    const foundOrgs = await OrgController.find(adminUser);
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof foundOrgs[0].getValidUpdateFields).to.equal('function');
-
-    // Find the orgs with the lean option
-    const leanOrgs = await OrgController.find(adminUser, options);
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof leanOrgs[0].getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error.message);
@@ -644,41 +611,6 @@ async function optionFieldsCreate() {
 }
 
 /**
- * @description Validates that the create results return JSON data rather than model instances.
- */
-async function optionLeanCreate() {
-  try {
-    // Select a org to test
-    const orgID = utils.parseID(orgs[1]._id).pop();
-    const orgObj = {
-      id: orgID,
-      name: 'Org01'
-    };
-
-    // Delete the org
-    await OrgController.remove(adminUser, orgID);
-
-    // Create lean option
-    const options = { lean: true };
-
-    // Create the org
-    const createdOrgs = await OrgController.create(adminUser,
-      orgObj, options);
-    // There should be one org
-    chai.expect(createdOrgs.length).to.equal(1);
-    const foundOrg = createdOrgs[0];
-
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof foundOrg.getValidUpdateFields).to.equal('undefined');
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
  * @description Validates that the return object from update() can be populated.
  */
 async function optionPopulateUpdate() {
@@ -767,38 +699,6 @@ async function optionFieldsUpdate() {
 }
 
 /**
- * @description Validates that the update results return JSON data rather than model instances.
- */
-async function optionLeanUpdate() {
-  try {
-    // Select a org to test
-    const orgID = utils.parseID(orgs[1]._id).pop();
-    const orgObj = {
-      id: orgID,
-      name: 'Org01 lean update'
-    };
-
-    // Create lean option
-    const options = { lean: true };
-
-    // Update the org
-    const createdOrgs = await OrgController.update(adminUser,
-      orgObj, options);
-    // There should be one org
-    chai.expect(createdOrgs.length).to.equal(1);
-    const foundOrg = createdOrgs[0];
-
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof foundOrg.getValidUpdateFields).to.equal('undefined');
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
  * @description Validates that the return object from create() can be populated.
  */
 async function optionPopulateReplace() {
@@ -878,38 +778,6 @@ async function optionFieldsReplace() {
     fields.forEach((field) => {
       chai.expect(keys.includes(field)).to.equal(true);
     });
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Validates that the create results return JSON data rather than model instances.
- */
-async function optionLeanReplace() {
-  try {
-    // Select a org to test
-    const orgID = orgs[1]._id;
-    const orgObj = {
-      id: orgID,
-      name: 'Org01'
-    };
-
-    // Create lean option
-    const options = { lean: true };
-
-    // Replace the org
-    const createdOrgs = await OrgController.createOrReplace(adminUser,
-      orgObj, options);
-    // There should be one org
-    chai.expect(createdOrgs.length).to.equal(1);
-    const foundOrg = createdOrgs[0];
-
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof foundOrg.getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error.message);

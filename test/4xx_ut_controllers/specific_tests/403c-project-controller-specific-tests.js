@@ -97,8 +97,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should only return the specified fields', optionFieldsFind);
   it('should limit the number of search results', optionLimitFind);
   it('should skip over find results', optionSkipFind);
-  it('should return a raw JSON version of a project instead of a document with'
-    + ' instance methods from find()', optionLeanFind);
   it('should sort find results', optionSortFind);
   it('should find a project with a specific name', optionNameFind);
   it('should find projects with a certain level of visibility', optionVisibilityFind);
@@ -110,18 +108,12 @@ describe(M.getModuleName(module.filename), () => {
   // ------------- Create -------------
   it('should populate the return object from create', optionPopulateCreate);
   it('should only return specified fields from create', optionFieldsCreate);
-  it('should return a raw JSON version of a project instead of a document with'
-    + ' instance methods from create()', optionLeanCreate);
   // ------------- Update -------------
   it('should populate the return object from update', optionPopulateUpdate);
   it('should only return specified fields from update', optionFieldsUpdate);
-  it('should return a raw JSON version of a project instead of a document with'
-    + ' instance methods from update()', optionLeanUpdate);
   // ------------- Replace ------------
   it('should populate the return object from createOrReplace', optionPopulateReplace);
   it('should only return specified fields from createOrReplace', optionFieldsReplace);
-  it('should return a raw JSON version of a project instead of a document with'
-    + ' instance methods from createOrReplace()', optionLeanReplace);
   // ------------- Remove -------------
 });
 
@@ -330,32 +322,6 @@ async function optionSkipFind() {
     chai.expect(skipProjects.length).to.equal(numProjects - options.skip);
     // Check that the first 3 projects were skipped
     chai.expect(skipProjects[0]._id).to.equal(allProjects[3]._id);
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Validates that find results can return raw JSON rather than models.
- */
-async function optionLeanFind() {
-  try {
-    // Create lean option
-    const options = { lean: true };
-
-    // Find the projects without lean to check that they are models
-    const foundProjects = await ProjectController.find(adminUser, org._id);
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof foundProjects[0].getValidUpdateFields).to.equal('function');
-
-    // Find the projects with the lean option
-    const leanProjects = await ProjectController.find(adminUser, org._id, options);
-
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof leanProjects[0].getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error.message);
@@ -726,41 +692,6 @@ async function optionFieldsCreate() {
 }
 
 /**
- * @description Validates that the create results return JSON data rather than model instances.
- */
-async function optionLeanCreate() {
-  try {
-    // Select a project to test
-    const projectID = utils.parseID(projects[1]._id).pop();
-    const projectObj = {
-      id: projectID,
-      name: 'Project01'
-    };
-
-    // Delete the project
-    await ProjectController.remove(adminUser, org._id, projectID);
-
-    // Create lean option
-    const options = { lean: true };
-
-    // Create the project
-    const createdProjects = await ProjectController.create(adminUser, org._id,
-      projectObj, options);
-    // There should be one project
-    chai.expect(createdProjects.length).to.equal(1);
-    const foundProject = createdProjects[0];
-
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof foundProject.getValidUpdateFields).to.equal('undefined');
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
  * @description Validates that the return object from update() can be populated.
  */
 async function optionPopulateUpdate() {
@@ -849,38 +780,6 @@ async function optionFieldsUpdate() {
 }
 
 /**
- * @description Validates that the update results return JSON data rather than model instances.
- */
-async function optionLeanUpdate() {
-  try {
-    // Select a project to test
-    const projectID = utils.parseID(projects[1]._id).pop();
-    const projectObj = {
-      id: projectID,
-      name: 'Project01 lean update'
-    };
-
-    // Create lean option
-    const options = { lean: true };
-
-    // Update the project
-    const updatedProjects = await ProjectController.update(adminUser, org._id,
-      projectObj, options);
-    // There should be one project
-    chai.expect(updatedProjects.length).to.equal(1);
-    const foundProject = updatedProjects[0];
-
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof foundProject.getValidUpdateFields).to.equal('undefined');
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
  * @description Validates that the return object from create() can be populated.
  */
 async function optionPopulateReplace() {
@@ -960,38 +859,6 @@ async function optionFieldsReplace() {
     fields.forEach((field) => {
       chai.expect(keys.includes(field)).to.equal(true);
     });
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Validates that the create results return JSON data rather than model instances.
- */
-async function optionLeanReplace() {
-  try {
-    // Select a project to test
-    const projectID = utils.parseID(projects[1]._id).pop();
-    const projectObj = {
-      id: projectID,
-      name: 'Project01'
-    };
-
-    // Create lean option
-    const options = { lean: true };
-
-    // Replace the project
-    const createdProjects = await ProjectController.createOrReplace(adminUser, org._id,
-      projectObj, options);
-    // There should be one project
-    chai.expect(createdProjects.length).to.equal(1);
-    const foundProject = createdProjects[0];
-
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof foundProject.getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error.message);

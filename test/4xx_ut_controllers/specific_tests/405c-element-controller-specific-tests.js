@@ -122,8 +122,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should return a limited number of elements from find()', optionLimitFind);
   it('should return a second batch of elements with the limit and skip option'
     + ' from find()', optionSkipFind);
-  it('should return a raw JSON version of an element instead of a document with'
-    + ' instance methods from find()', optionLeanFind);
   it('should sort find results', optionSortFind);
   it('should return every parent up to root with the rootpath option', optionRootpathFind);
   // ------------- Create -------------
@@ -133,8 +131,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should populate allowed fields when creating an element', optionPopulateCreate);
   it('should return an element with only the specific fields specified from'
     + ' create()', optionFieldsCreate);
-  it('should return a raw JSON version of an element instead of a document with'
-    + ' instance methods from create()', optionLeanCreate);
   // ------------- Update -------------
   it('should archive an element', archiveElement);
   it('should update an element source to be on a different project', updateExternalSource);
@@ -142,14 +138,10 @@ describe(M.getModuleName(module.filename), () => {
   it('should populate allowed fields when updating an element', optionPopulateUpdate);
   it('should return an element with only the specific fields specified from'
     + ' update()', optionFieldsUpdate);
-  it('should return a raw JSON version of an element instead of a document with'
-    + ' instance methods from update()', optionLeanUpdate);
   // ------------- Replace ------------
   it('should populate allowed fields when replacing an element', optionPopulateReplace);
   it('should return an element with only the specific fields specified from'
     + ' createOrReplace()', optionFieldsReplace);
-  it('should return a raw JSON version of an element instead of a document with'
-    + ' instance methods from createOrReplace()', optionLeanReplace);
   // ------------- Remove -------------
   it('should delete an element which is part of a relationship', deleteRelElement);
   // ------------- Search -------------
@@ -159,8 +151,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should return a limited number of elements from search()', optionLimitSearch);
   it('should return a second batch of elements with the limit and skip option '
     + 'from search()', optionSkipSearch);
-  it('should return a raw JSON version of an element instead of a document with'
-    + ' instance methods from search()', optionLeanSearch);
   it('should sort search results', optionSortSearch);
 });
 
@@ -387,44 +377,6 @@ async function optionSkipFind() {
     // Verify the second batch of elements are not the same as the first
     const secondBatchIDs = secondElements.map(e => e._id);
     chai.expect(secondBatchIDs).to.not.have.members(firstBatchIDs);
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Verifies that providing the option 'lean' returns raw JSON of an
- * element rather than a document with instance methods in the find() function.
- */
-async function optionLeanFind() {
-  try {
-    // Get the ID of the element to find
-    const elemID = utils.parseID(elements[0]._id).pop();
-    // Create the options object with lean: true
-    const options = { lean: true };
-
-    // Find the element without the lean option
-    const notLeanELems = await ElementController.find(adminUser, org._id, projIDs[0],
-      branchID, elemID);
-    // Expect there to be exactly 1 element found
-    chai.expect(notLeanELems.length).to.equal(1);
-    const elem = notLeanELems[0];
-
-    // Expect the instance method getValidUpdateFields to be a function
-    chai.expect(typeof elem.getValidUpdateFields).to.equal('function');
-
-    // Find the element WITH the lean option
-    const leanElems = await ElementController.find(adminUser, org._id, projIDs[0],
-      branchID, elemID, options);
-    // Expect there to be exactly 1 element found
-    chai.expect(leanElems.length).to.equal(1);
-    const elem2 = leanElems[0];
-
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof elem2.getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error);
@@ -757,56 +709,6 @@ async function optionFieldsCreate() {
 }
 
 /**
- * @description Verifies that providing the option 'lean' returns raw JSON of an
- * element rather than a document with instance methods object in the create()
- * function.
- */
-async function optionLeanCreate() {
-  // Create the element object
-  const leanElemObj = {
-    id: utils.parseID(elements[11].id).pop(),
-    name: 'Lean Element'
-  };
-  const notLeanElemObj = {
-    id: utils.parseID(elements[12].id).pop(),
-    name: 'Not Lean Element'
-  };
-  // Create the options object with lean: true
-  const options = { lean: true };
-
-  // Remove the elements that already exist with these ids
-  await ElementController.remove(adminUser, org.id, projIDs[0], branchID,
-    [leanElemObj.id, notLeanElemObj.id]);
-
-  try {
-    // Create the element without the lean option
-    const createdElements = await ElementController.create(adminUser, org._id, projIDs[0],
-      branchID, notLeanElemObj);
-    // Expect there to be exactly 1 element created
-    chai.expect(createdElements.length).to.equal(1);
-    const elem = createdElements[0];
-
-    // Expect the instance method getValidUpdateFields to be a function
-    chai.expect(typeof elem.getValidUpdateFields).to.equal('function');
-
-    // Create the element WITH the lean option
-    const createdElements2 = await ElementController.create(adminUser, org._id, projIDs[0],
-      branchID, leanElemObj, options);
-    // Expect there to be exactly 1 element created
-    chai.expect(createdElements2.length).to.equal(1);
-    const elem2 = createdElements2[0];
-
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof elem2.getValidUpdateFields).to.equal('undefined');
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
  * @description Verifies that an element can be archived.
  */
 async function archiveElement() {
@@ -1014,56 +916,6 @@ async function optionFieldsUpdate() {
 }
 
 /**
- * @description Verifies that providing the option 'lean' returns raw JSON of an
- * element rather than a document with instance methods object in the update()
- * function.
- */
-async function optionLeanUpdate() {
-  try {
-    // Create the update object
-    const elem0 = {
-      id: utils.parseID(elements[0].id).pop(),
-      name: 'update 1'
-    };
-
-    // Create the options object with lean: true
-    const options = { lean: true };
-    // Update the element without the lean option
-    const updatedElements = await ElementController.update(adminUser, org._id, projIDs[0], branchID,
-      elem0);
-
-    // Expect there to be exactly 1 element updated
-    chai.expect(updatedElements.length).to.equal(1);
-    const elem1 = updatedElements[0];
-    chai.expect(elem1.name).to.equal('update 1');
-
-    // Expect the instance method getValidUpdateFields to be a function
-    chai.expect(typeof elem1.getValidUpdateFields).to.equal('function');
-
-    // Make a second update
-    elem0.name = 'Batch Element 0';
-
-    // Update the element WITH the lean option
-    const leanUpdatedElements = await ElementController.update(adminUser, org._id, projIDs[0],
-      branchID, elem0, options);
-
-    // Expect there to be exactly 1 element updated
-    chai.expect(leanUpdatedElements.length).to.equal(1);
-    const elem2 = leanUpdatedElements[0];
-    chai.expect(elem2.name).to.equal('Batch Element 0');
-
-
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof elem2.getValidUpdateFields).to.equal('undefined');
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
  * @description Verifies that the fields specified in the element model function
  * getValidPopulateFields() can all be populated in the createOrReplace()
  * function using the option 'populate'.
@@ -1164,52 +1016,6 @@ async function optionFieldsReplace() {
 
     // Check that the keys in the notFindOptions are not in elem
     chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Verifies that providing the option 'lean' returns raw JSON of an
- * element rather than a document with instance methods object in the
- * createOrReplace() function.
- */
-async function optionLeanReplace() {
-  try {
-    // Create the element object
-    const leanElemObj = {
-      id: utils.parseID(elements[10].id).pop(),
-      name: 'Lean Element'
-    };
-    const notLeanElemObj = {
-      id: utils.parseID(elements[11].id).pop(),
-      name: 'Not Lean Element'
-    };
-    // Create the options object with lean: true
-    const options = { lean: true };
-
-    // Replace the element without the lean option
-    const leanElems = await ElementController.createOrReplace(adminUser, org._id, projIDs[0],
-      branchID, notLeanElemObj);
-    // Expect there to be exactly 1 element replaced
-    chai.expect(leanElems.length).to.equal(1);
-    const elem = leanElems[0];
-
-    // Expect the instance method getValidUpdateFields to be a function
-    chai.expect(typeof elem.getValidUpdateFields).to.equal('function');
-
-    // Replace the element WITH the lean option
-    const notLeanElems = await ElementController.createOrReplace(adminUser, org._id, projIDs[0],
-      branchID, leanElemObj, options);
-    // Expect there to be exactly 1 element replaced
-    chai.expect(notLeanElems.length).to.equal(1);
-    const elem2 = notLeanElems[0];
-
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof elem2.getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error);
@@ -1382,45 +1188,6 @@ async function optionSkipSearch() {
     // Verify the second batch of elements are not the same as the first
     const secondBatchIDs = secondElements.map(e => e._id);
     chai.expect(secondBatchIDs).to.not.have.members(firstBatchIDs);
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Verifies that providing the option 'lean' returns raw JSON of an
- * element rather than a document with instance methods object in the search()
- * function.
- */
-async function optionLeanSearch() {
-  try {
-    // Create the query to search with
-    const query = `"${elements[0].name}"`;
-    // Create the options object with lean: true
-    const options = { lean: true };
-
-    // Search for elements
-    const foundElements = await ElementController.search(adminUser, org._id, projIDs[0],
-      branchID, query);
-    // Expect there to be exactly 1 element found
-    chai.expect(foundElements.length).to.equal(1);
-    const elem = foundElements[0];
-
-    // Expect the instance method getValidUpdateFields to be a function
-    chai.expect(typeof elem.getValidUpdateFields).to.equal('function');
-
-    // Search for elements WITH the lean option
-    const leanElements = await ElementController.search(adminUser, org._id, projIDs[0],
-      branchID, query, options);
-    // Expect there to be exactly 1 element found
-    chai.expect(leanElements.length).to.equal(1);
-    const elem2 = leanElements[0];
-
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof elem2.getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error);

@@ -101,7 +101,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should return a raw JSON version of a branch instead of a document with'
     + ' instance methods from find()', optionLimitFind);
   it('should skip over find results', optionSkipFind);
-  it('should should return raw JSON rather than instances of models', optionLeanFind);
   it('should sort find results', optionSortFind);
   it('should find a specific tagged branch', optionTagFind);
   it('should find a branch with a specific source', optionSourceFind);
@@ -114,13 +113,9 @@ describe(M.getModuleName(module.filename), () => {
   // ------------- Create -------------
   it('should populate the return object from create', optionPopulateCreate);
   it('should only return specified fields from create', optionFieldsCreate);
-  it('should return a raw JSON version of a branch instead of a document with'
-    + ' instance methods from create()', optionLeanCreate);
   // ------------- Update -------------
   it('should populate the return object from update', optionPopulateUpdate);
   it('should only return specified fields from update', optionFieldsUpdate);
-  it('should return a raw JSON version of a branch instead of a document with'
-    + ' instance methods from update()', optionLeanUpdate);
   // ------------- Remove -------------
 });
 
@@ -300,35 +295,6 @@ async function optionSkipFind() {
     // Find all the branches with the skip option
     const skipBranches = await BranchController.find(adminUser, org._id, projID, options);
     chai.expect(skipBranches.length).to.equal(numBranches - options.skip);
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Validates that find results can return raw JSON rather than models.
- */
-async function optionLeanFind() {
-  try {
-    // Create lean option
-    const options = { lean: true };
-
-    // Find the branches without lean to check that they are models
-    const foundBranches = await BranchController.find(adminUser, org._id, projID);
-
-    const branch1 = foundBranches[0];
-    // Expect the instance method getValidUpdateFields to be a function
-    chai.expect(typeof branch1.getValidUpdateFields).to.equal('function');
-
-    // Find the branches with the lean option
-    const leanBranches = await BranchController.find(adminUser, org._id, projID, options);
-
-    const branch2 = leanBranches[0];
-    // Expect the instance method getValidUpdateFields to undefined
-    chai.expect(typeof branch2.getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error.message);
@@ -722,42 +688,6 @@ async function optionFieldsCreate() {
 }
 
 /**
- * @description Validates that the create results return JSON data rather than model instances.
- */
-async function optionLeanCreate() {
-  try {
-    // Select a branch to test
-    const branchID = utils.parseID(branches[1]._id).pop();
-    const branchObj = {
-      id: branchID,
-      name: 'Branch01',
-      source: 'master'
-    };
-
-    // Delete the branch
-    await BranchController.remove(adminUser, org._id, projID, branchID);
-
-    // Create lean option
-    const options = { lean: true };
-
-    // Create the branch
-    const createdBranches = await BranchController.create(adminUser, org._id, projID,
-      branchObj, options);
-    // There should be one branch
-    chai.expect(createdBranches.length).to.equal(1);
-    const foundBranch = createdBranches[0];
-
-    // Expect the instance method getValidUpdateFields to undefined
-    chai.expect(typeof foundBranch.getValidUpdateFields).to.equal('undefined');
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
  * @description Validates that the return object from update() can be populated.
  */
 async function optionPopulateUpdate() {
@@ -837,38 +767,6 @@ async function optionFieldsUpdate() {
     fields.forEach((field) => {
       chai.expect(keys.includes(field)).to.equal(true);
     });
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Validates that the update results return JSON data rather than model instances.
- */
-async function optionLeanUpdate() {
-  try {
-    // Select a branch to test
-    const branchID = utils.parseID(branches[1]._id).pop();
-    const branchObj = {
-      id: branchID,
-      name: 'Branch01 lean update'
-    };
-
-    // Create lean option
-    const options = { lean: true };
-
-    // Update the branch
-    const createdBranches = await BranchController.update(adminUser, org._id, projID,
-      branchObj, options);
-    // There should be one branch
-    chai.expect(createdBranches.length).to.equal(1);
-    const foundBranch = createdBranches[0];
-
-    // Expect the instance method getValidUpdateFields to undefined
-    chai.expect(typeof foundBranch.getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error.message);

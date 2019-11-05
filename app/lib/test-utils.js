@@ -70,7 +70,7 @@ module.exports.createNonAdminUser = async function() {
       });
 
       // Hash the user password
-      user.hashPassword();
+      User.hashPassword(user);
 
       // Save user object to the database
       const newUser = (await User.insertMany(user))[0];
@@ -123,7 +123,7 @@ module.exports.createTestAdmin = async function() {
         admin: true
       });
 
-      user.hashPassword();
+      User.hashPassword(user);
 
       // Save user object to the database
       const newAdminUser = (await User.insertMany(user))[0];

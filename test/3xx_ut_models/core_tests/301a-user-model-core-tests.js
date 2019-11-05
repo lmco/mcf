@@ -154,7 +154,7 @@ async function verifyValidPassword() {
     // Find the created user from the previous createUser test.
     const user = await User.findOne({ _id: testData.users[1].username });
     // Verify the user's password
-    const result = await user.verifyPassword(testData.users[1].password);
+    const result = await User.verifyPassword(user, testData.users[1].password);
     // expected - verifyPassword() returned true
     result.should.equal(true);
   }

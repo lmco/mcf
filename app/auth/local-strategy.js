@@ -71,7 +71,7 @@ async function handleBasicAuth(req, res, username, password) {
   let result = null;
   try {
     // Compute the password hash on given password
-    result = await user.verifyPassword(password);
+    result = await User.verifyPassword(user, password);
   }
   catch (verifyErr) {
     throw new M.ServerError(verifyErr.message, 'warn');
