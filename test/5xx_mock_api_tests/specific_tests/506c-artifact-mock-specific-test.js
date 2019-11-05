@@ -1,18 +1,18 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.505c-element-mock-specific-tests
+ * @module test.506c-artifact-mock-specific-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
  * @license MIT
  *
- * @owner Connor Doyle
+ * @owner Phillip Lee
  *
- * @author Connor Doyle
+ * @author Phillip Lee
  *
  * @description This tests mock requests of the API controller functionality:
- * GET, POST, PATCH, PUT, and DELETE elements.
+ * GZIP with POST and PATCH artifacts.
  */
 
 // Node modules
@@ -24,11 +24,13 @@ const zlib = require('zlib');
 const chai = require('chai');
 
 // MBEE modules
-const ElementController = M.require('controllers.element-controller');
+const ArtifactController = M.require('controllers.artifact-controller');
 const ProjectController = M.require('controllers.project-controller');
 const apiController = M.require('controllers.api-controller');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
+const jmi = M.require('lib.jmi-conversions');
+
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
@@ -93,24 +95,26 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute tests */
-  it('should create elements from an uploaded gzip file', postGzip);
-  it('should put elements from an uploaded gzip file', putGzip);
-  it('should patch elements from an uploaded gzip file', patchGzip);
+  it('should create artifacts from an uploaded gzip file', postGzip);
+  it('should patch artifacts from an uploaded gzip file', patchGzip);
 });
 
 /* --------------------( Tests )-------------------- */
 
 /**
  * @description Verifies that a gzip file can be uploaded, unzipped, and
- * the contents can be used to create elements.
+ * the contents can be used to create artifacts.
  *
  * @param {Function} done - The mocha callback.
  */
 function postGzip(done) {
-  const elementData = testData.elements[0];
+  const artifactData = [
+    testData.artifacts[1],
+    testData.artifacts[2]
+  ];
 
   // Create a gzip file for testing
-  const zippedData = zlib.gzipSync(JSON.stringify(elementData));
+  const zippedData = zlib.gzipSync(JSON.stringify(artifactData));
   fs.appendFileSync((filepath), zippedData);
 
   // Initialize the request attributes
@@ -138,72 +142,22 @@ function postGzip(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Verify response body
-    const createdElements = JSON.parse(_data);
-    const createdElement = createdElements[0];
+    const createdArtifacts = JSON.parse(_data);
 
-    // Verify element created properly
-    chai.expect(createdElement.id).to.equal(elementData.id);
-    chai.expect(createdElement.name).to.equal(elementData.name);
-    chai.expect(createdElement.custom || {}).to.deep.equal(elementData.custom);
-    chai.expect(createdElement.project).to.equal(projID);
+    // Convert createdArtifacts to JMI type 2 for easier lookup
+    const jmi2Artifacts = jmi.convertJMI(1, 2, createdArtifacts, 'id');
 
-    // Clear the data used for testing
-    fs.truncateSync(filepath);
+    // Loop through each artifact data object
+    artifactData.forEach((artObj) => {
+      const artifactID = artObj.id;
+      const createdArt = jmi2Artifacts[artifactID];
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
-  };
-
-  // POST elements
-  apiController.postElements(req, res);
-}
-
-/**
- * @description Verifies that a gzip file can be uploaded, unzipped, and
- * the contents can be used to create or replace elements.
- *
- * @param {Function} done - The mocha callback.
- */
-function putGzip(done) {
-  const elementData = testData.elements[1];
-
-  // Create a gzip file for testing
-  const zippedData = zlib.gzipSync(JSON.stringify(elementData));
-  fs.appendFileSync((filepath), zippedData);
-
-  // Initialize the request attributes
-  const params = {
-    orgid: org._id,
-    projectid: projID,
-    branchid: branchID
-  };
-  const body = {};
-  const method = 'PUT';
-  const query = {};
-  const headers = 'application/gzip';
-
-  // Create a read stream of the zip file and give it request-like attributes
-  const req = testUtils.createReadStreamRequest(adminUser, params, body, method, query,
-    filepath, headers);
-  req.headers['accept-encoding'] = 'gzip';
-
-  // Set response as empty object
-  const res = {};
-
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Verify response body
-    const createdElements = JSON.parse(_data);
-    const createdElement = createdElements[0];
-
-    // Verify element created properly
-    chai.expect(createdElement.id).to.equal(elementData.id);
-    chai.expect(createdElement.name).to.equal(elementData.name);
-    chai.expect(createdElement.custom || {}).to.deep.equal(elementData.custom);
-    chai.expect(createdElement.project).to.equal(projID);
+      // Verify artifact created properly
+      chai.expect(createdArt.id).to.equal(artifactID);
+      chai.expect(createdArt.name).to.equal(artObj.name);
+      chai.expect(createdArt.custom || {}).to.deep.equal(artObj.custom);
+      chai.expect(createdArt.project).to.equal(projID);
+    });
 
     // Clear the data used for testing
     fs.truncateSync(filepath);
@@ -212,29 +166,31 @@ function putGzip(done) {
     setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
   };
 
-  // PUT elements
-  apiController.putElements(req, res);
+  // POSTs an artifact
+  apiController.postArtifacts(req, res);
 }
 
 /**
  * @description Verifies that a gzip file can be uploaded, unzipped, and
- * the contents can be used to update elements.
+ * the contents can be used to update artifacts.
  *
  * @param {Function} done - The mocha callback.
  */
 function patchGzip(done) {
-  const elementData = testData.elements[2];
+  const artifactData = [
+    testData.artifacts[3],
+    testData.artifacts[4]];
 
-  // Create the element to be patched
-  ElementController.create(adminUser, org.id, projID, branchID, elementData)
+  // Create the artifact to be patched
+  ArtifactController.create(adminUser, org._id, projID, branchID, artifactData)
   .then(() => {
     // Create a gzip file for testing
-    const zippedData = zlib.gzipSync(JSON.stringify(elementData));
+    const zippedData = zlib.gzipSync(JSON.stringify(artifactData));
     fs.appendFileSync((filepath), zippedData);
 
     // Initialize the request attributes
     const params = {
-      orgid: org.id,
+      orgid: org._id,
       projectid: projID,
       branchid: branchID
     };
@@ -257,14 +213,21 @@ function patchGzip(done) {
     // Verifies the response data
     res.send = function send(_data) {
       // Verify response body
-      const updatedElements = JSON.parse(_data);
-      const updatedElement = updatedElements[0];
+      const updatedArtifacts = JSON.parse(_data);
+      // Convert createdArtifacts to JMI type 2 for easier lookup
+      const jmi2Artifacts = jmi.convertJMI(1, 2, updatedArtifacts, 'id');
 
-      // Verify element updated properly
-      chai.expect(updatedElement.id).to.equal(elementData.id);
-      chai.expect(updatedElement.name).to.equal(elementData.name);
-      chai.expect(updatedElement.custom || {}).to.deep.equal(elementData.custom);
-      chai.expect(updatedElement.project).to.equal(projID);
+      // Loop through each artifact data object
+      artifactData.forEach((artObj) => {
+        const artifactID = artObj.id;
+        const updatedArtifact = jmi2Artifacts[artifactID];
+
+        // Verify artifact updated properly
+        chai.expect(updatedArtifact.id).to.equal(artifactID);
+        chai.expect(updatedArtifact.name).to.equal(artObj.name);
+        chai.expect(updatedArtifact.custom || {}).to.deep.equal(artObj.custom);
+        chai.expect(updatedArtifact.project).to.equal(projID);
+      });
 
       // Clear the data used for testing
       fs.truncateSync(filepath);
@@ -273,7 +236,7 @@ function patchGzip(done) {
       setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
     };
 
-    // PATCH elements
-    apiController.patchElements(req, res);
+    // PATCH artifacts
+    apiController.patchArtifacts(req, res);
   });
 }

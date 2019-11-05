@@ -71,7 +71,7 @@ async function handleBasicAuth(req, res, username, password) {
   let result = null;
   try {
     // Compute the password hash on given password
-    result = await user.verifyPassword(password);
+    result = await User.verifyPassword(user, password);
   }
   catch (verifyErr) {
     throw new M.ServerError(verifyErr.message, 'warn');
@@ -92,7 +92,7 @@ async function handleBasicAuth(req, res, username, password) {
       && user.failedlogins[user.failedlogins.length - 4].timestamp
       > Date.now() - 15 * utils.timeConversions.MINUTES) {
       // Count the number of non-archived admins in the database
-      const admins = await User.find({ admin: true, archived: false }, null, { lean: true });
+      const admins = await User.find({ admin: true, archived: false }, null);
       // Check if the user is the only admin
       if (user.admin && admins.length === 1) {
         // It is recommended that a listener be registered for this event to notify the proper

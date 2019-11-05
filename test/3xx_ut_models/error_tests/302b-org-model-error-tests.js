@@ -84,13 +84,12 @@ async function idTooShort() {
 
     // Change id to be too short.
     orgData._id = '0';
+    delete orgData.id;
 
-    // Create org object
-    const orgObject = Org.createDocument(orgData);
-
-    // Save org
-    await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed:'
-      + ` _id: Org ID length [${orgData._id.length}] must not be less than 2 characters.`);
+    // Expect insertMany() to fail with specific error message
+    await Org.insertMany(orgData).should.eventually.be.rejectedWith('Organization '
+      + `validation failed: _id: Org ID length [${orgData._id.length}] must not`
+      + ' be less than 2 characters.');
   }
   catch (error) {
     M.log.error(error);
@@ -108,14 +107,12 @@ async function idTooLong() {
 
     // Change id to be too long (64 characters max)
     orgData._id = '01234567890123456789012345678901234567890123456789012345678912345';
+    delete orgData.id;
 
-    // Create org object
-    const orgObject = Org.createDocument(orgData);
-
-    // Save org
-    await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed: '
-      + `_id: Org ID length [${orgData._id.length}] must not be more than `
-      + `${validators.org.idLength} characters.`);
+    // Expect insertMany() to fail with specific error message
+    await Org.insertMany(orgData).should.eventually.be.rejectedWith('Organization'
+      + ` validation failed: _id: Org ID length [${orgData._id.length}] must `
+      + `not be more than ${validators.org.idLength} characters.`);
   }
   catch (error) {
     M.log.error(error);
@@ -138,13 +135,11 @@ async function invalidID() {
 
     // Change id to be invalid
     orgData._id = '!!';
+    delete orgData.id;
 
-    // Create org object
-    const orgObject = Org.createDocument(orgData);
-
-    // Save org
-    await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed: '
-      + `_id: Invalid org ID [${orgData._id}].`);
+    // Expect insertMany() to fail with specific error message
+    await Org.insertMany(orgData).should.eventually.be.rejectedWith('Organization'
+      + ` validation failed: _id: Invalid org ID [${orgData._id}].`);
   }
   catch (error) {
     M.log.error(error);
@@ -159,13 +154,11 @@ async function invalidID() {
 async function idNotProvided() {
   try {
     const orgData = Object.assign({}, testData.orgs[0]);
+    delete orgData.id;
 
-    // Create org object
-    const orgObject = Org.createDocument(orgData);
-
-    // Save org
-    await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed: '
-      + '_id: Path `_id` is required.');
+    // Expect insertMany() to fail with specific error message
+    await Org.insertMany(orgData).should.eventually.be.rejectedWith('Organization'
+      + ' validation failed: _id: Path `_id` is required.');
   }
   catch (error) {
     M.log.error(error);
@@ -184,13 +177,11 @@ async function nameNotProvided() {
 
     // Delete org name
     delete orgData.name;
+    delete orgData.id;
 
-    // Create org object
-    const orgObject = Org.createDocument(orgData);
-
-    // Save org
-    await orgObject.save().should.eventually.be.rejectedWith('Organization validation failed: '
-      + 'name: Path `name` is required.');
+    // Expect insertMany() to fail with specific error message
+    await Org.insertMany(orgData).should.eventually.be.rejectedWith('Organization'
+      + ' validation failed: name: Path `name` is required.');
   }
   catch (error) {
     M.log.error(error);
@@ -211,14 +202,12 @@ async function permissionsInvalid() {
     orgData.permissions = {
       invalid: 'permissions'
     };
+    delete orgData.id;
 
-    // Create org object
-    const orgObject = Org.createDocument(orgData);
-
-    // Expect save() to fail with specific error message
-    await orgObject.save().should.eventually.be.rejectedWith(
-      'Organization validation failed: permissions: The organization permissions '
-      + 'object is not properly formatted.'
+    // Expect insertMany() to fail with specific error message
+    await Org.insertMany(orgData).should.eventually.be.rejectedWith(
+      'Organization validation failed: permissions: The organization '
+      + 'permissions object is not properly formatted.'
     );
   }
   catch (error) {

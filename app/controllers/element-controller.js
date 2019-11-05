@@ -81,8 +81,6 @@ const permissions = M.require('lib.permissions');
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  * @param {string} [options.sort] - Provide a particular field to sort the
  * results by. You may also add a negative sign in front of the field to
  * indicate sorting in reverse order.
@@ -142,7 +140,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
 
     // Validate the provided options
     const validatedOptions = utils.validateOptions(options, ['includeArchived',
-      'populate', 'subtree', 'fields', 'limit', 'skip', 'lean', 'sort', 'rootpath'], Element);
+      'populate', 'subtree', 'fields', 'limit', 'skip', 'sort', 'rootpath'], Element);
 
     // Ensure search options are valid
     if (options) {
@@ -245,8 +243,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
           { skip: validatedOptions.skip,
             limit: validatedOptions.limit,
             sort: validatedOptions.sort,
-            populate: validatedOptions.populateString,
-            lean: validatedOptions.lean
+            populate: validatedOptions.populateString
           });
       }
       else {
@@ -279,8 +276,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
               { skip: batchSkip,
                 limit: batchLimit,
                 sort: validatedOptions.sort,
-                populate: validatedOptions.populateString,
-                lean: validatedOptions.lean
+                populate: validatedOptions.populateString
               })
             .then((elems) => {
               foundElements = foundElements.concat(elems);
@@ -301,8 +297,7 @@ async function find(requestingUser, organizationID, projectID, branchID, element
             { skip: validatedOptions.skip,
               limit: validatedOptions.limit,
               sort: validatedOptions.sort,
-              populate: validatedOptions.populateString,
-              lean: validatedOptions.lean
+              populate: validatedOptions.populateString
             })
           .then((elems) => {
             foundElements = foundElements.concat(elems);
@@ -362,8 +357,6 @@ async function find(requestingUser, organizationID, projectID, branchID, element
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  *
  * @returns {Promise<object[]>} Array of created element objects.
  *
@@ -395,8 +388,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
     const projectRefs = [];
 
     // Initialize and ensure options are valid
-    const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
-      'lean'], Element);
+    const validatedOptions = utils.validateOptions(options, ['populate', 'fields'], Element);
 
     // Define array to store element data
     let elementsToCreate = [];
@@ -466,8 +458,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
     permissions.createElement(reqUser, organization, project, foundBranch);
 
     // Find all referenced projects
-    const referencedProjects = await Project.find({ _id: { $in: projectRefs } },
-      null, { lean: true });
+    const referencedProjects = await Project.find({ _id: { $in: projectRefs } }, null);
 
     // Verify that each project has a visibility of 'internal'
     referencedProjects.forEach((proj) => {
@@ -485,7 +476,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
       // Split arrIDs into batches of 50000
       const tmpQuery = { _id: { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) } };
       // Attempt to find any elements with matching _id
-      promises.push(Element.find(tmpQuery, '_id', { lean: true })
+      promises.push(Element.find(tmpQuery, '_id')
       .then((foundElements) => {
         if (foundElements.length > 0) {
           // Get array of the foundElements's ids
@@ -576,7 +567,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
     M.log.debug('create(): Before finding extra elements');
 
     // Find extra elements, and only return _id for faster lookup
-    const extraElements = await Element.find(findExtraElementsQuery, '_id', { lean: true });
+    const extraElements = await Element.find(findExtraElementsQuery, '_id');
     // Convert extraElements to JMI type 2 for easier lookup
     const extraElementsJMI2 = jmi.convertJMI(1, 2, extraElements);
     // Loop through each remaining element that does not have its parent,
@@ -620,7 +611,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
     });
 
     M.log.debug('create(): Before insertMany()');
-    const createdElements = await Element.insertMany(elementObjects, { lean: true });
+    const createdElements = await Element.insertMany(elementObjects);
     M.log.debug('create(): After insertMany()');
 
     promises = [];
@@ -632,9 +623,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
 
       // Add find operation to promises array
       promises.push(Element.find(tmpQuery, validatedOptions.fieldsString,
-        { populate: validatedOptions.populateString,
-          lean: validatedOptions.lean
-        })
+        { populate: validatedOptions.populateString })
       .then((_foundElements) => {
         populatedElements = populatedElements.concat(_foundElements);
       }));
@@ -698,8 +687,6 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  *
  * @returns {Promise<object[]>} Array of updated element objects.
  *
@@ -733,8 +720,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
     const projectRefs = [];
 
     // Initialize and ensure options are valid
-    const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
-      'lean'], Element);
+    const validatedOptions = utils.validateOptions(options, ['populate', 'fields'], Element);
 
     // Find the organization and validate that it was found and not archived
     const organization = await helper.findAndValidate(Org, orgID);
@@ -833,8 +819,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
       index++;
     });
 
-    const referencedProjects2 = await Project.find({ _id: { $in: projectRefs } },
-      null, { lean: true });
+    const referencedProjects2 = await Project.find({ _id: { $in: projectRefs } }, null);
 
     // Verify each project reference has a visibility of 'internal'
     referencedProjects2.forEach((proj) => {
@@ -855,7 +840,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
       searchQuery._id = { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) };
 
       // Add find operation to promises array
-      promises2.push(Element.find(searchQuery, null, { lean: true })
+      promises2.push(Element.find(searchQuery, null)
       .then((_foundElements) => {
         foundElements = foundElements.concat(_foundElements);
       }));
@@ -874,7 +859,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
       );
     }
 
-    const foundSourceTarget = await Element.find(sourceTargetQuery, null, { lean: true });
+    const foundSourceTarget = await Element.find(sourceTargetQuery, null);
 
     // Convert elementsToUpdate to JMI type 2
     const jmiType2 = jmi.convertJMI(1, 2, elementsToUpdate);
@@ -1016,9 +1001,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
       searchQuery._id = { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) };
       // Add find operation to promises array
       promises3.push(Element.find(searchQuery, validatedOptions.fieldsString,
-        { populate: validatedOptions.populateString,
-          lean: validatedOptions.lean
-        })
+        { populate: validatedOptions.populateString })
       .then((_foundElements) => {
         foundUpdatedElements = foundUpdatedElements.concat(_foundElements);
       }));
@@ -1075,8 +1058,6 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id, id, and contains. To NOT include a field, provide a '-' in
  * front.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  *
  * @returns {Promise<object[]>} Array of created/replaced element objects.
  *
@@ -1174,7 +1155,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
       searchQuery._id = { $in: arrIDs.slice(i * 50000, i * 50000 + 50000) };
 
       // Add find operation to promises array
-      promises.push(Element.find(searchQuery, null, { lean: true })
+      promises.push(Element.find(searchQuery, null)
       .then((_foundElements) => {
         foundElements = foundElements.concat(_foundElements);
       }));
@@ -1368,8 +1349,7 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
     permissions.deleteElement(reqUser, organization, project, foundBranch);
 
     // Find the elements to delete
-    const foundElements = await Element.find({ _id: { $in: elementsToFind } },
-      null, { lean: true });
+    const foundElements = await Element.find({ _id: { $in: elementsToFind } }, null);
     const foundElementIDs = foundElements.map(e => e._id);
 
     // Check if all elements were found
@@ -1411,7 +1391,7 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
       const batchIDs = uniqueIDs.slice(i * 50000, i * 50000 + 50000);
       // Find batch
       promises.push(
-        Element.find({ _id: { $in: batchIDs } }, null, { lean: true })
+        Element.find({ _id: { $in: batchIDs } }, null)
         .then((e) => {
           elementsToDelete = elementsToDelete.concat(e);
         })
@@ -1434,10 +1414,8 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
     EventEmitter.emit('elements-deleted', elementsToDelete);
 
     // Find all sources/targets which point to deleted elements
-    const sources = await Element.find({ source: { $in: uniqueIDs } }, null,
-      { lean: true });
-    const targets = await Element.find({ target: { $in: uniqueIDs } }, null,
-      { lean: true });
+    const sources = await Element.find({ source: { $in: uniqueIDs } }, null);
+    const targets = await Element.find({ target: { $in: uniqueIDs } }, null);
 
     // Get only unique elements
     const sourceIDs = sources.map(e => e._id);
@@ -1531,7 +1509,7 @@ function findElementTree(organizationID, projectID, branchID, elementIDs) {
   async function findElementTreeHelper(ids) {
     try {
       // Find all elements whose parent is in the list of given ids
-      const elements = await Element.find({ parent: { $in: ids } }, '_id', { lean: true });
+      const elements = await Element.find({ parent: { $in: ids } }, '_id');
       // Get a list of element ids
       const foundIDs = elements.map(e => e._id);
       // Add these elements to the global list of found elements
@@ -1626,7 +1604,7 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
    * circular reference has been found or returns an empty string.
    */
   async function findElementParentRecursive(e) {
-    const foundElement = await Element.findOne({ _id: e.parent }, null, { lean: true });
+    const foundElement = await Element.findOne({ _id: e.parent }, null);
     // If foundElement is null, reject with error
     if (!foundElement) {
       throw new M.NotFoundError('Parent element '
@@ -1685,8 +1663,6 @@ async function moveElementCheck(organizationID, projectID, branchID, element) {
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  * @param {string} [options.sort] - Provide a particular field to sort the results by.
  * You may also add a negative sign in front of the field to indicate sorting in
  * reverse order.
@@ -1735,7 +1711,7 @@ async function search(requestingUser, organizationID, projectID, branchID, query
 
     // Validate and set the options
     const validatedOptions = utils.validateOptions(options, ['includeArchived',
-      'populate', 'fields', 'limit', 'skip', 'lean', 'sort'], Element);
+      'populate', 'fields', 'limit', 'skip', 'sort'], Element);
 
     // Ensure options are valid
     if (options) {
@@ -1818,8 +1794,7 @@ async function search(requestingUser, organizationID, projectID, branchID, query
       { skip: validatedOptions.skip,
         limit: validatedOptions.limit,
         sort: validatedOptions.sort,
-        populate: validatedOptions.populateString,
-        lean: validatedOptions.lean
+        populate: validatedOptions.populateString
       });
   }
   catch (error) {
@@ -1863,7 +1838,7 @@ async function findElementRootPath(organizationID, projectID, branchID, elementI
   async function findElementTreeHelper(searchID) {
     try {
       // Find the parent of the element
-      const parent = await Element.findOne({ _id: searchID }, 'parent', { lean: true });
+      const parent = await Element.findOne({ _id: searchID }, 'parent');
       // Ensure the parent was found
       if (!parent) {
         throw new M.DataFormatError('Element or parent not found', 'warn');

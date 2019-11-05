@@ -147,9 +147,6 @@ OrganizationSchema.plugin(extensions);
  * @description Returns supported permission levels
  * @memberOf OrganizationSchema
  */
-OrganizationSchema.method('getPermissionLevels', function() {
-  return ['remove_all', 'read', 'write', 'admin'];
-});
 OrganizationSchema.static('getPermissionLevels', function() {
   return ['remove_all', 'read', 'write', 'admin'];
 });
@@ -158,9 +155,6 @@ OrganizationSchema.static('getPermissionLevels', function() {
  * @description Returns organization fields that can be changed
  * @memberOf OrganizationSchema
  */
-OrganizationSchema.method('getValidUpdateFields', function() {
-  return ['name', 'custom', 'archived', 'permissions'];
-});
 OrganizationSchema.static('getValidUpdateFields', function() {
   return ['name', 'custom', 'archived', 'permissions'];
 });
@@ -169,10 +163,6 @@ OrganizationSchema.static('getValidUpdateFields', function() {
  * @description Returns a list of fields a requesting user can populate
  * @memberOf OrganizationSchema
  */
-OrganizationSchema.method('getValidPopulateFields', function() {
-  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'projects'];
-});
-
 OrganizationSchema.static('getValidPopulateFields', function() {
   return ['archivedBy', 'lastModifiedBy', 'createdBy', 'projects'];
 });

@@ -97,14 +97,12 @@ async function idTooShort() {
 
     // Change id to be too short.
     elemData._id = '01:01:01:0';
+    delete elemData.id;
 
-    // Create element object
-    const elemObject = Element.createDocument(elemData);
-
-    // Expect save() to fail with specific error message
-    await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: _id: '
-      + `Element ID length [${utils.parseID(elemData._id).pop().length}] must not`
-      + ' be less than 2 characters.');
+    // Expect insertMany() to fail with specific error message
+    await Element.insertMany(elemData).should.eventually.be.rejectedWith('Element'
+      + ` validation failed: _id: Element ID length [${utils.parseID(elemData._id).pop().length}]`
+      + ' must not be less than 2 characters.');
   }
   catch (error) {
     M.log.error(error);
@@ -136,14 +134,11 @@ async function idTooLong() {
       + '67890123456789012345678901234567890123456789012345678901234567890123456'
       + '789012345678901234567890123456789012345678901234567890123456789012345678'
       + '901234567890123456789012';
+    delete elemData.id;
 
-
-    // Create element object
-    const elemObject = Element.createDocument(elemData);
-
-    // Expect save() to fail with specific error message
-    await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: _id: '
-      + `Element ID length [${elemData._id.length - validators.branch.idLength - 1}]`
+    // Expect insertMany() to fail with specific error message
+    await Element.insertMany(elemData).should.eventually.be.rejectedWith('Element validation '
+      + `failed: _id: Element ID length [${elemData._id.length - validators.branch.idLength - 1}]`
       + ` must not be more than ${validators.element.idLength - validators.branch.idLength - 1}`
       + ' characters.');
   }
@@ -163,13 +158,11 @@ async function idNotProvided() {
     elemData.project = 'org:proj';
     elemData.branch = 'org:proj:branch';
     elemData.parent = 'org:proj:branch:model';
+    delete elemData.id;
 
-    // Create element object
-    const elemObject = Element.createDocument(elemData);
-
-    // Expect save() to fail with specific error message
-    await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: _id: '
-      + 'Path `_id` is required.');
+    // Expect insertMany() to fail with specific error message
+    await Element.insertMany(elemData).should.eventually.be.rejectedWith('Element '
+      + 'validation failed: _id: Path `_id` is required.');
   }
   catch (error) {
     M.log.error(error);
@@ -195,13 +188,11 @@ async function invalidID() {
 
     // Change id to be invalid
     elemData._id = '!!!!!!!!!!!';
+    delete elemData.id;
 
-    // Create element object
-    const elemObject = Element.createDocument(elemData);
-
-    // Expect save() to fail with specific error message
-    await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: '
-      + `_id: Invalid element ID [${elemData._id}].`);
+    // Expect insertMany() to fail with specific error message
+    await Element.insertMany(elemData).should.eventually.be.rejectedWith('Element '
+      + `validation failed: _id: Invalid element ID [${elemData._id}].`);
   }
   catch (error) {
     M.log.error(error);
@@ -219,13 +210,11 @@ async function projectNotProvided() {
     elemData._id = `org:proj:branch:${elemData.id}`;
     elemData.branch = 'org:proj:branch';
     elemData.parent = 'org:proj:branch:model';
+    delete elemData.id;
 
-    // Create element object
-    const elemObject = Element.createDocument(elemData);
-
-    // Expect save() to fail with specific error message
-    await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: project: '
-      + 'Path `project` is required.');
+    // Expect insertMany() to fail with specific error message
+    await Element.insertMany(elemData).should.eventually.be.rejectedWith('Element'
+      + ' validation failed: project: Path `project` is required.');
   }
   catch (error) {
     M.log.error(error);
@@ -251,13 +240,12 @@ async function projectInvalid() {
 
     // Set invalid project
     elemData.project = '!!';
+    delete elemData.id;
 
-    // Create element object
-    const elemObject = Element.createDocument(elemData);
-
-    // Expect save() to fail with specific error message
-    await elemObject.save().should.eventually.be.rejectedWith(
-      `Element validation failed: project: ${elemData.project} is not a valid project ID.`
+    // Expect insertMany() to fail with specific error message
+    await Element.insertMany(elemData).should.eventually.be.rejectedWith(
+      `Element validation failed: project: ${elemData.project} is not a valid `
+      + 'project ID.'
     );
   }
   catch (error) {
@@ -276,13 +264,11 @@ async function branchNotProvided() {
     elemData._id = `org:proj:branch:${elemData.id}`;
     elemData.project = 'org:proj';
     elemData.parent = 'org:proj:branch:model';
+    delete elemData.id;
 
-    // Create element object
-    const elemObject = Element.createDocument(elemData);
-
-    // Expect save() to fail with specific error message
-    await elemObject.save().should.eventually.be.rejectedWith('Element validation failed: branch: '
-      + 'Path `branch` is required.');
+    // Expect insertMany() to fail with specific error message
+    await Element.insertMany(elemData).should.eventually.be.rejectedWith('Element'
+      + ' validation failed: branch: Path `branch` is required.');
   }
   catch (error) {
     M.log.error(error);
@@ -308,13 +294,12 @@ async function branchInvalid() {
 
     // Set invalid branch
     elemData.branch = '!!';
+    delete elemData.id;
 
-    // Create element object
-    const elemObject = Element.createDocument(elemData);
-
-    // Expect save() to fail with specific error message
-    await elemObject.save().should.eventually.be.rejectedWith(
-      `Element validation failed: branch: ${elemData.branch} is not a valid branch ID.`
+    // Expect insertMany() to fail with specific error message
+    await Element.insertMany(elemData).should.eventually.be.rejectedWith(
+      `Element validation failed: branch: ${elemData.branch} is not a valid `
+      + 'branch ID.'
     );
   }
   catch (error) {
@@ -341,13 +326,12 @@ async function parentInvalid() {
 
     // Set invalid parent
     elemData.parent = '!!';
+    delete elemData.id;
 
-    // Create element object
-    const elemObject = Element.createDocument(elemData);
-
-    // Expect save() to fail with specific error message
-    await elemObject.save().should.eventually.be.rejectedWith(
-      `Element validation failed: parent: ${elemData.parent} is not a valid parent ID.`
+    // Expect insertMany() to fail with specific error message
+    await Element.insertMany(elemData).should.eventually.be.rejectedWith(
+      `Element validation failed: parent: ${elemData.parent} is not a valid `
+      + 'parent ID.'
     );
   }
   catch (error) {
@@ -375,13 +359,12 @@ async function sourceInvalid() {
 
     // Set invalid source
     elemData.source = '!!';
+    delete elemData.id;
 
-    // Create element object
-    const elemObject = Element.createDocument(elemData);
-
-    // Expect save() to fail with specific error message
-    await elemObject.save().should.eventually.be.rejectedWith(
-      `Element validation failed: source: ${elemData.source} is not a valid source ID.`
+    // Expect insertMany() to fail with specific error message
+    await Element.insertMany(elemData).should.eventually.be.rejectedWith(
+      `Element validation failed: source: ${elemData.source} is not a valid `
+      + 'source ID.'
     );
   }
   catch (error) {
@@ -405,13 +388,12 @@ async function sourceWithNoTarget() {
 
     // Set target to null
     elemData.target = null;
+    delete elemData.id;
 
-    // Create element object
-    const elemObject = Element.createDocument(elemData);
-
-    // Expect save() to fail with specific error message
-    await elemObject.save().should.eventually.be.rejectedWith(
-      'Element validation failed: source: Target is required if source is provided.'
+    // Expect insertMany() to fail with specific error message
+    await Element.insertMany(elemData).should.eventually.be.rejectedWith(
+      'Element validation failed: source: Target is required if source is '
+      + 'provided.'
     );
   }
   catch (error) {
@@ -439,13 +421,12 @@ async function targetInvalid() {
 
     // Set invalid target
     elemData.target = '!!';
+    delete elemData.id;
 
-    // Create element object
-    const elemObject = Element.createDocument(elemData);
-
-    // Expect save() to fail with specific error message
-    await elemObject.save().should.eventually.be.rejectedWith(
-      `Element validation failed: target: ${elemData.target} is not a valid target ID.`
+    // Expect insertMany() to fail with specific error message
+    await Element.insertMany(elemData).should.eventually.be.rejectedWith(
+      `Element validation failed: target: ${elemData.target} is not a valid `
+      + 'target ID.'
     );
   }
   catch (error) {
@@ -469,13 +450,12 @@ async function targetWithNoSource() {
 
     // Set source to null
     elemData.source = null;
+    delete elemData.id;
 
-    // Create element object
-    const elemObject = Element.createDocument(elemData);
-
-    // Expect save() to fail with specific error message
-    await elemObject.save().should.eventually.be.rejectedWith(
-      'Element validation failed: target: Source is required if target is provided.'
+    // Expect insertMany() to fail with specific error message
+    await Element.insertMany(elemData).should.eventually.be.rejectedWith(
+      'Element validation failed: target: Source is required if target is '
+      + 'provided.'
     );
   }
   catch (error) {

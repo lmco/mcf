@@ -89,14 +89,12 @@ async function idTooShort() {
 
     // Change id to be too short.
     projData._id = '01:0';
+    delete projData.id;
 
-    // Create project object
-    const projObject = Project.createDocument(projData);
-
-    // Expect save() to fail with specific error message
-    await projObject.save().should.eventually.be.rejectedWith('Project validation failed: _id: '
-      + `Project ID length [${utils.parseID(projData._id).pop().length}] must not`
-      + ' be less than 2 characters.');
+    // Expect insertMany() to fail with specific error message
+    await Project.insertMany(projData).should.eventually.be.rejectedWith('Project'
+      + ` validation failed: _id: Project ID length [${utils.parseID(projData._id).pop().length}]`
+      + ' must not be less than 2 characters.');
   }
   catch (error) {
     M.log.error(error);
@@ -116,13 +114,11 @@ async function idTooLong() {
     // Change id to be too long.
     projData._id = '012345678901234567890123456789012345:01234567890123456789'
       + '01234567890123456';
+    delete projData.id;
 
-    // Create project object
-    const projObject = Project.createDocument(projData);
-
-    // Expect save() to fail with specific error message
-    await projObject.save().should.eventually.be.rejectedWith('Project validation failed: _id: '
-      + `Project ID length [${projData._id.length - validators.org.idLength - 1}]`
+    // Expect insertMany() to fail with specific error message
+    await Project.insertMany(projData).should.eventually.be.rejectedWith('Project validation'
+      + ` failed: _id: Project ID length [${projData._id.length - validators.org.idLength - 1}]`
       + ` must not be more than ${validators.project.idLength - validators.org.idLength - 1}`
       + ' characters.');
   }
@@ -140,13 +136,11 @@ async function idNotProvided() {
   try {
     const projData = Object.assign({}, testData.projects[0]);
     projData.org = 'org';
+    delete projData.id;
 
-    // Create project object
-    const projObject = Project.createDocument(projData);
-
-    // Expect save() to fail with specific error message
-    await projObject.save().should.eventually.be.rejectedWith('Project validation failed: _id: '
-      + 'Path `_id` is required.');
+    // Expect insertMany() to fail with specific error message
+    await Project.insertMany(projData).should.eventually.be.rejectedWith('Project'
+      + ' validation failed: _id: Path `_id` is required.');
   }
   catch (error) {
     M.log.error(error);
@@ -170,13 +164,11 @@ async function invalidID() {
 
     // Change id to be invalid
     projData._id = '!!!!!';
+    delete projData.id;
 
-    // Create project object
-    const projObject = Project.createDocument(projData);
-
-    // Expect save() to fail with specific error message
-    await projObject.save().should.eventually.be.rejectedWith('Project validation failed: '
-      + `_id: Invalid project ID [${projData._id}].`);
+    // Expect insertMany() to fail with specific error message
+    await Project.insertMany(projData).should.eventually.be.rejectedWith('Project'
+      + ` validation failed: _id: Invalid project ID [${projData._id}].`);
   }
   catch (error) {
     M.log.error(error);
@@ -192,13 +184,11 @@ async function orgNotProvided() {
   try {
     const projData = Object.assign({}, testData.projects[0]);
     projData._id = `org:${projData.id}`;
+    delete projData.id;
 
-    // Create project object
-    const projObject = Project.createDocument(projData);
-
-    // Expect save() to fail with specific error message
-    await projObject.save().should.eventually.be.rejectedWith('Project validation failed: org: '
-      + 'Path `org` is required.');
+    // Expect insertMany() to fail with specific error message
+    await Project.insertMany(projData).should.eventually.be.rejectedWith('Project'
+      + ' validation failed: org: Path `org` is required.');
   }
   catch (error) {
     M.log.error(error);
@@ -220,12 +210,10 @@ async function orgInvalid() {
     const projData = Object.assign({}, testData.projects[0]);
     projData._id = `org:${projData.id}`;
     projData.org = '!!';
+    delete projData.id;
 
-    // Create project object
-    const projObject = Project.createDocument(projData);
-
-    // Expect save() to fail with specific error message
-    await projObject.save().should.eventually.be.rejectedWith(
+    // Expect insertMany() to fail with specific error message
+    await Project.insertMany(projData).should.eventually.be.rejectedWith(
       `Project validation failed: org: ${projData.org} is not a valid org ID.`
     );
   }
@@ -245,15 +233,13 @@ async function nameNotProvided() {
     projData._id = `org:${projData.id}`;
     projData.org = 'org';
 
-    // Delete name key
+    // Delete name and id key
     delete projData.name;
+    delete projData.id;
 
-    // Create project object
-    const projObject = Project.createDocument(projData);
-
-    // Expect save() to fail with specific error message
-    projObject.save().should.eventually.be.rejectedWith('Project validation failed: '
-      + 'name: Path `name` is required.');
+    // Expect insertMany() to fail with specific error message
+    await Project.insertMany(projData).should.eventually.be.rejectedWith('Project'
+      + ' validation failed: name: Path `name` is required.');
   }
   catch (error) {
     M.log.error(error);
@@ -270,19 +256,17 @@ async function permissionsInvalid() {
     const projData = Object.assign({}, testData.projects[0]);
     projData._id = `org:${projData.id}`;
     projData.org = 'org';
+    delete projData.id;
 
     // Set invalid permissions
     projData.permissions = {
       invalid: 'permissions'
     };
 
-    // Create project object
-    const projObject = Project.createDocument(projData);
-
-    // Expect save() to fail with specific error message
-    await projObject.save().should.eventually.be.rejectedWith(
-      'Project validation failed: permissions: The project permissions object is '
-      + 'not properly formatted.'
+    // Expect insertMany() to fail with specific error message
+    await Project.insertMany(projData).should.eventually.be.rejectedWith(
+      'Project validation failed: permissions: The project permissions object '
+      + 'is not properly formatted.'
     );
   }
   catch (error) {
@@ -300,17 +284,15 @@ async function visibilityInvalid() {
     const projData = Object.assign({}, testData.projects[0]);
     projData._id = `org:${projData.id}`;
     projData.org = 'org';
+    delete projData.id;
 
     // Set invalid visibility
     projData.visibility = 'public';
 
-    // Create project object
-    const projObject = Project.createDocument(projData);
-
-    // Expect save() to fail with specific error message
-    await projObject.save().should.eventually.be.rejectedWith(
-      `Project validation failed: visibility: \`${projData.visibility}\` is not a`
-      + ' valid enum value for path `visibility`.'
+    // Expect insertMany() to fail with specific error message
+    await Project.insertMany(projData).should.eventually.be.rejectedWith(
+      `Project validation failed: visibility: \`${projData.visibility}\` is not`
+      + ' a valid enum value for path `visibility`.'
     );
   }
   catch (error) {

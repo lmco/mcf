@@ -92,7 +92,7 @@ async function createArtifact() {
   const artData = testData.artifacts[0];
 
   // Create new artifact
-  const artifact = Artifact.createDocument({
+  const artifact = {
     _id: utils.createID(org.id, project.id, branch.id, artData.id),
     filename: artData.filename,
     project: utils.createID(org.id, project.id),
@@ -100,11 +100,11 @@ async function createArtifact() {
     location: artData.location,
     custom: artData.custom,
     strategy: M.config.artifact.strategy
-  });
+  };
 
   try {
     // Save artifact object to the database
-    const createdArtifact = await artifact.save();
+    const createdArtifact = (await Artifact.insertMany(artifact))[0];
 
     // Verify output
     chai.expect(createdArtifact._id).to.equal(utils.createID(org.id, project.id, branch.id,

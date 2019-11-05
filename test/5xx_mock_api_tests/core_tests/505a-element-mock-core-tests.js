@@ -65,12 +65,12 @@ describe(M.getModuleName(module.filename), () => {
       const projData = testData.projects[0];
 
       // Create project
-      return ProjController.create(adminUser, org.id, projData);
+      return ProjController.create(adminUser, org._id, projData);
     })
     .then((retProj) => {
       // Set global project
       proj = retProj;
-      projID = utils.parseID(proj[0].id).pop();
+      projID = utils.parseID(proj[0]._id).pop();
       done();
     })
     .catch((error) => {

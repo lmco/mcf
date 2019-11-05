@@ -97,8 +97,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should only return the specified fields', optionFieldsFind);
   it('should limit the number of search results', optionLimitFind);
   it('should skip over find results', optionSkipFind);
-  it('should return a raw JSON version of a project instead of a document with'
-    + ' instance methods from find()', optionLeanFind);
   it('should sort find results', optionSortFind);
   it('should find a project with a specific name', optionNameFind);
   it('should find projects with a certain level of visibility', optionVisibilityFind);
@@ -110,18 +108,12 @@ describe(M.getModuleName(module.filename), () => {
   // ------------- Create -------------
   it('should populate the return object from create', optionPopulateCreate);
   it('should only return specified fields from create', optionFieldsCreate);
-  it('should return a raw JSON version of a project instead of a document with'
-    + ' instance methods from create()', optionLeanCreate);
   // ------------- Update -------------
   it('should populate the return object from update', optionPopulateUpdate);
   it('should only return specified fields from update', optionFieldsUpdate);
-  it('should return a raw JSON version of a project instead of a document with'
-    + ' instance methods from update()', optionLeanUpdate);
   // ------------- Replace ------------
   it('should populate the return object from createOrReplace', optionPopulateReplace);
   it('should only return specified fields from createOrReplace', optionFieldsReplace);
-  it('should return a raw JSON version of a project instead of a document with'
-    + ' instance methods from createOrReplace()', optionLeanReplace);
   // ------------- Remove -------------
 });
 
@@ -174,7 +166,7 @@ async function optionPopulateFind() {
 
     // Perform a find on the project
     const foundProjects = await ProjectController.find(adminUser, org._id,
-      utils.parseID(project.id).pop(), options);
+      utils.parseID(project._id).pop(), options);
     // There should be one project
     chai.expect(foundProjects.length).to.equal(1);
     const foundProject = foundProjects[0];
@@ -212,9 +204,9 @@ async function optionIncludeArchivedFind() {
   try {
     // Select projects to test
     const project = projects[1];
-    const projectID = utils.parseID(project.id).pop();
+    const projectID = utils.parseID(project._id).pop();
     const archivedProject = projects[2];
-    const archivedID = utils.parseID(archivedProject.id).pop();
+    const archivedID = utils.parseID(archivedProject._id).pop();
 
     // Create find option
     const options = { includeArchived: true };
@@ -259,11 +251,11 @@ async function optionFieldsFind() {
   try {
     // Select a project to test
     const project = projects[1];
-    const projectID = utils.parseID(project.id).pop();
+    const projectID = utils.parseID(project._id).pop();
 
     // Create fields option
     const fields = ['name', 'permissions'];
-    const options = { fields: fields, lean: true };
+    const options = { fields: fields };
 
     // Perform a find on the project
     const foundProjects = await ProjectController.find(adminUser, org._id,
@@ -339,32 +331,6 @@ async function optionSkipFind() {
 }
 
 /**
- * @description Validates that find results can return raw JSON rather than models.
- */
-async function optionLeanFind() {
-  try {
-    // Create lean option
-    const options = { lean: true };
-
-    // Find the projects without lean to check that they are models
-    const foundProjects = await ProjectController.find(adminUser, org._id);
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof foundProjects[0].getValidUpdateFields).to.equal('function');
-
-    // Find the projects with the lean option
-    const leanProjects = await ProjectController.find(adminUser, org._id, options);
-
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof leanProjects[0].getValidUpdateFields).to.equal('undefined');
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
  * @description Validates that the find results can be sorted.
  */
 async function optionSortFind() {
@@ -372,15 +338,15 @@ async function optionSortFind() {
     // Update the test project objects
     const testProjects = [
       {
-        id: utils.parseID(projects[0].id).pop(),
+        id: utils.parseID(projects[0]._id).pop(),
         name: 'b'
       },
       {
-        id: utils.parseID(projects[1].id).pop(),
+        id: utils.parseID(projects[1]._id).pop(),
         name: 'c'
       },
       {
-        id: utils.parseID(projects[2].id).pop(),
+        id: utils.parseID(projects[2]._id).pop(),
         name: 'a'
       }];
     // Create sort options
@@ -388,7 +354,7 @@ async function optionSortFind() {
     const sortOptionReverse = { sort: '-name' };
 
     // Update the projects
-    const updatedProjects = await ProjectController.update(adminUser, org.id, testProjects);
+    const updatedProjects = await ProjectController.update(adminUser, org._id, testProjects);
     // Expect updatedProjects array to contain 3 projects
     chai.expect(updatedProjects.length).to.equal(3);
 
@@ -399,11 +365,11 @@ async function optionSortFind() {
 
     // Validate that the sort option is working
     chai.expect(foundProjects[0].name).to.equal('a');
-    chai.expect(foundProjects[0].id).to.equal(projects[2].id);
+    chai.expect(foundProjects[0]._id).to.equal(projects[2]._id);
     chai.expect(foundProjects[1].name).to.equal('b');
-    chai.expect(foundProjects[1].id).to.equal(projects[0].id);
+    chai.expect(foundProjects[1]._id).to.equal(projects[0]._id);
     chai.expect(foundProjects[2].name).to.equal('c');
-    chai.expect(foundProjects[2].id).to.equal(projects[1].id);
+    chai.expect(foundProjects[2]._id).to.equal(projects[1]._id);
 
     // Find the projects and return them sorted in reverse
     const reverseProjects = await ProjectController.find(adminUser, org._id,
@@ -414,11 +380,11 @@ async function optionSortFind() {
 
     // Validate that the sort option is working
     chai.expect(reverseProjects[0].name).to.equal('c');
-    chai.expect(reverseProjects[0].id).to.equal(projects[1].id);
+    chai.expect(reverseProjects[0]._id).to.equal(projects[1]._id);
     chai.expect(reverseProjects[1].name).to.equal('b');
-    chai.expect(reverseProjects[1].id).to.equal(projects[0].id);
+    chai.expect(reverseProjects[1]._id).to.equal(projects[0]._id);
     chai.expect(reverseProjects[2].name).to.equal('a');
-    chai.expect(reverseProjects[2].id).to.equal(projects[2].id);
+    chai.expect(reverseProjects[2]._id).to.equal(projects[2]._id);
   }
   catch (error) {
     M.log.error(error.message);
@@ -537,9 +503,9 @@ async function optionArchivedFind() {
   try {
     // Select projects to test
     const project = projects[1];
-    const projectID = utils.parseID(project.id).pop();
+    const projectID = utils.parseID(project._id).pop();
     const archivedProject = projects[2];
-    const archivedID = utils.parseID(archivedProject.id).pop();
+    const archivedID = utils.parseID(archivedProject._id).pop();
 
     // Create find option
     const options = { archived: true };
@@ -701,7 +667,7 @@ async function optionFieldsCreate() {
 
     // Create fields option
     const fields = ['name', 'visibility'];
-    const options = { fields: fields, lean: true };
+    const options = { fields: fields };
 
     // Create the project
     const createdProjects = await ProjectController.create(adminUser, org._id,
@@ -717,41 +683,6 @@ async function optionFieldsCreate() {
     fields.forEach((field) => {
       chai.expect(keys.includes(field)).to.equal(true);
     });
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Validates that the create results return JSON data rather than model instances.
- */
-async function optionLeanCreate() {
-  try {
-    // Select a project to test
-    const projectID = utils.parseID(projects[1]._id).pop();
-    const projectObj = {
-      id: projectID,
-      name: 'Project01'
-    };
-
-    // Delete the project
-    await ProjectController.remove(adminUser, org._id, projectID);
-
-    // Create lean option
-    const options = { lean: true };
-
-    // Create the project
-    const createdProjects = await ProjectController.create(adminUser, org._id,
-      projectObj, options);
-    // There should be one project
-    chai.expect(createdProjects.length).to.equal(1);
-    const foundProject = createdProjects[0];
-
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof foundProject.getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error.message);
@@ -824,7 +755,7 @@ async function optionFieldsUpdate() {
 
     // Create fields option
     const fields = ['name', 'visibility'];
-    const options = { fields: fields, lean: true };
+    const options = { fields: fields };
 
     // Update the project
     const updatedProjects = await ProjectController.update(adminUser, org._id,
@@ -840,38 +771,6 @@ async function optionFieldsUpdate() {
     fields.forEach((field) => {
       chai.expect(keys.includes(field)).to.equal(true);
     });
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Validates that the update results return JSON data rather than model instances.
- */
-async function optionLeanUpdate() {
-  try {
-    // Select a project to test
-    const projectID = utils.parseID(projects[1]._id).pop();
-    const projectObj = {
-      id: projectID,
-      name: 'Project01 lean update'
-    };
-
-    // Create lean option
-    const options = { lean: true };
-
-    // Update the project
-    const updatedProjects = await ProjectController.update(adminUser, org._id,
-      projectObj, options);
-    // There should be one project
-    chai.expect(updatedProjects.length).to.equal(1);
-    const foundProject = updatedProjects[0];
-
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof foundProject.getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error.message);
@@ -944,7 +843,7 @@ async function optionFieldsReplace() {
 
     // Create fields option
     const fields = ['name', 'visibility'];
-    const options = { fields: fields, lean: true };
+    const options = { fields: fields };
 
     // Replace the project
     const createdProjects = await ProjectController.createOrReplace(adminUser, org._id,
@@ -960,38 +859,6 @@ async function optionFieldsReplace() {
     fields.forEach((field) => {
       chai.expect(keys.includes(field)).to.equal(true);
     });
-  }
-  catch (error) {
-    M.log.error(error.message);
-    // Expect no error
-    chai.expect(error.message).to.equal(null);
-  }
-}
-
-/**
- * @description Validates that the create results return JSON data rather than model instances.
- */
-async function optionLeanReplace() {
-  try {
-    // Select a project to test
-    const projectID = utils.parseID(projects[1]._id).pop();
-    const projectObj = {
-      id: projectID,
-      name: 'Project01'
-    };
-
-    // Create lean option
-    const options = { lean: true };
-
-    // Replace the project
-    const createdProjects = await ProjectController.createOrReplace(adminUser, org._id,
-      projectObj, options);
-    // There should be one project
-    chai.expect(createdProjects.length).to.equal(1);
-    const foundProject = createdProjects[0];
-
-    // Expect the instance method getValidUpdateFields to be undefined
-    chai.expect(typeof foundProject.getValidUpdateFields).to.equal('undefined');
   }
   catch (error) {
     M.log.error(error.message);
