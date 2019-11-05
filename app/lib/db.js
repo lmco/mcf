@@ -247,7 +247,7 @@ class Schema extends DBModule.Schema {
  * {@link https://mongoosejs.com/docs/api/model.html} with a few important
  * exceptions. (1) The constructor creates an instance of the model, not a
  * document. (2) The createDocument method is used to create an actual
- * document. (3) The insertMany option "rawResult" is replaced with "lean".
+ * document.
  */
 class Model extends DBModule.Model {
 
@@ -437,9 +437,6 @@ class Model extends DBModule.Model {
    * documents can be populated. Populating a field returns the entire
    * referenced document instead of that document's ID. If no document exists,
    * null is returned.
-   * @param {boolean} [options.lean] - If false (by default), every document
-   * returned will contain methods that were declared in the Schema. If true,
-   * just the raw JSON will be returned from the database.
    * @param {Function} [cb] - A callback function to run.
    *
    * @returns {Promise<object[]>} An array containing the found documents, if
@@ -464,9 +461,6 @@ class Model extends DBModule.Model {
    * documents can be populated. Populating a field returns the entire
    * referenced document instead of that document's ID. If no document exists,
    * null is returned.
-   * @param {boolean} [options.lean] - If false (by default), every document
-   * returned will contain methods that were declared in the Schema. If true,
-   * just the raw JSON will be returned from the database.
    * @param {Function} [cb] - A callback function to run.
    *
    * @returns {Promise<(object|null)>} The found document, if any otherwise
@@ -492,9 +486,6 @@ class Model extends DBModule.Model {
    *
    * @param {object[]} docs - An array of documents to insert.
    * @param {object} [options] - An object containing options.
-   * @param {boolean} [options.lean] - If false (by default), every document
-   * returned will contain methods that were declared in the Schema. If true,
-   * just the raw JSON will be returned from the database.
    * @param {boolean} [options.skipValidation] - If true, will not validate
    * the documents which are being created.
    * @param {Function} [cb] - A callback function to run.

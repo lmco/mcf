@@ -340,9 +340,6 @@ async function getOrgs(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Get all organizations the requesting user has access to
     // NOTE: find() sanitizes arrOrgID.
@@ -414,9 +411,6 @@ async function postOrgs(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   // Get the org data
   let orgData;
@@ -502,9 +496,6 @@ async function putOrgs(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   // Get the org data
   let orgData;
   if (req.headers['content-type'] === 'application/gzip') {
@@ -587,9 +578,6 @@ async function patchOrgs(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   // Get the org data
   let orgData;
@@ -741,9 +729,6 @@ async function getOrg(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Find the org from it's id
     // NOTE: find() sanitizes req.params.orgid
@@ -836,9 +821,6 @@ async function postOrg(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Create the organization with provided parameters
     // NOTE: create() sanitizes req.body
@@ -924,9 +906,6 @@ async function putOrg(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Create or replace the organization with provided parameters
     // NOTE: createOrReplace() sanitizes req.body
@@ -1010,9 +989,6 @@ async function patchOrg(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   try {
     // Update the specified organization
@@ -1172,9 +1148,6 @@ async function getAllProjects(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Get all projects the requesting user has access to
     const projects = await ProjectController.find(req.user, null, undefined, options);
@@ -1283,9 +1256,6 @@ async function getProjects(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Get all projects the requesting user has access to in a specified org
     // NOTE: find() sanitizes req.params.orgid and ids
@@ -1357,9 +1327,6 @@ async function postProjects(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   // Get the project data
   let projectData;
@@ -1445,9 +1412,6 @@ async function putProjects(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   // Get the project data
   let projectData;
   if (req.headers['content-type'] === 'application/gzip') {
@@ -1530,9 +1494,6 @@ async function patchProjects(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   // Get the project data
   let projectData;
@@ -1687,9 +1648,6 @@ async function getProject(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Find the project
     // NOTE: find() sanitizes req.params.projectid and req.params.orgid
@@ -1782,9 +1740,6 @@ async function postProject(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Create project with provided parameters
     // NOTE: create() sanitizes req.params.orgid and req.body
@@ -1869,9 +1824,6 @@ async function putProject(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Create or replace project with provided parameters
     // NOTE: createOrReplace() sanitizes req.params.orgid and req.body
@@ -1955,9 +1907,6 @@ async function patchProject(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   try {
     // Update the specified project
@@ -2128,9 +2077,6 @@ async function getUsers(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Get Users
     // NOTE: find() sanitizes req.usernames
@@ -2206,9 +2152,6 @@ async function postUsers(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   // Get the user data
   let userData;
@@ -2293,9 +2236,6 @@ async function putUsers(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   // Get the user data
   let userData;
   if (req.headers['content-type'] === 'application/gzip') {
@@ -2378,9 +2318,6 @@ async function patchUsers(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   // Get the user data
   let userData;
@@ -2527,9 +2464,6 @@ async function getUser(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Find the member from its username
     // NOTE: find() sanitizes req.params.username
@@ -2624,9 +2558,6 @@ async function postUser(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Create user with provided parameters
     // NOTE: create() sanitizes req.body
@@ -2711,9 +2642,6 @@ async function putUser(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Creates or replaces a user with provided parameters
     // NOTE: createOrReplace() sanitizes req.body
@@ -2797,9 +2725,6 @@ async function patchUser(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   try {
     // Update the specified user
@@ -3003,9 +2928,6 @@ async function searchUsers(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Find users
     // NOTE: search() sanitizes input params
@@ -3150,7 +3072,6 @@ async function getElements(req, res) {
     fields: 'array',
     limit: 'number',
     skip: 'number',
-    lean: 'boolean',
     sort: 'string',
     ids: 'array',
     format: 'string',
@@ -3224,9 +3145,6 @@ async function getElements(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   try {
     // Find elements
@@ -3331,9 +3249,6 @@ async function postElements(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   // Get the element data
   let elementData;
   if (req.headers['content-type'] === 'application/gzip') {
@@ -3418,9 +3333,6 @@ async function putElements(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   // Get the element data
   let elementData;
   if (req.headers['content-type'] === 'application/gzip') {
@@ -3503,9 +3415,6 @@ async function patchElements(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   // Get the element data
   let elementData;
@@ -3684,9 +3593,6 @@ async function searchElements(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Find elements
     // NOTE: search() sanitizes input params
@@ -3761,9 +3667,6 @@ async function getElement(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   try {
     // Find the element
@@ -3861,9 +3764,6 @@ async function postElement(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Create element with provided parameters
     // NOTE: create() sanitizes input params
@@ -3949,9 +3849,6 @@ async function putElement(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Create or replace element with provided parameters
     // NOTE: createOrReplace() sanitizes input params
@@ -4035,9 +3932,6 @@ async function patchElement(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   try {
     // Updates the specified element
@@ -4213,9 +4107,6 @@ async function getBranches(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Find branches
     // NOTE: find() sanitizes input params
@@ -4287,9 +4178,6 @@ async function postBranches(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   // Get the branch data
   let branchData;
@@ -4373,9 +4261,6 @@ async function patchBranches(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   // Get the branch data
   let branchData;
@@ -4529,9 +4414,6 @@ async function getBranch(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Find the branch
     // NOTE: find() sanitizes req.params.branchid, req.params.projectid and req.params.orgid
@@ -4623,9 +4505,6 @@ async function postBranch(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Create branch with provided parameters
     // NOTE: create() sanitizes input params
@@ -4709,9 +4588,6 @@ async function patchBranch(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   try {
     // Updates the specified branch
@@ -4852,9 +4728,6 @@ async function getArtifact(req, res) {
     delete options.minified;
   }
 
-  // Set the lean option to true for better performance
-  options.lean = true;
-
   try {
     // Find the artifact from its artifact.id, branch.id, project.id, and org.id
     // NOTE: find() sanitizes input params
@@ -4929,9 +4802,6 @@ async function postArtifact(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   // If artifact ID was provided in the body, ensure it matches artifact ID in params
   if (Object.prototype.hasOwnProperty.call('id')
@@ -5008,9 +4878,6 @@ async function patchArtifact(req, res) {
     minified = options.minified;
     delete options.minified;
   }
-
-  // Set the lean option to true for better performance
-  options.lean = true;
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {

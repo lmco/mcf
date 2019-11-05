@@ -224,7 +224,7 @@ async function optionFieldsCreate() {
     const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
 
     // Create a list of visible user fields.
-    const visibleFields = Object.keys(createdUser._doc);
+    const visibleFields = Object.keys(createdUser);
 
     // Check that the only keys in the user are the expected ones
     chai.expect(visibleFields).to.have.members(expectedFields);
@@ -234,7 +234,7 @@ async function optionFieldsCreate() {
     const notFindUser = notFindUsers[0];
 
     // Create a list of visible user fields. Object.keys(createdUser) returns hidden fields as well
-    const visibleFields2 = Object.keys(notFindUser._doc);
+    const visibleFields2 = Object.keys(notFindUser);
 
     // Check that the keys in the notFindOptions are not in createdUser
     chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
@@ -675,7 +675,7 @@ async function optionFieldsUpdate() {
     const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
 
     // Create a list of visible user fields.
-    const visibleFields = Object.keys(updatedUser._doc);
+    const visibleFields = Object.keys(updatedUser);
 
     // Check that the only keys in the user are the expected ones
     chai.expect(visibleFields).to.have.members(expectedFields);
@@ -694,7 +694,7 @@ async function optionFieldsUpdate() {
     const expectedFields2 = notFindOptions.fields;
 
     // Create a list of visible user fields.
-    const visibleFields2 = Object.keys(updatedUser2._doc);
+    const visibleFields2 = Object.keys(updatedUser2);
 
     // Check that the only keys in the user are the expected ones
     chai.expect(visibleFields2).to.not.have.members(expectedFields2);
@@ -828,7 +828,7 @@ async function optionFieldsReplace() {
     const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
 
     // Create a list of visible user fields.
-    const visibleFields = Object.keys(replacedUser._doc);
+    const visibleFields = Object.keys(replacedUser);
 
     // Check that the only keys in the user are the expected ones
     chai.expect(visibleFields).to.have.members(expectedFields);
@@ -842,7 +842,7 @@ async function optionFieldsReplace() {
     chai.expect(notFindUser.fname).to.equal(replaceUserObj2.fname);
 
     // Create a list of visible user fields.
-    const visibleFields2 = Object.keys(notFindUser._doc);
+    const visibleFields2 = Object.keys(notFindUser);
 
     // Check that the keys in the notFindOptions are not in createdUser
     chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);

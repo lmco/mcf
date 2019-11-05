@@ -62,8 +62,8 @@ describe(M.getModuleName(module.filename), () => {
       // Define project data
       const projData = testData.projects[0];
       // Create project
-      proj = await ProjectController.create(adminUser, org.id, projData);
-      projID = utils.parseID(proj[0].id).pop();
+      proj = await ProjectController.create(adminUser, org._id, projData);
+      projID = utils.parseID(proj[0]._id).pop();
     }
     catch (error) {
       M.log.error(error);
@@ -115,7 +115,7 @@ function postGzip(done) {
 
   // Initialize the request attributes
   const params = {
-    orgid: org.id,
+    orgid: org._id,
     projectid: projID,
     branchid: branchID
   };
@@ -173,7 +173,7 @@ function putGzip(done) {
 
   // Initialize the request attributes
   const params = {
-    orgid: org.id,
+    orgid: org._id,
     projectid: projID,
     branchid: branchID
   };

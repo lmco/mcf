@@ -166,7 +166,7 @@ async function optionPopulateFind() {
 
     // Perform a find on the project
     const foundProjects = await ProjectController.find(adminUser, org._id,
-      utils.parseID(project.id).pop(), options);
+      utils.parseID(project._id).pop(), options);
     // There should be one project
     chai.expect(foundProjects.length).to.equal(1);
     const foundProject = foundProjects[0];
@@ -204,9 +204,9 @@ async function optionIncludeArchivedFind() {
   try {
     // Select projects to test
     const project = projects[1];
-    const projectID = utils.parseID(project.id).pop();
+    const projectID = utils.parseID(project._id).pop();
     const archivedProject = projects[2];
-    const archivedID = utils.parseID(archivedProject.id).pop();
+    const archivedID = utils.parseID(archivedProject._id).pop();
 
     // Create find option
     const options = { includeArchived: true };
@@ -251,11 +251,11 @@ async function optionFieldsFind() {
   try {
     // Select a project to test
     const project = projects[1];
-    const projectID = utils.parseID(project.id).pop();
+    const projectID = utils.parseID(project._id).pop();
 
     // Create fields option
     const fields = ['name', 'permissions'];
-    const options = { fields: fields, lean: true };
+    const options = { fields: fields };
 
     // Perform a find on the project
     const foundProjects = await ProjectController.find(adminUser, org._id,
@@ -338,15 +338,15 @@ async function optionSortFind() {
     // Update the test project objects
     const testProjects = [
       {
-        id: utils.parseID(projects[0].id).pop(),
+        id: utils.parseID(projects[0]._id).pop(),
         name: 'b'
       },
       {
-        id: utils.parseID(projects[1].id).pop(),
+        id: utils.parseID(projects[1]._id).pop(),
         name: 'c'
       },
       {
-        id: utils.parseID(projects[2].id).pop(),
+        id: utils.parseID(projects[2]._id).pop(),
         name: 'a'
       }];
     // Create sort options
@@ -354,7 +354,7 @@ async function optionSortFind() {
     const sortOptionReverse = { sort: '-name' };
 
     // Update the projects
-    const updatedProjects = await ProjectController.update(adminUser, org.id, testProjects);
+    const updatedProjects = await ProjectController.update(adminUser, org._id, testProjects);
     // Expect updatedProjects array to contain 3 projects
     chai.expect(updatedProjects.length).to.equal(3);
 
@@ -365,11 +365,11 @@ async function optionSortFind() {
 
     // Validate that the sort option is working
     chai.expect(foundProjects[0].name).to.equal('a');
-    chai.expect(foundProjects[0].id).to.equal(projects[2].id);
+    chai.expect(foundProjects[0]._id).to.equal(projects[2]._id);
     chai.expect(foundProjects[1].name).to.equal('b');
-    chai.expect(foundProjects[1].id).to.equal(projects[0].id);
+    chai.expect(foundProjects[1]._id).to.equal(projects[0]._id);
     chai.expect(foundProjects[2].name).to.equal('c');
-    chai.expect(foundProjects[2].id).to.equal(projects[1].id);
+    chai.expect(foundProjects[2]._id).to.equal(projects[1]._id);
 
     // Find the projects and return them sorted in reverse
     const reverseProjects = await ProjectController.find(adminUser, org._id,
@@ -380,11 +380,11 @@ async function optionSortFind() {
 
     // Validate that the sort option is working
     chai.expect(reverseProjects[0].name).to.equal('c');
-    chai.expect(reverseProjects[0].id).to.equal(projects[1].id);
+    chai.expect(reverseProjects[0]._id).to.equal(projects[1]._id);
     chai.expect(reverseProjects[1].name).to.equal('b');
-    chai.expect(reverseProjects[1].id).to.equal(projects[0].id);
+    chai.expect(reverseProjects[1]._id).to.equal(projects[0]._id);
     chai.expect(reverseProjects[2].name).to.equal('a');
-    chai.expect(reverseProjects[2].id).to.equal(projects[2].id);
+    chai.expect(reverseProjects[2]._id).to.equal(projects[2]._id);
   }
   catch (error) {
     M.log.error(error.message);
@@ -503,9 +503,9 @@ async function optionArchivedFind() {
   try {
     // Select projects to test
     const project = projects[1];
-    const projectID = utils.parseID(project.id).pop();
+    const projectID = utils.parseID(project._id).pop();
     const archivedProject = projects[2];
-    const archivedID = utils.parseID(archivedProject.id).pop();
+    const archivedID = utils.parseID(archivedProject._id).pop();
 
     // Create find option
     const options = { archived: true };
@@ -667,7 +667,7 @@ async function optionFieldsCreate() {
 
     // Create fields option
     const fields = ['name', 'visibility'];
-    const options = { fields: fields, lean: true };
+    const options = { fields: fields };
 
     // Create the project
     const createdProjects = await ProjectController.create(adminUser, org._id,
@@ -755,7 +755,7 @@ async function optionFieldsUpdate() {
 
     // Create fields option
     const fields = ['name', 'visibility'];
-    const options = { fields: fields, lean: true };
+    const options = { fields: fields };
 
     // Update the project
     const updatedProjects = await ProjectController.update(adminUser, org._id,
@@ -843,7 +843,7 @@ async function optionFieldsReplace() {
 
     // Create fields option
     const fields = ['name', 'visibility'];
-    const options = { fields: fields, lean: true };
+    const options = { fields: fields };
 
     // Replace the project
     const createdProjects = await ProjectController.createOrReplace(adminUser, org._id,

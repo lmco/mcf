@@ -75,8 +75,6 @@ const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  * @param {string} [options.sort] - Provide a particular field to sort the results by.
  * You may also add a negative sign in front of the field to indicate sorting in
  * reverse order.
@@ -126,7 +124,7 @@ async function find(requestingUser, orgs, options) {
 
     // Initialize and ensure options are valid
     const validatedOptions = utils.validateOptions(options, ['populate',
-      'includeArchived', 'fields', 'limit', 'skip', 'lean', 'sort'], Organization);
+      'includeArchived', 'fields', 'limit', 'skip', 'sort'], Organization);
 
     // Ensure options are valid
     if (options) {
@@ -185,8 +183,7 @@ async function find(requestingUser, orgs, options) {
       { limit: validatedOptions.limit,
         skip: validatedOptions.skip,
         sort: validatedOptions.sort,
-        populate: validatedOptions.populateString,
-        lean: validatedOptions.lean
+        populate: validatedOptions.populateString
       });
   }
   catch (error) {
@@ -216,8 +213,6 @@ async function find(requestingUser, orgs, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  *
  * @returns {Promise<object[]>} Array of created organization objects.
  *
@@ -244,8 +239,7 @@ async function create(requestingUser, orgs, options) {
     const saniOrgs = sani.db(JSON.parse(JSON.stringify(orgs)));
 
     // Initialize and ensure options are valid
-    const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
-      'lean'], Organization);
+    const validatedOptions = utils.validateOptions(options, ['populate', 'fields'], Organization);
 
     // Define array to store org data
     let orgsToCreate = [];
@@ -307,7 +301,7 @@ async function create(requestingUser, orgs, options) {
 
 
     // Find any existing, conflicting orgs
-    const foundOrgs = await Organization.find(searchQuery, '_id', { lean: true });
+    const foundOrgs = await Organization.find(searchQuery, '_id');
     // If there are any foundOrgs, there is a conflict
     if (foundOrgs.length > 0) {
       // Get arrays of the foundOrg's ids and names
@@ -319,7 +313,7 @@ async function create(requestingUser, orgs, options) {
     }
 
     // Get all existing users for permissions
-    const foundUsers = await User.find({}, null, { lean: true });
+    const foundUsers = await User.find({}, null);
 
     // Create array of usernames
     const foundUsernames = foundUsers.map(u => u._id);
@@ -366,9 +360,7 @@ async function create(requestingUser, orgs, options) {
 
     return await Organization.find({ _id: { $in: arrIDs } },
       validatedOptions.fieldsString,
-      { populate: validatedOptions.populateString,
-        lean: validatedOptions.lean
-      });
+      { populate: validatedOptions.populateString });
   }
   catch (error) {
     throw errors.captureError(error);
@@ -408,8 +400,6 @@ async function create(requestingUser, orgs, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  *
  * @returns {Promise<object[]>} Array of updated organization objects.
  *
@@ -438,8 +428,7 @@ async function update(requestingUser, orgs, options) {
     let updatingPermissions = false;
 
     // Initialize and ensure options are valid
-    const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
-      'lean'], Organization);
+    const validatedOptions = utils.validateOptions(options, ['populate', 'fields'], Organization);
 
     // Check the type of the orgs parameter
     if (Array.isArray(saniOrgs)) {
@@ -491,7 +480,7 @@ async function update(requestingUser, orgs, options) {
 
     try {
       // Find the orgs to update
-      foundOrgs = await Organization.find(searchQuery, null, { populate: 'projects', lean: true });
+      foundOrgs = await Organization.find(searchQuery, null, { populate: 'projects' });
     }
     catch (error) {
       throw new M.DatabaseError(error.message, 'warn');
@@ -673,9 +662,7 @@ async function update(requestingUser, orgs, options) {
     await Organization.bulkWrite(bulkArray);
 
     const foundUpdatedOrgs = await Organization.find(searchQuery, validatedOptions.fieldsString,
-      { populate: validatedOptions.populateString,
-        lean: validatedOptions.lean
-      });
+      { populate: validatedOptions.populateString });
 
     // Emit the event orgs-updated
     EventEmitter.emit('orgs-updated', foundUpdatedOrgs);
@@ -711,8 +698,6 @@ async function update(requestingUser, orgs, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  *
  * @returns {Promise<object[]>} Array of replaced/created organization objects.
  *
@@ -783,7 +768,7 @@ async function createOrReplace(requestingUser, orgs, options) {
     const searchQuery = { _id: { $in: arrIDs } };
 
     // Find the orgs to replace
-    foundOrgs = await Organization.find(searchQuery, null, { lean: true });
+    foundOrgs = await Organization.find(searchQuery, null);
 
     // Check if there are new orgs
     // Note: if more orgs than found, there must be new orgs
@@ -906,7 +891,7 @@ async function remove(requestingUser, orgs, options) {
     }
 
     // Find the orgs to delete
-    const foundOrgs = await Organization.find(searchQuery, null, { lean: true });
+    const foundOrgs = await Organization.find(searchQuery, null);
 
     // Check that user can remove each org
     foundOrgs.forEach(org => {
@@ -930,8 +915,7 @@ async function remove(requestingUser, orgs, options) {
     }
 
     // Find all projects to delete
-    const projectsToDelete = await Project.find({ org: { $in: searchedIDs } },
-      null, { lean: true });
+    const projectsToDelete = await Project.find({ org: { $in: searchedIDs } }, null);
 
     const projectIDs = projectsToDelete.map(p => p._id);
 

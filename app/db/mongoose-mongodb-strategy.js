@@ -137,7 +137,10 @@ function sanitize(data) {
 
 class Schema extends mongoose.Schema {
 
-  constructor(definition, options) {
+  constructor(definition, options = {}) {
+    // Set the minimize option to false, allowing for empty objects to be stored in the database
+    options.minimize = false;
+
     super(definition, options);
 
     // Required for virtual getters
@@ -366,15 +369,21 @@ class Model {
    * documents can be populated. Populating a field returns the entire
    * referenced document instead of that document's ID. If no document exists,
    * null is returned.
-   * @param {boolean} [options.lean] - If false (by default), every document
-   * returned will contain methods that were declared in the Schema. If true,
-   * just the raw JSON will be returned from the database.
    * @param {Function} [cb] - A callback function to run.
    *
    * @returns {Promise<object[]>} An array containing the found documents, if
    * any.
    */
   async find(filter, projection, options, cb) {
+    // Set lean option to true
+    if (!options) {
+      options = { lean: true }; // eslint-disable-line no-param-reassign
+    }
+    else {
+      options.lean = true;
+    }
+
+    // Call model.find()
     return this.model.find(filter, projection, options, cb);
   }
 
@@ -394,14 +403,20 @@ class Model {
    * documents can be populated. Populating a field returns the entire
    * referenced document instead of that document's ID. If no document exists,
    * null is returned.
-   * @param {boolean} [options.lean] - If false (by default), every document
-   * returned will contain methods that were declared in the Schema. If true,
-   * just the raw JSON will be returned from the database.
    * @param {Function} [cb] - A callback function to run.
    *
    * @returns {Promise<object>} The found document, if any.
    */
   async findOne(conditions, projection, options, cb) {
+    // Set lean option to true
+    if (!options) {
+      options = { lean: true }; // eslint-disable-line no-param-reassign
+    }
+    else {
+      options.lean = true;
+    }
+
+    // Call model.findOne()
     return this.model.findOne(conditions, projection, options, cb);
   }
 
@@ -423,9 +438,6 @@ class Model {
    *
    * @param {object[]} docs - An array of documents to insert.
    * @param {object} [options] - An object containing options.
-   * @param {boolean} [options.lean] - If false (by default), every document
-   * returned will contain methods that were declared in the Schema. If true,
-   * just the raw JSON will be returned from the database.
    * @param {boolean} [options.skipValidation] - If true, will not validate
    * the documents which are being created.
    * @param {Function} [cb] - A callback function to run.
@@ -435,11 +447,13 @@ class Model {
   async insertMany(docs, options, cb) {
     let useCollection = false;
 
-    // Replace the lean option with rawResult
-    if (options && options.lean) {
-      options.rawResult = true;
-      delete options.lean;
-    }
+    // // Set the rawResult option
+    // if (!options) {
+    //   options = { rawResult: true }; // eslint-disable-line no-param-reassign
+    // }
+    // else {
+    //   options.rawResult = true;
+    // }
 
     // Set useCollection if skipValidation is true
     if (options && options.skipValidation) {
@@ -447,24 +461,19 @@ class Model {
       delete options.skipValidation;
     }
 
-    let documents = [];
+    let responseQuery = {};
 
     // If useCollection is true, use the MongoDB function directly
     if (useCollection) {
-      documents = await this.model.collection.insertMany(docs);
+      responseQuery = await this.model.collection.insertMany(docs);
     }
     else {
       // Insert the documents
-      documents = await this.model.insertMany(docs, options, cb);
+      responseQuery = await this.model.insertMany(docs, options, cb);
     }
 
-    if (options && options.rawResult) {
-      // Query returned, return just the documents
-      return documents.ops;
-    }
-    else {
-      return documents;
-    }
+    // Since using rawResult, the documents are stored in responseQuery.ops
+    return responseQuery;
   }
 
   /**

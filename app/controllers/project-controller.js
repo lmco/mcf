@@ -76,8 +76,6 @@ const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  * @param {string} [options.sort] - Provide a particular field to sort the results by.
  * You may also add a negative sign in front of the field to indicate sorting in
  * reverse order.
@@ -136,7 +134,7 @@ async function find(requestingUser, organizationID, projects, options) {
 
     // Initialize and ensure options are valid
     const validatedOptions = utils.validateOptions(options, ['populate',
-      'includeArchived', 'fields', 'limit', 'skip', 'lean', 'sort'], Project);
+      'includeArchived', 'fields', 'limit', 'skip', 'sort'], Project);
 
     // Ensure options are valid
     if (options) {
@@ -191,8 +189,7 @@ async function find(requestingUser, organizationID, projects, options) {
       limit: validatedOptions.limit,
       skip: validatedOptions.skip,
       sort: validatedOptions.sort,
-      populate: validatedOptions.populateString,
-      lean: validatedOptions.lean
+      populate: validatedOptions.populateString
     };
 
     // If the user specifies an organization
@@ -293,8 +290,6 @@ async function find(requestingUser, organizationID, projects, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  *
  * @returns {Promise<object[]>} Array of created project objects.
  *
@@ -320,8 +315,7 @@ async function create(requestingUser, organizationID, projects, options) {
     let projObjects = [];
 
     // Initialize and ensure options are valid
-    const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
-      'lean'], Project);
+    const validatedOptions = utils.validateOptions(options, ['populate', 'fields'], Project);
 
     // Define array to store project data
     let projectsToCreate = [];
@@ -388,7 +382,7 @@ async function create(requestingUser, organizationID, projects, options) {
     permissions.createProject(reqUser, foundOrg);
 
     // Search for projects with the same id
-    const foundProjects = await Project.find(searchQuery, '_id', { lean: true });
+    const foundProjects = await Project.find(searchQuery, '_id');
     // If there are any foundProjects, there is a conflict
     if (foundProjects.length > 0) {
       // Get arrays of the foundProjects's ids and names
@@ -400,7 +394,7 @@ async function create(requestingUser, organizationID, projects, options) {
     }
 
     // Get all existing users for permissions
-    const foundUsers = await User.find({}, '_id', { lean: true });
+    const foundUsers = await User.find({}, '_id');
 
     // Create array of usernames
     const foundUsernames = foundUsers.map(u => u._id);
@@ -545,9 +539,7 @@ async function create(requestingUser, organizationID, projects, options) {
 
     return await Project.find({ _id: { $in: arrIDs } },
       validatedOptions.fieldsString,
-      { populate: validatedOptions.populateString,
-        lean: validatedOptions.lean
-      });
+      { populate: validatedOptions.populateString });
   }
   catch (error) {
     throw errors.captureError(error);
@@ -589,8 +581,6 @@ async function create(requestingUser, organizationID, projects, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  *
  * @returns {Promise<object[]>} Array of updated project objects.
  *
@@ -620,8 +610,7 @@ async function update(requestingUser, organizationID, projects, options) {
     let updatingPermissions = false;
 
     // Initialize and ensure options are valid
-    const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
-      'lean'], Project);
+    const validatedOptions = utils.validateOptions(options, ['populate', 'fields'], Project);
 
     // Check the type of the projects parameter
     if (Array.isArray(saniProjects)) {
@@ -676,7 +665,7 @@ async function update(requestingUser, organizationID, projects, options) {
     const foundOrg = await helper.findAndValidate(Organization, orgID);
 
     // Find the projects to update
-    const foundProjects = await Project.find(searchQuery, null, { lean: true });
+    const foundProjects = await Project.find(searchQuery, null);
 
     // Check that the user has permission to update each project
     foundProjects.forEach((proj) => {
@@ -696,7 +685,7 @@ async function update(requestingUser, organizationID, projects, options) {
     let foundUsers = [];
     // Find users if updating permissions
     if (updatingPermissions) {
-      foundUsers = await User.find({}, '_id', { lean: true });
+      foundUsers = await User.find({}, '_id');
     }
 
     // Set existing users
@@ -871,7 +860,7 @@ async function update(requestingUser, organizationID, projects, options) {
     while (length === 50000) {
       // Find all elements on the modified projects
       const elemsOnModifed = await Element.find({ project: { $in: loweredVisibility } }, // eslint-disable-line
-        null, { populate: 'sourceOf targetOf', lean: true, limit: length, skip: iteration });
+        null, { populate: 'sourceOf targetOf', limit: length, skip: iteration });
 
       // For each of the found elements
       elemsOnModifed.forEach((e) => {
@@ -902,7 +891,7 @@ async function update(requestingUser, organizationID, projects, options) {
 
     // Find broken relationships
     const foundElements = await Element.find(relQuery, null,
-      { populate: 'source target', lean: true });
+      { populate: 'source target' });
 
     const bulkArray2 = [];
     // For each broken relationship
@@ -949,9 +938,7 @@ async function update(requestingUser, organizationID, projects, options) {
     }
 
     const foundUpdatedProjects = await Project.find(searchQuery, validatedOptions.fieldsString,
-      { populate: validatedOptions.populateString,
-        lean: validatedOptions.lean
-      });
+      { populate: validatedOptions.populateString });
 
     // Emit the event projects-updated
     EventEmitter.emit('projects-updated', foundUpdatedProjects);
@@ -990,8 +977,6 @@ async function update(requestingUser, organizationID, projects, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and id fields. To NOT include a field, provide a '-' in
  * front.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  *
  * @returns {Promise<object[]>} Array of created project objects.
  *
@@ -1067,7 +1052,7 @@ async function createOrReplace(requestingUser, organizationID, projects, options
     const foundOrg = await helper.findAndValidate(Organization, orgID);
 
     // Find the projects to update
-    foundProjects = await Project.find(searchQuery, null, { lean: true });
+    foundProjects = await Project.find(searchQuery, null);
 
     // Check if new projects are being created
     if (projectsToLookUp.length > foundProjects.length) {
@@ -1229,7 +1214,7 @@ async function remove(requestingUser, organizationID, projects, options) {
     const foundOrg = await helper.findAndValidate(Organization, orgID);
 
     // Find the projects to delete
-    const foundProjects = await Project.find(searchQuery, null, { lean: true });
+    const foundProjects = await Project.find(searchQuery, null);
 
     // Ensure user has permission to delete each project
     foundProjects.forEach(project => {

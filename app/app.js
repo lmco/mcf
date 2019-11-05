@@ -183,6 +183,7 @@ async function createDefaultOrganization() {
     }
   }
   catch (error) {
+    console.log(error);
     throw new M.ServerError('Failed to create the default organization.', 'error');
   }
 }

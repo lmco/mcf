@@ -122,7 +122,7 @@ async function optionPopulateFind() {
     const options = { populate: fields };
 
     // Perform a find on the org
-    const foundOrgs = await OrgController.find(adminUser, org.id, options);
+    const foundOrgs = await OrgController.find(adminUser, org._id, options);
     // There should be one org
     chai.expect(foundOrgs.length).to.equal(1);
     const foundOrg = foundOrgs[0];
@@ -160,9 +160,9 @@ async function optionIncludeArchivedFind() {
   try {
     // Select orgs to test
     const org = orgs[1];
-    const orgID = org.id;
+    const orgID = org._id;
     const archivedOrg = orgs[2];
-    const archivedID = archivedOrg.id;
+    const archivedID = archivedOrg._id;
 
     // Create find option
     const options = { includeArchived: true };
@@ -206,11 +206,11 @@ async function optionFieldsFind() {
   try {
     // Select a org to test
     const org = orgs[1];
-    const orgID = org.id;
+    const orgID = org._id;
 
     // Create fields option
     const fields = ['name', 'permissions'];
-    const options = { fields: fields, lean: true };
+    const options = { fields: fields };
 
     // Perform a find on the org
     const foundOrgs = await OrgController.find(adminUser, orgID, options);
@@ -357,9 +357,9 @@ async function optionArchivedFind() {
   try {
     // Select orgs to test
     const org = orgs[1];
-    const orgID = org.id;
+    const orgID = org._id;
     const archivedOrg = orgs[2];
-    const archivedID = utils.parseID(archivedOrg.id).pop();
+    const archivedID = utils.parseID(archivedOrg._id).pop();
 
     // Create find option
     const options = { archived: true };
@@ -463,15 +463,15 @@ async function optionSortFind() {
   try {
     // Update the test org objects
     const testOrg0 = {
-      id: orgs[0].id,
+      id: orgs[0]._id,
       name: 'b'
     };
     const testOrg1 = {
-      id: orgs[1].id,
+      id: orgs[1]._id,
       name: 'c'
     };
     const testOrg2 = {
-      id: orgs[2].id,
+      id: orgs[2]._id,
       name: 'a'
     };
     // Create sort options
@@ -586,7 +586,7 @@ async function optionFieldsCreate() {
 
     // Create fields option
     const fields = ['name', 'permissions'];
-    const options = { fields: fields, lean: true };
+    const options = { fields: fields };
 
     // Create the org
     const createdOrgs = await OrgController.create(adminUser,
@@ -674,7 +674,7 @@ async function optionFieldsUpdate() {
 
     // Create fields option
     const fields = ['name', 'permissions'];
-    const options = { fields: fields, lean: true };
+    const options = { fields: fields };
 
     // Update the org
     const updatedOrgs = await OrgController.update(adminUser,
@@ -762,7 +762,7 @@ async function optionFieldsReplace() {
 
     // Create fields option
     const fields = ['name', 'permissions'];
-    const options = { fields: fields, lean: true };
+    const options = { fields: fields };
 
     // Replace the org
     const createdOrgs = await OrgController.createOrReplace(adminUser,

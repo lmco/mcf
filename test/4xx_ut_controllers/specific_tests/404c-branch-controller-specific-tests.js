@@ -62,7 +62,7 @@ describe(M.getModuleName(module.filename), () => {
         testData.branches.slice(1, 8));
       // Sort the branches; they will be returned out of order if custom id validators are used
       branches = branches.sort((a, b) => {
-        if (a.id === 'master') return -1;
+        if (a._id === 'master') return -1;
         if (Number(a.name.slice(-1)) > Number(b.name.slice(-1))) return 1;
         else return -1;
       });
@@ -136,7 +136,7 @@ async function optionPopulateFind() {
 
     // Perform a find on the branch
     const foundBranches = await BranchController.find(adminUser, org._id, projID,
-      utils.parseID(branch.id).pop(), options);
+      utils.parseID(branch._id).pop(), options);
     // There should be one branch
     chai.expect(foundBranches.length).to.equal(1);
     const foundBranch = foundBranches[0];
@@ -174,9 +174,9 @@ async function optionIncludeArchivedFind() {
   try {
     // Select branches to test
     const branch = branches[1];
-    const branchID = utils.parseID(branch.id).pop();
+    const branchID = utils.parseID(branch._id).pop();
     const archivedBranch = branches[2];
-    const archivedID = utils.parseID(archivedBranch.id).pop();
+    const archivedID = utils.parseID(archivedBranch._id).pop();
 
     // Create find option
     const options = { includeArchived: true };
@@ -223,11 +223,11 @@ async function optionFieldsFind() {
   try {
     // Select a branch to test
     const branch = branches[1];
-    const branchID = utils.parseID(branch.id).pop();
+    const branchID = utils.parseID(branch._id).pop();
 
     // Create fields option
     const fields = ['name', 'source', 'tag'];
-    const options = { fields: fields, lean: true };
+    const options = { fields: fields };
 
     // Perform a find on the branch
     const foundBranches = await BranchController.find(adminUser, org._id, projID,
@@ -311,15 +311,15 @@ async function optionSortFind() {
     // Update the test branch objects
     const testBranches = [
       {
-        id: utils.parseID(branches[0].id).pop(),
+        id: utils.parseID(branches[0]._id).pop(),
         name: 'b'
       },
       {
-        id: utils.parseID(branches[1].id).pop(),
+        id: utils.parseID(branches[1]._id).pop(),
         name: 'c'
       },
       {
-        id: utils.parseID(branches[2].id).pop(),
+        id: utils.parseID(branches[2]._id).pop(),
         name: 'a'
       }];
     // Create sort options
@@ -327,23 +327,23 @@ async function optionSortFind() {
     const sortOptionReverse = { sort: '-name' };
 
     // Update the branches
-    const updatedBranches = await BranchController.update(adminUser, org.id, projID, testBranches);
+    const updatedBranches = await BranchController.update(adminUser, org._id, projID, testBranches);
     // Expect updatedBranches array to contain 3 projects
     chai.expect(updatedBranches.length).to.equal(3);
 
     const foundBranches = await BranchController.find(adminUser, org._id, projID,
-      testBranches.map((p) => p.id), sortOption);
+      testBranches.map((b) => b.id), sortOption);
 
     // Expect to find 3 branches
     chai.expect(foundBranches.length).to.equal(3);
 
     // Validate that the sort option is working
     chai.expect(foundBranches[0].name).to.equal('a');
-    chai.expect(foundBranches[0].id).to.equal(branches[2].id);
+    chai.expect(foundBranches[0]._id).to.equal(branches[2]._id);
     chai.expect(foundBranches[1].name).to.equal('b');
-    chai.expect(foundBranches[1].id).to.equal(branches[0].id);
+    chai.expect(foundBranches[1]._id).to.equal(branches[0]._id);
     chai.expect(foundBranches[2].name).to.equal('c');
-    chai.expect(foundBranches[2].id).to.equal(branches[1].id);
+    chai.expect(foundBranches[2]._id).to.equal(branches[1]._id);
 
     // Find the branches and return them sorted in reverse
     const reverseBranches = await BranchController.find(adminUser, org._id, projID,
@@ -354,11 +354,11 @@ async function optionSortFind() {
 
     // Validate that the sort option is working
     chai.expect(reverseBranches[0].name).to.equal('c');
-    chai.expect(reverseBranches[0].id).to.equal(branches[1].id);
+    chai.expect(reverseBranches[0]._id).to.equal(branches[1]._id);
     chai.expect(reverseBranches[1].name).to.equal('b');
-    chai.expect(reverseBranches[1].id).to.equal(branches[0].id);
+    chai.expect(reverseBranches[1]._id).to.equal(branches[0]._id);
     chai.expect(reverseBranches[2].name).to.equal('a');
-    chai.expect(reverseBranches[2].id).to.equal(branches[2].id);
+    chai.expect(reverseBranches[2]._id).to.equal(branches[2]._id);
   }
   catch (error) {
     M.log.error(error.message);
@@ -496,9 +496,9 @@ async function optionArchivedFind() {
   try {
     // Select branches to test
     const branch = branches[1];
-    const branchID = utils.parseID(branch.id).pop();
+    const branchID = utils.parseID(branch._id).pop();
     const archivedBranch = branches[2];
-    const archivedID = utils.parseID(archivedBranch.id).pop();
+    const archivedID = utils.parseID(archivedBranch._id).pop();
 
     // Create find option
     const options = { archived: true };
@@ -663,7 +663,7 @@ async function optionFieldsCreate() {
 
     // Create fields option
     const fields = ['name', 'source', 'tag'];
-    const options = { fields: fields, lean: true };
+    const options = { fields: fields };
 
     // Create the branch
     const createdBranches = await BranchController.create(adminUser, org._id, projID,
@@ -751,7 +751,7 @@ async function optionFieldsUpdate() {
 
     // Create fields option
     const fields = ['name', 'source', 'tag'];
-    const options = { fields: fields, lean: true };
+    const options = { fields: fields };
 
     // Update the branch
     const updatedBranches = await BranchController.update(adminUser, org._id, projID,

@@ -233,8 +233,7 @@ module.exports.createTestOrg = async function(adminUser) {
  */
 module.exports.removeTestOrg = async function() {
   // Find all projects to delete
-  const projectsToDelete = await Project.find({ org: testData.orgs[0].id },
-    null, { lean: true });
+  const projectsToDelete = await Project.find({ org: testData.orgs[0].id }, null);
   const projectIDs = projectsToDelete.map(p => p._id);
 
   // Delete any artifacts in the org
