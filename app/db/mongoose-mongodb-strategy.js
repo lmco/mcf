@@ -437,7 +437,7 @@ class Model {
 
     // Define the rawResult option
     if (!options) {
-      options = { rawResult: true }; //eslint-disable-line no-param-reassign
+      options = { rawResult: true }; // eslint-disable-line no-param-reassign
     }
     else {
       options.rawResult = true;
@@ -449,7 +449,7 @@ class Model {
       delete options.skipValidation;
     }
 
-    let responseQuery = [];
+    let responseQuery = {};
 
     // If useCollection is true, use the MongoDB function directly
     if (useCollection) {
