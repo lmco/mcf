@@ -39,6 +39,7 @@ const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
 const WebhookController = M.require('controllers.webhook-controller');
+const Webhook = M.require('models.webhook');
 const errors = M.require('lib.errors');
 const jmi = M.require('lib.jmi-conversions');
 const logger = M.require('lib.logger');
@@ -113,10 +114,13 @@ module.exports = {
   postBlob,
   deleteBlob,
   getBlobById,
+  getWebhooks,
+  deleteWebhooks,
   getWebhook,
   postWebhook,
   patchWebhook,
   deleteWebhook,
+  triggerWebhook,
   invalidRoute
 };
 
@@ -5312,26 +5316,64 @@ async function getBlobById(req, res) {
   }
 }
 
-async function getWebhook(req, res) {
+/* -----------------------( Webhooks API Endpoints )------------------------- */
+/**
+ * GET /api/webhooks
+ * GET /api/orgs/:orgid/webhooks
+ * GET /api/orgs/:orgid/projects/:projectid/webhooks
+ * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/webhooks
+ *
+ * @description Gets all webhooks a user has access to at the server, org, project, or branch
+ * level, or gets all webhooks specified by id
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {object} Response object with webhooks' public data.
+ */
+async function getWebhooks(req, res) {
   // Define options
+  let webhookIDs;
   let options;
   let minified = false;
+  let org;
+  let project;
+  let branch;
 
-  // Define valid option and its parsed type
+  // Define valid options and their parsed types
   const validOptions = {
-    minified: 'boolean'
+    populate: 'array',
+    archived: 'boolean',
+    includeArchived: 'boolean',
+    fields: 'array',
+    limit: 'number',
+    skip: 'number',
+    lean: 'boolean',
+    sort: 'string',
+    ids: 'array',
+    minified: 'boolean',
+    type: 'string',
+    name: 'string',
+    triggers: 'array',
+    createdBy: 'string',
+    lastModifiedBy: 'string',
+    archivedBy: 'string'
   };
+
+  // Loop through req.query
+  if (req.query) {
+    Object.keys(req.query).forEach((k) => {
+      // If the key starts with custom., add it to the validOptions object
+      if (k.startsWith('custom.')) {
+        validOptions[k] = 'string';
+      }
+    });
+  }
 
   // Sanity Check: there should always be a user in the request
   if (!req.user) {
     M.log.critical('No requesting user available.');
     const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
-
-  // Singular api: should not accept arrays
-  if (Array.isArray(req.body)) {
-    const error = new M.DataFormatError('Input cannot be an array', 'warn');
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
@@ -5345,17 +5387,59 @@ async function getWebhook(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
+  // Check query for element IDs
+  if (options.ids) {
+    webhookIDs = options.ids;
+    delete options.ids;
+  }
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
+    // No IDs include in options, check body
+    webhookIDs = req.body;
+  }
+  // Check for webhook objects in body
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
+    webhookIDs = req.body.map(p => p.id);
+  }
+
+  // Extract org, project, and branch from params
+  if (req.params.hasOwnProperty('org')) org = req.params.org;
+  if (req.params.hasOwnProperty('project')) project = req.params.project;
+  if (req.params.hasOwnProperty('branch')) branch = req.params.branch;
+  if (req.query.hasOwnProperty('server') && !org && !project && !branch) {
+    options.server = req.query.server;
+  }
+  else if (!org && !project && !branch) {
+    // Set server true by default if no org, project, or branch is being searched for.
+    // The user must explicitly set server to false if they want to search through every webhook.
+    options.server = true;
+  }
+
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   try {
-    const hook = WebhookController.find(req.user, req.body, options);
+    // Find webhooks
+    const webhooks = await WebhookController.find(req.user, org, project, branch, webhookIDs,
+      options);
+
+    // Get public data of webhooks
+    const webhooksPublicData = sani.html(
+      webhooks.map((w) => publicData.getPublicData(w, 'webhook', options))
+    );
+
+    // Verify the webhooks public data array is not empty
+    if (webhooksPublicData.length === 0) {
+      throw new M.NotFoundError('No webhooks found.', 'warn');
+    }
 
     // Format JSON
-    const json = formatJSON(hook, minified);
+    const json = formatJSON(webhooksPublicData, minified);
 
     // Return 200: OK and the found webhook
     return returnResponse(req, res, json, 200);
@@ -5366,10 +5450,26 @@ async function getWebhook(req, res) {
   }
 }
 
-async function postWebhook(req, res) {
+/**
+ * DELETE /api/webhooks
+ * DELETE /api/orgs/:orgid/webhooks
+ * DELETE /api/orgs/:orgid/projects/:projectid/webhooks
+ * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/webhooks
+ *
+ * @description Deletes the specified webhooks
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {object} Response object with the deleted webhook ids.
+ */
+async function deleteWebhooks(req, res) {
   // Define options
-  let options;
+  let options = {};
   let minified = false;
+  let org;
+  let project;
+  let branch;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -5383,9 +5483,87 @@ async function postWebhook(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // Singular api: should not accept arrays
-  if (Array.isArray(req.body)) {
-    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Extract org, project, and branch from params
+  if (req.params.hasOwnProperty('org')) org = req.params.org;
+  if (req.params.hasOwnProperty('project')) project = req.params.project;
+  if (req.params.hasOwnProperty('branch')) branch = req.params.branch;
+  if (req.query.hasOwnProperty('server') && !org && !project && !branch) {
+    options.server = req.query.server;
+  }
+  else if (!org && !project && !branch) {
+    // Set server true by default if no org, project, or branch is being searched for.
+    options.server = true;
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  try {
+    // Remove the specified webhooks
+    const webhooks = await WebhookController.remove(req.user, org, project, branch, req.body,
+      options);
+
+    // Get the webhook ids
+    const parsedIDs = webhooks.map((w) => w._id);
+
+    // Format JSON
+    const json = formatJSON(parsedIDs, minified);
+
+    // Return 200: OK and the deleted webhook
+    return returnResponse(req, res, json, 200);
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+/**
+ * GET /api/webhooks/:webhookid
+ * GET /api/orgs/:orgid/webhooks/:webhookid
+ * GET /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/webhooks/:webhookid
+ *
+ * @description Gets a single webhook by id
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {object} Response object with the webhook's public data.
+ */
+async function getWebhook(req, res) {
+  // Define options
+  let options;
+  let minified = false;
+  let org;
+  let project;
+  let branch;
+
+  // Define valid option type
+  const validOptions = {
+    populate: 'array',
+    includeArchived: 'boolean',
+    fields: 'array',
+    minified: 'boolean',
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
@@ -5399,17 +5577,142 @@ async function postWebhook(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
+  // Extract org, project, and branch from params
+  if (req.params.hasOwnProperty('org')) org = req.params.org;
+  if (req.params.hasOwnProperty('project')) project = req.params.project;
+  if (req.params.hasOwnProperty('branch')) branch = req.params.branch;
+  if (req.query.hasOwnProperty('server') && !org && !project && !branch) {
+    options.server = req.query.server;
+  }
+  else if (!org && !project && !branch) {
+    // Set server true by default if no org, project, or branch is being searched for.
+    // The user must explicitly set server to false if they want to search through every webhook.
+    options.server = true;
+  }
+
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
     delete options.minified;
   }
 
+  // Set the lean option to true for better performance
+  options.lean = true;
+
   try {
-    const hook = WebhookController.create(req.user, req.body, options);
+    // Find the webhook
+    const webhooks = await WebhookController.find(req.user, org, project, branch,
+      req.params.webhookid, options);
+
+    // If no webhook was found, return 404
+    if (webhooks.length === 0) {
+      throw new M.NotFoundError(
+        `Webhook [${req.params.webhookid}] not found.`, 'warn'
+      );
+    }
+    const webhook = webhooks[0];
+
+    // Get the public data for the webhook
+    const webhookPublicData = sani.html(
+      publicData.getPublicData(webhook, 'webhook', options)
+    );
 
     // Format JSON
-    const json = formatJSON(hook, minified);
+    const json = formatJSON(webhookPublicData, minified);
+
+    // Return 200: OK and the found webhook
+    return returnResponse(req, res, json, 200);
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+/**
+ * POST /api/webhooks
+ *
+ * @description Creates a webhook.
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {object} Response object with the created webhook.
+ */
+async function postWebhook(req, res) {
+  // Define options
+  let options;
+  let minified = false;
+  let org = null;
+  let project = null;
+  let branch = null;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'string',
+    fields: 'string',
+    lean: 'boolean',
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Posting multiple webhooks is not supported at this time.  '
+      + 'Input cannot be an array', 'warn');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Extract org, project, and branch from params
+  if (req.params.hasOwnProperty('org')) org = req.params.org;
+  if (req.params.hasOwnProperty('project')) project = req.params.project;
+  if (req.params.hasOwnProperty('branch')) branch = req.params.branch;
+  if (req.query.hasOwnProperty('server') && !org && !project && !branch) {
+    options.server = req.query.server;
+  }
+  else if (!org && !project && !branch) {
+    // Set server true by default if no org, project, or branch is being searched for.
+    options.server = true;
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  // Set the lean option to true for better performance
+  options.lean = true;
+
+  try {
+    // Create the webhook with provided parameters
+    const webhooks = await WebhookController.create(req.user, org, project, branch, req.body,
+      options);
+    const webhook = webhooks[0];
+
+    // Get the webhook public data
+    const webhookPublicData = sani.html(
+      publicData.getPublicData(webhook, 'webhook', options)
+    );
+
+    // Format JSON
+    const json = formatJSON(webhookPublicData, minified);
 
     // Return 200: OK and the created webhook
     return returnResponse(req, res, json, 200);
@@ -5420,10 +5723,126 @@ async function postWebhook(req, res) {
   }
 }
 
+/**
+ * PATCH /api/webhooks
+ *
+ * @description Updates the specified webhook.
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {object} Response object with the updated webhook.
+ */
 async function patchWebhook(req, res) {
   // Define options
   let options;
   let minified = false;
+  let org;
+  let project;
+  let branch;
+
+  // Define valid option type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array',
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // If an ID was provided in the body, ensure it matches the ID in params
+  if (req.body.hasOwnProperty('_id') && (req.body._id !== req.params.webhookid)) {
+    const error = new M.DataFormatError(
+      'Webhook ID in the body does not match ID in the params.', 'warn'
+    );
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Set the element ID in the body equal req.params.elementid
+  req.body._id = req.params.webhookid;
+
+  // Extract org, project, and branch from params
+  if (req.params.hasOwnProperty('org')) org = req.params.org;
+  if (req.params.hasOwnProperty('project')) project = req.params.project;
+  if (req.params.hasOwnProperty('branch')) branch = req.params.branch;
+  if (req.query.hasOwnProperty('server') && !org && !project && !branch) {
+    options.server = req.query.server;
+  }
+  else if (!org && !project && !branch) {
+    // Set server true by default if no org, project, or branch is being searched for.
+    options.server = true;
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  try {
+    // Updates the specified webhook
+    const webhooks = await WebhookController.update(req.user, org, project, branch, req.body,
+      options);
+    const webhook = webhooks[0];
+
+    // Get the webhook public data
+    const webhookPublicData = sani.html(
+      publicData.getPublicData(webhook, 'webhook', options)
+    );
+
+    // Format JSON
+    const json = formatJSON(webhookPublicData, minified);
+
+    // Return 200: OK and the updated webhook
+    return returnResponse(req, res, json, 200);
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+/**
+ * DELETE /api/webhooks/:webhookid
+ * DELETE /api/orgs/:orgid/webhooks/:webhookid
+ * DELETE /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
+ * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/webhooks/:webhookid
+ *
+ * @description Deletes the specified webhook
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {object} Respones object with the deleted webhook id.
+ */
+async function deleteWebhook(req, res) {
+  // Define options
+  let options;
+  let minified = false;
+  let org;
+  let project;
+  let branch;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -5453,6 +5872,18 @@ async function patchWebhook(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
+  // Extract org, project, and branch from params
+  if (req.params.hasOwnProperty('org')) org = req.params.org;
+  if (req.params.hasOwnProperty('project')) project = req.params.project;
+  if (req.params.hasOwnProperty('branch')) branch = req.params.branch;
+  if (req.query.hasOwnProperty('server') && !org && !project && !branch) {
+    options.server = req.query.server;
+  }
+  else if (!org && !project && !branch) {
+    // Set server true by default if no org, project, or branch is being searched for.
+    options.server = true;
+  }
+
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
@@ -5460,12 +5891,17 @@ async function patchWebhook(req, res) {
   }
 
   try {
-    const hook = WebhookController.update(req.user, req.body, options);
+    // Remove the specified webhook
+    const webhooks = await WebhookController.remove(req.user, org, project, branch,
+      req.params.webhookid, options);
+
+    // Get the webhook id
+    const parsedID = webhooks[0]._id;
 
     // Format JSON
-    const json = formatJSON(hook, minified);
+    const json = formatJSON(parsedID, minified);
 
-    // Return 200: OK and the updated webhook
+    // Return 200: OK and the deleted webhook
     return returnResponse(req, res, json, 200);
   }
   catch (error) {
@@ -5474,37 +5910,40 @@ async function patchWebhook(req, res) {
   }
 }
 
-async function deleteWebhook(req, res) {
-  // Define options
-  let options;
-  let minified = false;
+/**
+ * GET /api/webhooks/trigger/:base64id
+ *
+ * @description Deletes the specified webhook
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {object} Notification that the trigger succeeded or failed.
+ */
+async function triggerWebhook(req, res) {
+  // Parse the token from the request
+  if (!req.body.token) throw new M.AuthorizationError('Token not found in request body.', 'warn');
+  const token = req.body.token;
 
-  // Define valid option and its parsed type
-  const validOptions = {
-    minified: 'boolean'
-  };
-
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
-
-  // Singular api: should not accept arrays
-  if (Array.isArray(req.body)) {
-    const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  // Parse the webhook id from the base64 encoded url
+  const webhookID = Buffer.from(req.params.base64id, 'base64').toString('ascii');
 
   try {
-    const hook = WebhookController.remove(req.user, req.body, options);
+    const webhook = await WebhookController.find(req.user, null, null, null, webhookID);
 
-    // Format JSON
-    const json = formatJSON(hook, minified);
+    if (webhook.type !== 'Incoming') {
+      throw new M.ServerError('Webhook is not listening for external calls', 'warn');
+    }
+
+    Webhook.verifyAuthority(token);
+
+    Webhook.sendRequest();
+
+    // Return message
+    const message = 'success';
 
     // Return 200: OK and the deleted webhook
-    return returnResponse(req, res, json, 200);
+    return returnResponse(req, res, message, 200);
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -5527,4 +5966,3 @@ function invalidRoute(req, res) {
   const json = 'Invalid Route or Method.';
   return returnResponse(req, res, json, 404);
 }
-

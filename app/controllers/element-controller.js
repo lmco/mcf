@@ -624,7 +624,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
     M.log.debug('create(): After insertMany()');
 
     promises = [];
-    const createdIDs = await createdElements.map(e => e._id);
+    const createdIDs = createdElements.map(e => e._id);
     // Find elements in batches
     for (let i = 0; i < createdIDs.length / 50000; i++) {
       // Split elementIDs list into batches of 50000
@@ -1299,8 +1299,8 @@ async function createOrReplace(requestingUser, organizationID, projectID,
 
 /**
  * @description This function removes one or many elements as well as the
- * subtree under those elements. Once the elements are deleted, the IDs of the
- * deleted elements are returned.
+ * subtree under those elements. Once the elements are deleted, the elements
+ * as they were before deletion are returned.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -1311,7 +1311,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
  * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @returns {Promise<string[]>} Array of deleted element ids.
+ * @returns {Promise<object[]>} Array of deleted element objects.
  *
  * @example
  * remove({User}, 'orgID', 'projID', 'branch', ['elem1', 'elem2'])

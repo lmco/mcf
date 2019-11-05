@@ -340,5 +340,18 @@
       "tag": true,
       "source": "master"
     }
+  ],
+  "webhooks": [
+    {
+      "name": "test_webhook00",
+      "type": "Outgoing",
+      "triggers": "elements-created",
+      "responses": [
+        {
+          "url": "http://fakeurl.com"
+        }
+      ],
+      "server": true
+    }
   ]
 }

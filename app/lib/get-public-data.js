@@ -53,6 +53,8 @@ module.exports.getPublicData = function(object, type, options) {
       return getOrgPublicData(object, options);
     case 'user':
       return getUserPublicData(object, options);
+    case 'webhook':
+      return getWebhookPublicData(object, options);
     default:
       throw new M.DataFormatError(`Invalid model type [${type}]`, 'warn');
   }
@@ -891,6 +893,105 @@ function getUserPublicData(user, options) {
     // If only specific fields should be included
     else if (options.fields.every(f => !f.startsWith('-'))) {
       const returnObj = { username: data.username };
+      // Add specific field to returnObj
+      options.fields.forEach((f) => {
+        returnObj[f] = (data.hasOwnProperty(f)) ? data[f] : undefined;
+      });
+      return returnObj;
+    }
+  }
+
+  return data;
+}
+
+/**
+ * @description Returns a webhook's public data.
+ *
+ * @param {object} webhook - The raw JSON of the webhook.
+ * @param {object} options - A list of options passed in by the user to the API Controller.
+ *
+ * @returns {object} The public data of the webhook.
+ */
+function getWebhookPublicData(webhook, options) {
+  let createdBy = null;
+  let lastModifiedBy = null;
+  let archivedBy;
+  let projects;
+
+  // If webhook.createdBy is defined
+  if (webhook.createdBy) {
+    // If org.createdBy is populated
+    if (typeof webhook.createdBy === 'object') {
+      // Get the public data of createdBy
+      createdBy = getUserPublicData(webhook.createdBy, {});
+    }
+    else {
+      createdBy = webhook.createdBy;
+    }
+  }
+
+  // If webhook.lastModifiedBy is defined
+  if (webhook.lastModifiedBy) {
+    // If org.lastModifiedBy is populated
+    if (typeof webhook.lastModifiedBy === 'object') {
+      // Get the public data of lastModifiedBy
+      lastModifiedBy = getUserPublicData(webhook.lastModifiedBy, {});
+    }
+    else {
+      lastModifiedBy = webhook.lastModifiedBy;
+    }
+  }
+
+  // If org.archivedBy is defined
+  if (webhook.archivedBy && webhook.archived) {
+    // If org.archivedBy is populated
+    if (typeof webhook.archivedBy === 'object') {
+      // Get the public data of archivedBy
+      archivedBy = getUserPublicData(webhook.archivedBy, {});
+    }
+    else {
+      archivedBy = webhook.archivedBy;
+    }
+  }
+
+  // Return the organization public fields
+  const data = {
+    id: webhook._id,
+    name: webhook.name,
+    type: webhook.type,
+    description: webhook.description,
+    triggers: webhook.triggers,
+    responses: webhook.responses ? webhook.responses : undefined,
+    incoming: webhook.incoming ? webhook.incoming : undefined,
+    level: webhook.level,
+    custom: webhook.custom || {},
+    createdOn: (webhook.createdOn) ? webhook.createdOn.toString() : undefined,
+    createdBy: createdBy,
+    updatedOn: (webhook.updatedOn) ? webhook.updatedOn.toString() : undefined,
+    lastModifiedBy: lastModifiedBy,
+    archived: webhook.archived,
+    archivedOn: (webhook.archivedOn) ? webhook.archivedOn.toString() : undefined,
+    archivedBy: archivedBy
+  };
+
+
+  // If the fields options is defined
+  if (options.hasOwnProperty('fields')) {
+    // If fields should be excluded
+    if (options.fields.every(f => f.startsWith('-'))) {
+      // For each of those fields
+      options.fields.forEach((f) => {
+        // If -id, ignore it
+        if (f === '-id') {
+          return;
+        }
+        // Remove the field from data
+        data[f.slice(1)] = undefined;
+      });
+    }
+    // If only specific fields should be included
+    else if (options.fields.every(f => !f.startsWith('-'))) {
+      const returnObj = { id: data.id };
       // Add specific field to returnObj
       options.fields.forEach((f) => {
         returnObj[f] = (data.hasOwnProperty(f)) ? data[f] : undefined;
