@@ -435,20 +435,33 @@ class Model {
   async insertMany(docs, options, cb) {
     let useCollection = false;
 
+    // Define the rawResult option
+    if (!options) {
+      options = { rawResult: true }; // eslint-disable-line no-param-reassign
+    }
+    else {
+      options.rawResult = true;
+    }
+
     // Set useCollection if skipValidation is true
     if (options && options.skipValidation) {
       useCollection = true;
       delete options.skipValidation;
     }
 
+    let responseQuery = {};
+
     // If useCollection is true, use the MongoDB function directly
     if (useCollection) {
-      return this.model.collection.insertMany(docs);
+      responseQuery = await this.model.collection.insertMany(docs);
     }
     else {
       // Insert the documents
-      return this.model.insertMany(docs, options, cb);
+      responseQuery = await this.model.insertMany(docs, options, cb);
     }
+
+    // Return responseQuery.ops, the array of inserted documents
+    return responseQuery.ops;
   }
 
   /**
