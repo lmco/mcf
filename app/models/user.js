@@ -250,6 +250,11 @@ UserSchema.static('hashPassword', function(obj) {
   // Require auth module
   const AuthController = M.require('lib.auth');
 
+  // If the provider is not defined, set it the the default, its needed for this fxn
+  if (!obj.hasOwnProperty('provider')) {
+    obj.provider = 'local';
+  }
+
   // Check validation status NOT successful
   if (!AuthController.validatePassword(obj.password, obj.provider)) {
     // Failed validation, throw error
