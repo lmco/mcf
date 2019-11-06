@@ -211,7 +211,7 @@
       "id": "batchelem9",
       "name": "Batch Element 9",
       "parent": "model",
-      "archived": "true"
+      "archived": true
     },
     {
       "id": "batchelem10",
