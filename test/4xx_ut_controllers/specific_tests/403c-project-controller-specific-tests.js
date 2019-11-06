@@ -230,8 +230,7 @@ async function optionIncludeArchivedFind() {
       [projectID, archivedID], options);
     // There should be two projects
     chai.expect(foundProjects.length).to.equal(2);
-    chai.expect(foundProjects[0]._id).to.equal(project._id);
-    chai.expect(foundProjects[1]._id).to.equal(archivedProject._id);
+    chai.expect(foundProjects.map(p => p._id)).to.have.members([project._id, archivedProject._id]);
 
     // Clean up for the following tests
     archiveUpdate.archived = false;
