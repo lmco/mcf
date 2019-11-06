@@ -284,6 +284,388 @@ class Schema {
 
 }
 
+class Query {
+
+  constructor(model, options) {
+    this.model = model;
+    this.options = options;
+    this.ExpressionAttributeNames = {};
+    this.ExpressionAttributeValues = {};
+    this.RequestItemsKeys = [];
+    this.UpdateExpression = '';
+  }
+
+  parseFilterExpression(query, expAttNames) {
+    const returnObj = {
+      ExpressionAttributeNames: expAttNames,
+      ExpressionAttributeValues: {},
+      FilterExpression: ''
+    };
+
+    // Handle filter expression
+    Object.keys(query).forEach((k) => {
+      // Handle special case where key name starts with an underscore
+      let keyName = (k === '_id') ? 'id' : k;
+
+      // TODO: SUPPORT TEXT SEARCH
+      if (keyName === '$text') {
+        throw new M.NotImplementedError('Text search is currently not supported.');
+      }
+
+      // Handle case where searching nested object
+      if (keyName.includes('.')) {
+        const split = keyName.split('.');
+        split.forEach((s) => {
+          const kName = (s === '_id') ? 'id' : s;
+          // Add key to ExpressionAttributeNames
+          returnObj.ExpressionAttributeNames[`#${kName}`] = s;
+        });
+        keyName = split.join('.#');
+      }
+      else {
+        // Add key to ExpressionAttributeNames
+        returnObj.ExpressionAttributeNames[`#${keyName}`] = k;
+      }
+
+      const valueKey = (k.includes('.')) ? k.split('.').join('_') : k;
+
+      // Handle the special $in case
+      if (typeof query[k] === 'object' && query[k] !== null
+        && Object.keys(query[k])[0] === '$in') {
+        // Init the filter string
+        let filterString = '';
+        const arr = Object.values(query[k])[0];
+
+        if (arr.length > 0) {
+          // Loop over each item in arr
+          for (let i = 0; i < arr.length; i++) {
+            // Add value to ExpressionAttributeValues
+            returnObj.ExpressionAttributeValues[`:${valueKey}${i}`] = { S: arr[i] };
+
+            // If FilterExpression is empty, init it
+            if (!returnObj.FilterExpression && !filterString) {
+              filterString = `( #${keyName} = :${valueKey}${i}`;
+            }
+            else if (!filterString) {
+              filterString = ` AND ( #${keyName} = :${valueKey}${i}`;
+            }
+            else {
+              filterString += ` OR #${keyName} = :${valueKey}${i}`;
+            }
+          }
+
+          filterString += ' )';
+          returnObj.FilterExpression += filterString;
+        }
+      }
+      else {
+        switch (typeof query[k]) {
+          case 'string':
+            returnObj.ExpressionAttributeValues[`:${valueKey}`] = { S: query[k] };
+            break;
+          case 'boolean':
+            returnObj.ExpressionAttributeValues[`:${valueKey}`] = { BOOL: query[k] };
+            break;
+          case 'number':
+            returnObj.ExpressionAttributeValues[`:${valueKey}`] = {
+              N: query[k].toString()
+            };
+            break;
+          default: {
+            throw new M.DatabaseError(
+              `Query param type [${typeof query[k]}] is not supported`, 'critical'
+            );
+          }
+        }
+
+        // Handle special case where searching an array of permissions
+        if (keyName.startsWith('permissions.')) {
+          // If FilterExpression is not defined yet, define it
+          if (returnObj.FilterExpression === '') {
+            returnObj.FilterExpression = `contains (#${keyName}, :${valueKey})`;
+          }
+          else {
+            // Append on condition
+            returnObj.FilterExpression += ` AND  contains (#${keyName}, :${valueKey})`;
+          }
+        }
+        // If FilterExpression is not defined yet, define it
+        else if (returnObj.FilterExpression === '') {
+          returnObj.FilterExpression = `#${keyName} = :${valueKey}`;
+        }
+        else {
+          // Append on condition
+          returnObj.FilterExpression += ` AND #${keyName} = :${valueKey}`;
+        }
+      }
+    });
+
+    return returnObj;
+  }
+
+  parseRequestItemsKeys(query) {
+    const returnArray = [];
+    const base = {};
+    const inVals = {};
+
+    // For each key in the query
+    Object.keys(query).forEach((key) => {
+      switch (typeof query[key]) {
+        case 'string':
+          base[key] = { S: query[key] };
+          break;
+        case 'number':
+          base[key] = { N: query[key].toString() };
+          break;
+        case 'boolean':
+          base[key] = { BOOL: query[key] };
+          break;
+        case 'object': {
+          if (query[key] !== null) {
+            // Handle the $in case
+            if (Object.keys(query[key])[0] === '$in') {
+              inVals[key] = Object.values(query[key])[0];
+            }
+          }
+          break;
+        }
+        default:
+          throw new M.DataFormatError(`Invalid type in query ${typeof query[key]}.`);
+      }
+    });
+
+    // If no $in exists in the query, return the base query
+    if (Object.keys(inVals).length === 0) {
+      returnArray.push(base);
+    }
+    else {
+      // For each in_val
+      Object.keys(inVals).forEach((k) => {
+        // For each item in the array to search through
+        inVals[k].forEach((i) => {
+          switch (typeof i) {
+            case 'string':
+              base[k] = { S: i };
+              break;
+            case 'number':
+              base[k] = { N: i.toString() };
+              break;
+            default:
+              throw new M.DataFormatError(`Invalid type in $in array ${typeof i}.`);
+          }
+
+          // Add on query, using JSON parse/stringify
+          returnArray.push(JSON.parse(JSON.stringify(base)));
+        });
+      });
+    }
+
+    this.RequestItemsKeys = returnArray;
+  }
+
+  keyFormat(obj) {
+    switch (typeof obj) {
+      case 'string': return { S: obj };
+      case 'boolean': return { BOOL: obj };
+      case 'number': return { N: obj.toString() };
+      case 'object': {
+        if (Array.isArray(obj) && obj.every(o => typeof o === 'string')) {
+          return { SS: obj };
+        }
+        else if (Array.isArray(obj)) {
+          return { L: obj.map(i => this.keyFormat(i)) };
+        }
+        else if (obj !== null) {
+          const returnObj = { M: {} };
+          Object.keys(obj).forEach((k) => {
+            returnObj.M[k] = this.keyFormat(obj[k]);
+          });
+          return returnObj;
+        }
+        else {
+          return { S: 'null' };
+        }
+      }
+    }
+  }
+
+
+  parseUpdateExpression(filter) {
+    // Handle filter expression
+    Object.keys(filter).forEach((k) => {
+      // Handle special case where key name starts with an underscore
+      let keyName = (k === '_id') ? 'id' : k;
+
+      // Handle case where updating an object
+      if (keyName.includes('.')) {
+        const split = keyName.split('.');
+        split.forEach((s) => {
+          const kName = (s === '_id') ? 'id' : s;
+          // Add key to ExpressionAttributeNames
+          this.ExpressionAttributeNames[`#${kName}`] = s;
+        });
+        keyName = split.join('.#');
+      }
+      else {
+        // Add key to ExpressionAttributeNames
+        this.ExpressionAttributeNames[`#${keyName}`] = k;
+      }
+
+      const valueKey = (k.includes('.')) ? k.split('.').join('_') : k;
+
+      // Perform operation based on the type of parameter being updated
+      this.ExpressionAttributeValues[`:${valueKey}`] = this.keyFormat(filter[k]);
+
+      // If UpdateExpression is not defined yet, define it
+      if (this.UpdateExpression === '') {
+        this.UpdateExpression = `SET #${keyName} = :${valueKey}`;
+      }
+      else {
+        // Append on condition
+        this.UpdateExpression += `, #${keyName} = :${valueKey}`;
+      }
+    });
+  }
+
+  batchGetItem(filter) {
+    this.parseRequestItemsKeys(filter);
+    const queries = [];
+
+    const baseObj = {
+      RequestItems: {}
+    };
+    baseObj.RequestItems[this.model.TableName] = { Keys: [] };
+
+    for (let i = 0; i < this.RequestItemsKeys.length / 25; i++) {
+      baseObj.RequestItems[this.model.TableName].Keys = this.RequestItemsKeys
+      .slice(i * 25, i * 25 + 25);
+      queries.push(JSON.parse(JSON.stringify(baseObj)));
+    }
+
+    return queries;
+  }
+
+  /**
+   * @description Creates a query formatted to be used in batchWriteItem calls.
+   */
+  batchWriteItem(docs, operation) {
+    const queries = [];
+    const baseObj = {
+      RequestItems: {}
+    };
+    baseObj.RequestItems[this.model.TableName] = [];
+
+    // Determine if array of PutRequests or DeleteRequests
+    const op = (operation === 'insert') ? 'PutRequest' : 'DeleteRequest';
+
+    // Perform in batches of 25, the max number per request
+    for (let i = 0; i < docs.length / 25; i++) {
+      const batch = docs.slice(i * 25, i * 25 + 25);
+      const tmpQuery = JSON.parse(JSON.stringify(baseObj));
+
+      batch.forEach((doc) => {
+        if (op === 'PutRequest') {
+          const putObj = {
+            PutRequest: {
+              Item: {}
+            }
+          };
+          putObj.PutRequest.Item = this.model.formatObject(doc);
+          tmpQuery.RequestItems[this.model.TableName].push(putObj);
+        }
+        else {
+          const deleteObj = {
+            DeleteRequest: {
+              Key: { _id: { S: doc._id } }
+            }
+          };
+          tmpQuery.RequestItems[this.model.TableName].push(deleteObj);
+        }
+      });
+
+      queries.push(tmpQuery);
+    }
+
+    return queries;
+  }
+
+  getItem(filter) {
+    this.parseRequestItemsKeys(filter);
+
+    return {
+      TableName: this.model.TableName,
+      Key: this.RequestItemsKeys[0]
+    };
+  }
+
+  updateItem(filter, doc) {
+    this.parseUpdateExpression(doc);
+    this.parseRequestItemsKeys(filter);
+
+    const baseObj = {
+      TableName: this.model.TableName,
+      ReturnValues: 'ALL_NEW',
+      Key: this.RequestItemsKeys[0]
+    };
+
+    // Add on the ExpressionAttributeNames if defined
+    if (Object.keys(this.ExpressionAttributeNames).length !== 0) {
+      baseObj.ExpressionAttributeNames = this.ExpressionAttributeNames;
+    }
+
+    // Add on ExpressionAttributeValues and UpdateExpression if defined
+    if (this.UpdateExpression.length) {
+      baseObj.UpdateExpression = this.UpdateExpression;
+    }
+    if (Object.keys(this.ExpressionAttributeValues).length !== 0) {
+      baseObj.ExpressionAttributeValues = this.ExpressionAttributeValues;
+    }
+
+    return baseObj;
+  }
+
+  scan(query) {
+    const filterObj = this.parseFilterExpression(query, {});
+    const baseObj = {
+      TableName: this.model.TableName
+    };
+
+    // Add on  ExpressionAttributeNames if defined
+    if (Object.keys(filterObj.ExpressionAttributeNames).length !== 0) {
+      baseObj.ExpressionAttributeNames = filterObj.ExpressionAttributeNames;
+    }
+
+    // Add on ExpressionAttributeValues and FilterExpression if defined
+    if (filterObj.FilterExpression.length > 0) {
+      baseObj.FilterExpression = filterObj.FilterExpression;
+    }
+    // If no FilterExpression is defined, remove the ExpressionAttributeNames
+    else {
+      delete baseObj.ExpressionAttributeNames;
+    }
+
+    if (Object.keys(filterObj.ExpressionAttributeValues).length !== 0) {
+      baseObj.ExpressionAttributeValues = filterObj.ExpressionAttributeValues;
+    }
+
+    // For each options
+    if (this.options) {
+      // If the limit option is provided and is greater than 0
+      if (this.options.limit && this.options.limit > 0) {
+        baseObj.Limit = this.options.limit;
+      }
+
+      // If the option LastEvaluatedKey is provided, set it for pagination
+      if (this.options.LastEvaluatedKey) {
+        baseObj.LastEvaluatedKey = this.options.LastEvaluatedKey;
+      }
+    }
+
+    return baseObj;
+  }
+
+}
+
 /**
  * @description Defines the Model class. Models are used to create documents and
  * to directly manipulate the database. Operations should be defined to perform
@@ -381,7 +763,9 @@ class Model {
    * @async
    *
    * @param {object[]} documents -  The documents to properly format.
-   * @param {object} options - The options supplied to the function.
+   * @param {string} [projection] - A space separated string containing a list
+   * of fields to return (or not return).
+   * @param {object} [options={}] - The options supplied to the function.
    *
    * @returns {object[]} - An array of properly formatted documents.
    */
@@ -423,6 +807,8 @@ class Model {
    * @async
    *
    * @param {object} document -  The documents to properly format.
+   * @param {string} [projection] - A space separated string containing a list
+   * of fields to return (or not return).
    * @param {object} [options={}] - The options supplied to the function.
    * @param {boolean} [recurse=false] - A boolean value which if true, specifies
    * that this function was called recursively.
@@ -672,7 +1058,7 @@ class Model {
 
         M.log.debug(`DB OPERATION: ${this.TableName} scan`);
         // Find the documents
-        const result = await conn.scan(scanObj).promise();
+        const result = await conn.scan(scanObj).promise(); // eslint-disable-line no-await-in-loop
         docs = docs.concat(result.Items);
 
         // If there are no more documents to find, exit loop
@@ -780,10 +1166,8 @@ class Model {
           M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
           // Append operation to promises array
           promises.push(
-            // Connect to the database
-            connect()
             // Make the batchGetItem request
-            .then((conn) => conn.batchGetItem(q).promise())
+            conn.batchGetItem(q).promise()
             .then((found) => {
               // Append the found documents to the function-global array
               docs = docs.concat(found.Responses[this.TableName]);
@@ -1147,6 +1531,7 @@ class Model {
    * @param {object} [options] - An object containing options.
    * @param {Function} [cb] - A callback function to run.
    */
+  // TODO
   async updateMany(filter, doc, options, cb) {
     // return this.updateItem(filter, doc, options);
   }
@@ -1311,386 +1696,6 @@ class Store extends DynamoDBStore {
 
     // Call parent constructor
     super(obj);
-  }
-
-}
-
-
-class Query {
-
-  constructor(model, options) {
-    this.model = model;
-    this.options = options;
-    this.ExpressionAttributeNames = {};
-    this.ExpressionAttributeValues = {};
-    this.RequestItemsKeys = [];
-    this.UpdateExpression = '';
-  }
-
-  parseFilterExpression(query, expAttNames) {
-    const returnObj = {
-      ExpressionAttributeNames: expAttNames,
-      ExpressionAttributeValues: {},
-      FilterExpression: ''
-    };
-
-    // Handle filter expression
-    Object.keys(query).forEach((k) => {
-      // Handle special case where key name starts with an underscore
-      let keyName = (k === '_id') ? 'id' : k;
-
-      // Handle case where searching nested object
-      if (keyName.includes('.')) {
-        const split = keyName.split('.');
-        split.forEach((s) => {
-          const kName = (s === '_id') ? 'id' : s;
-          // Add key to ExpressionAttributeNames
-          returnObj.ExpressionAttributeNames[`#${kName}`] = s;
-        });
-        keyName = split.join('.#');
-      }
-      else {
-        // Add key to ExpressionAttributeNames
-        returnObj.ExpressionAttributeNames[`#${keyName}`] = k;
-      }
-
-      const valueKey = (k.includes('.')) ? k.split('.').join('_') : k;
-
-      // Handle the special $in case
-      if (typeof query[k] === 'object' && query[k] !== null
-          && Object.keys(query[k])[0] === '$in') {
-        // Init the filter string
-        let filterString = '';
-        const arr = Object.values(query[k])[0];
-
-        if (arr.length > 0) {
-          // Loop over each item in arr
-          for (let i = 0; i < arr.length; i++) {
-            // Add value to ExpressionAttributeValues
-            returnObj.ExpressionAttributeValues[`:${valueKey}${i}`] = { S: arr[i] };
-
-            // If FilterExpression is empty, init it
-            if (!returnObj.FilterExpression && !filterString) {
-              filterString = `( #${keyName} = :${valueKey}${i}`;
-            }
-            else if (!filterString) {
-              filterString = ` AND ( #${keyName} = :${valueKey}${i}`;
-            }
-            else {
-              filterString += ` OR #${keyName} = :${valueKey}${i}`;
-            }
-          }
-
-          filterString += ' )';
-          returnObj.FilterExpression += filterString;
-        }
-      }
-      else {
-        switch (typeof query[k]) {
-          case 'string':
-            returnObj.ExpressionAttributeValues[`:${valueKey}`] = { S: query[k] };
-            break;
-          case 'boolean':
-            returnObj.ExpressionAttributeValues[`:${valueKey}`] = { BOOL: query[k] };
-            break;
-          case 'number':
-            returnObj.ExpressionAttributeValues[`:${valueKey}`] = {
-              N: query[k].toString()
-            };
-            break;
-          default: {
-            throw new M.DatabaseError(
-              `Query param type [${typeof query[k]}] is not supported`, 'critical'
-            );
-          }
-        }
-
-        // Handle special case where searching an array of permissions
-        if (keyName.startsWith('permissions.')) {
-          // If FilterExpression is not defined yet, define it
-          if (returnObj.FilterExpression === '') {
-            returnObj.FilterExpression = `contains (#${keyName}, :${valueKey})`;
-          }
-          else {
-            // Append on condition
-            returnObj.FilterExpression += ` AND  contains (#${keyName}, :${valueKey})`;
-          }
-        }
-        else {
-          // If FilterExpression is not defined yet, define it
-          if (returnObj.FilterExpression === '') {
-            returnObj.FilterExpression = `#${keyName} = :${valueKey}`;
-          }
-          else {
-            // Append on condition
-            returnObj.FilterExpression += ` AND #${keyName} = :${valueKey}`;
-          }
-        }
-      }
-    });
-
-    return returnObj;
-  }
-
-  parseRequestItemsKeys(query) {
-    const returnArray = [];
-    const base = {};
-    const inVals = {};
-
-    // For each key in the query
-    Object.keys(query).forEach((key) => {
-      switch (typeof query[key]) {
-        case 'string':
-          base[key] = { S: query[key] };
-          break;
-        case 'number':
-          base[key] = { N: query[key].toString() };
-          break;
-        case 'boolean':
-          base[key] = { BOOL: query[key] };
-          break;
-        case 'object': {
-          if (query[key] !== null) {
-            // Handle the $in case
-            if (Object.keys(query[key])[0] === '$in') {
-              inVals[key] = Object.values(query[key])[0];
-            }
-          }
-          break;
-        }
-        default:
-          throw new M.DataFormatError(`Invalid type in query ${typeof query[key]}.`);
-      }
-    });
-
-    // If no $in exists in the query, return the base query
-    if (Object.keys(inVals).length === 0) {
-      returnArray.push(base);
-    }
-    else {
-      // For each in_val
-      Object.keys(inVals).forEach((k) => {
-        // For each item in the array to search through
-        inVals[k].forEach((i) => {
-          switch (typeof i) {
-            case 'string':
-              base[k] = { S: i };
-              break;
-            case 'number':
-              base[k] = { N: i.toString() };
-              break;
-            default:
-              throw new M.DataFormatError(`Invalid type in $in array ${typeof i}.`);
-          }
-
-          // Add on query, using JSON parse/stringify
-          returnArray.push(JSON.parse(JSON.stringify(base)));
-        });
-      });
-    }
-
-    this.RequestItemsKeys = returnArray;
-  }
-
-  keyFormat(obj) {
-    switch (typeof obj) {
-      case 'string': return { S: obj };
-      case 'boolean': return { BOOL: obj };
-      case 'number': return { N: obj.toString() };
-      case 'object': {
-        if (Array.isArray(obj) && obj.every(o => typeof o === 'string')) {
-          return { SS: obj };
-        }
-        else if (Array.isArray(obj)) {
-          return { L: obj.map(i => this.keyFormat(i)) };
-        }
-        else if (obj !== null) {
-          const returnObj = { M: {} };
-          Object.keys(obj).forEach((k) => {
-            returnObj.M[k] = this.keyFormat(obj[k]);
-          });
-          return returnObj;
-        }
-        else {
-          return { S: 'null' };
-        }
-      }
-    }
-  }
-
-
-  parseUpdateExpression(filter) {
-    // Handle filter expression
-    Object.keys(filter).forEach((k) => {
-      // Handle special case where key name starts with an underscore
-      let keyName = (k === '_id') ? 'id' : k;
-
-      // Handle case where updating an object
-      if (keyName.includes('.')) {
-        const split = keyName.split('.');
-        split.forEach((s) => {
-          const kName = (s === '_id') ? 'id' : s;
-          // Add key to ExpressionAttributeNames
-          this.ExpressionAttributeNames[`#${kName}`] = s;
-        });
-        keyName = split.join('.#');
-      }
-      else {
-        // Add key to ExpressionAttributeNames
-        this.ExpressionAttributeNames[`#${keyName}`] = k;
-      }
-
-      const valueKey = (k.includes('.')) ? k.split('.').join('_') : k;
-
-      // Perform operation based on the type of parameter being updated
-      this.ExpressionAttributeValues[`:${valueKey}`] = this.keyFormat(filter[k]);
-
-      // If UpdateExpression is not defined yet, define it
-      if (this.UpdateExpression === '') {
-        this.UpdateExpression = `SET #${keyName} = :${valueKey}`;
-      }
-      else {
-        // Append on condition
-        this.UpdateExpression += `, #${keyName} = :${valueKey}`;
-      }
-    });
-  }
-
-  batchGetItem(filter) {
-    this.parseRequestItemsKeys(filter);
-    const queries = [];
-
-    const baseObj = {
-      RequestItems: {}
-    };
-    baseObj.RequestItems[this.model.TableName] = { Keys: [] };
-
-    for (let i = 0; i < this.RequestItemsKeys.length / 25; i++) {
-      baseObj.RequestItems[this.model.TableName].Keys = this.RequestItemsKeys
-      .slice(i * 25, i * 25 + 25);
-      queries.push(JSON.parse(JSON.stringify(baseObj)));
-    }
-
-    return queries;
-  }
-
-  /**
-   * @description Creates a query formatted to be used in batchWriteItem calls.
-   */
-  batchWriteItem(docs, operation) {
-    const queries = [];
-    const baseObj = {
-      RequestItems: {}
-    };
-    baseObj.RequestItems[this.model.TableName] = [];
-
-    // Determine if array of PutRequests or DeleteRequests
-    const op = (operation === 'insert') ? 'PutRequest' : 'DeleteRequest';
-
-    // Perform in batches of 25, the max number per request
-    for (let i = 0; i < docs.length / 25; i++) {
-      const batch = docs.slice(i * 25, i * 25 + 25);
-      const tmpQuery = JSON.parse(JSON.stringify(baseObj));
-
-      batch.forEach((doc) => {
-        if (op === 'PutRequest') {
-          const putObj = {
-            PutRequest: {
-              Item: {}
-            }
-          };
-          putObj.PutRequest.Item = this.model.formatObject(doc);
-          tmpQuery.RequestItems[this.model.TableName].push(putObj);
-        }
-        else {
-          const deleteObj = {
-            DeleteRequest: {
-              Key: { _id: { S: doc._id } }
-            }
-          };
-          tmpQuery.RequestItems[this.model.TableName].push(deleteObj);
-        }
-      });
-
-      queries.push(tmpQuery);
-    }
-
-    return queries;
-  }
-
-  getItem(filter) {
-    this.parseRequestItemsKeys(filter);
-
-    return {
-      TableName: this.model.TableName,
-      Key: this.RequestItemsKeys[0]
-    };
-  }
-
-  updateItem(filter, doc) {
-    this.parseUpdateExpression(doc);
-    this.parseRequestItemsKeys(filter);
-
-    const baseObj = {
-      TableName: this.model.TableName,
-      ReturnValues: 'ALL_NEW',
-      Key: this.RequestItemsKeys[0]
-    };
-
-    // Add on the ExpressionAttributeNames if defined
-    if (Object.keys(this.ExpressionAttributeNames).length !== 0) {
-      baseObj.ExpressionAttributeNames = this.ExpressionAttributeNames;
-    }
-
-    // Add on ExpressionAttributeValues and UpdateExpression if defined
-    if (this.UpdateExpression.length) {
-      baseObj.UpdateExpression = this.UpdateExpression;
-    }
-    if (Object.keys(this.ExpressionAttributeValues).length !== 0) {
-      baseObj.ExpressionAttributeValues = this.ExpressionAttributeValues;
-    }
-
-    return baseObj;
-  }
-
-  scan(query) {
-    const filterObj = this.parseFilterExpression(query, {});
-    const baseObj = {
-      TableName: this.model.TableName
-    };
-
-    // Add on  ExpressionAttributeNames if defined
-    if (Object.keys(filterObj.ExpressionAttributeNames).length !== 0) {
-      baseObj.ExpressionAttributeNames = filterObj.ExpressionAttributeNames;
-    }
-
-    // Add on ExpressionAttributeValues and FilterExpression if defined
-    if (filterObj.FilterExpression.length > 0) {
-      baseObj.FilterExpression = filterObj.FilterExpression;
-    }
-    // If no FilterExpression is defined, remove the ExpressionAttributeNames
-    else {
-      delete baseObj.ExpressionAttributeNames;
-    }
-
-    if (Object.keys(filterObj.ExpressionAttributeValues).length !== 0) {
-      baseObj.ExpressionAttributeValues = filterObj.ExpressionAttributeValues;
-    }
-
-    // For each options
-    if (this.options) {
-      // If the limit option is provided and is greater than 0
-      if (this.options.limit && this.options.limit > 0) {
-        baseObj.Limit = this.options.limit;
-      }
-
-      // If the option LastEvaluatedKey is provided, set it for pagination
-      if (this.options.LastEvaluatedKey) {
-        baseObj.LastEvaluatedKey = this.options.LastEvaluatedKey;
-      }
-    }
-
-    return baseObj;
   }
 
 }
