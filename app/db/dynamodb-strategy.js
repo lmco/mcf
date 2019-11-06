@@ -289,10 +289,8 @@ class Schema {
  * to directly manipulate the database. Operations should be defined to perform
  * all basic CRUD operations on the database. The Model class requirements are
  * closely based on the Mongoose.js Model class
- * {@link https://mongoosejs.com/docs/api/model.html} with a few important
- * exceptions. (1) The constructor creates an instance of the model, not a
- * document. (2) The createDocument method is used to create an actual
- * document. (3) The insertMany option "rawResult" is replaced with "lean".
+ * {@link https://mongoosejs.com/docs/api/model.html} with an important
+ * exception, the constructor creates an instance of the model, not a document.
  */
 class Model {
 
@@ -549,166 +547,6 @@ class Model {
 
     // Wait for promises to complete
     await Promise.all(promises);
-  }
-
-  /**
-   * @description Creates a document based on the model's schema. Sets defaults
-   * if the schema definition has a default defined for the field, and the field
-   * is not set. Defines the prototype functions validateSync, save, remove,
-   * markModified (which is unused) and hooks/methods defined by the schema
-   * definition.
-   *
-   * @param {object} doc - The JSON to be converted into a document. Should
-   * roughly align with the model's schema. Each document created should at
-   * least contain an _id, as well as the methods defined in the schema.
-   *
-   * @returns {object} The document object.
-   */
-  createDocument(doc) {
-    // Create a copy of the JSON
-    doc = JSON.parse(JSON.stringify(doc)); // eslint-disable-line no-param-reassign
-    // Reset the prototypes
-    doc.__proto__ = {}; // eslint-disable-line no-proto
-    const def = this.definition;
-    const table = this.TableName;
-    const modelName = this.modelName;
-    const model = this;
-
-    // Set defaults
-    Object.keys(def).forEach((param) => {
-      // If a default exists and the value isn't set
-      if (def[param].default && !Object.keys(doc).includes(param)) {
-        // If the default is a function, call it
-        if (typeof def[param].default === 'function') {
-          doc[param] = def[param].default();
-        }
-        else {
-          // Set the value equal to th default
-          doc[param] = def[param].default;
-        }
-      }
-    });
-
-    /**
-     * @description Synchronously validates a document. Runs validator
-     * functions, validates the type, sets defaults if no value is provided, and
-     * if the field is required and no default is provided, and error is thrown.
-     *
-     * @param {string[]|string|undefined} fields - The fields to validate on the
-     * document. Can either be an array of string, a single string, or
-     * undefined. If undefined, all fields defined in the Schema are validated.
-     *
-     * @throws {DataFormatError}
-     */
-    doc.__proto__.validateSync = function(fields) { // eslint-disable-line no-proto
-      let keys;
-      // If fields is provided and is an array, set equal to keys
-      if (Array.isArray(fields)) {
-        keys = fields;
-      }
-      // If only a single field is provided, add to array
-      else if (typeof fields === 'string') {
-        keys = [fields];
-      }
-      // Validate every key in the document
-      else {
-        keys = Object.keys(doc);
-      }
-
-      // Loop over each valid parameter in the definition
-      Object.keys(def).forEach((param) => {
-        // If a default exists and the value isn't set, and no specific fields are provided
-        if (def[param].hasOwnProperty('default') && !keys.includes(param) && !fields) {
-          // If the default is a function, call it
-          if (typeof def[param].default === 'function') {
-            doc[param] = def[param].default();
-          }
-          else if (def[param].default === '') {
-            // Do nothing, empty strings cannot be saved in DynamoDB
-          }
-          else {
-            // Set the value equal to the default
-            doc[param] = def[param].default;
-          }
-        }
-
-        // Parameter was defined on the document
-        if (keys.includes(param)) {
-          // Validate type
-          let shouldBeType;
-          switch (def[param].type) {
-            case 'S':
-              shouldBeType = 'string'; break;
-            case 'N':
-              shouldBeType = 'number'; break;
-            case 'M':
-              shouldBeType = 'object'; break;
-            case 'BOOL':
-              shouldBeType = 'boolean'; break;
-            default:
-              throw new M.DataFormatError(`Invalid DynamoDB type: ${def[param].type}`);
-          }
-
-          // If validators are defined on the field
-          if (def[param].hasOwnProperty('validate')) {
-            // For each validator defined
-            def[param].validate.forEach((v) => {
-              // Call the validator, binding the document to "this"
-              if (!v.validator.call(doc, doc[param])) {
-                // If the validator fails, throw an error
-                throw new M.DataFormatError(`${modelName} validation failed: `
-                + `${param}: ${v.message({ value: doc[param] })}`);
-              }
-            });
-          }
-
-          // If not the correct type, throw an error
-          if (typeof doc[param] !== shouldBeType // eslint-disable-line valid-typeof
-            && !(shouldBeType !== 'object' && doc[param] === null)) {
-            throw new M.DataFormatError(`${modelName} validation failed: `
-              + `${param}: Cast to ${utils.toTitleCase(shouldBeType)} failed `
-              + `for value "${JSON.stringify(doc[param])}" at path "${param}"`);
-          }
-
-          // If an array of enums exists, and the value is not in it, throw an error
-          if (def[param].hasOwnProperty('enum') && !def[param].enum.includes(doc[param])) {
-            throw new M.DataFormatError(`${modelName} validation failed: `
-              + `${param}: \`${doc[param]}\` is not a valid enum value for path`
-              + ` \`${param}\`.`);
-          }
-
-          // Handle special case where the field should be a string, and defaults to null
-          if (def[param].hasOwnProperty('default')
-            && def[param].default === null && doc[param] === null) {
-            // The string null is a reserved keyword for string fields with null defaults
-            if (doc[param] === 'null') {
-              throw new M.DataFormatError('The string \'null\' is a reserved '
-                + `keyword for the parameter [${param}].`);
-            }
-            // Set the value to the string null
-            else {
-              doc[param] = 'null';
-            }
-          }
-
-          // If value is a blank string, delete key; blank strings are not allowed in DynamoDB
-          if (doc[param] === '') delete doc[param];
-        }
-        // If the parameter is required and no default is provided, throw an error
-        else if (def[param].required && !def[param].default) {
-          let message = `Path \`${param}\` is required.`;
-          // If required is an array, grab the error message (second entry)
-          if (Array.isArray(def[param].required) && def[param].required.length === 2) {
-            message = def[param].required[1];
-          }
-          throw new M.DataFormatError(`${modelName} validation failed: `
-            + `${param}: ${message}`);
-        }
-      });
-    };
-
-    // Return the document containing the prototype functions
-    return doc;
   }
 
   /**
@@ -1070,8 +908,7 @@ class Model {
       else {
         const promises = [];
         // Format and validate documents
-        const formattedDocs = docs.map(d => this.createDocument(d));
-        formattedDocs.forEach(d => d.validateSync());
+        const formattedDocs = docs.map(d => this.validate(d));
 
         // Connect to the database
         const conn = await connect();
@@ -1291,6 +1128,105 @@ class Model {
       M.log.verbose(`Failed in ${this.modelName}.updateOne().`);
       throw error.captureError(error);
     }
+  }
+
+  validate(doc) {
+    const keys = Object.keys(doc);
+
+    // Loop over each valid parameter in the definition
+    Object.keys(this.definition).forEach((param) => {
+      // If a default exists and the value isn't set, and no specific fields are provided
+      if (this.definition[param].hasOwnProperty('default') && !keys.includes(param)) {
+        // If the default is a function, call it
+        if (typeof this.definition[param].default === 'function') {
+          doc[param] = this.definition[param].default();
+        }
+        else if (this.definition[param].default === '') {
+          // Do nothing, empty strings cannot be saved in DynamoDB
+        }
+        else {
+          // Set the value equal to the default
+          doc[param] = this.definition[param].default;
+        }
+      }
+
+      // Parameter was defined on the document
+      if (keys.includes(param)) {
+        // Validate type
+        let shouldBeType;
+        switch (this.definition[param].type) {
+          case 'S':
+            shouldBeType = 'string'; break;
+          case 'N':
+            shouldBeType = 'number'; break;
+          case 'M':
+            shouldBeType = 'object'; break;
+          case 'BOOL':
+            shouldBeType = 'boolean'; break;
+          default:
+            throw new M.DataFormatError(`Invalid DynamoDB type: ${this.definition[param].type}`);
+        }
+
+        // If validators are defined on the field
+        if (this.definition[param].hasOwnProperty('validate')) {
+          // For each validator defined
+          this.definition[param].validate.forEach((v) => {
+            // Call the validator, binding the document to "this"
+            if (!v.validator.call(doc, doc[param])) {
+              // If the validator fails, throw an error
+              throw new M.DataFormatError(`${this.modelName} validation failed: `
+                + `${param}: ${v.message({ value: doc[param] })}`);
+            }
+          });
+        }
+
+        // If not the correct type, throw an error
+        if (typeof doc[param] !== shouldBeType // eslint-disable-line valid-typeof
+          && !(shouldBeType !== 'object' && doc[param] === null)) {
+          throw new M.DataFormatError(`${this.modelName} validation failed: `
+            + `${param}: Cast to ${utils.toTitleCase(shouldBeType)} failed `
+            + `for value "${JSON.stringify(doc[param])}" at path "${param}"`);
+        }
+
+        // If an array of enums exists, and the value is not in it, throw an error
+        if (this.definition[param].hasOwnProperty('enum')
+          && !this.definition[param].enum.includes(doc[param])) {
+          throw new M.DataFormatError(`${this.modelName} validation failed: `
+            + `${param}: \`${doc[param]}\` is not a valid enum value for path`
+            + ` \`${param}\`.`);
+        }
+
+        // Handle special case where the field should be a string, and defaults to null
+        if (this.definition[param].hasOwnProperty('default')
+          && this.definition[param].default === null && doc[param] === null) {
+          // The string null is a reserved keyword for string fields with null defaults
+          if (doc[param] === 'null') {
+            throw new M.DataFormatError('The string \'null\' is a reserved '
+              + `keyword for the parameter [${param}].`);
+          }
+          // Set the value to the string null
+          else {
+            doc[param] = 'null';
+          }
+        }
+
+        // If value is a blank string, delete key; blank strings are not allowed in DynamoDB
+        if (doc[param] === '') delete doc[param];
+      }
+      // If the parameter is required and no default is provided, throw an error
+      else if (this.definition[param].required && !this.definition[param].default) {
+        let message = `Path \`${param}\` is required.`;
+        // If required is an array, grab the error message (second entry)
+        if (Array.isArray(this.definition[param].required)
+          && this.definition[param].required.length === 2) {
+          message = this.definition[param].required[1];
+        }
+        throw new M.DataFormatError(`${this.modelName} validation failed: `
+          + `${param}: ${message}`);
+      }
+    });
+
+    return doc;
   }
 
 }
