@@ -988,7 +988,6 @@ class Model {
         const query = new Query(this, options);
         // Get the formatted batchWriteItem queries
         const batchWriteQueries = query.batchWriteItem(formattedDocs, 'insert');
-
         // For each query
         batchWriteQueries.forEach((q) => {
           // Perform the batchWriteItem operation
@@ -1638,7 +1637,7 @@ class Query {
     for (let i = 0; i < this.RequestItemsKeys.length / 25; i++) {
       baseObj.RequestItems[this.model.TableName].Keys = this.RequestItemsKeys
       .slice(i * 25, i * 25 + 25);
-      queries.push(baseObj);
+      queries.push(JSON.parse(JSON.stringify(baseObj)));
     }
 
     return queries;

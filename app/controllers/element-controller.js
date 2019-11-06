@@ -527,7 +527,9 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
         }
         else {
           // Add elements parent to list of elements to search for in DB
-          elementsToFind.push(element.$parent);
+          if (!elementsToFind.includes(element.$parent)) {
+            elementsToFind.push(element.$parent);
+          }
           remainingElements.push(element);
         }
       }
@@ -541,7 +543,9 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
         }
         else {
           // Add elements source to list of elements to search for in DB
-          elementsToFind.push(element.$source);
+          if (!elementsToFind.includes(element.$source)) {
+            elementsToFind.push(element.$source);
+          }
           remainingElements.push(element);
         }
       }
@@ -555,7 +559,9 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
         }
         else {
           // Add elements target to list of elements to search for in DB
-          elementsToFind.push(element.$target);
+          if (!elementsToFind.includes(element.$target)) {
+            elementsToFind.push(element.$target);
+          }
           remainingElements.push(element);
         }
       }
