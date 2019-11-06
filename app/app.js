@@ -209,6 +209,8 @@ async function createDefaultAdmin() {
         admin: true
       };
 
+      User.hashPassword(adminUserData);
+
       // Save the admin user
       await User.insertMany(adminUserData);
 
