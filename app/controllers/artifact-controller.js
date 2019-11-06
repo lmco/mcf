@@ -600,7 +600,6 @@ async function update(requestingUser, organizationID, projectID, branchID,
       });
     });
 
-    console.log(JSON.stringify(bulkArray, null, 2));
     await Artifact.bulkWrite(bulkArray);
 
     const foundArtifacts = await Artifact.find(searchQuery, validatedOptions.fieldsString,

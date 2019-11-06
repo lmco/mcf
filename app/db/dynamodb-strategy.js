@@ -385,11 +385,11 @@ class Model {
    *
    * @returns {object[]} - An array of properly formatted documents.
    */
-  async formatDocuments(documents, options) {
+  async formatDocuments(documents, projection, options = {}) {
     // Loop through each document
     const promises = [];
     for (let i = 0; i < documents.length; i++) {
-      promises.push(this.formatDocument(documents[i], options)
+      promises.push(this.formatDocument(documents[i], projection, options)
       .then((doc) => {
         documents[i] = doc;
       }));
@@ -397,6 +397,21 @@ class Model {
 
     // Wait for all promises to complete
     await Promise.all(promises);
+
+    if (options.sort) {
+      const order = Object.values(options.sort)[0];
+      const key = Object.keys(options.sort)[0];
+
+      // Sort the documents using custom sort function
+      documents.sort((a, b) => {
+        return a[key] > b[key];
+      });
+
+      // If sorting in reverse order, reverse the sorted array
+      if (order === -1) {
+        documents.reverse();
+      }
+    }
 
     // Return modified documents
     return documents;
@@ -414,7 +429,7 @@ class Model {
    *
    * @returns {object} - The properly formatted document.
    */
-  async formatDocument(document, options = {}, recurse = false) {
+  async formatDocument(document, projection, options = {}, recurse = false) {
     const promises = [];
     // For each field in the document
     Object.keys(document).forEach((field) => {
@@ -427,7 +442,7 @@ class Model {
       // If the field type is 'M', meaning a JSON object/map
       if (Object.keys(document[field])[0] === 'M') {
         // Recursively call this function with the field contents and no options
-        promises.push(this.formatDocument(document[field].M, {}, true)
+        promises.push(this.formatDocument(document[field].M, null, {}, true)
         .then((retDoc) => {
           document[field] = retDoc;
         }));
@@ -437,6 +452,11 @@ class Model {
         && Object.values(document[field])[0] !== null) {
         // Convert the field to a Number, and remove the type
         document[field] = Number(Object.values(document[field])[0]);
+      }
+      // If the field is a list
+      else if (Object.keys(document[field])[0] === 'L') {
+        // TODO: Handle lists
+        throw new M.NotImplementedError('Not handeling lists....', 'crtical');
       }
       else {
         // Remove the type from the value, ex: hello: { S: 'world' } --> hello: 'world'
@@ -461,7 +481,7 @@ class Model {
     await Promise.all(promises);
 
     // If the top level, and not a recursive call of this function
-    if (!recurse) {
+    if (!recurse && !projection) {
       // Loop through all keys in definition
       Object.keys(this.definition).forEach((k) => {
         // If the key is not in the document
@@ -475,6 +495,34 @@ class Model {
 
       // Populate any fields specified in the options object
       await this.populate(document, options);
+    }
+    // If a projection is specified
+    else if (!recurse && projection) {
+      const fields = projection.split(' ');
+
+      // Exclude certain fields from the document
+      if (fields.every(s => s.startsWith('-'))) {
+        fields.forEach((f) => {
+          // Remove leading '-'
+          const key = f.slice(1);
+          delete document[key];
+        });
+      }
+      // Include only specified fields
+      else {
+        // Ensure _id is added to fields
+        if (!fields.includes('_id')) {
+          fields.push('_id');
+        }
+
+        // For each field on the document
+        Object.keys(document).forEach((f) => {
+          // If the field is not desired, delete it
+          if (!fields.includes(f)) {
+            delete document[f];
+          }
+        });
+      }
     }
 
     return document;
@@ -629,7 +677,7 @@ class Model {
       }
 
       // Format the documents
-      docs = await this.formatDocuments(docs, options);
+      docs = await this.formatDocuments(docs, null, options);
 
       // Create a new query object
       const query = new Query(this, options);
@@ -696,6 +744,17 @@ class Model {
   async find(filter, projection, options, cb) {
     try {
       let docs = [];
+      let limit;
+      let skip;
+      if (options) {
+        limit = options.limit;
+        skip = options.skip;
+        delete options.limit;
+        delete options.skip;
+      }
+      else {
+        options = {}; // eslint-disable-line no-param-reassign
+      }
 
       // Use batchGetItem only iff the only parameter being searched is the _id
       if (Object.keys(filter).length === 1 && Object.keys(filter)[0] === '_id') {
@@ -731,41 +790,48 @@ class Model {
         // Find all documents which match the query
         while (more) {
           // Find the max number of documents
-          const result = await this.scan(filter, null, options); // eslint-disable-line
-
-          // If there are no more documents to find, exit loop
-          if (!result.LastEvaluatedKey) {
-            more = false;
-          }
-          // If ONLY the option limit is provided and not skip
-          else if (options.limit && !options.skip) {
-            // The correct number of documents has been found
-            if (docs.length + result.Items.length === options.limit) {
-              more = false;
-            }
-            // Too many docs found, should never happen
-            else if (docs.length + result.Items.length > options.limit) {
-              throw new M.ServerError('Too many documents found using limit option.');
-            }
-            // Still not enough documents found, reduce options.limit and et LastEvaluatedKey
-            else {
-              options.LastEvaluatedKey = result.LastEvaluatedKey;
-              options.limit -= result.Items.length;
-            }
-          }
-          // Still more documents to be found
-          else {
-            // Set LastEvaluatedKey, used to paginate
-            options.LastEvaluatedKey = result.LastEvaluatedKey;
-          }
+          const result = await this.scan(filter, projection, options); // eslint-disable-line
 
           // Append found documents to the running array
           docs = docs.concat(result.Items);
+
+          // If the skip and/or limit options are provided
+          if (limit || skip) {
+            // If only the skip option is provided
+            if (skip && !limit) {
+              // If all of the documents have been found
+              if (!result.LastEvaluatedKey) {
+                // Remove the first documents, equal to number of options.skip
+                docs = docs.slice(skip);
+                more = false;
+              }
+            }
+            // If only the limit option is provided
+            else if (limit && !skip) {
+              // If the correct number or all documents found
+              if (docs.length >= limit || !result.LastEvaluatedKey) {
+                docs = docs.slice(0, limit);
+                more = false;
+              }
+            }
+            // Both the limit and skip options provided
+            else if (skip + limit <= docs.length || !result.LastEvaluatedKey) {
+              docs = docs.slice(skip).slice(0, limit);
+              more = false;
+            }
+          }
+          // If there are no more documents to find, exit loop
+          else if (!result.LastEvaluatedKey) {
+            more = false;
+          }
+
+          // Set LastEvaluatedKey, used to paginate
+          options.LastEvaluatedKey = result.LastEvaluatedKey;
         }
       }
 
       // Format and return the documents
-      return await this.formatDocuments(docs, options);
+      return await this.formatDocuments(docs, projection, options);
     }
     catch (error) {
       M.log.verbose(`Failed in ${this.modelName}.find().`);
@@ -829,7 +895,7 @@ class Model {
         }
         else {
           // Return the document
-          return await this.formatDocument(result.Item, options);
+          return await this.formatDocument(result.Item, projection, options);
         }
       }
       // Not all fields have indexes, use scan to find the document
@@ -838,7 +904,7 @@ class Model {
         const result = await this.scan(conditions, projection, options);
         // If there were documents found, return the first one
         if (Array.isArray(result.Items) && result.Items.length !== 0) {
-          return await this.formatDocument(result.Items[0]);
+          return await this.formatDocument(result.Items[0], projection, options);
         }
         // No document found, return null
         else {
@@ -1127,11 +1193,11 @@ class Model {
       // Update the single item
       const updatedItem = await conn.updateItem(updateObj).promise();
       // Return the properly formatted, newly updated document
-      return await this.formatDocument(updatedItem.Attributes, options);
+      return await this.formatDocument(updatedItem.Attributes, null, options);
     }
     catch (error) {
       M.log.verbose(`Failed in ${this.modelName}.updateOne().`);
-      throw error.captureError(error);
+      throw errors.captureError(error);
     }
   }
 
@@ -1291,6 +1357,11 @@ class Query {
     // Handle projections
     if (projection) {
       const fields = projection.split(' ');
+      // Always include _id in projection
+      if (!fields.includes('_id')) {
+        fields.push('_id');
+      }
+
       // For each field to return
       fields.forEach((f) => {
         // Handle special case where key name starts with an underscore
@@ -1478,6 +1549,32 @@ class Query {
     this.RequestItemsKeys = returnArray;
   }
 
+  keyFormat(obj) {
+    switch (typeof obj) {
+      case 'string': return { S: obj };
+      case 'boolean': return { BOOL: obj };
+      case 'number': return { N: obj.toString() };
+      case 'object': {
+        if (Array.isArray(obj) && obj.every(o => typeof o === 'string')) {
+          return { SS: obj };
+        }
+        else if (Array.isArray(obj)) {
+          return { L: obj.map(i => this.keyFormat(i)) };
+        }
+        else if (obj !== null) {
+          const returnObj = { M: {} };
+          Object.keys(obj).forEach((k) => {
+            returnObj.M[k] = this.keyFormat(obj[k]);
+          });
+          return returnObj;
+        }
+        else {
+          return { S: 'null' };
+        }
+      }
+    }
+  }
+
 
   parseUpdateExpression(filter) {
     // Handle filter expression
@@ -1503,29 +1600,7 @@ class Query {
       const valueKey = (k.includes('.')) ? k.split('.').join('_') : k;
 
       // Perform operation based on the type of parameter being updated
-      switch (typeof filter[k]) {
-        case 'string':
-          this.ExpressionAttributeValues[`:${valueKey}`] = { S: filter[k] };
-          break;
-        case 'boolean':
-          this.ExpressionAttributeValues[`:${valueKey}`] = { BOOL: filter[k] };
-          break;
-        case 'number':
-          this.ExpressionAttributeValues[`:${valueKey}`] = {
-            N: filter[k].toString()
-          };
-          break;
-        case 'object': {
-          console.log(keyName);
-          console.log(filter[k]);
-        }
-          break;
-        default: {
-          throw new M.DatabaseError(
-            `Query param type [${typeof filter[k]}] is not supported`, 'critical'
-          );
-        }
-      }
+      this.ExpressionAttributeValues[`:${valueKey}`] = this.keyFormat(filter[k]);
 
       // If UpdateExpression is not defined yet, define it
       if (this.UpdateExpression === '') {
@@ -1540,7 +1615,7 @@ class Query {
 
   batchGetItem(filter, projection) {
     // Parse the projection
-    const projectionObj = this.parseProjection(projection);
+    // const projectionObj = this.parseProjection(projection);
 
     this.parseRequestItemsKeys(filter);
     const queries = [];
@@ -1550,15 +1625,15 @@ class Query {
     };
     baseObj.RequestItems[this.model.TableName] = { Keys: [] };
 
-    // Add on the ProjectionExpression and ExpressionAttributeNames if defined
-    if (projectionObj.ProjectionExpression.length) {
-      baseObj.RequestItems[this.model.TableName]
-      .ProjectionExpression = projectionObj.ProjectionExpression;
-    }
-    if (Object.keys(projectionObj.ExpressionAttributeNames).length !== 0) {
-      baseObj.RequestItems[this.model.TableName]
-      .ExpressionAttributeNames = projectionObj.ExpressionAttributeNames;
-    }
+    // // Add on the ProjectionExpression and ExpressionAttributeNames if defined
+    // if (projectionObj.ProjectionExpression.length) {
+    //   baseObj.RequestItems[this.model.TableName]
+    //   .ProjectionExpression = projectionObj.ProjectionExpression;
+    // }
+    // if (Object.keys(projectionObj.ExpressionAttributeNames).length !== 0) {
+    //   baseObj.RequestItems[this.model.TableName]
+    //   .ExpressionAttributeNames = projectionObj.ExpressionAttributeNames;
+    // }
 
     for (let i = 0; i < this.RequestItemsKeys.length / 25; i++) {
       baseObj.RequestItems[this.model.TableName].Keys = this.RequestItemsKeys
@@ -1615,7 +1690,7 @@ class Query {
 
   getItem(filter, projection) {
     // Parse the projection
-    const projectionObj = this.parseProjection(projection);
+    // const projectionObj = this.parseProjection(projection);
 
     this.parseRequestItemsKeys(filter);
 
@@ -1624,13 +1699,13 @@ class Query {
       Key: this.RequestItemsKeys[0]
     };
 
-    // Add on the ProjectionExpression and ExpressionAttributeNames if defined
-    if (projectionObj.ProjectionExpression.length) {
-      baseObj.ProjectionExpression = projectionObj.ProjectionExpression;
-    }
-    if (Object.keys(projectionObj.ExpressionAttributeNames).length !== 0) {
-      baseObj.ExpressionAttributeNames = projectionObj.ExpressionAttributeNames;
-    }
+    // // Add on the ProjectionExpression and ExpressionAttributeNames if defined
+    // if (projectionObj.ProjectionExpression.length) {
+    //   baseObj.ProjectionExpression = projectionObj.ProjectionExpression;
+    // }
+    // if (Object.keys(projectionObj.ExpressionAttributeNames).length !== 0) {
+    //   baseObj.ExpressionAttributeNames = projectionObj.ExpressionAttributeNames;
+    // }
 
     return baseObj;
   }
@@ -1663,17 +1738,18 @@ class Query {
 
   scan(query, projection = null) {
     // Parse the projection
-    const projectionObj = this.parseProjection(projection);
+    // const projectionObj = this.parseProjection(projection);
 
-    const filterObj = this.parseFilterExpression(query, projectionObj.ExpressionAttributeNames);
+    // const filterObj = this.parseFilterExpression(query, projectionObj.ExpressionAttributeNames);
+    const filterObj = this.parseFilterExpression(query, {});
     const baseObj = {
       TableName: this.model.TableName
     };
 
     // Add on the ProjectionExpression and ExpressionAttributeNames if defined
-    if (projectionObj.ProjectionExpression.length) {
-      baseObj.ProjectionExpression = projectionObj.ProjectionExpression;
-    }
+    // if (projectionObj.ProjectionExpression.length) {
+    //   baseObj.ProjectionExpression = projectionObj.ProjectionExpression;
+    // }
     if (Object.keys(filterObj.ExpressionAttributeNames).length !== 0) {
       baseObj.ExpressionAttributeNames = filterObj.ExpressionAttributeNames;
     }

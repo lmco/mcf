@@ -70,7 +70,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after(async () => {
     try {
-      await Organization.deleteMany({ _id: orgs.map((o) => o._id) });
+      await Organization.deleteMany({ _id: { $in: orgs.map((o) => o._id) } });
       await testUtils.removeTestAdmin();
       await db.disconnect();
     }
