@@ -895,6 +895,13 @@ class Model {
    */
   async insertMany(docs, options, cb) {
     try {
+      // If only a single document, add to array
+      if (!Array.isArray(docs)) {
+        docs = [docs]; // eslint-disable-line no-param-reassign
+      }
+      // Format and validate documents
+      const formattedDocs = docs.map(d => this.validate(d));
+
       // Create a query, searching for existing documents by _id
       const findQuery = { _id: { $in: docs.map(d => d._id) } };
       // Attempt to find any existing documents
@@ -907,8 +914,6 @@ class Model {
       }
       else {
         const promises = [];
-        // Format and validate documents
-        const formattedDocs = docs.map(d => this.validate(d));
 
         // Connect to the database
         const conn = await connect();
@@ -1214,7 +1219,8 @@ class Model {
         if (doc[param] === '') delete doc[param];
       }
       // If the parameter is required and no default is provided, throw an error
-      else if (this.definition[param].required && !this.definition[param].default) {
+      else if (this.definition[param].required
+        && !this.definition[param].hasOwnProperty('default')) {
         let message = `Path \`${param}\` is required.`;
         // If required is an array, grab the error message (second entry)
         if (Array.isArray(this.definition[param].required)
@@ -1379,7 +1385,6 @@ class Query {
             };
             break;
           default: {
-            console.log(query);
             throw new M.DatabaseError(
               `Query param type [${typeof query[k]}] is not supported`, 'critical'
             );
@@ -1495,8 +1500,7 @@ class Query {
         this.ExpressionAttributeNames[`#${keyName}`] = k;
       }
 
-      const valueKey = (k.includes('.')) ? k.split('.')
-      .join('_') : k;
+      const valueKey = (k.includes('.')) ? k.split('.').join('_') : k;
 
       // Perform operation based on the type of parameter being updated
       switch (typeof filter[k]) {
