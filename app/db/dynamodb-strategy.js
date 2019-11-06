@@ -659,11 +659,20 @@ class Model {
     try {
       let docs = [];
       let more = true;
+      // Connect to the database
+      const conn = await connect();
 
       // Find all documents which match the provided conditions
       while (more) {
         // Find the max number of documents
-        const result = await this.scan(conditions, null, options); // eslint-disable-line
+        // Create a new DynamoDB query
+        const query = new Query(this, options);
+        // Get the formatted scan query
+        const scanObj = query.scan(conditions);
+
+        M.log.debug(`DB OPERATION: ${this.TableName} scan`);
+        // Find the documents
+        const result = await conn.scan(scanObj).promise();
         docs = docs.concat(result.Items);
 
         // If there are no more documents to find, exit loop
@@ -684,8 +693,6 @@ class Model {
       // Get the formatted batchWriteItem query, used for deletion
       const deleteQueries = query.batchWriteItem(docs, 'delete');
 
-      // Connect to the database
-      const conn = await connect();
       const promises = [];
 
       // For each delete query
@@ -756,12 +763,15 @@ class Model {
         options = {}; // eslint-disable-line no-param-reassign
       }
 
+      // Connect to the database
+      const conn = await connect();
+
       // Use batchGetItem only iff the only parameter being searched is the _id
       if (Object.keys(filter).length === 1 && Object.keys(filter)[0] === '_id') {
         // Create the new query object
         const query = new Query(this, options);
         // Get an array of properly formatted batchGetItem queries
-        const queriesToMake = query.batchGetItem(filter, projection);
+        const queriesToMake = query.batchGetItem(filter);
 
         const promises = [];
         // For each query
@@ -789,8 +799,14 @@ class Model {
 
         // Find all documents which match the query
         while (more) {
-          // Find the max number of documents
-          const result = await this.scan(filter, projection, options); // eslint-disable-line
+          // Create a new DynamoDB query
+          const query = new Query(this, options);
+          // Get the formatted scan query
+          const scanObj = query.scan(filter);
+
+          M.log.debug(`DB OPERATION: ${this.TableName} scan`);
+          // Find the documents
+          const result = await conn.scan(scanObj).promise(); // eslint-disable-line
 
           // Append found documents to the running array
           docs = docs.concat(result.Items);
@@ -875,15 +891,15 @@ class Model {
         }
       });
 
+      // Connect to the database
+      const conn = await connect();
+
       // If all fields are indexed, use getItem
       if (allIndexed) {
         // Create a new query object
         const query = new Query(this, options);
         // Get a formatted getItem query
-        const getObj = query.getItem(conditions, projection);
-
-        // Connect to the database
-        const conn = await connect();
+        const getObj = query.getItem(conditions);
 
         // Make the getItem request
         M.log.debug(`DB OPERATION: ${this.TableName} getItem`);
@@ -900,8 +916,14 @@ class Model {
       }
       // Not all fields have indexes, use scan to find the document
       else {
+        // Create a new DynamoDB query
+        const query = new Query(this, options);
+        // Get the formatted scan query
+        const scanObj = query.scan(conditions);
+
+        M.log.debug(`DB OPERATION: ${this.TableName} scan`);
         // Find the document
-        const result = await this.scan(conditions, projection, options);
+        const result = await conn.scan(scanObj).promise();
         // If there were documents found, return the first one
         if (Array.isArray(result.Items) && result.Items.length !== 0) {
           return await this.formatDocument(result.Items[0], projection, options);
@@ -1115,40 +1137,6 @@ class Model {
   }
 
   /**
-   * @description Scans every document in the specified table, and returns the
-   * documents which match the filter. This function is used to find documents
-   * when not every parameter in the filter is indexed. See the
-   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#scan-property scan}
-   * documentation for more information.
-   * @async
-   *
-   * @param {object} filter - A list of fields to query.
-   * @param {string|null} projection - The specific fields to return.
-   * @param {object} options - A list of provided options.
-   *
-   * @returns {Promise<object>} The results of the scan query.
-   */
-  async scan(filter, projection, options) {
-    try {
-      // Create a new DynamoDB query
-      const query = new Query(this, options);
-      // Get the formatted scan query
-      const scanObj = query.scan(filter, projection);
-
-      // Connect to the database
-      const conn = await connect();
-
-      M.log.debug(`DB OPERATION: ${this.TableName} scan`);
-      // Find the documents
-      return await conn.scan(scanObj).promise();
-    }
-    catch (error) {
-      M.log.verbose(`Failed in ${this.modelName}.scan().`);
-      throw errors.captureError(error);
-    }
-  }
-
-  /**
    * @description Updates multiple documents matched by the filter with the same
    * changes in the provided doc.
    * @async
@@ -1337,50 +1325,6 @@ class Query {
     this.ExpressionAttributeValues = {};
     this.RequestItemsKeys = [];
     this.UpdateExpression = '';
-  }
-
-
-  /**
-   * @description Parses the projection string and returns an object containing
-   * the ProjectionExpression key/value and the ExpressionAttributeNames object.
-   *
-   * @param {string} projection - A space separated string of specific fields to
-   * of a document.
-   */
-  parseProjection(projection) { // eslint-disable-line class-methods-use-this
-    const returnObj = {
-      ExpressionAttributeNames: {},
-      ProjectionExpression: ''
-    };
-
-    // Handle projections
-    if (projection) {
-      const fields = projection.split(' ');
-      // Always include _id in projection
-      if (!fields.includes('_id')) {
-        fields.push('_id');
-      }
-
-      // For each field to return
-      fields.forEach((f) => {
-        // Handle special case where key name starts with an underscore
-        const keyName = (f === '_id') ? 'id' : f;
-
-        // Create unique key for field
-        returnObj.ExpressionAttributeNames[`#${keyName}`] = f;
-
-        // If ProjectionExpression is not defined, init it
-        if (!returnObj.ProjectionExpression) {
-          returnObj.ProjectionExpression = `#${keyName}`;
-        }
-        // Add onto ProjectionExpression with leading comma
-        else {
-          returnObj.ProjectionExpression += `,#${keyName}`;
-        }
-      });
-    }
-
-    return returnObj;
   }
 
   parseFilterExpression(query, expAttNames) {
@@ -1612,10 +1556,7 @@ class Query {
     });
   }
 
-  batchGetItem(filter, projection) {
-    // Parse the projection
-    // const projectionObj = this.parseProjection(projection);
-
+  batchGetItem(filter) {
     this.parseRequestItemsKeys(filter);
     const queries = [];
 
@@ -1623,16 +1564,6 @@ class Query {
       RequestItems: {}
     };
     baseObj.RequestItems[this.model.TableName] = { Keys: [] };
-
-    // // Add on the ProjectionExpression and ExpressionAttributeNames if defined
-    // if (projectionObj.ProjectionExpression.length) {
-    //   baseObj.RequestItems[this.model.TableName]
-    //   .ProjectionExpression = projectionObj.ProjectionExpression;
-    // }
-    // if (Object.keys(projectionObj.ExpressionAttributeNames).length !== 0) {
-    //   baseObj.RequestItems[this.model.TableName]
-    //   .ExpressionAttributeNames = projectionObj.ExpressionAttributeNames;
-    // }
 
     for (let i = 0; i < this.RequestItemsKeys.length / 25; i++) {
       baseObj.RequestItems[this.model.TableName].Keys = this.RequestItemsKeys
@@ -1687,26 +1618,13 @@ class Query {
     return queries;
   }
 
-  getItem(filter, projection) {
-    // Parse the projection
-    // const projectionObj = this.parseProjection(projection);
-
+  getItem(filter) {
     this.parseRequestItemsKeys(filter);
 
-    const baseObj = {
+    return {
       TableName: this.model.TableName,
       Key: this.RequestItemsKeys[0]
     };
-
-    // // Add on the ProjectionExpression and ExpressionAttributeNames if defined
-    // if (projectionObj.ProjectionExpression.length) {
-    //   baseObj.ProjectionExpression = projectionObj.ProjectionExpression;
-    // }
-    // if (Object.keys(projectionObj.ExpressionAttributeNames).length !== 0) {
-    //   baseObj.ExpressionAttributeNames = projectionObj.ExpressionAttributeNames;
-    // }
-
-    return baseObj;
   }
 
   updateItem(filter, doc) {
@@ -1735,20 +1653,13 @@ class Query {
     return baseObj;
   }
 
-  scan(query, projection = null) {
-    // Parse the projection
-    // const projectionObj = this.parseProjection(projection);
-
-    // const filterObj = this.parseFilterExpression(query, projectionObj.ExpressionAttributeNames);
+  scan(query) {
     const filterObj = this.parseFilterExpression(query, {});
     const baseObj = {
       TableName: this.model.TableName
     };
 
-    // Add on the ProjectionExpression and ExpressionAttributeNames if defined
-    // if (projectionObj.ProjectionExpression.length) {
-    //   baseObj.ProjectionExpression = projectionObj.ProjectionExpression;
-    // }
+    // Add on  ExpressionAttributeNames if defined
     if (Object.keys(filterObj.ExpressionAttributeNames).length !== 0) {
       baseObj.ExpressionAttributeNames = filterObj.ExpressionAttributeNames;
     }
@@ -1757,10 +1668,11 @@ class Query {
     if (filterObj.FilterExpression.length > 0) {
       baseObj.FilterExpression = filterObj.FilterExpression;
     }
-    // If not FilterExpression is defined, remove the ExpressionAttributeNames
-    else if (!baseObj.hasOwnProperty('ProjectionExpression')) {
+    // If no FilterExpression is defined, remove the ExpressionAttributeNames
+    else {
       delete baseObj.ExpressionAttributeNames;
     }
+
     if (Object.keys(filterObj.ExpressionAttributeValues).length !== 0) {
       baseObj.ExpressionAttributeValues = filterObj.ExpressionAttributeValues;
     }

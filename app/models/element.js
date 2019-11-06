@@ -208,7 +208,7 @@ const ElementSchema = new db.Schema({
         // If source is provided
         if (v && v !== 'null') {
           // Reject if target is null
-          return this.target;
+          return (this.target && this.target !== 'null');
         }
 
         return true;
@@ -237,7 +237,7 @@ const ElementSchema = new db.Schema({
         // If target is provided
         if (v && v !== 'null') {
           // Reject if source is null
-          return this.source;
+          return (this.source && this.source !== 'null');
         }
 
         return true;
