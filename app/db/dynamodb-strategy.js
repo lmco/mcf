@@ -1439,26 +1439,19 @@ class Model {
 
         // If the field to populate is defined
         if (popObj) {
-          // If the field is null, empty string or undefined
-          if (!doc[f]) {
-            // Set the value to null if justOne is true, else an empty array
-            doc[f] = (popObj.justOne) ? null : [];
-          }
-          else {
-            // Create the find query
-            const query = {};
-            query[popObj.foreignField] = doc[popObj.localField];
+          // Create the find query
+          const query = {};
+          query[popObj.foreignField] = doc[popObj.localField];
 
-            // If justOne is true, use findOne
-            if (popObj.justOne) {
-              promises.push(models[popObj.ref].findOne(query, null, {})
-              .then((objs) => { doc[f] = objs; }));
-            }
-            // findOne is false, find an array of matching documents
-            else {
-              promises.push(models[popObj.ref].find(query, null, {})
-              .then((objs) => { doc[f] = objs; }));
-            }
+          // If justOne is true, use findOne
+          if (popObj.justOne) {
+            promises.push(models[popObj.ref].findOne(query, null, {})
+            .then((objs) => { doc[f] = objs; }));
+          }
+          // findOne is false, find an array of matching documents
+          else {
+            promises.push(models[popObj.ref].find(query, null, {})
+            .then((objs) => { doc[f] = objs; }));
           }
         }
       });

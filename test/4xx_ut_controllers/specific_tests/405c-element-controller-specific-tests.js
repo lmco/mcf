@@ -257,6 +257,8 @@ async function optionSubtreeFind() {
     const foundElements = await ElementController.find(adminUser, org._id, projIDs[0], branchID,
       elemID, options);
 
+    console.log(foundElements)
+
     // Expect there to be 6 elements found, the searched element and 5 in subtree
     chai.expect(foundElements.length).to.equal(6);
 
