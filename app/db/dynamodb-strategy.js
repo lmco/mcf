@@ -1063,18 +1063,24 @@ class Model {
         // Get the formatted scan query
         const scanObj = query.scan(conditions);
 
-        M.log.debug(`DB OPERATION: ${this.TableName} scan`);
-        // Find the documents
-        const result = await conn.scan(scanObj).promise(); // eslint-disable-line no-await-in-loop
-        docs = docs.concat(result.Items);
-
-        // If there are no more documents to find, exit loop
-        if (!result.LastEvaluatedKey) {
+        // If there is no filter. block from finding all documents to delete
+        if (!scanObj.hasOwnProperty('FilterExpression')) {
           more = false;
         }
         else {
-          // Set LastEvaluatedKey, used to paginate
-          options.LastEvaluatedKey = result.LastEvaluatedKey;
+          M.log.debug(`DB OPERATION: ${this.TableName} scan`);
+          // Find the documents
+          const result = await conn.scan(scanObj).promise(); // eslint-disable-line no-await-in-loop
+          docs = docs.concat(result.Items);
+
+          // If there are no more documents to find, exit loop
+          if (!result.LastEvaluatedKey) {
+            more = false;
+          }
+          else {
+            // Set LastEvaluatedKey, used to paginate
+            options.LastEvaluatedKey = result.LastEvaluatedKey;
+          }
         }
       }
 
