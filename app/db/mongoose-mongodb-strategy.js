@@ -296,6 +296,9 @@ class Model {
    * @returns {Promise<number>} The number of documents which matched the filter.
    */
   async countDocuments(filter, cb) {
+    // Validate the query
+    this.validateQuery(filter);
+
     return this.model.countDocuments(filter, cb);
   }
 
@@ -326,6 +329,9 @@ class Model {
    * operation.
    */
   async deleteMany(conditions, options, cb) {
+    // Validate the query
+    this.validateQuery(conditions);
+
     return this.model.deleteMany(conditions, options, cb);
   }
 
@@ -363,6 +369,9 @@ class Model {
    * any.
    */
   async find(filter, projection, options, cb) {
+    // Validate the query
+    this.validateQuery(filter);
+
     // Set lean option to true
     if (!options) {
       options = { lean: true }; // eslint-disable-line no-param-reassign
@@ -396,6 +405,9 @@ class Model {
    * @returns {Promise<object>} The found document, if any.
    */
   async findOne(conditions, projection, options, cb) {
+    // Validate the query
+    this.validateQuery(conditions);
+
     // Set lean option to true
     if (!options) {
       options = { lean: true }; // eslint-disable-line no-param-reassign
@@ -478,6 +490,9 @@ class Model {
    * @returns {Promise<object[]>} The updated objects.
    */
   async updateMany(filter, doc, options, cb) {
+    // Validate the query
+    this.validateQuery(filter);
+
     return this.model.updateMany(filter, doc, options, cb);
   }
 
@@ -495,7 +510,35 @@ class Model {
    * @returns {Promise<object>} The updated document.
    */
   async updateOne(filter, doc, options, cb) {
+    // Validate the query
+    this.validateQuery(filter);
+
     return this.model.updateOne(filter, doc, options, cb);
+  }
+
+  /**
+   * @description Validates a query to ensure it is not using any illegal,
+   * mongo specific keys.
+   *
+   * @param {object} query - The query to validate.
+   *
+   * @throws {ServerError}
+   */
+  validateQuery(query) {
+    // Loop over all keys in the query
+    Object.keys(query).forEach((k) => {
+      // If the value is an object, call recursively
+      if (typeof query[k] === 'object' && query[k] !== null) {
+        this.validateQuery(query[k]);
+      }
+
+      const validKeys = ['$in', '$search', '$text'];
+      // If the key starts with '$' and is not in the validKeys array, throw an error
+      if (k.startsWith('$') && !validKeys.includes(k)) {
+        throw new M.ServerError(`The mongo keyword ${k} is no longer supported`
+           + ' after implementation of the database abstraction.', 'critical');
+      }
+    });
   }
 
 }
