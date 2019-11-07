@@ -832,10 +832,11 @@ class Model {
         document[field][Object.keys(document[field])[0]] = null;
       }
 
-      // If the field type is 'M', meaning a JSON object/map
-      if (Object.keys(document[field])[0] === 'M') {
+      // If the field type is 'M', meaning a JSON object/map or 'L' meaning a array/list
+      if (Object.keys(document[field])[0] === 'M' || Object.keys(document[field])[0] === 'L') {
+        const type = Object.keys(document[field])[0];
         // Recursively call this function with the field contents and no options
-        promises.push(this.formatDocument(document[field].M, null, {}, true)
+        promises.push(this.formatDocument(document[field][type], null, {}, true)
         .then((retDoc) => {
           document[field] = retDoc;
         }));
@@ -845,11 +846,6 @@ class Model {
         && Object.values(document[field])[0] !== null) {
         // Convert the field to a Number, and remove the type
         document[field] = Number(Object.values(document[field])[0]);
-      }
-      // If the field is a list
-      else if (Object.keys(document[field])[0] === 'L') {
-        // TODO: Handle lists
-        throw new M.NotImplementedError('Not handeling lists....', 'crtical');
       }
       else {
         // Remove the type from the value, ex: hello: { S: 'world' } --> hello: 'world'
@@ -1031,9 +1027,46 @@ class Model {
    *
    * @param {string} name - The name of the index.
    */
-  // TODO
   async deleteIndex(name) {
-    // return super.deleteIndex(name);
+    try {
+      // Connect to the database
+      const conn = await connect();
+
+      // Get the table information
+      const tableInfo = await conn.describeTable({ TableName: this.TableName }).promise();
+
+      // Get an array of active index names
+      const indexNames = (tableInfo.Table.GlobalSecondaryIndexes)
+        ? tableInfo.Table.GlobalSecondaryIndexes.map(i => i.IndexName)
+        : [];
+
+      // If the index exists
+      if (indexNames.includes(name)) {
+        // Create update object
+        const updateObj = {
+          TableName: this.TableName,
+          GlobalSecondaryIndexUpdates: [{
+            Delete: {
+              IndexName: name
+            }
+          }]
+        };
+
+        // Update the table and delete the index
+        const result = await conn.updateTable(updateObj).promise();
+
+        // If the result does not show the index is deleting, throw an error
+        const deletedIndex = result.TableDescription.GlobalSecondaryIndexes
+        .filter(f => f.IndexName === name)[0];
+        if (deletedIndex.IndexStatus !== 'DELETING') {
+          throw new M.DatabaseError(`Index ${name} may not have been deleted.`);
+        }
+      }
+    }
+    catch (error) {
+      M.log.verbose(`Failed in ${this.modelName}.deleteIndex().`);
+      throw errors.captureError(error);
+    }
   }
 
   /**
@@ -1402,6 +1435,7 @@ class Model {
         const query = new Query(this, options);
         // Get the formatted batchWriteItem queries
         const batchWriteQueries = query.batchWriteItem(formattedDocs, 'insert');
+
         // For each query
         batchWriteQueries.forEach((q) => {
           // Perform the batchWriteItem operation
@@ -1501,7 +1535,8 @@ class Model {
             }
             // Handle all other arrays
             else {
-              returnObj[key] = { L: this.formatObject(obj[key]) };
+              // console.log(obj[key])
+              returnObj[key] = { L: obj[key].map(o => this.formatObject(o)) };
             }
           }
           else if (obj[key] === null) {
@@ -1531,10 +1566,34 @@ class Model {
    * @param {object} doc - The object containing updates to the found documents.
    * @param {object} [options] - An object containing options.
    * @param {Function} [cb] - A callback function to run.
+   *
+   * @returns {object} Query containing information about the number of
+   * documents which matched the filter (n) and the number of documents which
+   * were modified (nModified).
    */
-  // TODO
   async updateMany(filter, doc, options, cb) {
-    // return this.updateItem(filter, doc, options);
+    try {
+      // Find each document which matches the filter
+      const docs = await this.find(filter, null, options);
+
+      const promises = [];
+      // For each document found
+      docs.forEach((d) => {
+        // Create a query for find one, which should find a single document
+        const q = { _id: d._id };
+        // Update the document with the specified changes
+        promises.push(this.updateOne(q, doc));
+      });
+
+      // Wait for all promises to complete
+      await Promise.all(promises);
+
+      // Return a query with update info
+      return { n: docs.length, nModified: docs.length };
+    }
+    catch (error) {
+      throw errors.captureError(error);
+    }
   }
 
   /**
@@ -1574,6 +1633,16 @@ class Model {
     }
   }
 
+  /**
+   * @description Validates a document which is to be inserted into the
+   * database. Sets any default fields which are not provided in the original
+   * document.
+   *
+   * @param {object} doc - The document to be inserted into the database.
+   *
+   * @returns {object} The validated document, with default values set if they
+   * were not specified in the original document.
+   */
   validate(doc) {
     const keys = Object.keys(doc);
 
