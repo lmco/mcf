@@ -23,7 +23,8 @@ const DynamoDBStore = require('dynamodb-store');
 const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 
-// Define a function wide variable models, which stores each model
+// Define a function wide variable models, which stores each model when it gets created
+// this is later used for population of documents across models
 const models = {};
 
 /**
@@ -50,10 +51,11 @@ async function connect() {
 /**
  * @description Disconnects from the database. This function is not necessary
  * for DynamoDB.
+ * @async
  *
  * @returns {Promise} Resolves every time.
  */
-function disconnect() {
+async function disconnect() {
   return new Promise((resolve) => resolve());
 }
 
@@ -426,6 +428,11 @@ class Query {
             if (Object.keys(query[key])[0] === '$in') {
               inVals[key] = Object.values(query[key])[0];
             }
+          }
+          else {
+            // Search for the string null, as you cannot store the value null in
+            // a string field, and thus 'null' has been made a reserved keyword
+            base[key] = { S: 'null' };
           }
           break;
         }
@@ -1265,6 +1272,7 @@ class Model {
   async findOne(conditions, projection, options, cb) {
     try {
       let allIndexed = true;
+      let doc;
       // Loop through each field in the conditions object
       Object.keys(conditions).forEach((key) => {
         // If the field is not indexed, set allIndexed to false
@@ -1277,11 +1285,11 @@ class Model {
 
       // Connect to the database
       const conn = await connect();
+      // Create a new query object
+      const query = new Query(this, options);
 
-      // If all fields are indexed, use getItem
+      // If all fields are indexed, use getItem as it will be significantly faster
       if (allIndexed) {
-        // Create a new query object
-        const query = new Query(this, options);
         // Get a formatted getItem query
         const getObj = query.getItem(conditions);
 
@@ -1289,34 +1297,28 @@ class Model {
         M.log.debug(`DB OPERATION: ${this.TableName} getItem`);
         const result = await conn.getItem(getObj).promise();
 
-        // If no document is found, return null
-        if (Object.keys(result).length === 0) {
-          return null;
-        }
-        else {
-          // Return the document
-          return await this.formatDocument(result.Item, projection, options);
+        // If document was found, set it
+        if (Object.keys(result).length !== 0) {
+          doc = result.Item;
         }
       }
       // Not all fields have indexes, use scan to find the document
       else {
-        // Create a new DynamoDB query
-        const query = new Query(this, options);
         // Get the formatted scan query
         const scanObj = query.scan(conditions);
 
+        // Make the scan request
         M.log.debug(`DB OPERATION: ${this.TableName} scan`);
-        // Find the document
         const result = await conn.scan(scanObj).promise();
+
         // If there were documents found, return the first one
         if (Array.isArray(result.Items) && result.Items.length !== 0) {
-          return await this.formatDocument(result.Items[0], projection, options);
-        }
-        // No document found, return null
-        else {
-          return null;
+          doc = this.formatDocument(result.Items[0], projection, options);
         }
       }
+
+      // Return the formatted document or null
+      return (doc) ? this.formatDocument(doc, projection, options) : null;
     }
     catch (error) {
       M.log.verbose(`Failed in ${this.modelName}.findOne().`);
