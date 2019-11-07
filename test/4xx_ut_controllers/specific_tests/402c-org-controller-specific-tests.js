@@ -70,7 +70,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after(async () => {
     try {
-      await Organization.deleteMany({ _id: orgs.map((o) => o._id) });
+      await Organization.deleteMany({ _id: { $in: orgs.map((o) => o._id) } });
       await testUtils.removeTestAdmin();
       await db.disconnect();
     }
@@ -185,8 +185,7 @@ async function optionIncludeArchivedFind() {
       [orgID, archivedID], options);
     // There should be two orgs
     chai.expect(foundOrgs.length).to.equal(2);
-    chai.expect(foundOrgs[0]._id).to.equal(org._id);
-    chai.expect(foundOrgs[1]._id).to.equal(archivedOrg._id);
+    chai.expect(foundOrgs.map(o => o._id)).to.have.members([org._id, archivedOrg._id]);
 
     // Clean up for the following tests
     archiveUpdate.archived = false;

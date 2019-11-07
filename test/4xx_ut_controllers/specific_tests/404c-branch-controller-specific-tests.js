@@ -201,8 +201,7 @@ async function optionIncludeArchivedFind() {
       [branchID, archivedID], options);
     // There should be two branches
     chai.expect(foundBranches.length).to.equal(2);
-    chai.expect(foundBranches[0]._id).to.equal(branch._id);
-    chai.expect(foundBranches[1]._id).to.equal(archivedBranch._id);
+    chai.expect(foundBranches.map(b => b._id)).to.have.members([branch._id, archivedBranch._id]);
 
     // Clean up for the following tests
     archiveUpdate.archived = false;
