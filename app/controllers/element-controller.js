@@ -1434,22 +1434,23 @@ async function remove(requestingUser, organizationID, projectID, branchID, eleme
 
     // For each relationship
     promises.push(relationships.forEach((rel) => {
+      const u = {};
       // If the source no longer exists, set it to the undefined element
       if (uniqueIDs.includes(rel.source)) {
         // Reset source to the undefined element
-        rel.source = utils.createID(rel.branch, 'undefined');
+        u.source = utils.createID(rel.branch, 'undefined');
       }
 
       // If the target no longer exists, set it to the undefined element
       if (uniqueIDs.includes(rel.target)) {
         // Reset target to the undefined element
-        rel.target = utils.createID(rel.branch, 'undefined');
+        u.target = utils.createID(rel.branch, 'undefined');
       }
 
       bulkArray.push({
         updateOne: {
           filter: { _id: rel._id },
-          update: rel
+          update: u
         }
       });
     }));
