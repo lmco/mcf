@@ -96,6 +96,7 @@ describe(M.getModuleName(module.filename), () => {
   // -------------- Find --------------
   // ------------- Create -------------
   // ------------- Update -------------
+  // it('should reject an update to an archived org')
   // ------------- Replace ------------
   it('should reject put org with invalid id', putInvalidId);
   it('should reject put org without id', putWithoutId);

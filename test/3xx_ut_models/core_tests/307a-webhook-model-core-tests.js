@@ -88,11 +88,8 @@ async function createOutgoingWebhook() {
     // Give the webhook the previously generated global _id
     webhookData._id = webhookID;
 
-    // Create a webhook from the Webhook model object
-    const webhook = Webhook.createDocument(webhookData);
-
     // Save the Webhook model object to the database
-    await webhook.save();
+    await Webhook.insertMany(webhookData);
   }
   catch (error) {
     M.log.error(error);
@@ -131,6 +128,15 @@ async function findWebhook() {
     // Verify correct webhook is returned
     webhook._id.should.equal(webhookID);
     webhook.name.should.equal(testData.webhooks[0].name);
+    webhook.type.should.equal(testData.webhooks[0].type);
+    webhook.description.should.equal(testData.webhooks[0].description);
+    webhook.triggers.should.deep.equal(testData.webhooks[0].triggers);
+    for (let i = 0; i < testData.webhooks[0].responses.length; i++) {
+      should.exist(webhook.responses[i].url);
+      webhook.responses[i].url.should.equal(testData.webhooks[0].responses[i].url);
+      should.exist(webhook.responses[i].method);
+      webhook.responses[i].method.should.equal(testData.webhooks[0].responses[i].method || 'POST');
+    }
   }
   catch (error) {
     M.log.error(error);

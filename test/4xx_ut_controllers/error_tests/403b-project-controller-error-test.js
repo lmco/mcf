@@ -99,7 +99,10 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   // -------------- Find --------------
   // ------------- Create -------------
+  // it('should reject creating a project on an archived org')
   // ------------- Update -------------
+  // it('should reject an update to a project on an archived org')
+  // it('should reject an update to an archived project')
   // ------------- Replace ------------
   it('should reject put proj with invalid id', putInvalidId);
   it('should reject put proj without id', putWithoutId);

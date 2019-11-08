@@ -103,7 +103,12 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   // -------------- Find --------------
   // ------------- Create -------------
+  // it('should reject creating a branch on an archived org')
+  // it('should reject creating a branch on an archived project')
   // ------------- Update -------------
+  // it('should reject an update to a branch on an archived org')
+  // it('should reject an update to a branch on an archived project')
+  // it('should reject an update to an archived branch')
   // ------------- Replace ------------
   // ------------- Remove -------------
   it('should reject deletion of master branch'

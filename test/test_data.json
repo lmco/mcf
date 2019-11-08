@@ -362,13 +362,32 @@
     {
       "name": "test_webhook00",
       "type": "Outgoing",
-      "triggers": "elements-created",
+      "description": "test webhook description 0",
+      "triggers": ["test-event"],
       "responses": [
         {
-          "url": "http://fakeurl.com"
+          "url": "testurl0"
         }
-      ],
-      "server": true
+      ]
+    },
+    {
+      "name": "test_webhook01",
+      "type": "Incoming",
+      "description": "test webhook description 1",
+      "triggers": ["test-event"],
+      "token": "test_token",
+      "tokenLocation": "test_location"
+    },
+    {
+      "name": "test_webhook02",
+      "type": "Outgoing",
+      "description": "test webhook description 2",
+      "triggers": ["test-event"],
+      "responses": [
+        {
+          "url": "testurl2"
+        }
+      ]
     }
   ]
 }

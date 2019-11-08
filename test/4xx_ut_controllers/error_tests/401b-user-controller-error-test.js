@@ -93,6 +93,7 @@ describe(M.getModuleName(module.filename), () => {
   // -------------- Find --------------
   // ------------- Create -------------
   // ------------- Update -------------
+  // it('should reject an update to an archived user')
   // ------------- Replace ------------
   it('should reject put user with invalid username', putInvalidUsername);
   it('should reject put user without username', putWithoutUsername);

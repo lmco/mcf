@@ -306,7 +306,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
         'lastModifiedBy', 'archived', 'archivedBy'];
       break;
     case 'Webhook':
-      validSearchOptions = ['server', 'type', 'name', 'createdBy', 'lastModifiedBy', 'archived',
+      validSearchOptions = ['type', 'name', 'createdBy', 'lastModifiedBy', 'archived',
         'archivedBy'];
       break;
     default:
@@ -485,6 +485,17 @@ module.exports.validateOptions = function(options, validOptions, model) {
 
       // Set the lean option in the returnObject
       validatedOptions.lean = val;
+    }
+
+    // Handle the server option for webhooks
+    if (opt === 'server') {
+      // Ensure the value is a boolean
+      if (typeof options.server !== 'boolean') {
+        throw new M.DataFormatError('The option \'server\' is not a boolean.', 'warn');
+      }
+
+      // Set the server option in the returnObject
+      validatedOptions.server = val;
     }
   });
 

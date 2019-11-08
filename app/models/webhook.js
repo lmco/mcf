@@ -84,9 +84,8 @@ const extensions = M.require('models.plugin.extensions');
  * @property {object} responses.auth - An optional field where a username and password may be
  * provided.
  * @property {object} responses.data - An optional field for data to send with the request.
- * @property {object} incoming - A field to store the token to verify incoming triggers against.
- * @property {string} incoming.token - The token to validate incoming requests against.
- * @property {string} incoming.tokenLocation - The location of the incoming requests.  TODO: allow one webhook to have multiple incoming tokens and locations?
+ * @property {string} token - The token to validate incoming requests against.
+ * @property {string} tokenLocation - The location of the incoming requests.  TODO: allow one webhook to have multiple incoming tokens and locations?
  * @property {string} org - An optional field to specify which org events the webhook listens for.
  * Exclusive with project and branch fields.
  * @property {string} project - An optional field to specify which project events the webhook
@@ -106,6 +105,7 @@ const WebhookSchema = new db.Schema({
     type: 'String',
     required: true,
     enum: ['Outgoing', 'Incoming'],
+    immutable: true,
     validate: [{
       validator: function(v) {
         if (v === 'Outgoing') {
@@ -113,15 +113,30 @@ const WebhookSchema = new db.Schema({
         }
       },
       message: () => 'An outgoing webhook must have a responses field.'
+    }, {
+      validator: function(v) {
+        if (v === 'Outgoing') {
+          return !(this.token || this.tokenLocation);
+        }
+      },
+      message: () => 'An outgoing webhook cannot have a token or tokenLocation.'
     },
     {
       validator: function(v) {
         if (v === 'Incoming') {
-          return this.incoming;
+          return (typeof this.token === 'string' && typeof this.tokenLocation === 'string');
         }
       },
-      message: () => 'An incoming webhook must have an incoming field.'
-    }]
+      message: () => 'An incoming webhook must have a token and a tokenLocation.'
+    }, {
+      validator: function(v) {
+        if (v === 'Incoming') {
+          return !(this.responses && this.responses.length);
+        }
+      },
+      message: () => 'An incoming webhook cannot have a responses field.'
+    }
+    ]
   },
   description: {
     type: 'String'
@@ -144,10 +159,11 @@ const WebhookSchema = new db.Schema({
   responses: [{
     url: {
       type: 'String',
+      required: true,
       validate: [{
         validator: function(v) {
           return true;
-          //return RegExp(validators.url).test(v); TODO: this isn't correct
+          //return RegExp(validators.webhook.url).test(v);
         },
         message: () => 'The URL field does not contain a valid url.'
       }
@@ -162,18 +178,18 @@ const WebhookSchema = new db.Schema({
       type: 'Object',
       default: { 'Content-Type': 'application/json' }
     },
-    auth: {
+    auth: { // TODO: hash the password
       type: 'Object',
       validate: [{
         validator: function(v) {
           return (Object.keys(v).includes('username') && typeof v.username === 'string');
         },
-        message: () => 'Authorization field does not contain a username or the username is not a string.'
+        message: () => 'Auth field does not contain a username or the username is not a string.'
       }, {
         validator: function(v) {
           return (Object.keys(v).includes('password') && typeof v.password === 'string');
         },
-        message: () => 'Authorization field does not contain a password or the password is not a string.'
+        message: () => 'Auth field does not contain a password or the password is not a string.'
       }]
     },
     ca: {
@@ -183,30 +199,46 @@ const WebhookSchema = new db.Schema({
       type: 'Object'
     }
   }],
-  incoming: {
-    type: 'Object',
+  token: {
+    type: 'String',
     validate: [{
-      validator: function(v) {
-        return (v.token && typeof v.token === 'string');
+      validator: function() {
+        return this.type === 'Incoming';
       },
-      message: () => 'The incoming field does not have a token field.'
-    }, {
+      message: () => 'Only an Incoming webhook can have a token.'
+    },
+    {
       validator: function(v) {
-        return (v.tokenLocation && typeof v.tokenLocation === 'string');
+        return v !== null && v !== undefined;
       },
-      message: () => 'The incoming field does not have a tokenLocation field.'
+      message: () => 'A token cannot be null or undefined.'
     }]
   },
-  level: {
+  tokenLocation: {
     type: 'String',
-    required: true,
+    validate: [{
+      validator: function(v) {
+        return this.type === 'Incoming';
+      },
+      message: () => 'Only an Incoming webhook can have a tokenLocation.'
+    },
+    {
+      validator: function(v) {
+        return typeof v === 'string';
+      },
+      message: () => 'A tokenLocation cannot be null or undefined.'
+    }]
+  },
+  reference: {
+    type: 'String',
+    immutabe: true,
     validate: [{
       validator: function(v) {
         return (v === '' || RegExp(validators.org.id).test(v)
           || RegExp(validators.project.id).test(v) || RegExp(validators.branch.id).test(v));
       },
-      message: (v) => `Invalid level id ${v}: level must either be an empty string or match an org, `
-        + 'project, or branch id.'
+      message: (v) => `Invalid reference id ${v}: reference must either be an empty string or `
+        + 'match an org, project, or branch id.'
     }]
   }
 });
@@ -263,27 +295,11 @@ WebhookSchema.method('verifyAuthority', function(value) {
  * @memberOf WebhookSchema
  */
 WebhookSchema.method('getValidUpdateFields', function() {
-  return ['name', 'description', 'triggers', 'responses', 'incoming', 'org',
-    'project', 'branch'];
+  return ['name', 'description', 'triggers', 'responses', 'token', 'tokenLocation'];
 });
 
 WebhookSchema.static('getValidUpdateFields', function() {
-  return ['name', 'description', 'triggers', 'responses', 'incoming', 'org',
-    'project', 'branch'];
-});
-
-/**
- * @description Returns webhook fields that can be changed in bulk
- * @memberOf WebhookSchema
- */
-WebhookSchema.method('getValidBulkUpdateFields', function() {
-  return ['name', 'description', 'triggers', 'responses', 'incoming', 'org',
-    'project', 'branch'];
-});
-
-WebhookSchema.static('getValidBulkUpdateFields', function() {
-  return ['name', 'description', 'triggers', 'responses', 'incoming', 'org',
-    'project', 'branch'];
+  return ['name', 'description', 'triggers', 'responses', 'token', 'tokenLocation'];
 });
 
 /**
@@ -291,13 +307,11 @@ WebhookSchema.static('getValidBulkUpdateFields', function() {
  * @memberOf WebhookSchema
  */
 WebhookSchema.method('getValidPopulateFields', function() {
-  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'org', 'project',
-    'branch'];
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'reference'];
 });
 
 WebhookSchema.static('getValidPopulateFields', function() {
-  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'org', 'project',
-    'branch'];
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'reference'];
 });
 
 

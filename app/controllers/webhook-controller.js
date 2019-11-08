@@ -29,6 +29,7 @@ module.exports = {
 const uuidv4 = require('uuid/v4');
 
 // Node modules
+const assert = require('assert');
 
 // MBEE modules
 const Webhook = M.require('models.webhook');
@@ -41,6 +42,8 @@ const helper = M.require('lib.controller-utils');
 const sani = M.require('lib.sanitization');
 const permissions = M.require('lib.permissions');
 const EventEmitter = M.require('lib.events');
+const jmi = M.require('lib.jmi-conversions');
+const validators = M.require('lib.validators');
 
 
 /**
@@ -115,19 +118,19 @@ async function find(requestingUser, organizationID, projectID, branchID, webhook
       ? sani.db(JSON.parse(JSON.stringify(webhooks)))
       : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = organizationID === null ? sani.db(organizationID) : null;
-    const projID = projectID === null ? sani.db(projectID) : null;
-    const branID = branchID === null ? sani.db(branchID) : null;
+    const orgID = organizationID !== null ? sani.db(organizationID) : null;
+    const projID = projectID !== null ? sani.db(projectID) : null;
+    const branID = branchID !== null ? sani.db(branchID) : null;
     const searchQuery = { archived: false };
 
     // Validate the provided options
     const validatedOptions = utils.validateOptions(options, ['includeArchived',
-      'populate', 'fields', 'limit', 'skip', 'lean', 'sort'], Webhook);
+      'populate', 'fields', 'limit', 'skip', 'lean', 'sort', 'server'], Webhook);
 
     // Ensure search options are valid
     if (options) {
       // Create array of valid search options
-      const validSearchOptions = ['server', 'type', 'name', 'createdBy', 'lastModifiedBy', 'archived',
+      const validSearchOptions = ['type', 'name', 'createdBy', 'lastModifiedBy', 'archived',
         'archivedBy'];
 
       // Loop through provided options, look for validSearchOptions
@@ -172,16 +175,16 @@ async function find(requestingUser, organizationID, projectID, branchID, webhook
 
     // Add the webhook level to the search query
     if (branID) {
-      searchQuery.branch = utils.createID(orgID, projID, branID);
+      searchQuery.reference = utils.createID(orgID, projID, branID);
     }
     else if (projID) {
-      searchQuery.project = utils.createID(orgID, projID);
+      searchQuery.reference = utils.createID(orgID, projID);
     }
     else if (orgID) {
-      searchQuery.org = orgID;
+      searchQuery.reference = orgID;
     }
-    else {
-      searchQuery.server = true;
+    else if (validatedOptions.server) {
+      searchQuery.reference = '';
     }
 
     // Add webhook ids to the search query
@@ -196,12 +199,12 @@ async function find(requestingUser, organizationID, projectID, branchID, webhook
       searchQuery.archived = true;
     }
 
+    // TODO: throw an error if webhook ids were speficied but not found?
     return Webhook.find(searchQuery, validatedOptions.fieldsString,
       { skip: validatedOptions.skip,
         limit: validatedOptions.limit,
         sort: validatedOptions.sort,
-        populate: validatedOptions.populate,
-        lean: validatedOptions.lean
+        populate: validatedOptions.populate
       });
   }
   catch (error) {
@@ -270,9 +273,9 @@ async function create(requestingUser, organizationID, projectID, branchID, webho
     // Sanitize input parameters and create function-wide variables
     const saniWebhooks = sani.db(JSON.parse(JSON.stringify(webhooks)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = organizationID === null ? sani.db(organizationID) : null;
-    const projID = projectID === null ? sani.db(projectID) : null;
-    const branID = branchID === null ? sani.db(branchID) : null;
+    const orgID = organizationID !== null ? sani.db(organizationID) : null;
+    const projID = projectID !== null ? sani.db(projectID) : null;
+    const branID = branchID !== null ? sani.db(branchID) : null;
     let webhooksToCreate;
 
     // Initialize and ensure options are valid
@@ -286,6 +289,24 @@ async function create(requestingUser, organizationID, projectID, branchID, webho
     else if (typeof saniWebhooks === 'object') {
       webhooksToCreate = [saniWebhooks];
     }
+
+    // Create a list of valid keys
+    const validWebhookKeys = ['name', 'type', 'description', 'triggers', 'responses', 'token',
+      'tokenLocation'];
+
+    // Validate the webhook objects
+    webhooksToCreate.forEach((webhook) => {
+      try {
+        // Validate the keys
+        Object.keys(webhook).forEach((k) => {
+          // Ensure it's on the list of valid keys
+          assert.ok(validWebhookKeys.includes(k), `Invalid key: [${k}]`);
+        });
+      }
+      catch (error) {
+        throw new M.DataFormatError(error.message, 'warn');
+      }
+    });
 
     let organization;
     let project;
@@ -313,16 +334,16 @@ async function create(requestingUser, organizationID, projectID, branchID, webho
     const webhookObjects = webhooksToCreate.map((webhookObj) => {
       webhookObj._id = uuidv4();
       if (branID) {
-        webhookObj.level.id = utils.createID(orgID, projID, branID);
+        webhookObj.reference = utils.createID(orgID, projID, branID);
       }
       else if (projID) {
-        webhookObj.level.id = utils.createID(orgID, projID);
+        webhookObj.reference = utils.createID(orgID, projID);
       }
       else if (orgID) {
-        webhookObj.level.id = orgID;
+        webhookObj.reference = orgID;
       }
       else {
-        webhookObj.level.id = 'server';
+        webhookObj.reference = '';
       }
       webhookObj.lastModifiedBy = reqUser._id;
       webhookObj.createdBy = reqUser._id;
@@ -339,9 +360,7 @@ async function create(requestingUser, organizationID, projectID, branchID, webho
     // Find the newly created webhooks
     const createdIDs = createdWebhooks.map((w) => w._id);
     const foundWebhooks = await Webhook.find({ _id: createdIDs }, validatedOptions.fieldsString,
-      { populate: validatedOptions.populateString,
-        lean: validatedOptions.lean
-      });
+      { populate: validatedOptions.populateString });
 
     // Emit the event for webhook creation
     EventEmitter.emit('webhooks-created', foundWebhooks);
@@ -395,6 +414,212 @@ async function update(requestingUser, organizationID, projectID, branchID, webho
     // Ensure input parameters are correct type
     helper.checkParams(requestingUser, options);
     helper.checkParamsDataType('object', webhooks, 'Webhooks');
+
+    // Sanitize input parameters and function-wide variables
+    const saniWebhooks = sani.db(JSON.parse(JSON.stringify(webhooks)));
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const orgID = organizationID !== null ? sani.db(organizationID) : null;
+    const projID = projectID !== null ? sani.db(projectID) : null;
+    const branID = branchID !== null ? sani.db(branchID) : null;
+    const duplicateCheck = [];
+    let webhooksToUpdate;
+    let refID;
+
+    // Initialize and ensure options are valid
+    const validatedOptions = utils.validateOptions(options, ['populate', 'fields'], Webhook);
+
+    // Check the type of the webhooks parameter; standardize input into array format
+    if (Array.isArray(saniWebhooks)) {
+      webhooksToUpdate = saniWebhooks;
+    }
+    else if (typeof saniWebhooks === 'object') {
+      webhooksToUpdate = [saniWebhooks];
+    }
+
+    let organization;
+    let project;
+    let branch;
+    if (orgID) {
+      // Find the organization and validate that it was found and not archived
+      organization = await helper.findAndValidate(Org, orgID);
+    }
+    if (projID) {
+      // Find the project and validate that it was found and not archived
+      project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
+    }
+    if (branID) {
+      // Ensure the branch is not archived
+      branch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID));
+    }
+
+    // Permissions check
+    permissions.updateWebhook(reqUser, organization, project, branch);
+
+    // Get the reference id
+    if (branID) {
+      refID = utils.createID(orgID, projID, branID);
+    }
+    else if (projID) {
+      refID = utils.createID(orgID, projID);
+    }
+    else if (orgID) {
+      refID = orgID;
+    }
+    else {
+      refID = '';
+    }
+
+    webhooksToUpdate.forEach((webhook) => {
+      // Ensure that each update object has an _id
+      if (webhook._id === undefined) {
+        throw new M.DataFormatError('One or more webhook updates does not have an _id.');
+      }
+      // Ensure that the user is not trying to modify a webhook's type
+      if (webhook.type !== undefined) {
+        throw new M.DataFormatError(`Problem with update for webhook ${webhook._id}: `
+        + 'A webhook\'s type cannot be changed.', 'warn');
+      }
+      // Check that all updates either match the reference id or do not include a reference
+      if (webhook.reference !== undefined && webhook.reference !== refID) {
+        throw new M.DataFormatError(`Problem with update for webhook ${webhook._id}: `
+          + 'A webhook\'s reference id cannot be changed.', 'warn');
+      }
+      // Check that the update array does not contain duplicate _ids
+      if (duplicateCheck.includes(webhook._id)) {
+        throw new M.DataFormatError(`Duplicate _ids found in update array: ${webhook._id}`);
+      }
+      duplicateCheck.push(webhook._id);
+    });
+
+    // Get webhookIDs
+    const webhookIDs = webhooksToUpdate.map((w) => w._id);
+
+    // Find the webhooks
+    const foundWebhooks = await Webhook.find({ _id: webhookIDs, reference: refID });
+
+    // Check that all webhooks were found
+    if (foundWebhooks.length !== webhooksToUpdate.length) {
+      const foundIDs = foundWebhooks.map((w) => w._id);
+      const notFound = webhookIDs.filter((w) => !foundIDs.includes(w));
+      throw new M.DataFormatError('The following webhooks were not found at the specified '
+      + `reference level ${refID}: [${notFound}]`, 'warn');
+    }
+
+    // Convert webhook updates to jmi for efficiency
+    const jmiUpdates = jmi.convertJMI(1, 2, webhooksToUpdate);
+    const bulkArray = [];
+
+    // Get array of editable parameters
+    const validFields = Webhook.getValidUpdateFields();
+
+    // Check that the user isn't trying to make any invalid updates
+    foundWebhooks.forEach((webhook) => {
+      const webhookUpdate = jmiUpdates[webhook._id];
+
+      // Save the _id but remove it from the update
+      const id = webhook._id;
+      delete webhookUpdate._id;
+
+      // An archived webhook cannot be updated
+      if (webhook.archived && (webhookUpdate.archived === undefined
+        || webhookUpdate.archived !== false || webhookUpdate.archived !== 'false')) {
+        throw new M.OperationError(`The Webhook [${webhook._id}] is archived. `
+          + 'It must first be unarchived before performing this operation.', 'warn');
+      }
+
+      // For each key in the updated object
+      Object.keys(webhookUpdate).forEach((key) => {
+        // Check if the field is valid to update
+        if (!validFields.includes(key)) {
+          throw new M.OperationError(`Webhook property [${key}] cannot `
+            + 'be changed.', 'warn');
+        }
+
+        // Get validator for field if one exists
+        if (validators.webhook.hasOwnProperty(key)) {
+          // TODO: I'm not using regex for webhook validation - still leave this in here?
+          // If the validator is a regex string
+          if (typeof validators.webhook[key] === 'string') {
+            // If validation fails, throw error
+            if (!RegExp(validators.webhook[key]).test(webhookUpdate[key])) {
+              throw new M.DataFormatError(`Problem with update for webhook ${webhook._id}: `
+                + `Invalid ${key}: [${webhookUpdate[key]}]`, 'warn');
+            }
+          }
+          // If the validator is a function
+          else if (typeof validators.webhook[key] === 'function') {
+            if (!validators.webhook[key](webhookUpdate[key])) {
+              throw new M.DataFormatError(`Problem with update for webhook ${webhook._id}: `
+                + `Invalid ${key}: [${webhookUpdate[key]}]`, 'warn');
+            }
+          }
+          // Improperly formatted validator
+          else {
+            throw new M.ServerError(`Webhook validator [${key}] is neither a `
+              + 'function nor a regex string.');
+          }
+        }
+
+        if (key === 'archived') {
+          // If the webhook is being archived
+          if (webhookUpdate[key] && !webhook[key]) {
+            webhookUpdate.archivedBy = reqUser._id;
+            webhookUpdate.archivedOn = Date.now();
+          }
+          // If the org is being unarchived
+          else if (!webhookUpdate[key] && webhook[key]) {
+            webhookUpdate.archivedBy = null;
+            webhookUpdate.archivedOn = null;
+          }
+        }
+      });
+
+      // Update lastModifiedBy field and updatedOn
+      webhookUpdate.lastModifiedBy = reqUser._id;
+      webhookUpdate.updatedOn = Date.now();
+
+      // TODO: Incorporate these checks into validators.webhook?
+      // --- Incoming Webhook specific checks ---
+      if (webhook.type === 'Incoming') {
+        if (webhookUpdate.responses !== undefined) {
+          throw new M.DataFormatError(`Problem with update for webhook ${webhook._id}: `
+            + 'An incoming webhook cannot have a responses field.', 'warn');
+        }
+      }
+
+      // --- Outgoing Webhook specific checks ---
+      else if (webhook.type === 'Outgoing') {
+        if (webhookUpdate.token !== undefined) {
+          throw new M.DataFormatError(`Problem with update for webhook ${webhook._id}: `
+            + 'An outgoing webhook cannot have a token.', 'warn');
+        }
+        if (webhookUpdate.tokenLocation !== undefined) {
+          throw new M.DataFormatError(`Problem with update for webhook ${webhook._id}: `
+            + 'An outgoing webhook cannot have a tokenLocation.', 'warn');
+        }
+      }
+
+      // Push the update onto the list of updates
+      bulkArray.push({
+        updateOne: {
+          filter: { _id: id },
+          update: webhookUpdate
+        }
+      });
+    });
+
+    // Send it
+    await Webhook.bulkWrite(bulkArray);
+
+    // Find the updated webhooks
+    const foundUpdatedWebhooks = await Webhook.find({ _id: webhookIDs },
+      validatedOptions.fieldsString,
+      { populate: validatedOptions.populateString });
+
+    // Emit the event webhooks-updated
+    EventEmitter.emit('webhooks-updated', foundUpdatedWebhooks);
+
+    return foundUpdatedWebhooks;
   }
   catch (error) {
     throw errors.captureError(error);
@@ -434,17 +659,17 @@ async function remove(requestingUser, organizationID, projectID, branchID, webho
     // Sanitize input parameters and create function-wide variables
     const saniWebhooks = sani.db(JSON.parse(JSON.stringify(webhooks)));
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
-    const orgID = organizationID === null ? sani.db(organizationID) : null;
-    const projID = projectID === null ? sani.db(projectID) : null;
-    const branID = branchID === null ? sani.db(branchID) : null;
-    let webhooksToFind = [];
+    const orgID = organizationID !== null ? sani.db(organizationID) : null;
+    const projID = projectID !== null ? sani.db(projectID) : null;
+    const branID = branchID !== null ? sani.db(branchID) : null;
+    let webhooksToDelete = [];
 
     // Check the type of the webhooks parameter
     if (Array.isArray(saniWebhooks) && saniWebhooks.length !== 0) {
-      webhooksToFind = saniWebhooks;
+      webhooksToDelete = saniWebhooks;
     }
     else if (typeof saniWebhooks === 'string') {
-      webhooksToFind = [saniWebhooks];
+      webhooksToDelete = [saniWebhooks];
     }
 
     let organization;
@@ -468,12 +693,12 @@ async function remove(requestingUser, organizationID, projectID, branchID, webho
     permissions.deleteWebhook(reqUser, organization, project, branch);
 
     // Find webhooks to delete
-    const foundWebhooks = await Webhook.find({ _id: { $in: webhooksToFind } },
-      null, { lean: true });
+    const foundWebhooks = await Webhook.find({ _id: webhooksToDelete },
+      null);
     const foundWebhookIDs = foundWebhooks.map((w) => w._id);
 
     // Check that all webhooks were found
-    const notFoundIDs = webhooksToFind.filter((w) => !foundWebhookIDs.includes(w));
+    const notFoundIDs = webhooksToDelete.filter((w) => !foundWebhookIDs.includes(w));
     // If not all were found, throw an error
     if (notFoundIDs.length > 0) {
       throw new M.NotFoundError('The following webhooks were not found: '
@@ -481,7 +706,7 @@ async function remove(requestingUser, organizationID, projectID, branchID, webho
     }
 
     // Delete the webhooks
-    await Webhook.deleteMany(webhooks);
+    await Webhook.deleteMany({ _id: webhooksToDelete });
 
     // Emit event for webhook deletion
     EventEmitter.emit('webhooks-deleted', foundWebhooks);

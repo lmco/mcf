@@ -123,10 +123,20 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   // -------------- Find --------------
+  // it('should reject a request to find an element by an unauthorized user')
   // ------------- Create -------------
   it('should reject creating elements to a tag '
     + 'saying elements cannot be created.', createInTag);
+  // it('should reject creating an element on an archived org')
+  // it('should reject creating an element on an archived project')
+  // it('should reject creating an element on an archived branch')
+  // it('should reject a request to create an element by an unauthorized user')
   // ------------- Update -------------
+  // it('should reject an update to an element on an archived org')
+  // it('should reject an update to an element on an archived project')
+  // it('should reject an update to an element on an archived branch')
+  // it('should reject an update to an archived element')
+  // it('should reject an update to an element by an unauthorized user')
   it('should reject an update saying a source cannot be set to self', updateSourceToSelf);
   it('should reject an update saying a target cannot be set to self', updateTargetToSelf);
   it('should reject an update saying a source cannot be found', updateNonExistentSource);
@@ -138,12 +148,24 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject updating elements to a tag '
     + 'saying elements cannot be update.', updateInTag);
   // ------------- Replace ------------
+  // it('should reject replacing an element on an archived org')
+  // it('should reject replacing an element on an archived project')
+  // it('should reject replacing an element on an archived branch')
+  // it('should reject a request to replace an element by an unauthorized user')
   it('should reject put elements with invalid id', putInvalidId);
   it('should reject put elements without id', putWithoutId);
   // ------------- Remove -------------
+  // it('should reject deleting an element on an archived org')
+  // it('should reject deleting an element on an archived project')
+  // it('should reject deleting an element on an archived branch')
+  // it('should reject a request to delete an element by an unauthorized user')
   it('should reject deleting elements in a tag '
     + 'saying elements cannot be deleted.', deleteInTag);
   // ------------- Search -------------
+  // it('should reject searching an element on an archived org')
+  // it('should reject searching an element on an archived project')
+  // it('should reject searching an element on an archived branch')
+  // it('should reject a request to delete an element by an unauthorized user')
 });
 
 /* --------------------( Tests )-------------------- */

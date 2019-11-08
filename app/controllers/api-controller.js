@@ -5767,7 +5767,7 @@ async function getWebhooks(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // Check query for element IDs
+  // Check query for webhook IDs
   if (options.ids) {
     webhookIDs = options.ids;
     delete options.ids;
@@ -5790,7 +5790,8 @@ async function getWebhooks(req, res) {
   }
   else if (!org && !project && !branch) {
     // Set server true by default if no org, project, or branch is being searched for.
-    // The user must explicitly set server to false if they want to search through every webhook.
+    // The user must explicitly set server to false and query /api/webhooks if they
+    // want to search through every webhook.
     options.server = true;
   }
 

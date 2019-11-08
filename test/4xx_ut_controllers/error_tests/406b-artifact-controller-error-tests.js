@@ -119,11 +119,18 @@ describe(M.getModuleName(module.filename), () => {
   // -------------- Find --------------
   it('should reject a find request for a blob that does not exist.', findNonexistingBlob);
   // ------------- Create -------------
+  // it('should reject creating an artifact on an archived org')
+  // it('should reject creating an artifact on an archived project')
+  // it('should reject creating an artifact on an archived branch')
   it('should reject creating artifacts on a tag '
     + 'saying artifacts cannot be created.', createInTag);
   it('should reject creating a blob that already exists.', createExistingBlob);
   it('should reject creating an artifact that already exists.', createExistingArtifact);
   // ------------- Update -------------
+  // it('should reject an update to an artifact on an archived org')
+  // it('should reject an update to an artifact on an archived project')
+  // it('should reject an update to an artifact on an archived branch')
+  // it('should reject an update to an archived artifact')
   it('should reject updating artifact that does NOT exist.', updateNonexistingArtifact);
   it('should reject updating artifacts on a tag '
     + 'saying artifacts cannot be updated.', updateInTag);

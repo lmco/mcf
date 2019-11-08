@@ -193,6 +193,35 @@ const user = {
   custom: customDataValidator
 };
 
+/**
+ * @description Functions to validate webhook data
+ *
+ * type:
+ *   - Must be either the string "Outgoing" or "Incoming"
+ * triggers:
+ *   - MUST be an array of strings
+ * responses:
+ *   - MUST be an array of objects that have at least a url field
+ */
+const webhook = {
+  type: function(data) {
+    return data === 'Outgoing' || data === 'Incoming';
+  },
+  triggers: function(data) {
+    return Array.isArray(data) && data.every((s) => typeof s === 'string');
+  },
+  responses: function(data) {
+    return Array.isArray(data) && data.length > 0
+      && data.every((response) => (typeof response === 'object'
+      && typeof response.url === 'string'));
+  },
+  token: function(data) {
+    return typeof data === 'string';
+  },
+  tokenLocation: function(data) {
+    return typeof data === 'string';
+  }
+};
 
 /**
  * @description Regular Expressions to validate url data
@@ -217,6 +246,7 @@ module.exports = {
   artifact,
   element,
   user,
+  webhook,
   url,
   id,
   idLength

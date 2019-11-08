@@ -702,24 +702,20 @@ function deleteBlob(user, org, project) {
  */
 function createWebhook(user, org = null, project = null, branch = null) {
   try {
-    if (!user.admin) {
-      if (org) {
-        assert.ok(org.permissions.hasOwnProperty(user._id),
-          `User does not have permission to create webhooks in the org [${org._id}].`);
-        assert.ok(org.permissions[user._id].includes('admin'),
-          `User does not have permission to create webhooks in the org [${org._id}].`);
-        if (project) {
-          assert.ok(project.permissions.hasOwnProperty(user._id),
-            'User does not have permission to create webhooks in the project '
-            + `[${utils.parseID(project._id).pop()}].`);
-          assert.ok(project.permissions[user._id].includes('admin'),
-            'User does not have permission to create webhooks in the project '
-            + `[${utils.parseID(project._id).pop()}].`);
-        }
-      }
-      else {
-        throw new M.PermissionError('User does not have permission to create webhooks.', 'warn');
-      }
+    if (project) {
+      assert.ok(user.admin || (project.permissions.hasOwnProperty(user._id)
+        && project.permissions[user._id].includes('admin')),
+      'User does not have permission to create webhooks on the project '
+        + `[${utils.parseID(project._id).pop()}].`);
+    }
+    else if (org) {
+      assert.ok(user.admin || (org.permissions.hasOwnProperty(user._id)
+        && org.permissions[user._id].includes('admin')),
+      `User does not have permission to create webhooks on the org [${org._id}].`);
+    }
+    else {
+      assert.ok(user.admin,
+        'User does not have permission to create server level webhooks.');
     }
   }
   catch (error) {
@@ -739,24 +735,20 @@ function createWebhook(user, org = null, project = null, branch = null) {
  */
 function readWebhook(user, org = null, project = null, branch = null) {
   try {
-    if (!user.admin) {
-      if (org) {
-        assert.ok(org.permissions.hasOwnProperty(user._id),
-          `User does not have permission to create webhooks in the org [${org._id}].`);
-        assert.ok(org.permissions[user._id].includes('admin'),
-          `User does not have permission to create webhooks in the org [${org._id}].`);
-        if (project) {
-          assert.ok(project.permissions.hasOwnProperty(user._id),
-            'User does not have permission to create webhooks in the project '
-            + `[${utils.parseID(project._id).pop()}].`);
-          assert.ok(project.permissions[user._id].includes('admin'),
-            'User does not have permission to create webhooks in the project '
-            + `[${utils.parseID(project._id).pop()}].`);
-        }
-      }
-      else {
-        throw new M.PermissionError('User does not have permission to create webhooks.', 'warn');
-      }
+    if (project) {
+      assert.ok(user.admin || (project.permissions.hasOwnProperty(user._id)
+        && project.permissions[user._id].includes('admin')),
+      'User does not have permission to read webhooks on the project '
+        + `[${utils.parseID(project._id).pop()}].`);
+    }
+    else if (org) {
+      assert.ok(user.admin || (org.permissions.hasOwnProperty(user._id)
+        && org.permissions[user._id].includes('admin')),
+      `User does not have permission to read webhooks on the org [${org._id}].`);
+    }
+    else {
+      assert.ok(user.admin,
+        'User does not have permission to read server level webhooks.');
     }
   }
   catch (error) {
@@ -776,24 +768,20 @@ function readWebhook(user, org = null, project = null, branch = null) {
  */
 function updateWebhook(user, org = null, project = null, branch = null) {
   try {
-    if (!user.admin) {
-      if (org) {
-        assert.ok(org.permissions.hasOwnProperty(user._id),
-          `User does not have permission to create webhooks in the org [${org._id}].`);
-        assert.ok(org.permissions[user._id].includes('admin'),
-          `User does not have permission to create webhooks in the org [${org._id}].`);
-        if (project) {
-          assert.ok(project.permissions.hasOwnProperty(user._id),
-            'User does not have permission to create webhooks in the project '
-            + `[${utils.parseID(project._id).pop()}].`);
-          assert.ok(project.permissions[user._id].includes('admin'),
-            'User does not have permission to create webhooks in the project '
-            + `[${utils.parseID(project._id).pop()}].`);
-        }
-      }
-      else {
-        throw new M.PermissionError('User does not have permission to create webhooks.', 'warn');
-      }
+    if (project) {
+      assert.ok(user.admin || (project.permissions.hasOwnProperty(user._id)
+        && project.permissions[user._id].includes('admin')),
+      'User does not have permission to update webhooks on the project '
+        + `[${utils.parseID(project._id).pop()}].`);
+    }
+    else if (org) {
+      assert.ok(user.admin || (org.permissions.hasOwnProperty(user._id)
+        && org.permissions[user._id].includes('admin')),
+      `User does not have permission to update webhooks on the org [${org._id}].`);
+    }
+    else {
+      assert.ok(user.admin,
+        'User does not have permission to update server level webhooks.');
     }
   }
   catch (error) {
@@ -813,24 +801,20 @@ function updateWebhook(user, org = null, project = null, branch = null) {
  */
 function deleteWebhook(user, org = null, project = null, branch = null) {
   try {
-    if (!user.admin) {
-      if (org) {
-        assert.ok(org.permissions.hasOwnProperty(user._id),
-          `User does not have permission to create webhooks in the org [${org._id}].`);
-        assert.ok(org.permissions[user._id].includes('admin'),
-          `User does not have permission to create webhooks in the org [${org._id}].`);
-        if (project) {
-          assert.ok(project.permissions.hasOwnProperty(user._id),
-            'User does not have permission to create webhooks in the project '
-            + `[${utils.parseID(project._id).pop()}].`);
-          assert.ok(project.permissions[user._id].includes('admin'),
-            'User does not have permission to create webhooks in the project '
-            + `[${utils.parseID(project._id).pop()}].`);
-        }
-      }
-      else {
-        throw new M.PermissionError('User does not have permission to create webhooks.', 'warn');
-      }
+    if (project) {
+      assert.ok(user.admin || (project.permissions.hasOwnProperty(user._id)
+        && project.permissions[user._id].includes('admin')),
+      'User does not have permission to delete webhooks on the project '
+        + `[${utils.parseID(project._id).pop()}].`);
+    }
+    else if (org) {
+      assert.ok(user.admin || (org.permissions.hasOwnProperty(user._id)
+        && org.permissions[user._id].includes('admin')),
+      `User does not have permission to delete webhooks on the org [${org._id}].`);
+    }
+    else {
+      assert.ok(user.admin,
+        'User does not have permission to delete server level webhooks.');
     }
   }
   catch (error) {
