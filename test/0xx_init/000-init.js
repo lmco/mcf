@@ -132,15 +132,15 @@ async function createDefaultOrg() {
     chai.expect(org).to.equal(null);
 
     // Create default org object
-    const defOrg = Organization.createDocument({
+    const defOrg = {
       _id: M.config.server.defaultOrganizationId,
       name: M.config.server.defaultOrganizationName,
       createdBy: null,
       lastModifiedBy: null
-    });
+    };
 
     // Save the default org
-    await defOrg.save();
+    await Organization.insertMany(defOrg);
   }
   catch (error) {
     M.log.error(error);
