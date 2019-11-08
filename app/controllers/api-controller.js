@@ -5041,7 +5041,7 @@ async function deleteArtifacts(req, res) {
     const parsedIDs = artIDs.map(a => utils.parseID(a).pop());
 
     // Format JSON
-    const json = formatJSON(parsedIDs[0], minified);
+    const json = formatJSON(parsedIDs, minified);
 
     return returnResponse(req, res, json, 200);
   }

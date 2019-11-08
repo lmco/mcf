@@ -169,17 +169,15 @@ async function find(requestingUser, organizationID, projectID, branchID, artifac
   }
 
   // Find the organization
-  const organization = await helper.findAndValidate(Org, orgID, reqUser,
-    validatedOptions.includeArchived);
+  const organization = await helper.findAndValidate(Org, orgID, validatedOptions.includeArchived);
 
   // Find the project
   const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-    reqUser, validatedOptions.includeArchived);
+    validatedOptions.includeArchived);
 
   // Find the branch, validate it was found and not archived
-  const branch = await helper.findAndValidate(Branch, utils.createID(
-    orgID, projID, branID
-  ), reqUser, validatedOptions.includeArchived);
+  const branch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
+    validatedOptions.includeArchived);
 
   // Permissions check
   permissions.readArtifact(reqUser, organization, project, branch);
@@ -291,16 +289,13 @@ async function create(requestingUser, organizationID, projectID, branchID,
     }
 
     // Find the organization and validate that it was found and not archived (unless specified)
-    const organization = await helper.findAndValidate(Org, orgID,
-      ((options && options.archived) || validatedOptions.includeArchived));
+    const organization = await helper.findAndValidate(Org, orgID);
 
     // Find the project and validate that it was found and not archived (unless specified)
-    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID),
-      ((options && options.archived) || validatedOptions.includeArchived));
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
 
     // Find the branch and validate that it was found and not archived (unless specified)
-    const branch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID),
-      ((options && options.archived) || validatedOptions.includeArchived));
+    const branch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID));
 
     // Check that the branch is is not a tag
     if (branch.tag) {
@@ -456,15 +451,13 @@ async function update(requestingUser, organizationID, projectID, branchID,
     }
 
     // Find organization, validate found and not archived
-    const organization = await helper.findAndValidate(Org, orgID, reqUser);
+    const organization = await helper.findAndValidate(Org, orgID);
 
     // Find project, validate found and not archived
-    const project = await helper.findAndValidate(Project,
-      utils.createID(orgID, projID), reqUser);
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
 
     // Find the branch and validate that it was found and not archived
-    const branch = await helper.findAndValidate(Branch,
-      utils.createID(orgID, projID, branID), reqUser);
+    const branch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID));
 
     // Check that the branch is is not a tag
     if (branch.tag) {
@@ -669,15 +662,13 @@ async function remove(requestingUser, organizationID, projectID, branchID,
     }
 
     // Find the organization and validate that it was found and not archived
-    const organization = await helper.findAndValidate(Org, orgID, reqUser);
+    const organization = await helper.findAndValidate(Org, orgID);
 
     // Find the project and validate that it was found and not archived
-    const project = await helper.findAndValidate(Project,
-      utils.createID(orgID, projID), reqUser);
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
 
     // Find the branch and validate that it was found and not archived
-    const branch = await helper.findAndValidate(Branch,
-      utils.createID(orgID, projID, branID), reqUser);
+    const branch = await helper.findAndValidate(Branch, utils.createID(orgID, projID, branID));
 
     // Check that the branch is is not a tag
     if (branch.tag) {
@@ -744,10 +735,10 @@ async function getBlob(requestingUser, organizationID,
     const projID = sani.db(projectID);
 
     // Find the organization
-    const organization = await helper.findAndValidate(Org, orgID, reqUser);
+    const organization = await helper.findAndValidate(Org, orgID);
 
     // Find the project
-    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
 
     // Permissions check
     permissions.readBlob(reqUser, organization, project);
@@ -802,10 +793,10 @@ async function postBlob(requestingUser, organizationID,
     const projID = sani.db(projectID);
 
     // Find the organization
-    const organization = await helper.findAndValidate(Org, orgID, reqUser);
+    const organization = await helper.findAndValidate(Org, orgID);
 
     // Find the project
-    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID), reqUser);
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
 
     // Permissions check
     permissions.createBlob(reqUser, organization, project);
@@ -855,11 +846,10 @@ async function deleteBlob(requestingUser, organizationID, projectID,
     const projID = sani.db(projectID);
 
     // Find the organization
-    const organization = await helper.findAndValidate(Org, orgID, reqUser);
+    const organization = await helper.findAndValidate(Org, orgID);
 
     // Find the project
-    const project = await helper.findAndValidate(Project,
-      utils.createID(orgID, projID), reqUser);
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
 
     // Permissions check
     permissions.deleteBlob(reqUser, organization, project);
