@@ -467,9 +467,18 @@ class Query {
       });
     }
 
-    this.RequestItemsKeys = returnArray;
+    return returnArray;
   }
 
+  /**
+   * @description Formats a JSON object properly for DynamoDB.
+   *
+   * @param {object} obj - The object to format.
+   *
+   * @returns {object} The formatted object, where the keys are the original
+   * keys, but the values are objects containing the "type" as a key and the
+   * original value as the value. Ex: { hello: { S: 'world' }}.
+   */
   keyFormat(obj) {
     switch (typeof obj) {
       case 'string': return { S: obj };
@@ -493,10 +502,12 @@ class Query {
           return { S: 'null' };
         }
       }
+      // Undefined or other types
+      default: throw new M.ServerError(`Unsupported query type ${typeof obj}.`);
     }
   }
 
-
+  // TODO: Update function to not use this
   parseUpdateExpression(filter) {
     // Handle filter expression
     Object.keys(filter).forEach((k) => {
@@ -534,18 +545,36 @@ class Query {
     });
   }
 
+  /**
+   * @description Creates an array of queries, properly formatted for DynamoDB's
+   * batchGetItem() function.
+   *
+   * @param {object} filter - The filter to parse and form into batchGetItem
+   * queries.
+   *
+   * @returns {object[]} - An array of formatted queries.
+   */
   batchGetItem(filter) {
-    this.parseRequestItemsKeys(filter);
+    // Format the filter into a RequestItems object
+    const requestItemsKeys = this.parseRequestItemsKeys(filter);
     const queries = [];
 
+    // Create the base query object
     const baseObj = {
-      RequestItems: {}
+      RequestItems: {
+        [this.model.TableName]: {
+          Keys: []
+        }
+      }
     };
-    baseObj.RequestItems[this.model.TableName] = { Keys: [] };
 
-    for (let i = 0; i < this.RequestItemsKeys.length / 25; i++) {
-      baseObj.RequestItems[this.model.TableName].Keys = this.RequestItemsKeys
+    // Loop over the number of keys in RequestItemsKeys
+    for (let i = 0; i < requestItemsKeys.length / 25; i++) {
+      // Grab in batches of 25, this is the max number for DynamoDB
+      baseObj.RequestItems[this.model.TableName].Keys = requestItemsKeys
       .slice(i * 25, i * 25 + 25);
+
+      // Add query to array, copying the object to avoid modifying by reference
       queries.push(JSON.parse(JSON.stringify(baseObj)));
     }
 
@@ -554,6 +583,12 @@ class Query {
 
   /**
    * @description Creates a query formatted to be used in batchWriteItem calls.
+   *
+   * @param {object[]} docs - An array of documents to be inserted/deleted.
+   * @param {string} operation - The operation being preformed, can either be
+   * 'insert' or 'delete'.
+   *
+   * @returns {object[]} - An array of queries to make.
    */
   batchWriteItem(docs, operation) {
     const queries = [];
@@ -597,22 +632,22 @@ class Query {
   }
 
   getItem(filter) {
-    this.parseRequestItemsKeys(filter);
+    const requestItemsKeys = this.parseRequestItemsKeys(filter);
 
     return {
       TableName: this.model.TableName,
-      Key: this.RequestItemsKeys[0]
+      Key: requestItemsKeys[0]
     };
   }
 
   updateItem(filter, doc) {
     this.parseUpdateExpression(doc);
-    this.parseRequestItemsKeys(filter);
+    const requestItemsKeys = this.parseRequestItemsKeys(filter);
 
     const baseObj = {
       TableName: this.model.TableName,
       ReturnValues: 'ALL_NEW',
-      Key: this.RequestItemsKeys[0]
+      Key: requestItemsKeys[0]
     };
 
     // Add on the ExpressionAttributeNames if defined
