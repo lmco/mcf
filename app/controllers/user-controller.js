@@ -88,8 +88,6 @@ const permissions = M.require('lib.permissions');
  * only returns unarchived users.  Overrides the includeArchived option.
  * @param {string} [options.archivedBy] - A string that will search for matches for
  * users that were archived by a specific person.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  * @param {string} [options.sort] - Provide a particular field to sort the results by.
  * You may also add a negative sign in front of the field to indicate sorting in
  * reverse order.
@@ -124,7 +122,7 @@ async function find(requestingUser, users, options) {
 
     // Initialize and ensure options are valid
     const validatedOptions = utils.validateOptions(options, ['populate',
-      'includeArchived', 'fields', 'limit', 'skip', 'lean', 'sort'], User);
+      'includeArchived', 'fields', 'limit', 'skip', 'sort'], User);
 
     // Define searchQuery
     const searchQuery = { archived: false };
@@ -180,8 +178,7 @@ async function find(requestingUser, users, options) {
       { limit: validatedOptions.limit,
         skip: validatedOptions.skip,
         sort: validatedOptions.sort,
-        populate: validatedOptions.populateString,
-        lean: validatedOptions.lean
+        populate: validatedOptions.populateString
       });
   }
   catch (error) {
@@ -217,8 +214,6 @@ async function find(requestingUser, users, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and username fields. To NOT include a field, provide a '-'
  * in front.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  *
  * @returns {Promise<object[]>} Array of created user objects.
  *
@@ -245,8 +240,7 @@ async function create(requestingUser, users, options) {
     const saniUsers = sani.db(JSON.parse(JSON.stringify(users)));
 
     // Initialize and ensure options are valid
-    const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
-      'lean'], User);
+    const validatedOptions = utils.validateOptions(options, ['populate', 'fields'], User);
 
     // Define array to store user data
     let usersToCreate = [];
@@ -298,7 +292,7 @@ async function create(requestingUser, users, options) {
     const searchQuery = { _id: { $in: arrUsernames } };
 
     // Find any existing, conflicting users
-    const foundUsers = await User.find(searchQuery, '_id', { lean: true });
+    const foundUsers = await User.find(searchQuery, '_id');
     // If there are any foundUsers, there is a conflict
     if (foundUsers.length > 0) {
       // Get arrays of the foundUsers's usernames
@@ -311,14 +305,13 @@ async function create(requestingUser, users, options) {
 
     // For each object of user data, create the user object
     const userObjects = usersToCreate.map((u) => {
-      const userObj = User.createDocument(u);
-      userObj.lastModifiedBy = reqUser._id;
-      userObj.createdBy = reqUser._id;
-      userObj.updatedOn = Date.now();
-      userObj.archivedBy = (userObj.archived) ? reqUser._id : null;
-      userObj.archivedOn = (userObj.archived) ? Date.now() : null;
-      userObj.hashPassword();
-      return userObj;
+      u.lastModifiedBy = reqUser._id;
+      u.createdBy = reqUser._id;
+      u.updatedOn = Date.now();
+      u.archivedBy = (u.archived) ? reqUser._id : null;
+      u.archivedOn = (u.archived) ? Date.now() : null;
+      User.hashPassword(u);
+      return u;
     });
 
     // Create the users
@@ -340,9 +333,7 @@ async function create(requestingUser, users, options) {
 
     // Find and return the created users
     return await User.find({ _id: { $in: arrUsernames } }, validatedOptions.fieldsString,
-      { populate: validatedOptions.populateString,
-        lean: validatedOptions.lean
-      });
+      { populate: validatedOptions.populateString });
   }
   catch (error) {
     throw errors.captureError(error);
@@ -383,8 +374,6 @@ async function create(requestingUser, users, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and username fields. To NOT include a field, provide a '-'
  * in front.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  *
  * @returns {Promise<object[]>} Array of updated user objects.
  *
@@ -410,8 +399,7 @@ async function update(requestingUser, users, options) {
     const duplicateCheck = {};
 
     // Initialize and ensure options are valid
-    const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
-      'lean'], User);
+    const validatedOptions = utils.validateOptions(options, ['populate', 'fields'], User);
 
     // Check the type of the users parameter
     if (Array.isArray(saniUsers)) {
@@ -459,7 +447,7 @@ async function update(requestingUser, users, options) {
     const searchQuery = { _id: { $in: arrUsernames } };
 
     // Find the users to update
-    const foundUsers = await User.find(searchQuery, null, { lean: true });
+    const foundUsers = await User.find(searchQuery, null);
     // Verify the same number of users are found as desired
     if (foundUsers.length !== arrUsernames.length) {
       const foundIDs = foundUsers.map(u => u._id);
@@ -566,9 +554,7 @@ async function update(requestingUser, users, options) {
     await User.bulkWrite(bulkArray);
 
     const foundUpdatedUsers = await User.find(searchQuery, validatedOptions.fieldsString,
-      { populate: validatedOptions.populateString,
-        lean: validatedOptions.lean
-      });
+      { populate: validatedOptions.populateString });
 
     // Emit the event users-updated
     EventEmitter.emit('users-updated', foundUpdatedUsers);
@@ -606,8 +592,6 @@ async function update(requestingUser, users, options) {
  * @param {string[]} [options.fields] - An array of fields to return. By default
  * includes the _id and username fields. To NOT include a field, provide a '-'
  * in front.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  *
  * @returns {Promise<object[]>} Array of created/replaced user objects.
  *
@@ -677,7 +661,7 @@ async function createOrReplace(requestingUser, users, options) {
     const searchQuery = { _id: { $in: arrUsernames } };
 
     // Find the users to update
-    const foundUsers = await User.find(searchQuery, null, { lean: true });
+    const foundUsers = await User.find(searchQuery, null);
 
     // If data directory doesn't exist, create it
     if (!fs.existsSync(path.join(M.root, 'data'))) {
@@ -882,8 +866,6 @@ async function remove(requestingUser, users, options) {
  * @param {number} [options.skip = 0] - A non-negative number that specifies the
  * number of documents to skip returning. For example, if 10 documents are found
  * and skip is 5, the first 5 documents will NOT be returned.
- * @param {boolean} [options.lean = false] - A boolean value that if true
- * returns raw JSON instead of converting the data to objects.
  * @param {string} [options.sort] - Provide a particular field to sort the results by.
  * You may also add a negative sign in front of the field to indicate sorting in
  * reverse order.
@@ -916,7 +898,7 @@ async function search(requestingUser, query, options) {
 
     // Validate and set the options
     const validatedOptions = utils.validateOptions(options, ['populate',
-      'limit', 'skip', 'lean', 'sort', 'includeArchived'], User);
+      'limit', 'skip', 'sort', 'includeArchived'], User);
 
     // Ensure search options are valid
     if (options) {
@@ -963,8 +945,7 @@ async function search(requestingUser, query, options) {
       { limit: validatedOptions.limit,
         skip: validatedOptions.skip,
         sort: validatedOptions.sort,
-        populate: validatedOptions.populateString,
-        lean: validatedOptions.lean
+        populate: validatedOptions.populateString
       });
   }
   catch (error) {
@@ -1026,7 +1007,7 @@ async function updatePassword(requestingUser, oldPassword, newPassword, confirmP
     }
 
     // Verify the old password matches
-    const verified = await foundUser.verifyPassword(oldPassword);
+    const verified = await User.verifyPassword(foundUser, oldPassword);
 
     // Ensure old password was verified
     if (!verified) {

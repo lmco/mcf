@@ -161,9 +161,6 @@ BranchSchema.plugin(extensions);
  * @description Returns branch fields that can be changed
  * @memberOf BranchSchema
  */
-BranchSchema.method('getValidUpdateFields', function() {
-  return ['name', 'custom', 'archived'];
-});
 BranchSchema.static('getValidUpdateFields', function() {
   return ['name', 'custom', 'archived'];
 });
@@ -172,10 +169,6 @@ BranchSchema.static('getValidUpdateFields', function() {
  * @description Returns a list of valid root source fields
  * @memberOf BranchSchema
  */
-BranchSchema.method('getValidRootSource', function() {
-  return ['master'];
-});
-
 BranchSchema.static('getValidRootSource', function() {
   return ['master'];
 });
@@ -184,10 +177,6 @@ BranchSchema.static('getValidRootSource', function() {
  * @description Returns a list of fields a requesting user can populate
  * @memberOf BranchSchema
  */
-BranchSchema.method('getValidPopulateFields', function() {
-  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'project', 'source'];
-});
-
 BranchSchema.static('getValidPopulateFields', function() {
   return ['archivedBy', 'lastModifiedBy', 'createdBy', 'project', 'source'];
 });

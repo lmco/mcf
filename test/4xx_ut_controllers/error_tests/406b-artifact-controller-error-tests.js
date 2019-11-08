@@ -166,7 +166,7 @@ async function findNonexistingBlob() {
 async function createInTag() {
   const artifactObj = testData.artifacts[0];
   // Attempt to create an artifact; should be rejected with specific error message
-  await ArtifactController.create(adminUser, org.id, projectID, tagID, artifactObj)
+  await ArtifactController.create(adminUser, org._id, projectID, tagID, artifactObj)
   .should.eventually.be.rejectedWith(`[${tagID}] is a tag and does`
       + ' not allow artifacts to be created, updated, or deleted.');
 }
