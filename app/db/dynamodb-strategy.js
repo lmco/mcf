@@ -572,6 +572,8 @@ class Query {
         updateObj.UpdateExpression += `, #${keyName} = :${valueKey}`;
       }
     });
+
+    return updateObj;
   }
 
   /**
