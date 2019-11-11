@@ -25,7 +25,7 @@ const jmi = M.require('lib.jmi-conversions');
 
 // MBEE modules
 const ArtifactController = M.require('controllers.artifact-controller');
-const db = M.require('lib.db');
+const db = M.require('db');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
