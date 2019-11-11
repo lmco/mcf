@@ -51,6 +51,29 @@ async function connect() {
 }
 
 /**
+ * @description Returns an AWS DocumentClient instance, used for simplifying
+ * specific requests to the database.
+ * @async
+ *
+ * @returns {Promise<object>} The AWS DynamoDB DocumentClient instance.
+ */
+async function connectDocument() {
+  try {
+    // Get a standard DynamoDB connection object
+    const conn = await connect();
+
+    // Return an instance of the DocumentClient, using the connection object as a base
+    return new AWS.DynamoDB.DocumentClient({
+      service: conn
+    });
+  }
+  catch (error) {
+    M.log.verbose('Failed to connect to the DocumentClient.');
+    throw errors.captureError(error);
+  }
+}
+
+/**
  * @description Disconnects from the database. This function is not necessary
  * for DynamoDB.
  * @async
