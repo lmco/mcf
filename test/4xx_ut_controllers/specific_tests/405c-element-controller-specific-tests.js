@@ -24,7 +24,7 @@ const chai = require('chai');
 const ElementController = M.require('controllers.element-controller');
 const ProjectController = M.require('controllers.project-controller');
 const Element = M.require('models.element');
-const db = M.require('lib.db');
+const db = M.require('db');
 const jmi = M.require('lib.jmi-conversions');
 const utils = M.require('lib.utils');
 

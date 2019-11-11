@@ -24,7 +24,7 @@ const fs = require('fs');     // Access the filesystem
 const path = require('path'); // Find directory paths
 
 // MBEE modules
-const db = M.require('lib.db');
+const db = M.require('db');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
