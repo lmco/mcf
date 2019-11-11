@@ -84,8 +84,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject creating an incoming webhook with no tokenLocation', noTokenLocationIncoming);
   it('should reject creating an outgoing webhook with an incoming field', tokenOutgoing);
   it('should reject creating an outgoing webhook with an incoming field', tokenLocationOutgoing);
-
-
+  it('should throw an error when the input token does not match the stored token', verifyToken);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -420,6 +419,37 @@ async function tokenLocationOutgoing() {
     // Save webhook; expect specific error message
     await Webhook.insertMany(webhookData).should.eventually.be.rejectedWith('Webhook validation '
       + 'failed: type: An outgoing webhook cannot have a token or tokenLocation.');
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
+}
+
+/**
+ * @description Verifies a token via the Webhook model.
+ */
+async function verifyToken() {
+  try {
+    // Get data for an incoming webhook
+    const webhookData = testData.webhooks[1];
+    // Give the webhook the previously generated global _id
+    webhookData._id = webhookID;
+
+    // Get the token
+    const token = 'wrong token';
+
+    // Save the Webhook model object to the database
+    const webhooks = await Webhook.insertMany(webhookData);
+
+    // Run the webhook test for tokens; it will throw an error if they don't match
+    try {
+      Webhook.verifyAuthority(webhooks[0], token);
+    }
+    catch (error) {
+      chai.expect(error.message).to.equal('Token received from request does not match stored token.');
+    }
   }
   catch (error) {
     M.log.error(error);

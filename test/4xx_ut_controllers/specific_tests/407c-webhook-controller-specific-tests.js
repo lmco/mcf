@@ -21,9 +21,6 @@ const chai = require('chai');
 // MBEE modules
 const WebhookController = M.require('controllers.webhook-controller');
 const Webhook = M.require('models.webhook');
-const Organization = M.require('models.organization');
-const Project = M.require('models.project');
-const Branch = M.require('models.branch');
 const db = M.require('lib.db');
 const utils = M.require('lib.utils');
 
@@ -31,14 +28,11 @@ const utils = M.require('lib.utils');
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
 let adminUser;
-let nonAdminUser;
 let org;
 let project;
 let projID;
 const branchID = 'master';
-let webhookID;
-let incomingWebhookID;
-let webhookIDs = [];
+const webhookIDs = [];
 
 /* --------------------( Main )-------------------- */
 /**
@@ -88,27 +82,30 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   // ------------- Create -------------
   it('should create a webhook on an org', createOnOrg);
-  it('should create a webhook on an org', createOnProject);
-  it('should create a webhook on an org', createOnBranch);
+  it('should create a webhook on a project', createOnProject);
+  it('should create a webhook on a branch', createOnBranch);
   it('should populate allowed fields when creating a webhook', optionPopulateCreate);
   it('should return a webhook with only the specific fields specified from create()', optionFieldsCreate);
   // -------------- Find --------------
   it('should find an org webhook', findOnOrg);
   it('should find a project webhook', findOnProject);
   it('should find a branch webhook', findOnBranch);
-  // it('should find any webhook', optionAllFind);
-  // it('should populate allowed fields when finding a webhook', optionPopulateFind);
-  // it('should find an archived webhook when the option archived is provided', optionArchivedFind);
-  // it('should return a webhook with only the specific fields specified from find()', optionFieldsFind);
-  // it('should return a limited number of webhooks from find()', optionLimitFind);
-  // it('should return a second batch of webhooks with the limit and skip option from find()', optionSkipFind);
-  // it('should sort find results', optionSortFind);
-
-  // // ------------- Update -------------
-  // it('should archive a webhook', archiveWebhook);
-  // it('should populate allowed fields when updating a webhook', optionPopulateUpdate);
-  // it('should return a webhook with only the specific fields specified from update()', optionFieldsUpdate);
+  it('should find any webhook', optionAllFind);
+  it('should populate allowed fields when finding a webhook', optionPopulateFind);
+  it('should find an archived webhook when the option archived is provided', optionArchivedFind);
+  it('should find an archived webhook when the option includeArchived is provided', optionIncludeArchivedFind);
+  it('should return a webhook with only the specific fields specified from find()', optionFieldsFind);
+  it('should return a limited number of webhooks from find()', optionLimitFind);
+  it('should return a second batch of webhooks with the limit and skip option from find()', optionSkipFind);
+  it('should sort find results', optionSortFind);
+  // ------------- Update -------------
+  it('should archive a webhook', archiveWebhook);
+  it('should populate allowed fields when updating a webhook', optionPopulateUpdate);
+  it('should return a webhook with only the specific fields specified from update()', optionFieldsUpdate);
   // ------------- Remove -------------
+  it('should delete a webhook from an org', deleteOnOrg);
+  it('should delete a webhook from a project', deleteOnProject);
+  it('should delete a webhook from a branch', deleteOnBranch);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -307,7 +304,7 @@ async function optionFieldsCreate() {
     const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
 
     // Create a list of visible webhook fields. Object.keys(webhook) returns hidden fields as well
-    const visibleFields = Object.keys(webhook._doc);
+    const visibleFields = Object.keys(webhook);
 
     // Check that the only keys in the element are the expected ones
     chai.expect(visibleFields).to.have.members(expectedFields);
@@ -324,7 +321,7 @@ async function optionFieldsCreate() {
     const webhook2 = notFieldsWebhooks[0];
 
     // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
-    const visibleFields2 = Object.keys(webhook2._doc);
+    const visibleFields2 = Object.keys(webhook2);
 
     // Check that the keys in the notFindOptions are not in elem
     chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
@@ -338,12 +335,6 @@ async function optionFieldsCreate() {
     chai.expect(error.message).to.equal(null);
   }
 }
-
-
-
-
-
-
 
 /**
  * @description Validates that the Webhook Controller can find a webhook on an org.
@@ -451,6 +442,565 @@ async function findOnBranch() {
     chai.expect(foundWebhook.createdOn).to.not.equal(null);
     chai.expect(foundWebhook.updatedOn).to.not.equal(null);
     chai.expect(foundWebhook.archivedOn).to.equal(null);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that the Webhook Controller can find a webhook on an org.
+ */
+async function optionAllFind() {
+  try {
+    // Set the server option to false to find every webhook
+    const options = { server: false };
+
+    // Find webhook via controller
+    const foundWebhooks = await WebhookController.find(adminUser, null, null, null,
+      options);
+
+    // Expect to find server webhooks
+    const serverWebhooks = foundWebhooks.filter((w) => w.reference === '');
+    chai.expect(serverWebhooks.length).to.be.at.least(2);
+
+    // Expect to find org webhooks
+    const orgWebhooks = foundWebhooks.filter((w) => w.reference === org._id);
+    chai.expect(orgWebhooks.length).to.be.at.least(1);
+
+    // Expect to find project webhooks
+    const projectWebhooks = foundWebhooks.filter((w) => w.reference === utils.createID(
+      org._id, projID
+    ));
+    chai.expect(projectWebhooks.length).to.be.at.least(1);
+
+    // Expect to find branch webhooks
+    const branchWebhooks = foundWebhooks.filter((w) => w.reference === utils.createID(
+      org._id, projID, branchID
+    ));
+    chai.expect(branchWebhooks.length).to.be.at.least(1);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that the Webhook Controller can return populated fields when
+ * finding a webhook.
+ */
+async function optionPopulateFind() {
+  try {
+    // Set object to create and populate option
+    const webhookData = webhookIDs[0];
+    const pop = Webhook.getValidPopulateFields();
+    const options = { populate: pop };
+
+    // Create webhook via controller
+    const foundWebhooks = await WebhookController.find(adminUser, null, null, null,
+      webhookData, options);
+
+    // Expect foundWebhooks array to contain 1 webhook
+    chai.expect(foundWebhooks.length).to.equal(1);
+    const webhook = foundWebhooks[0];
+
+    // For each field in pop
+    pop.forEach((field) => {
+      chai.expect(field in webhook).to.equal(true);
+      if (Array.isArray(webhook[field])) {
+        webhook[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (webhook[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof webhook[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in webhook[field]).to.equal(true);
+      }
+    });
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that the Webhook Controller can find an archived webhook with the
+ * archived option.
+ */
+async function optionArchivedFind() {
+  try {
+    const webhookData = webhookIDs[0];
+    const options = { archived: true };
+
+    // First archive the webhook
+    await Webhook.updateOne({ _id: webhookData }, options);
+
+    // Now attempt to find it
+    const foundWebhooks = await WebhookController.find(adminUser, null, null, null, webhookData,
+      options);
+
+    // Expect foundWebhooks array to contain 1 webhook
+    chai.expect(foundWebhooks.length).to.equal(1);
+    const webhook = foundWebhooks[0];
+
+    // Verify webhook
+    chai.expect(webhook._id).to.equal(webhookData);
+    chai.expect(webhook.archived).to.equal(true);
+
+    // Unarchive the webhook
+    await Webhook.updateOne({ _id: webhookData }, { archived: false });
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+
+/**
+ * @description Validates that the Webhook Controller can find an archived webhook with the
+ * includeArchived option.
+ */
+async function optionIncludeArchivedFind() {
+  try {
+    const webhookData = webhookIDs[0];
+    const options = { includeArchived: true };
+
+    // First archive the webhook
+    await Webhook.updateOne({ _id: webhookData }, { archived: true });
+
+    // Now attempt to find it
+    const foundWebhooks = await WebhookController.find(adminUser, null, null, null, webhookData,
+      options);
+
+    // Expect foundWebhooks array to contain 1 webhook
+    chai.expect(foundWebhooks.length).to.equal(1);
+    const webhook = foundWebhooks[0];
+
+    // Verify webhook
+    chai.expect(webhook._id).to.equal(webhookData);
+    chai.expect(webhook.archived).to.equal(true);
+
+    // Unarchive the webhook
+    await Webhook.updateOne({ _id: webhookData }, { archived: false });
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that the Webhook Controller can return only specified fields when
+ * findind webhooks with the fields option.
+ */
+async function optionFieldsFind() {
+  try {
+    // Set object to create and populate option
+    const webhookData = webhookIDs[0];
+    // Create the options object with the list of fields specifically to find
+    const findOptions = { fields: ['name', 'createdBy'] };
+    // Create the options object with the list of fields to specifically NOT to find
+    const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
+    // Create the list of fields which are always provided no matter what
+    const fieldsAlwaysProvided = ['_id'];
+
+    // Create webhook via controller
+    const fieldsWebhooks = await WebhookController.find(adminUser, null, null, null,
+      webhookData, findOptions);
+
+    // Expect createdWebhooks array to contain 1 webhook
+    chai.expect(fieldsWebhooks.length).to.equal(1);
+    const webhook = fieldsWebhooks[0];
+
+    // Create the list of fields that should be returned
+    const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
+
+    // Create a list of visible webhook fields. Object.keys(webhook) returns hidden fields as well
+    const visibleFields = Object.keys(webhook);
+
+    // Check that the only keys in the element are the expected ones
+    chai.expect(visibleFields).to.have.members(expectedFields);
+
+    // Keep track of _id to delete it at the end
+    webhookIDs.push(webhook._id);
+
+    // Create webhook via controller
+    const notFieldsWebhooks = await WebhookController.find(adminUser, null, null, null,
+      webhookData, notFindOptions);
+
+    // Expect createdWebhooks array to contain 1 webhook
+    chai.expect(notFieldsWebhooks.length).to.equal(1);
+    const webhook2 = notFieldsWebhooks[0];
+
+    // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
+    const visibleFields2 = Object.keys(webhook2);
+
+    // Check that the keys in the notFindOptions are not in elem
+    chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
+
+    // Keep track of _id to delete it at the end
+    webhookIDs.push(webhook2._id);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that the Webhook Controller can return a limited number of documents
+ * when finding webhooks with the limit option.
+ */
+async function optionLimitFind() {
+  try {
+    // Create the options object with a limit of 2 and server: false to find all webhooks
+    const options = { limit: 2, server: false };
+
+    // Find all webhooks
+    const foundWebhooks = await WebhookController.find(adminUser, null, null, null, options);
+    // Verify that no more than 2 webhooks were found
+    chai.expect(foundWebhooks).to.have.lengthOf.at.most(2);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Verifies that the Webhook Controller can return a second batch of documents when
+ * finding documents using the 'limit' and 'skip' option.
+ */
+async function optionSkipFind() {
+  try {
+    // Create the first options object with just a limit
+    const firstOptions = { limit: 2, server: false };
+    // Create the second options object with a limit and skip
+    const secondOptions = { limit: 2, skip: 2, server: false };
+
+    // Find all webhooks
+    const foundWebhooks = await WebhookController.find(adminUser, null, null, null,
+      firstOptions);
+    // Verify that no more than 2 webhooks were found
+    chai.expect(foundWebhooks).to.have.lengthOf.at.most(2);
+    // Add webhook ids to the firstBatchIDs array
+    const firstBatchIDs = foundWebhooks.map(w => w._id);
+
+    // Find the next batch of webhooks
+    const secondWebhooks = await WebhookController.find(adminUser, null, null, null,
+      secondOptions);
+    // Verify that no more than 2 webhooks were found
+    chai.expect(secondWebhooks).to.have.lengthOf.at.most(2);
+    // Verify the second batch of webhooks are not the same as the first
+    const secondBatchIDs = secondWebhooks.map(w => w._id);
+    chai.expect(secondBatchIDs).to.not.have.members(firstBatchIDs);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that the Webhook Controller can return find() results sorted.
+ */
+async function optionSortFind() {
+  try {
+    // Get data to create 3 webhooks
+    const webhookData = [{
+      name: 'a',
+      type: testData.webhooks[0].type,
+      triggers: testData.webhooks[0].triggers,
+      responses: testData.webhooks[0].responses
+    },
+    {
+      name: 'b',
+      type: testData.webhooks[0].type,
+      triggers: testData.webhooks[0].triggers,
+      responses: testData.webhooks[0].responses
+    },
+    {
+      name: 'c',
+      type: testData.webhooks[0].type,
+      triggers: testData.webhooks[0].triggers,
+      responses: testData.webhooks[0].responses
+    }];
+
+    // Create sort options
+    const sortOption = { sort: 'name' };
+    const sortOptionReverse = { sort: '-name' };
+
+    // Create the test webhooks
+    const createdWebhooks = await WebhookController.create(adminUser, null, null, null,
+      webhookData);
+    // Store the ids to be deleted at the end of the tests
+    webhookIDs.push(...createdWebhooks.map((w) => w._id));
+
+    // Find the webhooks and return them sorted
+    const foundWebhooks = await WebhookController.find(adminUser, null, null, null,
+      createdWebhooks.map((w) => w._id), sortOption);
+    // Expect to find all three webhooks
+    chai.expect(foundWebhooks.length).to.equal(3);
+
+    // Validate that the sort option is working
+    chai.expect(foundWebhooks[0].name).to.equal('a');
+    chai.expect(foundWebhooks[1].name).to.equal('b');
+    chai.expect(foundWebhooks[2].name).to.equal('c');
+
+    // Find the elements and return them sorted in reverse
+    const reverseWebhooks = await WebhookController.find(adminUser, null, null, null,
+      createdWebhooks.map((w) => w._id), sortOptionReverse);
+    // Expect to find all three webhooks
+    chai.expect(reverseWebhooks.length).to.equal(3);
+
+    // Validate that the sort option is working
+    chai.expect(reverseWebhooks[0].name).to.equal('c');
+    chai.expect(reverseWebhooks[1].name).to.equal('b');
+    chai.expect(reverseWebhooks[2].name).to.equal('a');
+
+    // await WebhookController.remove(adminUser, null, null, null,
+    //   createdWebhooks.map((w) => w._id));
+  }
+  catch (error) {
+    M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Verifies that the Webhook Controller can archive a webhook via update().
+ */
+async function archiveWebhook() {
+  try {
+    // Create the update object
+    const webhookData = {
+      _id: webhookIDs[0],
+      archived: true
+    };
+
+    // Update the webhook. The first webhook created was on the org
+    const updatedWebooks = await WebhookController.update(adminUser, org._id, null, null,
+      webhookData);
+
+    // Verify the array length is exactly 1
+    chai.expect(updatedWebooks.length).to.equal(1);
+    const webhook = updatedWebooks[0];
+
+    // Expect archived to be true, and archivedOn and archivedBy to not be null
+    chai.expect(webhook.archived).to.equal(true);
+    chai.expect(webhook.archivedBy).to.equal(adminUser._id);
+    chai.expect(webhook.archivedOn).to.not.equal(null);
+
+    // Unarchive the webhook for future use
+    Webhook.updateOne({ _id: webhookData._id }, { archived: false });
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that the Webhook Controller can return populated fields in the return
+ * object upon updating a webhook.
+ */
+async function optionPopulateUpdate() {
+  try {
+    // Get the valid populate fields
+    const pop = Webhook.getValidPopulateFields();
+    // Create the options object
+    const options = { populate: pop };
+    // Create the update object
+    const webhookData = {
+      _id: webhookIDs[1],
+      name: 'Update'
+    };
+
+    // Update the webhook. The second webhook created was on the project
+    const updatedWebhooks = await WebhookController.update(adminUser, org._id, projID, null,
+      webhookData, options);
+    // Verify the array length is exactly 1
+    chai.expect(updatedWebhooks.length).to.equal(1);
+    const webhook = updatedWebhooks[0];
+
+    // For each field in pop
+    pop.forEach((field) => {
+      chai.expect(field in webhook).to.equal(true);
+      if (Array.isArray(webhook[field])) {
+        webhook[field].forEach((item) => {
+          // Expect each populated field to be an object
+          chai.expect(typeof item).to.equal('object');
+          // Expect each populated field to at least have an id
+          chai.expect('_id' in item).to.equal(true);
+        });
+      }
+      else if (webhook[field] !== null) {
+        // Expect each populated field to be an object
+        chai.expect(typeof webhook[field]).to.equal('object');
+        // Expect each populated field to at least have an id
+        chai.expect('_id' in webhook[field]).to.equal(true);
+      }
+    });
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Verifies that option 'fields' returns an element with only
+ * specific fields in update().
+ */
+async function optionFieldsUpdate() {
+  try {
+    // Create the update objects
+    const webhookData = {
+      _id: webhookIDs[1],
+      name: 'Fields Update'
+    };
+    // Create the options object with the list of fields specifically to find
+    const findOptions = { fields: ['name', 'createdBy'] };
+    // Create the options object with the list of fields to specifically NOT to find
+    const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
+    // Create the list of fields which are always provided no matter what
+    const fieldsAlwaysProvided = ['_id'];
+
+    // Update the webhook only with specific fields returned
+    const updatedWebhooks = await WebhookController.update(adminUser, org._id, projID,
+      null, webhookData, findOptions);
+    // Expect there to be exactly 1 webhook updated
+    chai.expect(updatedWebhooks.length).to.equal(1);
+    const webhook = updatedWebhooks[0];
+
+    // Create the list of fields that should be returned
+    const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
+
+    // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
+    const visibleFields = Object.keys(webhook);
+
+    // Check that the only keys in the element are the expected ones
+    chai.expect(visibleFields).to.have.members(expectedFields);
+
+    // Update the webhook without the notFind fields
+    const notFindWebhooks = await WebhookController.update(adminUser, org._id, projID, null,
+      webhookData, notFindOptions);
+    // Expect there to be exactly 1 webhook updated
+    chai.expect(notFindWebhooks.length).to.equal(1);
+    const elem2 = notFindWebhooks[0];
+
+    // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
+    const visibleFields2 = Object.keys(elem2);
+
+    // Check that the keys in the notFindOptions are not in elem
+    chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that the Webhook Controller can delete a webhook on an org.
+ */
+async function deleteOnOrg() {
+  try {
+    const webhookID = webhookIDs[0];
+
+    // Delete webhook via controller
+    const deletedWebhooks = await WebhookController.remove(adminUser, org._id, null, null,
+      webhookID);
+
+    // Expect deletedWebhooks array to contain 1 webhook
+    chai.expect(deletedWebhooks.length).to.equal(1);
+    chai.expect(deletedWebhooks[0]).to.equal(webhookID);
+
+    // Try to find the webhook
+    const foundWebhooks = await WebhookController.find(adminUser, org._id, null, null,
+      webhookID);
+
+    // Expect nothing to be returned
+    chai.expect(foundWebhooks.length).to.equal(0);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that the Webhook Controller can delete a webhook on a project.
+ */
+async function deleteOnProject() {
+  try {
+    const webhookID = webhookIDs[1];
+
+    // Delete webhook via controller
+    const deletedWebhooks = await WebhookController.remove(adminUser, org._id, projID, null,
+      webhookID);
+
+    // Expect deletedWebhooks array to contain 1 webhook
+    chai.expect(deletedWebhooks.length).to.equal(1);
+    chai.expect(deletedWebhooks[0]).to.equal(webhookID);
+
+    // Try to find the webhook
+    const foundWebhooks = await WebhookController.find(adminUser, org._id, projID, null,
+      webhookID);
+
+    // Expect nothing to be returned
+    chai.expect(foundWebhooks.length).to.equal(0);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that the Webhook Controller can delete a webhook on a branch.
+ */
+async function deleteOnBranch() {
+  try {
+    const webhookID = webhookIDs[2];
+
+    // Delete webhook via controller
+    const deletedWebhooks = await WebhookController.remove(adminUser, org._id, projID, branchID,
+      webhookID);
+
+    // Expect deletedWebhooks array to contain 1 webhook
+    chai.expect(deletedWebhooks.length).to.equal(1);
+    chai.expect(deletedWebhooks[0]).to.equal(webhookID);
+
+    // Try to find the webhook
+    const foundWebhooks = await WebhookController.find(adminUser, org._id, projID, branchID,
+      webhookID);
+
+    // Expect nothing to be returned
+    chai.expect(foundWebhooks.length).to.equal(0);
   }
   catch (error) {
     M.log.error(error);

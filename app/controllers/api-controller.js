@@ -5795,7 +5795,7 @@ async function getWebhook(req, res) {
     populate: 'array',
     includeArchived: 'boolean',
     fields: 'array',
-    minified: 'boolean',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request

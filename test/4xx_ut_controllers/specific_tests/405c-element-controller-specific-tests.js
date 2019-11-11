@@ -439,7 +439,7 @@ async function optionSortFind() {
       testElems.map((e) => e.id),
       sortOptionReverse);
     // Expect to find all three elements
-    chai.expect(foundElems.length).to.equal(3);
+    chai.expect(reverseElems.length).to.equal(3);
 
     // Validate that the sort option is working
     chai.expect(reverseElems[0].name).to.equal('c');

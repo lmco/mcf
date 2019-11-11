@@ -311,23 +311,7 @@ async function deleteWebhook() {
 
     // Expect deletedWebhooks array to contain 1 webhook
     chai.expect(deletedWebhooks.length).to.equal(1);
-    const deletedWebhook = deletedWebhooks[0];
-
-    // Verify webhook
-    chai.expect(deletedWebhook._id).to.equal(webhookData._id);
-    chai.expect(deletedWebhook.name).to.equal(webhookData.name);
-    chai.expect(deletedWebhook.type).to.equal(webhookData.type);
-    chai.expect(deletedWebhook.description).to.equal(webhookData.description);
-    chai.expect(deletedWebhook.triggers).to.deep.equal(webhookData.triggers);
-    chai.expect(deletedWebhook.custom).to.deep.equal(webhookData.custom || {});
-
-    // Verify additional properties
-    chai.expect(deletedWebhook.createdBy).to.equal(adminUser._id);
-    chai.expect(deletedWebhook.lastModifiedBy).to.equal(adminUser._id);
-    chai.expect(deletedWebhook.archivedBy).to.equal(null);
-    chai.expect(deletedWebhook.createdOn).to.not.equal(null);
-    chai.expect(deletedWebhook.updatedOn).to.not.equal(null);
-    chai.expect(deletedWebhook.archivedOn).to.equal(null);
+    chai.expect(deletedWebhooks[0]).to.equal(webhookData._id);
 
     // Try to find the webhook
     const foundWebhooks = await WebhookController.find(adminUser, null, null, null,
@@ -357,31 +341,10 @@ async function deleteWebhooks() {
 
     // Expect deletedWebhooks array to contain 2 webhooks
     chai.expect(deletedWebhooks.length).to.equal(2);
+    chai.expect(deletedWebhooks.includes(webhookIDs[0])).to.equal(true);
+    chai.expect(deletedWebhooks.includes(webhookIDs[1])).to.equal(true);
 
-    // Convert createdWebhooks to JMI type 2 for easier lookup
-    const jmi2 = jmi.convertJMI(1, 2, deletedWebhooks);
-
-    webhookData.forEach((webhookDataObj) => {
-      const deletedWebhook = jmi2[webhookDataObj._id];
-
-      // Verify webhook
-      chai.expect(deletedWebhook._id).to.equal(webhookDataObj._id);
-      chai.expect(deletedWebhook.name).to.equal(webhookDataObj.name);
-      chai.expect(deletedWebhook.type).to.equal(webhookDataObj.type);
-      chai.expect(deletedWebhook.description).to.equal(webhookDataObj.description);
-      chai.expect(deletedWebhook.triggers).to.deep.equal(webhookDataObj.triggers);
-      chai.expect(deletedWebhook.custom).to.deep.equal(webhookDataObj.custom || {});
-
-      // Verify additional properties
-      chai.expect(deletedWebhook.createdBy).to.equal(adminUser._id);
-      chai.expect(deletedWebhook.lastModifiedBy).to.equal(adminUser._id);
-      chai.expect(deletedWebhook.archivedBy).to.equal(null);
-      chai.expect(deletedWebhook.createdOn).to.not.equal(null);
-      chai.expect(deletedWebhook.updatedOn).to.not.equal(null);
-      chai.expect(deletedWebhook.archivedOn).to.equal(null);
-    });
-
-    // Try to find the webhook
+    // Try to find the webhooks
     const foundWebhooks = await WebhookController.find(adminUser, null, null, null,
       webhookIDs);
 

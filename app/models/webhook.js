@@ -162,8 +162,7 @@ const WebhookSchema = new db.Schema({
       required: true,
       validate: [{
         validator: function(v) {
-          return true;
-          //return RegExp(validators.webhook.url).test(v);
+          return true; // TODO: validate the url?
         },
         message: () => 'The URL field does not contain a valid url.'
       }
@@ -256,15 +255,15 @@ WebhookSchema.plugin(extensions);
  * @description Send the requests stored in the webhook.
  * @memberOf WebhookSchema
  */
-WebhookSchema.method('sendRequest', function(data) {
+WebhookSchema.static('sendRequest', function(that, data) {
   // Verify that the webhook matches the org, project, or branch of the data or that this is
   // a generic, server-wide webbhook
-  if ((this.org && this.org === data.org)
-    || (this.project && this.project === data.project)
-    || (this.branch && this.branch === data.branch)
-    || (!this.org && !this.project && !this.branch)) {
+  if ((that.org && that.org === data.org)
+    || (that.project && that.project === data.project)
+    || (that.branch && that.branch === data.branch)
+    || (!that.org && !that.project && !that.branch)) {
     // For every response in the webhook responses list
-    this.responses.forEach((response) => {
+    that.responses.forEach((response) => {
       const options = {
         url: response.url,
         headers: response.headers,
@@ -284,9 +283,9 @@ WebhookSchema.method('sendRequest', function(data) {
  * @description Validates the token sent for an incoming webhook.
  * @memberOf WebhookSchema
  */
-WebhookSchema.method('verifyAuthority', function(value) {
-  if (!(this.type === 'Incoming' && this.incoming.token === value)) {
-    throw new M.PermissionError('Token recieved from request does not match stored token.', 'warn');
+WebhookSchema.static('verifyAuthority', function(that, value) {
+  if (!(that.type === 'Incoming' && that.token === value)) {
+    throw new M.PermissionError('Token received from request does not match stored token.', 'warn');
   }
 });
 
@@ -294,22 +293,15 @@ WebhookSchema.method('verifyAuthority', function(value) {
  * @description Returns webhook fields that can be changed
  * @memberOf WebhookSchema
  */
-WebhookSchema.method('getValidUpdateFields', function() {
-  return ['name', 'description', 'triggers', 'responses', 'token', 'tokenLocation'];
-});
-
 WebhookSchema.static('getValidUpdateFields', function() {
-  return ['name', 'description', 'triggers', 'responses', 'token', 'tokenLocation'];
+  return ['name', 'description', 'triggers', 'responses', 'token', 'tokenLocation',
+    'archived'];
 });
 
 /**
  * @description Returns a list of fields a requesting user can populate
  * @memberOf WebhookSchema
  */
-WebhookSchema.method('getValidPopulateFields', function() {
-  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'reference'];
-});
-
 WebhookSchema.static('getValidPopulateFields', function() {
   return ['archivedBy', 'lastModifiedBy', 'createdBy', 'reference'];
 });

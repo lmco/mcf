@@ -61,7 +61,9 @@ describe(M.getModuleName(module.filename), () => {
    */
   after(async () => {
     try {
-      db.disconnect();
+      // Remove the webhook
+      await Webhook.deleteMany({ _id: webhookID });
+      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);
@@ -76,6 +78,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should find a webhook', findWebhook);
   it('should update a webhook', updateWebhook);
   it('should delete a webhook', deleteWebhook);
+  it('should verify a token', verifyToken);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -180,6 +183,32 @@ async function deleteWebhook() {
 
     // foundWebhook should be null
     should.not.exist(foundWebhook);
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
+}
+
+/**
+ * @description Verifies a token via the Webhook model.
+ */
+async function verifyToken() {
+  try {
+    // Get data for an incoming webhook
+    const webhookData = testData.webhooks[1];
+    // Give the webhook the previously generated global _id
+    webhookData._id = webhookID;
+
+    // Get the token
+    const token = webhookData.token;
+
+    // Save the Webhook model object to the database
+    const webhooks = await Webhook.insertMany(webhookData);
+
+    // Run the webhook test for tokens; it will throw an error if they don't match
+    Webhook.verifyAuthority(webhooks[0], token);
   }
   catch (error) {
     M.log.error(error);

@@ -204,7 +204,7 @@ async function find(requestingUser, organizationID, projectID, branchID, webhook
       { skip: validatedOptions.skip,
         limit: validatedOptions.limit,
         sort: validatedOptions.sort,
-        populate: validatedOptions.populate
+        populate: validatedOptions.populateString
       });
   }
   catch (error) {
@@ -469,6 +469,7 @@ async function update(requestingUser, organizationID, projectID, branchID, webho
       refID = '';
     }
 
+    // Ensure update data is formatted properly
     webhooksToUpdate.forEach((webhook) => {
       // Ensure that each update object has an _id
       if (webhook._id === undefined) {
@@ -627,17 +628,17 @@ async function update(requestingUser, organizationID, projectID, branchID, webho
 }
 
 /**
- * @description This function removes one or many webhooks. Once the webhooks are deleted, the
- * documents as they were before deletion are returned.
+ * @description This function removes one or many webhooks and returns the _ids of the deleted
+ * webhooks.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string|null} organizationID - The ID of the owning organization.
  * @param {string|null} projectID - The ID of the owning project.
  * @param {string|null} branchID - The ID of the owning branch.
- * @param {(string|string[])} webhooks - The webhooks to remove. Can either be
- * an array of webhook ids or a single webhook id.
- * @param {object} [options] - A parameter that provides supported options.
- * Currently there are no supported options.
+ * @param {(string|string[])} webhooks - The webhooks to remove. Can either be an array of webhook
+ * ids or a single webhook id.
+ * @param {object} [options] - A parameter that provides supported options. Currently there are no
+ * supported options.
  *
  * @returns {Promise<object[]>} Array of deleted element ids.
  *
@@ -711,7 +712,7 @@ async function remove(requestingUser, organizationID, projectID, branchID, webho
     // Emit event for webhook deletion
     EventEmitter.emit('webhooks-deleted', foundWebhooks);
 
-    return foundWebhooks;
+    return foundWebhooks.map((w) => w._id);
   }
   catch (error) {
     throw errors.captureError(error);

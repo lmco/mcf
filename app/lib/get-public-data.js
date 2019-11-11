@@ -932,7 +932,6 @@ function getWebhookPublicData(webhook, options) {
   let createdBy = null;
   let lastModifiedBy = null;
   let archivedBy;
-  let projects;
 
   // If webhook.createdBy is defined
   if (webhook.createdBy) {
