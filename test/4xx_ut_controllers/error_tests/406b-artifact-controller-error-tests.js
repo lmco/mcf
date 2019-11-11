@@ -5,11 +5,11 @@
  *
  * @copyright Copyright (C) 2019, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Phillip Lee <phillip.lee@lmco.com>
+ * @owner Phillip Lee
  *
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Phillip Lee
  *
  * @description This tests for expected errors within the artifact controller.
  */
