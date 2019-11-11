@@ -28,7 +28,9 @@ const utils = M.require('lib.utils');
 const models = {};
 
 /**
- * @description Creates the connection to the DynamoDB instance.
+ * @description Creates the connection to the DynamoDB instance. View the
+ * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#constructor-property DynamoDB}
+ * documentation for more information on the DynamoDB constructor.
  *
  * @returns {Promise<object>} The DynamoDB connection object.
  */
@@ -293,8 +295,6 @@ class Query {
     this.options = options;
     this.ExpressionAttributeNames = {};
     this.ExpressionAttributeValues = {};
-    this.RequestItemsKeys = [];
-    this.UpdateExpression = '';
   }
 
   parseFilterExpression(query, expAttNames) {
@@ -509,6 +509,12 @@ class Query {
 
   // TODO: Update function to not use this
   parseUpdateExpression(filter) {
+    const updateObj = {
+      ExpressionAttributeNames: {},
+      ExpressionAttributeValues: {},
+      UpdateExpression: ''
+    };
+
     // Handle filter expression
     Object.keys(filter).forEach((k) => {
       // Handle special case where key name starts with an underscore
@@ -520,27 +526,27 @@ class Query {
         split.forEach((s) => {
           const kName = (s === '_id') ? 'id' : s;
           // Add key to ExpressionAttributeNames
-          this.ExpressionAttributeNames[`#${kName}`] = s;
+          updateObj.ExpressionAttributeNames[`#${kName}`] = s;
         });
         keyName = split.join('.#');
       }
       else {
         // Add key to ExpressionAttributeNames
-        this.ExpressionAttributeNames[`#${keyName}`] = k;
+        updateObj.ExpressionAttributeNames[`#${keyName}`] = k;
       }
 
       const valueKey = (k.includes('.')) ? k.split('.').join('_') : k;
 
       // Perform operation based on the type of parameter being updated
-      this.ExpressionAttributeValues[`:${valueKey}`] = this.keyFormat(filter[k]);
+      updateObj.ExpressionAttributeValues[`:${valueKey}`] = this.keyFormat(filter[k]);
 
       // If UpdateExpression is not defined yet, define it
-      if (this.UpdateExpression === '') {
-        this.UpdateExpression = `SET #${keyName} = :${valueKey}`;
+      if (updateObj.UpdateExpression === '') {
+        updateObj.UpdateExpression = `SET #${keyName} = :${valueKey}`;
       }
       else {
         // Append on condition
-        this.UpdateExpression += `, #${keyName} = :${valueKey}`;
+        updateObj.UpdateExpression += `, #${keyName} = :${valueKey}`;
       }
     });
   }
@@ -641,7 +647,7 @@ class Query {
   }
 
   updateItem(filter, doc) {
-    this.parseUpdateExpression(doc);
+    const updateExpressionObj = this.parseUpdateExpression(doc);
     const requestItemsKeys = this.parseRequestItemsKeys(filter);
 
     const baseObj = {
@@ -651,16 +657,16 @@ class Query {
     };
 
     // Add on the ExpressionAttributeNames if defined
-    if (Object.keys(this.ExpressionAttributeNames).length !== 0) {
-      baseObj.ExpressionAttributeNames = this.ExpressionAttributeNames;
+    if (Object.keys(updateExpressionObj.ExpressionAttributeNames).length !== 0) {
+      baseObj.ExpressionAttributeNames = updateExpressionObj.ExpressionAttributeNames;
     }
 
     // Add on ExpressionAttributeValues and UpdateExpression if defined
-    if (this.UpdateExpression.length) {
-      baseObj.UpdateExpression = this.UpdateExpression;
+    if (updateExpressionObj.UpdateExpression.length) {
+      baseObj.UpdateExpression = updateExpressionObj.UpdateExpression;
     }
-    if (Object.keys(this.ExpressionAttributeValues).length !== 0) {
-      baseObj.ExpressionAttributeValues = this.ExpressionAttributeValues;
+    if (Object.keys(updateExpressionObj.ExpressionAttributeValues).length !== 0) {
+      baseObj.ExpressionAttributeValues = updateExpressionObj.ExpressionAttributeValues;
     }
 
     return baseObj;
