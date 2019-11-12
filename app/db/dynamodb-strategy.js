@@ -30,23 +30,20 @@ const models = {};
 /**
  * @description Creates the connection to the DynamoDB instance. View the
  * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#constructor-property DynamoDB}
- * documentation for more information on the DynamoDB constructor.
+ * documentation for more information on the DynamoDB constructor. This function
+ * does not NEED to be async, but the requirements of the database abstraction
+ * layer expect it to be.
  *
  * @returns {Promise<object>} The DynamoDB connection object.
  */
 async function connect() {
-  return new Promise((resolve, reject) => {
-    // Create database connection
-    const dynamoDB = new AWS.DynamoDB({
-      apiVersion: '2012-08-10',
-      endpoint: `${M.config.db.url}:${M.config.db.port}`,
-      accessKeyId: M.config.db.accessKeyId,
-      secretAccessKey: M.config.db.secretAccessKey,
-      region: M.config.db.region
-    });
-
-    // Return the database connection
-    return resolve(dynamoDB);
+  // Create database connection
+  return new AWS.DynamoDB({
+    apiVersion: '2012-08-10',
+    endpoint: `${M.config.db.url}:${M.config.db.port}`,
+    accessKeyId: M.config.db.accessKeyId,
+    secretAccessKey: M.config.db.secretAccessKey,
+    region: M.config.db.region
   });
 }
 
@@ -81,7 +78,7 @@ async function connectDocument() {
  * @returns {Promise} Resolves every time.
  */
 async function disconnect() {
-  return new Promise((resolve) => resolve());
+  // Do nothing, not needed for DynamoDB
 }
 
 /**
@@ -325,146 +322,45 @@ class Query {
   }
 
   /**
-   * @description A helper function which parses a query and returns an object
-   * used by scan.
-   * @param query
-   * @returns {{ExpressionAttributeNames: *, FilterExpression: string, ExpressionAttributeValues: {}}}
-   */
-  parseFilterExpression(query) {
-    const returnObj = {
-      ExpressionAttributeNames: {},
-      ExpressionAttributeValues: {},
-      FilterExpression: ''
-    };
-
-    // Handle filter expression
-    Object.keys(query).forEach((k) => {
-      // Handle special case where key name starts with an underscore
-      let keyName = (k === '_id') ? 'id' : k;
-
-      // TODO: SUPPORT TEXT SEARCH
-      if (keyName === '$text') {
-        throw new M.NotImplementedError('Text search is currently not supported.');
-      }
-
-      // Handle case where searching nested object
-      if (keyName.includes('.')) {
-        const split = keyName.split('.');
-        split.forEach((s) => {
-          const kName = (s === '_id') ? 'id' : s;
-          // Add key to ExpressionAttributeNames
-          returnObj.ExpressionAttributeNames[`#${kName}`] = s;
-        });
-        keyName = split.join('.#');
-      }
-      else {
-        // Add key to ExpressionAttributeNames
-        returnObj.ExpressionAttributeNames[`#${keyName}`] = k;
-      }
-
-      const valueKey = (k.includes('.')) ? k.split('.').join('_') : k;
-
-      // Handle the special $in case
-      if (typeof query[k] === 'object' && query[k] !== null
-        && Object.keys(query[k])[0] === '$in') {
-        // Init the filter string
-        let filterString = '';
-        const arr = Object.values(query[k])[0];
-
-        if (arr.length > 0) {
-          // Loop over each item in arr
-          for (let i = 0; i < arr.length; i++) {
-            // Add value to ExpressionAttributeValues
-            returnObj.ExpressionAttributeValues[`:${valueKey}${i}`] = arr[i];
-
-            // If FilterExpression is empty, init it
-            if (!returnObj.FilterExpression && !filterString) {
-              filterString = `( #${keyName} = :${valueKey}${i}`;
-            }
-            else if (!filterString) {
-              filterString = ` AND ( #${keyName} = :${valueKey}${i}`;
-            }
-            else {
-              filterString += ` OR #${keyName} = :${valueKey}${i}`;
-            }
-          }
-
-          filterString += ' )';
-          returnObj.FilterExpression += filterString;
-        }
-      }
-      else {
-        returnObj.ExpressionAttributeValues[`:${valueKey}`] = query[k];
-
-        // Handle special case where searching an array of permissions
-        // TODO: SUPER HARDCODED
-        if (keyName.startsWith('permissions.')) {
-          // If FilterExpression is not defined yet, define it
-          if (returnObj.FilterExpression === '') {
-            returnObj.FilterExpression = `contains (#${keyName}, :${valueKey})`;
-          }
-          else {
-            // Append on condition
-            returnObj.FilterExpression += ` AND  contains (#${keyName}, :${valueKey})`;
-          }
-        }
-        // If FilterExpression is not defined yet, define it
-        else if (returnObj.FilterExpression === '') {
-          returnObj.FilterExpression = `#${keyName} = :${valueKey}`;
-        }
-        else {
-          // Append on condition
-          returnObj.FilterExpression += ` AND #${keyName} = :${valueKey}`;
-        }
-      }
-    });
-
-    return returnObj;
-  }
-
-  /**
+   * @description A helper function formats a key to be used in some
+   * objects ExpressionAttributeNames. Returns the formatted key and modifies
+   * the object by reference.
    *
-   * @param query
-   * @returns {object[]}
+   * @param {object} obj - A query object which contains a ExpressionAttributeNames
+   * object. This object is modified by reference.
+   * @param {string} key - The key to format for the ExpressionAttributeNames
+   * object.
+   *
+   * @returns {string} The formatted key.
+   *
+   * @throws {NotImplementedError} If the key is '$text', an error is thrown
+   * stating that text search is not supported.
    */
-  parseRequestItemsKeys(query) {
-    const returnArray = [];
-    const base = {};
-    const inVals = {};
+  parseExpressionAttributeNames(obj, key) { // eslint-disable-line class-methods-use-this
+    // Handle special case where key name starts with an underscore
+    let keyName = (key === '_id') ? 'id' : key;
 
-    // For each key in the query
-    Object.keys(query).forEach((key) => {
-      if (typeof query[key] === 'object') {
-        if (query[key] === null) {
-          base[key] = 'null';
-        }
-        else {
-          inVals[key] = Object.values(query[key])[0];
-        }
-      }
-      else {
-        base[key] = query[key];
-      }
-    });
+    // TODO: SUPPORT TEXT SEARCH
+    if (keyName === '$text') {
+      throw new M.NotImplementedError('Text search is currently not supported.');
+    }
 
-    // If no $in exists in the query, return the base query
-    if (Object.keys(inVals).length === 0) {
-      returnArray.push(base);
+    // Handle case where updating an object
+    if (keyName.includes('.')) {
+      const split = keyName.split('.');
+      split.forEach((s) => {
+        const kName = (s === '_id') ? 'id' : s;
+        // Add key to ExpressionAttributeNames
+        obj.ExpressionAttributeNames[`#${kName}`] = s;
+      });
+      keyName = split.join('.#');
     }
     else {
-      // For each in_val
-      Object.keys(inVals).forEach((k) => {
-        // For each item in the array to search through
-        inVals[k].forEach((i) => {
-          base[k] = i;
-
-          // Add on query, using JSON parse/stringify
-          returnArray.push(JSON.parse(JSON.stringify(base)));
-        });
-      });
+      // Add key to ExpressionAttributeNames
+      obj.ExpressionAttributeNames[`#${keyName}`] = key;
     }
 
-    return returnArray;
+    return keyName;
   }
 
   /**
@@ -496,56 +392,6 @@ class Query {
   }
 
   /**
-   *
-   * @param filter
-   * @returns {{ExpressionAttributeNames: {}, UpdateExpression: string, ExpressionAttributeValues: {}}}
-   */
-  parseUpdateExpression(filter) {
-    const updateObj = {
-      ExpressionAttributeNames: {},
-      ExpressionAttributeValues: {},
-      UpdateExpression: ''
-    };
-
-    // Handle filter expression
-    Object.keys(filter).forEach((k) => {
-      // Handle special case where key name starts with an underscore
-      let keyName = (k === '_id') ? 'id' : k;
-
-      // Handle case where updating an object
-      if (keyName.includes('.')) {
-        const split = keyName.split('.');
-        split.forEach((s) => {
-          const kName = (s === '_id') ? 'id' : s;
-          // Add key to ExpressionAttributeNames
-          updateObj.ExpressionAttributeNames[`#${kName}`] = s;
-        });
-        keyName = split.join('.#');
-      }
-      else {
-        // Add key to ExpressionAttributeNames
-        updateObj.ExpressionAttributeNames[`#${keyName}`] = k;
-      }
-
-      const valueKey = (k.includes('.')) ? k.split('.').join('_') : k;
-
-      // Perform operation based on the type of parameter being updated
-      updateObj.ExpressionAttributeValues[`:${valueKey}`] = this.formatJSON(filter[k]);
-
-      // If UpdateExpression is not defined yet, define it
-      if (updateObj.UpdateExpression === '') {
-        updateObj.UpdateExpression = `SET #${keyName} = :${valueKey}`;
-      }
-      else {
-        // Append on condition
-        updateObj.UpdateExpression += `, #${keyName} = :${valueKey}`;
-      }
-    });
-
-    return updateObj;
-  }
-
-  /**
    * @description Creates and returns an array of queries, properly formatted to
    * be used in DynamoDB's DocumentClient.batchGet(). Please view the following
    * links for more information:
@@ -559,24 +405,56 @@ class Query {
    */
   batchGet(filter) {
     // Format the filter into a RequestItems object
-    const requestItemsKeys = this.parseRequestItemsKeys(filter);
+    const base = {};
+    const inVals = {};
+    const keys = [];
     const queries = [];
-
-    // Create the base query object
-    const baseObj = {
+    const baseFindQuery = {
       RequestItems: {
         [this.model.TableName]: { Keys: [] }
       }
     };
 
-    // Loop over the number of keys in RequestItemsKeys
-    for (let i = 0; i < requestItemsKeys.length / 25; i++) {
+    // For each key in the query
+    Object.keys(filter).forEach((key) => {
+      if (typeof filter[key] === 'object') {
+        if (filter[key] === null) {
+          base[key] = 'null';
+        }
+        else {
+          inVals[key] = Object.values(filter[key])[0];
+        }
+      }
+      else {
+        base[key] = filter[key];
+      }
+    });
+
+    // If no $in exists in the query, return the base query
+    if (Object.keys(inVals).length === 0) {
+      keys.push(base);
+    }
+    else {
+      // For each in_val
+      Object.keys(inVals).forEach((k) => {
+        // For each item in the array to search through
+        inVals[k].forEach((i) => {
+          base[k] = i;
+
+          // Add on query, using JSON parse/stringify
+          keys.push(JSON.parse(JSON.stringify(base)));
+        });
+      });
+    }
+
+    // Loop over the number of keys
+    for (let i = 0; i < keys.length / 25; i++) {
       // Grab in batches of 25, this is the max number for DynamoDB
-      baseObj.RequestItems[this.model.TableName].Keys = requestItemsKeys
+      baseFindQuery.RequestItems[this.model.TableName].Keys = keys
       .slice(i * 25, i * 25 + 25);
 
       // Add query to array, copying the object to avoid modifying by reference
-      queries.push(JSON.parse(JSON.stringify(baseObj)));
+      queries.push(JSON.parse(JSON.stringify(baseFindQuery)));
     }
 
     return queries;
@@ -649,9 +527,12 @@ class Query {
    * @returns {object} - The properly formatted get() query.
    */
   getItem(filter) {
+    // Return a query where the Key is the first key/value from the filter
     return {
       TableName: this.model.TableName,
-      Key: this.parseRequestItemsKeys(filter)[0]
+      Key: {
+        [Object.keys(filter)[0]]: String(Object.values(filter)[0])
+      }
     };
   }
 
@@ -668,40 +549,94 @@ class Query {
    * @returns {object} - The properly formatted scan() query.
    */
   scan(query, options = {}) {
-    const filterObj = this.parseFilterExpression(query);
-    const baseObj = {
-      TableName: this.model.TableName
+    const findQuery = {
+      TableName: this.model.TableName,
+      ExpressionAttributeNames: {},
+      ExpressionAttributeValues: {},
+      FilterExpression: ''
     };
 
-    // Add on  ExpressionAttributeNames if defined
-    if (Object.keys(filterObj.ExpressionAttributeNames).length !== 0) {
-      baseObj.ExpressionAttributeNames = filterObj.ExpressionAttributeNames;
-    }
+    // If the query is not empty
+    if (Object.keys(query).length !== 0) {
+      // Handle the FilterExpression
+      Object.keys(query).forEach((k) => {
+        const keyName = this.parseExpressionAttributeNames(findQuery, k);
+        const valueKey = (k.includes('.')) ? k.split('.').join('_') : k;
 
-    // Add on ExpressionAttributeValues and FilterExpression if defined
-    if (filterObj.FilterExpression.length > 0) {
-      baseObj.FilterExpression = filterObj.FilterExpression;
+        // Handle the special $in case
+        if (typeof query[k] === 'object' && query[k] !== null
+          && Object.keys(query[k])[0] === '$in') {
+          // Init the filter string
+          let filterString = '';
+          const arr = Object.values(query[k])[0];
+
+          if (arr.length > 0) {
+            // Loop over each item in arr
+            for (let i = 0; i < arr.length; i++) {
+              // Add value to ExpressionAttributeValues
+              findQuery.ExpressionAttributeValues[`:${valueKey}${i}`] = arr[i];
+
+              // If FilterExpression is empty, init it
+              if (!findQuery.FilterExpression && !filterString) {
+                filterString = `( #${keyName} = :${valueKey}${i}`;
+              }
+              else if (!filterString) {
+                filterString = ` AND ( #${keyName} = :${valueKey}${i}`;
+              }
+              else {
+                filterString += ` OR #${keyName} = :${valueKey}${i}`;
+              }
+            }
+
+            filterString += ' )';
+            findQuery.FilterExpression += filterString;
+          }
+        }
+        else {
+          findQuery.ExpressionAttributeValues[`:${valueKey}`] = this.formatJSON(query[k]);
+
+          // TODO: SUPER HARDCODED
+          // Handle special case where searching an array of permissions
+          const filterString = (keyName.startsWith('permissions.'))
+            ? `contains (#${keyName}, :${valueKey})`
+            : `#${keyName} = :${valueKey}`;
+
+          // Set the FilterExpression
+          findQuery.FilterExpression = (!findQuery.FilterExpression)
+            ? filterString
+            : `${findQuery.FilterExpression} AND ${filterString}`;
+        }
+      });
+
+      // If the filterExpression is empty, delete ExpressionAttributeNames
+      // ExpressionAttributeValues and FilterExpression. This may happen if
+      // using $in with an empty array
+      if (!findQuery.FilterExpression) {
+        delete findQuery.ExpressionAttributeNames;
+        delete findQuery.ExpressionAttributeValues;
+        delete findQuery.FilterExpression;
+      }
     }
-    // If no FilterExpression is defined, remove the ExpressionAttributeNames
+    // Nothing is being filtered on
     else {
-      delete baseObj.ExpressionAttributeNames;
-    }
-
-    if (Object.keys(filterObj.ExpressionAttributeValues).length !== 0) {
-      baseObj.ExpressionAttributeValues = filterObj.ExpressionAttributeValues;
+      // Delete ExpressionAttributeNames, ExpressionAttributeValues and
+      // FilterExpression from the query. These cannot be empty if provided
+      delete findQuery.ExpressionAttributeNames;
+      delete findQuery.ExpressionAttributeValues;
+      delete findQuery.FilterExpression;
     }
 
     // If the limit option is provided and is greater than 0
     if (options.limit && options.limit > 0) {
-      baseObj.Limit = options.limit;
+      findQuery.Limit = options.limit;
     }
 
     // If the option LastEvaluatedKey is provided, set it for pagination
     if (options.LastEvaluatedKey) {
-      baseObj.LastEvaluatedKey = options.LastEvaluatedKey;
+      findQuery.LastEvaluatedKey = options.LastEvaluatedKey;
     }
 
-    return baseObj;
+    return findQuery;
   }
 
   /**
@@ -719,28 +654,45 @@ class Query {
    * @returns {object} - The properly formatted update() query.
    */
   update(filter, doc) {
-    const updateExpressionObj = this.parseUpdateExpression(doc);
-
-    const baseObj = {
+    // Init the update query
+    const updateQuery = {
+      ExpressionAttributeNames: {},
+      ExpressionAttributeValues: {},
+      UpdateExpression: '',
       TableName: this.model.TableName,
       ReturnValues: 'ALL_NEW',
-      Key: this.parseRequestItemsKeys(filter)[0]
+      Key: {
+        [Object.keys(filter)[0]]: String(Object.values(filter)[0]) // Set the key to filter on
+      }
     };
 
-    // Add on the ExpressionAttributeNames if defined
-    if (Object.keys(updateExpressionObj.ExpressionAttributeNames).length !== 0) {
-      baseObj.ExpressionAttributeNames = updateExpressionObj.ExpressionAttributeNames;
+    // If the update document is not empty
+    if (Object.keys(doc).length !== 0) {
+      // Handle the UpdateExpression
+      Object.keys(doc).forEach((k) => {
+        // Get the properly formatted key/value
+        const key = this.parseExpressionAttributeNames(updateQuery, k);
+        const value = (k.includes('.')) ? k.split('.').join('_') : k;
+
+        // Perform operation based on the type of parameter being updated
+        updateQuery.ExpressionAttributeValues[`:${value}`] = this.formatJSON(doc[k]);
+
+        // If UpdateExpression is not defined yet, define it, else append condition
+        updateQuery.UpdateExpression = (!updateQuery.UpdateExpression)
+          ? `SET #${key} = :${value}`
+          : `${updateQuery.UpdateExpression}, #${key} = :${value}`;
+      });
+    }
+    // No updates are actually being preformed
+    else {
+      // Delete ExpressionAttributeNames, ExpressionAttributeValues and
+      // UpdateExpression from the query. These cannot be empty if provided
+      delete updateQuery.ExpressionAttributeNames;
+      delete updateQuery.ExpressionAttributeValues;
+      delete updateQuery.UpdateExpression;
     }
 
-    // Add on ExpressionAttributeValues and UpdateExpression if defined
-    if (updateExpressionObj.UpdateExpression.length) {
-      baseObj.UpdateExpression = updateExpressionObj.UpdateExpression;
-    }
-    if (Object.keys(updateExpressionObj.ExpressionAttributeValues).length !== 0) {
-      baseObj.ExpressionAttributeValues = updateExpressionObj.ExpressionAttributeValues;
-    }
-
-    return baseObj;
+    return updateQuery;
   }
 
 }
@@ -842,8 +794,8 @@ class Model {
    * @async
    *
    * @param {object[]} documents -  The documents to properly format.
-   * @param {string} [projection] - A space separated string containing a list
-   * of fields to return (or not return).
+   * @param {string|null} [projection] - A space separated string containing a
+   * list of fields to return (or not return).
    * @param {object} [options={}] - The options supplied to the function.
    *
    * @returns {object[]} - An array of properly formatted documents.
