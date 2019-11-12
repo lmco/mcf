@@ -315,22 +315,24 @@ class Schema {
 class Query {
 
   /**
+   * @description Creates a new instance of the Query class. The Query class has
+   * multiple built-in functions for returning queries formatted for DynamoDB.
    *
-   * @param model
+   * @param {Model} model - The model which is using the queries.
    */
   constructor(model) {
     this.model = model;
   }
 
   /**
-   *
+   * @description A helper function which parses a query and returns an object
+   * used by scan.
    * @param query
-   * @param expAttNames
    * @returns {{ExpressionAttributeNames: *, FilterExpression: string, ExpressionAttributeValues: {}}}
    */
-  parseFilterExpression(query, expAttNames) {
+  parseFilterExpression(query) {
     const returnObj = {
-      ExpressionAttributeNames: expAttNames,
+      ExpressionAttributeNames: {},
       ExpressionAttributeValues: {},
       FilterExpression: ''
     };
@@ -466,15 +468,16 @@ class Query {
   }
 
   /**
-   * @description Formats a JSON object properly for DynamoDB.
+   * @description Formats a JSON object properly for DynamoDB. Changes all null
+   * values to strings. Since DynamoDB's DocumentClient is being used, the rest
+   * of the JSON does not need to be modified for use in DynamoDB.
    *
-   * @param {object} obj - The object to format.
+   * @param {object} obj - The JSON object to format.
    *
-   * @returns {object} The formatted object, where the keys are the original
-   * keys, but the values are objects containing the "type" as a key and the
-   * original value as the value. Ex: { hello: { S: 'world' }}.
+   * @returns {object} The formatted object, with all null values changed to the
+   * string "null".
    */
-  keyFormat(obj) {
+  formatJSON(obj) {
     // If the value is an object
     if (typeof obj === 'object') {
       // If null, return the string null since in DynamoDB you cannot store null in a string field
@@ -485,14 +488,13 @@ class Query {
       else {
         // Recursively call this function to fix null
         Object.keys(obj).forEach((k) => {
-          obj[k] = this.keyFormat(obj[k]);
+          obj[k] = this.formatJSON(obj[k]);
         });
       }
     }
     return obj;
   }
 
-  // TODO: Update function to not use this
   /**
    *
    * @param filter
@@ -528,7 +530,7 @@ class Query {
       const valueKey = (k.includes('.')) ? k.split('.').join('_') : k;
 
       // Perform operation based on the type of parameter being updated
-      updateObj.ExpressionAttributeValues[`:${valueKey}`] = this.keyFormat(filter[k]);
+      updateObj.ExpressionAttributeValues[`:${valueKey}`] = this.formatJSON(filter[k]);
 
       // If UpdateExpression is not defined yet, define it
       if (updateObj.UpdateExpression === '') {
@@ -616,7 +618,7 @@ class Query {
               Item: {}
             }
           };
-          putObj.PutRequest.Item = this.keyFormat(doc);
+          putObj.PutRequest.Item = this.formatJSON(doc);
           tmpQuery.RequestItems[this.model.TableName].push(putObj);
         }
         else {
@@ -666,7 +668,7 @@ class Query {
    * @returns {object} - The properly formatted scan() query.
    */
   scan(query, options = {}) {
-    const filterObj = this.parseFilterExpression(query, {});
+    const filterObj = this.parseFilterExpression(query);
     const baseObj = {
       TableName: this.model.TableName
     };
