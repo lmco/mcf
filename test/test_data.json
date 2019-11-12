@@ -375,8 +375,8 @@
       "type": "Incoming",
       "description": "test webhook description 1",
       "triggers": ["test-event"],
-      "token": "test_token",
-      "tokenLocation": "test_location"
+      "token": "test token",
+      "tokenLocation": "test location"
     },
     {
       "name": "test_webhook02",

@@ -51,7 +51,6 @@ describe(M.getModuleName(module.filename), () => {
       await db.connect();
       // Create test admin
       adminUser = await testUtils.createTestAdmin();
-      await testUtils.createNonAdminUser();
     }
     catch (error) {
       M.log.error(error);
@@ -65,9 +64,8 @@ describe(M.getModuleName(module.filename), () => {
    */
   after(async () => {
     try {
-      // Delete test admin and test user
+      // Delete test admin
       await testUtils.removeTestAdmin();
-      await testUtils.removeNonAdminUser();
       await db.disconnect();
     }
     catch (error) {

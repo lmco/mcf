@@ -40,12 +40,14 @@ const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
 const WebhookController = M.require('controllers.webhook-controller');
 const Webhook = M.require('models.webhook');
+const EventEmitter = M.require('lib.events');
 const errors = M.require('lib.errors');
 const jmi = M.require('lib.jmi-conversions');
 const logger = M.require('lib.logger');
 const publicData = M.require('lib.get-public-data');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
+
 
 // Expose `API Controller functions`
 module.exports = {
@@ -5583,6 +5585,7 @@ async function getWebhooks(req, res) {
     archived: 'boolean',
     includeArchived: 'boolean',
     fields: 'array',
+    server: 'boolean',
     limit: 'number',
     skip: 'number',
     lean: 'boolean',
@@ -5754,11 +5757,8 @@ async function deleteWebhooks(req, res) {
     const webhooks = await WebhookController.remove(req.user, org, project, branch, req.body,
       options);
 
-    // Get the webhook ids
-    const parsedIDs = webhooks.map((w) => w._id);
-
     // Format JSON
-    const json = formatJSON(parsedIDs, minified);
+    const json = formatJSON(webhooks, minified);
 
     // Return 200: OK and the deleted webhook
     return returnResponse(req, res, json, 200);
@@ -5795,7 +5795,8 @@ async function getWebhook(req, res) {
     populate: 'array',
     includeArchived: 'boolean',
     fields: 'array',
-    minified: 'boolean'
+    minified: 'boolean',
+    server: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -5921,13 +5922,6 @@ async function postWebhook(req, res) {
   if (req.params.hasOwnProperty('org')) org = req.params.org;
   if (req.params.hasOwnProperty('project')) project = req.params.project;
   if (req.params.hasOwnProperty('branch')) branch = req.params.branch;
-  if (req.query.hasOwnProperty('server') && !org && !project && !branch) {
-    options.server = req.query.server;
-  }
-  else if (!org && !project && !branch) {
-    // Set server true by default if no org, project, or branch is being searched for.
-    options.server = true;
-  }
 
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
@@ -5999,10 +5993,22 @@ async function patchWebhook(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // If an ID was provided in the body, ensure it matches the ID in params
-  if (req.body.hasOwnProperty('_id') && (req.body._id !== req.params.webhookid)) {
+  // Check that there's a webhookid in the params: coming from /api/webhooks/:webhookid
+  if (req.params.hasOwnProperty('webhookid')) {
+    // If there's also a webhookid in the body, check that it matches the params
+    if (req.body.hasOwnProperty('id' && (req.body.id !== req.params.webhookid))) {
+      const error = new M.DataFormatError(
+        'Webhook ID in the body does not match ID in the params.', 'warn'
+      );
+      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    }
+    // Set body id to params id
+    req.body.id = req.params.webhookid;
+  }
+  // Check that the body has an id: coming from /api/webhooks
+  else if (!req.body.hasOwnProperty('id')) {
     const error = new M.DataFormatError(
-      'Webhook ID in the body does not match ID in the params.', 'warn'
+      'There is no webhook ID in either params or body of request.', 'warn'
     );
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
@@ -6017,20 +6023,10 @@ async function patchWebhook(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // Set the element ID in the body equal req.params.elementid
-  req.body._id = req.params.webhookid;
-
   // Extract org, project, and branch from params
   if (req.params.hasOwnProperty('org')) org = req.params.org;
   if (req.params.hasOwnProperty('project')) project = req.params.project;
   if (req.params.hasOwnProperty('branch')) branch = req.params.branch;
-  if (req.query.hasOwnProperty('server') && !org && !project && !branch) {
-    options.server = req.query.server;
-  }
-  else if (!org && !project && !branch) {
-    // Set server true by default if no org, project, or branch is being searched for.
-    options.server = true;
-  }
 
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
@@ -6133,11 +6129,8 @@ async function deleteWebhook(req, res) {
     const webhooks = await WebhookController.remove(req.user, org, project, branch,
       req.params.webhookid, options);
 
-    // Get the webhook id
-    const parsedID = webhooks[0]._id;
-
     // Format JSON
-    const json = formatJSON(parsedID, minified);
+    const json = formatJSON(webhooks, minified);
 
     // Return 200: OK and the deleted webhook
     return returnResponse(req, res, json, 200);
@@ -6149,7 +6142,7 @@ async function deleteWebhook(req, res) {
 }
 
 /**
- * GET /api/webhooks/trigger/:base64id
+ * POST /api/webhooks/trigger/:base64id
  *
  * @description Deletes the specified webhook
  *
@@ -6163,24 +6156,34 @@ async function triggerWebhook(req, res) {
   if (!req.body.token) throw new M.AuthorizationError('Token not found in request body.', 'warn');
   const token = req.body.token;
 
+  // Parse data from request
+  const data = req.body.data ? req.body.data : null;
+
   // Parse the webhook id from the base64 encoded url
   const webhookID = Buffer.from(req.params.base64id, 'base64').toString('ascii');
 
   try {
-    const webhook = await WebhookController.find(req.user, null, null, null, webhookID);
+    // Note: this implies that incoming webhooks can only be found at the server level
+    // TODO: make it illegal to create an incoming webhook anywhere but server OR add org/project/branch support
+    const webhooks = await WebhookController.find(req.user, null, null, null, webhookID);
+    const webhook = webhooks[0];
 
     if (webhook.type !== 'Incoming') {
       throw new M.ServerError('Webhook is not listening for external calls', 'warn');
     }
 
-    Webhook.verifyAuthority(token);
+    // TODO: the following block should probably be in the WebhookController
+    Webhook.verifyAuthority(webhook, token);
 
-    Webhook.sendRequest();
+    webhook.triggers.forEach((trigger) => {
+      EventEmitter.emit(trigger, data);
+    });
+    // TODO ^^^^^
 
     // Return message
     const message = 'success';
 
-    // Return 200: OK and the deleted webhook
+    // Return 200: OK and the message
     return returnResponse(req, res, message, 200);
   }
   catch (error) {

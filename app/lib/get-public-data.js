@@ -935,7 +935,7 @@ function getWebhookPublicData(webhook, options) {
 
   // If webhook.createdBy is defined
   if (webhook.createdBy) {
-    // If org.createdBy is populated
+    // If webhook.createdBy is populated
     if (typeof webhook.createdBy === 'object') {
       // Get the public data of createdBy
       createdBy = getUserPublicData(webhook.createdBy, {});
@@ -947,7 +947,7 @@ function getWebhookPublicData(webhook, options) {
 
   // If webhook.lastModifiedBy is defined
   if (webhook.lastModifiedBy) {
-    // If org.lastModifiedBy is populated
+    // If webhook.lastModifiedBy is populated
     if (typeof webhook.lastModifiedBy === 'object') {
       // Get the public data of lastModifiedBy
       lastModifiedBy = getUserPublicData(webhook.lastModifiedBy, {});
@@ -957,9 +957,9 @@ function getWebhookPublicData(webhook, options) {
     }
   }
 
-  // If org.archivedBy is defined
+  // If webhook.archivedBy is defined
   if (webhook.archivedBy && webhook.archived) {
-    // If org.archivedBy is populated
+    // If webhook.archivedBy is populated
     if (typeof webhook.archivedBy === 'object') {
       // Get the public data of archivedBy
       archivedBy = getUserPublicData(webhook.archivedBy, {});
@@ -969,7 +969,7 @@ function getWebhookPublicData(webhook, options) {
     }
   }
 
-  // Return the organization public fields
+  // Return the webhook public fields
   const data = {
     id: webhook._id,
     name: webhook.name,
@@ -977,8 +977,9 @@ function getWebhookPublicData(webhook, options) {
     description: webhook.description,
     triggers: webhook.triggers,
     responses: webhook.responses ? webhook.responses : undefined,
-    incoming: webhook.incoming ? webhook.incoming : undefined,
-    level: webhook.level,
+    token: webhook.token ? webhook.token : undefined,
+    tokenLocation: webhook.tokenLocation ? webhook.tokenLocation : undefined,
+    reference: webhook.reference,
     custom: webhook.custom || {},
     createdOn: (webhook.createdOn) ? webhook.createdOn.toString() : undefined,
     createdBy: createdBy,
@@ -988,7 +989,6 @@ function getWebhookPublicData(webhook, options) {
     archivedOn: (webhook.archivedOn) ? webhook.archivedOn.toString() : undefined,
     archivedBy: archivedBy
   };
-
 
   // If the fields options is defined
   if (options.hasOwnProperty('fields')) {

@@ -306,7 +306,7 @@ async function optionFieldsCreate() {
     // Create a list of visible webhook fields. Object.keys(webhook) returns hidden fields as well
     const visibleFields = Object.keys(webhook);
 
-    // Check that the only keys in the element are the expected ones
+    // Check that the only keys in the webhook are the expected ones
     chai.expect(visibleFields).to.have.members(expectedFields);
 
     // Keep track of _id to delete it at the end
@@ -320,10 +320,10 @@ async function optionFieldsCreate() {
     chai.expect(notFieldsWebhooks.length).to.equal(1);
     const webhook2 = notFieldsWebhooks[0];
 
-    // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
+    // Create a list of visible webhook fields. Object.keys(webhook) returns hidden fields as well
     const visibleFields2 = Object.keys(webhook2);
 
-    // Check that the keys in the notFindOptions are not in elem
+    // Check that the keys in the notFindOptions are not in webhook
     chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
 
     // Keep track of _id to delete it at the end
@@ -632,7 +632,7 @@ async function optionFieldsFind() {
     // Create a list of visible webhook fields. Object.keys(webhook) returns hidden fields as well
     const visibleFields = Object.keys(webhook);
 
-    // Check that the only keys in the element are the expected ones
+    // Check that the only keys in the webhook are the expected ones
     chai.expect(visibleFields).to.have.members(expectedFields);
 
     // Keep track of _id to delete it at the end
@@ -646,10 +646,10 @@ async function optionFieldsFind() {
     chai.expect(notFieldsWebhooks.length).to.equal(1);
     const webhook2 = notFieldsWebhooks[0];
 
-    // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
+    // Create a list of visible webhook fields. Object.keys(webhook) returns hidden fields as well
     const visibleFields2 = Object.keys(webhook2);
 
-    // Check that the keys in the notFindOptions are not in elem
+    // Check that the keys in the notFindOptions are not in webhook
     chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
 
     // Keep track of _id to delete it at the end
@@ -764,7 +764,7 @@ async function optionSortFind() {
     chai.expect(foundWebhooks[1].name).to.equal('b');
     chai.expect(foundWebhooks[2].name).to.equal('c');
 
-    // Find the elements and return them sorted in reverse
+    // Find the webhooks and return them sorted in reverse
     const reverseWebhooks = await WebhookController.find(adminUser, null, null, null,
       createdWebhooks.map((w) => w._id), sortOptionReverse);
     // Expect to find all three webhooks
@@ -792,7 +792,7 @@ async function archiveWebhook() {
   try {
     // Create the update object
     const webhookData = {
-      _id: webhookIDs[0],
+      id: webhookIDs[0],
       archived: true
     };
 
@@ -810,7 +810,7 @@ async function archiveWebhook() {
     chai.expect(webhook.archivedOn).to.not.equal(null);
 
     // Unarchive the webhook for future use
-    Webhook.updateOne({ _id: webhookData._id }, { archived: false });
+    Webhook.updateOne({ _id: webhookData.id }, { archived: false });
   }
   catch (error) {
     M.log.error(error);
@@ -831,7 +831,7 @@ async function optionPopulateUpdate() {
     const options = { populate: pop };
     // Create the update object
     const webhookData = {
-      _id: webhookIDs[1],
+      id: webhookIDs[1],
       name: 'Update'
     };
 
@@ -869,14 +869,14 @@ async function optionPopulateUpdate() {
 }
 
 /**
- * @description Verifies that option 'fields' returns an element with only
+ * @description Verifies that option 'fields' returns a webhook with only
  * specific fields in update().
  */
 async function optionFieldsUpdate() {
   try {
     // Create the update objects
     const webhookData = {
-      _id: webhookIDs[1],
+      id: webhookIDs[1],
       name: 'Fields Update'
     };
     // Create the options object with the list of fields specifically to find
@@ -896,10 +896,10 @@ async function optionFieldsUpdate() {
     // Create the list of fields that should be returned
     const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
 
-    // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
+    // Create a list of visible webhook fields. Object.keys(webhook) returns hidden fields as well
     const visibleFields = Object.keys(webhook);
 
-    // Check that the only keys in the element are the expected ones
+    // Check that the only keys in the webhook are the expected ones
     chai.expect(visibleFields).to.have.members(expectedFields);
 
     // Update the webhook without the notFind fields
@@ -907,12 +907,12 @@ async function optionFieldsUpdate() {
       webhookData, notFindOptions);
     // Expect there to be exactly 1 webhook updated
     chai.expect(notFindWebhooks.length).to.equal(1);
-    const elem2 = notFindWebhooks[0];
+    const webhook2 = notFindWebhooks[0];
 
-    // Create a list of visible element fields. Object.keys(elem) returns hidden fields as well
-    const visibleFields2 = Object.keys(elem2);
+    // Create a list of visible webhook fields. Object.keys(webhook) returns hidden fields as well
+    const visibleFields2 = Object.keys(webhook2);
 
-    // Check that the keys in the notFindOptions are not in elem
+    // Check that the keys in the notFindOptions are not in the webhook
     chai.expect(visibleFields2).to.not.have.members(['createdOn', 'updatedOn']);
   }
   catch (error) {

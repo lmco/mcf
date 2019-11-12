@@ -240,8 +240,8 @@ async function find(requestingUser, organizationID, projectID, branchID, webhook
  * tokenLocation string. The token is a key that external requests to trigger the webhook must
  * provide, and the tokenLocation is the expected url of the external request. Incoming webhooks
  * must have an incoming field.
- * @param {string} webhooks.level - The level at which the webhook listens for events. Can be either
- * an empty string to indicate server level or an org, project, or branch id.
+ * @param {string} webhooks.reference - The level at which the webhook listens for events. Can be
+ * either an empty string to indicate server level or an org, project, or branch id.
  * @param {object} [webhooks.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
  * @param {object} [options] - A parameter that provides supported options.
@@ -472,28 +472,28 @@ async function update(requestingUser, organizationID, projectID, branchID, webho
     // Ensure update data is formatted properly
     webhooksToUpdate.forEach((webhook) => {
       // Ensure that each update object has an _id
-      if (webhook._id === undefined) {
-        throw new M.DataFormatError('One or more webhook updates does not have an _id.');
+      if (webhook.id === undefined) {
+        throw new M.DataFormatError('One or more webhook updates does not have an id.');
       }
       // Ensure that the user is not trying to modify a webhook's type
       if (webhook.type !== undefined) {
-        throw new M.DataFormatError(`Problem with update for webhook ${webhook._id}: `
+        throw new M.DataFormatError(`Problem with update for webhook ${webhook.id}: `
         + 'A webhook\'s type cannot be changed.', 'warn');
       }
       // Check that all updates either match the reference id or do not include a reference
       if (webhook.reference !== undefined && webhook.reference !== refID) {
-        throw new M.DataFormatError(`Problem with update for webhook ${webhook._id}: `
+        throw new M.DataFormatError(`Problem with update for webhook ${webhook.id}: `
           + 'A webhook\'s reference id cannot be changed.', 'warn');
       }
-      // Check that the update array does not contain duplicate _ids
-      if (duplicateCheck.includes(webhook._id)) {
-        throw new M.DataFormatError(`Duplicate _ids found in update array: ${webhook._id}`);
+      // Check that the update array does not contain duplicate ids
+      if (duplicateCheck.includes(webhook.id)) {
+        throw new M.DataFormatError(`Duplicate ids found in update array: ${webhook.id}`);
       }
-      duplicateCheck.push(webhook._id);
+      duplicateCheck.push(webhook.id);
     });
 
     // Get webhookIDs
-    const webhookIDs = webhooksToUpdate.map((w) => w._id);
+    const webhookIDs = webhooksToUpdate.map((w) => w.id);
 
     // Find the webhooks
     const foundWebhooks = await Webhook.find({ _id: webhookIDs, reference: refID });
@@ -507,7 +507,7 @@ async function update(requestingUser, organizationID, projectID, branchID, webho
     }
 
     // Convert webhook updates to jmi for efficiency
-    const jmiUpdates = jmi.convertJMI(1, 2, webhooksToUpdate);
+    const jmiUpdates = jmi.convertJMI(1, 2, webhooksToUpdate, 'id');
     const bulkArray = [];
 
     // Get array of editable parameters
@@ -519,7 +519,7 @@ async function update(requestingUser, organizationID, projectID, branchID, webho
 
       // Save the _id but remove it from the update
       const id = webhook._id;
-      delete webhookUpdate._id;
+      delete webhookUpdate.id;
 
       // An archived webhook cannot be updated
       if (webhook.archived && (webhookUpdate.archived === undefined
@@ -640,7 +640,7 @@ async function update(requestingUser, organizationID, projectID, branchID, webho
  * @param {object} [options] - A parameter that provides supported options. Currently there are no
  * supported options.
  *
- * @returns {Promise<object[]>} Array of deleted element ids.
+ * @returns {Promise<object[]>} Array of deleted webhook ids.
  *
  * @example
  * remove({User}, 'orgID', 'projID', 'branchID', ['webhook1', 'webhook2'])

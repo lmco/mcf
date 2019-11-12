@@ -145,14 +145,7 @@ const WebhookSchema = new db.Schema({
     type: 'Object',
     required: true,
     validate: [{
-      validator: function(v) {
-        if (Array.isArray(v)) {
-          return v.every((s) => typeof s === 'string');
-        }
-        else {
-          return false;
-        }
-      },
+      validator: validators.webhook.triggers,
       message: () => 'The triggers field must be an array of strings.'
     }]
   },

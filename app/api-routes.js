@@ -6178,142 +6178,6 @@ api.route('/users/:username/password')
  *       500:
  *         description: Internal Server Error, Failed to POST webhooks due to a
  *                      server side issue.
- *   patch:
- *     tags:
- *       - webhooks
- *     description: Updates multiple webhooks from the data provided in the
- *                  request body. Webhooks that are currently archived must
- *                  first be unarchived before making any other updates. The
- *                  following fields can be updated [name, description, archived,
- *                  triggers, incoming, requests, org, project, branch].
- *     produces:
- *       - application/json
- *     parameters:
- *       - in: body
- *         name: webhooks
- *         description: An array of objects containing updates to multiple
- *                      webhooks.
- *         schema:
- *           type: array
- *           items:
- *             type: object
- *             required:
- *               - id
- *             properties:
- *               id:
- *                 type: string
- *                 description: The current ID of the webhook, cannot be
- *                              updated.
- *               archived:
- *                 type: boolean
- *               name:
- *                 type: string
- *               description:
- *                 type: string
- *               triggers:
- *                 type: Array
- *                 description: An array of strings that refer to the events that
- *                              trigger the webhook. All Outgoing webhooks must
- *                              have at least one trigger.
- *               responses:
- *                 type: Array
- *                 description: An array of objects that contain information for
- *                              http requests.
- *                 items:
- *                   type: object
- *                   required:
- *                     - url
- *                   properties:
- *                     url:
- *                       type: string
- *                     method
- *                       type: string
- *                       default: 'POST'
- *                     headers:
- *                       type: object
- *                       default: { 'Content-Type': 'application/json' }
- *                     auth:
- *                       type: object
- *                       properties:
- *                         username:
- *                           type: string
- *                         password:
- *                           type: string
- *                     ca:
- *                       type: string
- *                     data:
- *                       type: object
- *                       description: an optional field to store data to send with the
- *                                    http requests upon webhook triggering.
- *               incoming:
- *                 type: object
- *                 description: A field that stores a token and a token location for
- *                              verifying external requests to trigger the webhook via
- *                              the api endpoint /api/webhooks/triggers/:base64id
- *                 properties:
- *                   token:
- *                     type: string
- *                   tokenLocation:
- *                     type: string
- *               org:
- *                 type: string
- *                 description: An organization id, exclusive with project, branch,
- *                              and server fields.
- *               project:
- *                 type: string
- *                 description: A project id, exclusive with org, branch, and
- *                              server fields.
- *               branch:
- *                 type: string
- *                 description: A branch id, exclusive with org, project, and
- *                              server fields.
- *               server:
- *                 type: boolean
- *                 description: A boolean to indicate that the webhook listens for
- *                              server-wide events. Defaults to true upon webhook
- *                              creation if no org, project, or branch .
- *               custom:
- *                 type: object
- *       - name: populate
- *         description: Comma separated list of values to be populated on return
- *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      org, project, branch]
- *         in: query
- *         type: string
- *         required: false
- *       - name: fields
- *         description: Comma separated list of specific fields to return. By
- *                      default the id field is returned. To specifically NOT
- *                      include a field, include a '-' in front of the field
- *                      (-name). [archived, archivedBy, archivedOn, createdBy,
- *                      createdOn, updatedOn, custom, description, lastModifiedBy,
- *                      name, org, project, branch, type, triggers, responses,
- *                      incoming]
- *         in: query
- *         type: string
- *       - name: minified
- *         description: If true, the returned JSON is minified. If false, the
- *                      returned JSON is formatted based on the format specified
- *                      in the config. The default value is false.
- *         in: query
- *         type: boolean
- *         default: false
- *     responses:
- *       200:
- *         description: OK, Succeeded to PATCH webhooks, returns webhooks' public
- *                      data.
- *       400:
- *         description: Bad Request, Failed to PATCH webhooks due to invalid
- *                      data.
- *       401:
- *         description: Unauthorized, Failed to PATCH webhooks due to not being
- *                      logged in.
- *       403:
- *         description: Forbidden, Failed to PATCH webhooks due to not having
- *                      permissions.
- *       500:
- *         description: Internal Server Error, Failed to PATCH webhooks due to
- *                      server side issue.
  *   delete:
  *     tags:
  *       - webhooks
@@ -6366,11 +6230,6 @@ api.route('/webhooks')
   Middleware.logRoute,
   APIController.postWebhook
 )
-.patch(
-  AuthController.authenticate,
-  Middleware.logRoute,
-  APIController.patchWebhook
-)
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
@@ -6407,7 +6266,7 @@ api.route('/webhooks')
  *                      side issue.
  */
 api.route('/webhooks/trigger/:base64id')
-.get(
+.post(
   AuthController.authenticate,
   Middleware.logRoute,
   APIController.triggerWebhook

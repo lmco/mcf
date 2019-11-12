@@ -211,14 +211,19 @@ const webhook = {
     return Array.isArray(data) && data.every((s) => typeof s === 'string');
   },
   responses: function(data) {
+    // Responses must be an array with at least one item
     return Array.isArray(data) && data.length > 0
+      // Every item in the array must be an object
       && data.every((response) => (typeof response === 'object'
+      // Every object in the array must have a url
       && typeof response.url === 'string'));
   },
   token: function(data) {
+    // Protect against null entries
     return typeof data === 'string';
   },
   tokenLocation: function(data) {
+    // Protect against null entries
     return typeof data === 'string';
   }
 };

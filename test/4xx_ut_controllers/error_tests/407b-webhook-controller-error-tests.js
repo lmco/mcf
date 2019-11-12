@@ -126,7 +126,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject an update from an unauthorized user at the org level', unauthorizedTest('org', 'update'));
   it('should reject an update from an unauthorized user at the project level', unauthorizedTest('project', 'update'));
   it('should reject an update from an unauthorized user at the branch level', unauthorizedTest('branch', 'update'));
-  it('should reject an update missing an _id', updateMissingID);
+  it('should reject an update missing an id', updateMissingID);
   it('should reject an attempt to change a webhook\'s type', updateType);
   it('should reject an attempt to change a webhook\'s reference id', updateReference);
   it('should reject an update array with duplicate _ids', updateDuplicate);
@@ -175,7 +175,7 @@ function unauthorizedTest(level, operation) {
     }
     else if (operation === 'update') {
       webhookData = {
-        _id: webhookID,
+        id: webhookID,
         description: 'update'
       };
     }
@@ -247,7 +247,7 @@ function archivedTest(model, operation) {
     }
     else if (operation === 'update') {
       webhookData = {
-        _id: webhookID,
+        id: webhookID,
         description: 'update'
       };
     }
@@ -353,17 +353,17 @@ async function createInvalidWebhook() {
 
 /**
  * @description Validates that the webhook controller will reject an update that is missing
- * an _id.
+ * an id.
  */
 async function updateMissingID() {
   try {
-    // Create update missing an _id
+    // Create update missing an id
     const webhookData = {
       description: 'update'
     };
 
     await WebhookController.update(adminUser, null, null, null, webhookData)
-    .should.eventually.be.rejectedWith('One or more webhook updates does not have an _id.');
+    .should.eventually.be.rejectedWith('One or more webhook updates does not have an id.');
   }
   catch (error) {
     M.log.error(error);
@@ -378,7 +378,7 @@ async function updateType() {
   try {
     // Create update for an outgoing webhook
     const webhookData = {
-      _id: webhookID,
+      id: webhookID,
       type: 'update'
     };
 
@@ -400,7 +400,7 @@ async function updateReference() {
   try {
     // Create update for an outgoing webhook
     const webhookData = {
-      _id: webhookID,
+      id: webhookID,
       reference: 'wrong'
     };
 
@@ -422,15 +422,15 @@ async function updateDuplicate() {
   try {
     // Create updates for an outgoing webhook
     const webhookData = [{
-      _id: webhookID,
+      id: webhookID,
       description: 'update'
     }, {
-      _id: webhookID,
+      id: webhookID,
       description: 'update'
     }];
 
     await WebhookController.update(adminUser, null, null, null, webhookData)
-    .should.eventually.be.rejectedWith('Duplicate _ids found in update array: '
+    .should.eventually.be.rejectedWith('Duplicate ids found in update array: '
       + `${webhookID}`);
   }
   catch (error) {
@@ -447,13 +447,13 @@ async function updateNotFound() {
   try {
     // Create update for an outgoing webhook
     const webhookData = {
-      _id: 'webhookID',
+      id: 'webhookID',
       description: 'update'
     };
 
     await WebhookController.update(adminUser, null, null, null, webhookData)
     .should.eventually.be.rejectedWith('The following webhooks were not found at the specified '
-      + `reference level : [${webhookData._id}]`);
+      + `reference level : [${webhookData.id}]`);
   }
   catch (error) {
     M.log.error(error);
@@ -469,7 +469,7 @@ async function updateAddResponses() {
   try {
     // Create update for an incoming webhook
     const webhookData = {
-      _id: incomingWebhookID,
+      id: incomingWebhookID,
       responses: [{ url: 'test' }]
     };
 
@@ -491,7 +491,7 @@ async function updateInvalidToken() {
   try {
     // Create update for an incoming webhook
     const webhookData = {
-      _id: incomingWebhookID,
+      id: incomingWebhookID,
       description: 'null',
       token: null
     };
@@ -514,7 +514,7 @@ async function updateInvalidTokenLocation() {
   try {
     // Create update for an incoming webhook
     const webhookData = {
-      _id: incomingWebhookID,
+      id: incomingWebhookID,
       tokenLocation: null
     };
 
@@ -536,7 +536,7 @@ async function updateAddToken() {
   try {
     // Create update for an outgoing webhook
     const webhookData = {
-      _id: webhookID,
+      id: webhookID,
       token: 'test'
     };
 
@@ -558,7 +558,7 @@ async function updateAddTokenLocation() {
   try {
     // Create update for an outgoing webhook
     const webhookData = {
-      _id: webhookID,
+      id: webhookID,
       tokenLocation: 'test'
     };
 
@@ -580,7 +580,7 @@ async function updateInvalidResponses() {
   try {
     // Create invalid update for an outgoing webhook
     let webhookData = {
-      _id: webhookID,
+      id: webhookID,
       responses: { url: 'test' } // This is wrong because responses must be an array
     };
 
@@ -590,7 +590,7 @@ async function updateInvalidResponses() {
 
     // Create invalid update for an outgoing webhook
     webhookData = {
-      _id: webhookID,
+      id: webhookID,
       responses: [{ method: 'test' }] // This is wrong because responses must have a url
     };
 
@@ -600,7 +600,7 @@ async function updateInvalidResponses() {
 
     // Create invalid update for an outgoing webhook
     webhookData = {
-      _id: webhookID,
+      id: webhookID,
       responses: [] // This is wrong because responses cannot be empty
     };
 
