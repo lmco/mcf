@@ -502,7 +502,7 @@ async function update(requestingUser, organizationID, projectID, branchID, webho
     if (foundWebhooks.length !== webhooksToUpdate.length) {
       const foundIDs = foundWebhooks.map((w) => w._id);
       const notFound = webhookIDs.filter((w) => !foundIDs.includes(w));
-      throw new M.DataFormatError('The following webhooks were not found at the specified '
+      throw new M.NotFoundError('The following webhooks were not found at the specified '
       + `reference level ${refID}: [${notFound}]`, 'warn');
     }
 

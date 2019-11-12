@@ -74,8 +74,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should find multiple webhooks', findWebhooks);
   it('should find all webhooks', findAllWebhooks);
   // ------------- Update -------------
-  // it('should update a webhook', updateWebhook);
-  // it('should update multiple webhooks', updateWebhooks);
+  //it('should update a webhook', updateWebhook);
+  //it('should update multiple webhooks', updateWebhooks);
   // ------------- Remove -------------
   it('should delete a webhook', deleteWebhook);
   it('should delete multiple webhooks', deleteWebhooks);

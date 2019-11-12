@@ -96,7 +96,7 @@ describe(M.getModuleName(module.filename), () => {
   // ------------ DELETE ------------
   it('should DELETE a webhook', deleteWebhook);
   it('should DELETE multiple webhooks', deleteWebhooks);
-  // --------- GET (trigger) ---------
+  // --------- POST (trigger) ---------
   it('should trigger an incoming webhook', triggerWebhook);
 });
 
