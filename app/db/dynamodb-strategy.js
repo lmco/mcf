@@ -311,15 +311,23 @@ class Schema {
 
 }
 
+/** Class for formatting DynamoDB queries. */
 class Query {
 
-  constructor(model, options) {
+  /**
+   *
+   * @param model
+   */
+  constructor(model) {
     this.model = model;
-    this.options = options;
-    this.ExpressionAttributeNames = {};
-    this.ExpressionAttributeValues = {};
   }
 
+  /**
+   *
+   * @param query
+   * @param expAttNames
+   * @returns {{ExpressionAttributeNames: *, FilterExpression: string, ExpressionAttributeValues: {}}}
+   */
   parseFilterExpression(query, expAttNames) {
     const returnObj = {
       ExpressionAttributeNames: expAttNames,
@@ -365,7 +373,7 @@ class Query {
           // Loop over each item in arr
           for (let i = 0; i < arr.length; i++) {
             // Add value to ExpressionAttributeValues
-            returnObj.ExpressionAttributeValues[`:${valueKey}${i}`] = { S: arr[i] };
+            returnObj.ExpressionAttributeValues[`:${valueKey}${i}`] = arr[i];
 
             // If FilterExpression is empty, init it
             if (!returnObj.FilterExpression && !filterString) {
@@ -384,26 +392,10 @@ class Query {
         }
       }
       else {
-        switch (typeof query[k]) {
-          case 'string':
-            returnObj.ExpressionAttributeValues[`:${valueKey}`] = { S: query[k] };
-            break;
-          case 'boolean':
-            returnObj.ExpressionAttributeValues[`:${valueKey}`] = { BOOL: query[k] };
-            break;
-          case 'number':
-            returnObj.ExpressionAttributeValues[`:${valueKey}`] = {
-              N: query[k].toString()
-            };
-            break;
-          default: {
-            throw new M.DatabaseError(
-              `Query param type [${typeof query[k]}] is not supported`, 'critical'
-            );
-          }
-        }
+        returnObj.ExpressionAttributeValues[`:${valueKey}`] = query[k];
 
         // Handle special case where searching an array of permissions
+        // TODO: SUPER HARDCODED
         if (keyName.startsWith('permissions.')) {
           // If FilterExpression is not defined yet, define it
           if (returnObj.FilterExpression === '') {
@@ -428,6 +420,11 @@ class Query {
     return returnObj;
   }
 
+  /**
+   *
+   * @param query
+   * @returns {object[]}
+   */
   parseRequestItemsKeys(query) {
     const returnArray = [];
     const base = {};
@@ -435,32 +432,16 @@ class Query {
 
     // For each key in the query
     Object.keys(query).forEach((key) => {
-      switch (typeof query[key]) {
-        case 'string':
-          base[key] = { S: query[key] };
-          break;
-        case 'number':
-          base[key] = { N: query[key].toString() };
-          break;
-        case 'boolean':
-          base[key] = { BOOL: query[key] };
-          break;
-        case 'object': {
-          if (query[key] !== null) {
-            // Handle the $in case
-            if (Object.keys(query[key])[0] === '$in') {
-              inVals[key] = Object.values(query[key])[0];
-            }
-          }
-          else {
-            // Search for the string null, as you cannot store the value null in
-            // a string field, and thus 'null' has been made a reserved keyword
-            base[key] = { S: 'null' };
-          }
-          break;
+      if (typeof query[key] === 'object') {
+        if (query[key] === null) {
+          base[key] = 'null';
         }
-        default:
-          throw new M.DataFormatError(`Invalid type in query ${typeof query[key]}.`);
+        else {
+          inVals[key] = Object.values(query[key])[0];
+        }
+      }
+      else {
+        base[key] = query[key];
       }
     });
 
@@ -473,16 +454,7 @@ class Query {
       Object.keys(inVals).forEach((k) => {
         // For each item in the array to search through
         inVals[k].forEach((i) => {
-          switch (typeof i) {
-            case 'string':
-              base[k] = { S: i };
-              break;
-            case 'number':
-              base[k] = { N: i.toString() };
-              break;
-            default:
-              throw new M.DataFormatError(`Invalid type in $in array ${typeof i}.`);
-          }
+          base[k] = i;
 
           // Add on query, using JSON parse/stringify
           returnArray.push(JSON.parse(JSON.stringify(base)));
@@ -503,34 +475,29 @@ class Query {
    * original value as the value. Ex: { hello: { S: 'world' }}.
    */
   keyFormat(obj) {
-    switch (typeof obj) {
-      case 'string': return { S: obj };
-      case 'boolean': return { BOOL: obj };
-      case 'number': return { N: obj.toString() };
-      case 'object': {
-        if (Array.isArray(obj) && obj.every(o => typeof o === 'string')) {
-          return { SS: obj };
-        }
-        else if (Array.isArray(obj)) {
-          return { L: obj.map(i => this.keyFormat(i)) };
-        }
-        else if (obj !== null) {
-          const returnObj = { M: {} };
-          Object.keys(obj).forEach((k) => {
-            returnObj.M[k] = this.keyFormat(obj[k]);
-          });
-          return returnObj;
-        }
-        else {
-          return { S: 'null' };
-        }
+    // If the value is an object
+    if (typeof obj === 'object') {
+      // If null, return the string null since in DynamoDB you cannot store null in a string field
+      if (obj === null) {
+        return 'null';
       }
-      // Undefined or other types
-      default: throw new M.ServerError(`Unsupported query type ${typeof obj}.`);
+      // If an array or object
+      else {
+        // Recursively call this function to fix null
+        Object.keys(obj).forEach((k) => {
+          obj[k] = this.keyFormat(obj[k]);
+        });
+      }
     }
+    return obj;
   }
 
   // TODO: Update function to not use this
+  /**
+   *
+   * @param filter
+   * @returns {{ExpressionAttributeNames: {}, UpdateExpression: string, ExpressionAttributeValues: {}}}
+   */
   parseUpdateExpression(filter) {
     const updateObj = {
       ExpressionAttributeNames: {},
@@ -577,15 +544,18 @@ class Query {
   }
 
   /**
-   * @description Creates an array of queries, properly formatted for DynamoDB's
-   * batchGetItem() function.
+   * @description Creates and returns an array of queries, properly formatted to
+   * be used in DynamoDB's DocumentClient.batchGet(). Please view the following
+   * links for more information:
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDBhtml#batchGetItem-property batchGetItem()}
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#batchGet-property DocumentClient.batchGet()}.
    *
-   * @param {object} filter - The filter to parse and form into batchGetItem
+   * @param {object} filter - The filter to parse and form into batchGet
    * queries.
    *
-   * @returns {object[]} - An array of formatted queries.
+   * @returns {object[]} - An array of properly formatted batchGet() queries.
    */
-  batchGetItem(filter) {
+  batchGet(filter) {
     // Format the filter into a RequestItems object
     const requestItemsKeys = this.parseRequestItemsKeys(filter);
     const queries = [];
@@ -593,9 +563,7 @@ class Query {
     // Create the base query object
     const baseObj = {
       RequestItems: {
-        [this.model.TableName]: {
-          Keys: []
-        }
+        [this.model.TableName]: { Keys: [] }
       }
     };
 
@@ -613,20 +581,25 @@ class Query {
   }
 
   /**
-   * @description Creates a query formatted to be used in batchWriteItem calls.
+   * @description Creates and returns an array of queries, properly formatted to
+   * be used in DynamoDB's DocumentClient.batchWrite(). Please view the
+   * following links for more information:
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#batchWriteItem-property batchWriteItem()}
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#batchWrite-property DocumentClient.batchWrite()}.
    *
    * @param {object[]} docs - An array of documents to be inserted/deleted.
    * @param {string} operation - The operation being preformed, can either be
    * 'insert' or 'delete'.
    *
-   * @returns {object[]} - An array of queries to make.
+   * @returns {object[]} - An array of properly formatted batchWrite() queries.
    */
-  batchWriteItem(docs, operation) {
+  batchWrite(docs, operation) {
     const queries = [];
     const baseObj = {
-      RequestItems: {}
+      RequestItems: {
+        [this.model.TableName]: []
+      }
     };
-    baseObj.RequestItems[this.model.TableName] = [];
 
     // Determine if array of PutRequests or DeleteRequests
     const op = (operation === 'insert') ? 'PutRequest' : 'DeleteRequest';
@@ -643,13 +616,13 @@ class Query {
               Item: {}
             }
           };
-          putObj.PutRequest.Item = this.model.formatObject(doc);
+          putObj.PutRequest.Item = this.keyFormat(doc);
           tmpQuery.RequestItems[this.model.TableName].push(putObj);
         }
         else {
           const deleteObj = {
             DeleteRequest: {
-              Key: { _id: { S: doc._id } }
+              Key: { _id: doc._id }
             }
           };
           tmpQuery.RequestItems[this.model.TableName].push(deleteObj);
@@ -662,42 +635,37 @@ class Query {
     return queries;
   }
 
+  /**
+   * @description Creates and returns a query, properly formatted to be used
+   * in DynamoDB's DocumentClient.get(). Please view the following links for
+   * more information:
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#getItem-property getItem()}
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#get-property DocumentClient.get()}.
+   *
+   * @param {object} filter - The query to parse and use in the get() query.
+   *
+   * @returns {object} - The properly formatted get() query.
+   */
   getItem(filter) {
-    const requestItemsKeys = this.parseRequestItemsKeys(filter);
-
     return {
       TableName: this.model.TableName,
-      Key: requestItemsKeys[0]
+      Key: this.parseRequestItemsKeys(filter)[0]
     };
   }
 
-  updateItem(filter, doc) {
-    const updateExpressionObj = this.parseUpdateExpression(doc);
-    const requestItemsKeys = this.parseRequestItemsKeys(filter);
-
-    const baseObj = {
-      TableName: this.model.TableName,
-      ReturnValues: 'ALL_NEW',
-      Key: requestItemsKeys[0]
-    };
-
-    // Add on the ExpressionAttributeNames if defined
-    if (Object.keys(updateExpressionObj.ExpressionAttributeNames).length !== 0) {
-      baseObj.ExpressionAttributeNames = updateExpressionObj.ExpressionAttributeNames;
-    }
-
-    // Add on ExpressionAttributeValues and UpdateExpression if defined
-    if (updateExpressionObj.UpdateExpression.length) {
-      baseObj.UpdateExpression = updateExpressionObj.UpdateExpression;
-    }
-    if (Object.keys(updateExpressionObj.ExpressionAttributeValues).length !== 0) {
-      baseObj.ExpressionAttributeValues = updateExpressionObj.ExpressionAttributeValues;
-    }
-
-    return baseObj;
-  }
-
-  scan(query) {
+  /**
+   * @description Creates and returns a query, properly formatted to be used
+   * in DynamoDB's DocumentClient.scan(). Please view the following links for
+   * more information:
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#scan-property scan}
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#scan-property DocumentClient.scan()}.
+   *
+   * @param {object} query - The query to parse and format for use in scan().
+   * @param {object} [options={}] - An optional object containing valid options.
+   *
+   * @returns {object} - The properly formatted scan() query.
+   */
+  scan(query, options = {}) {
     const filterObj = this.parseFilterExpression(query, {});
     const baseObj = {
       TableName: this.model.TableName
@@ -721,17 +689,53 @@ class Query {
       baseObj.ExpressionAttributeValues = filterObj.ExpressionAttributeValues;
     }
 
-    // For each options
-    if (this.options) {
-      // If the limit option is provided and is greater than 0
-      if (this.options.limit && this.options.limit > 0) {
-        baseObj.Limit = this.options.limit;
-      }
+    // If the limit option is provided and is greater than 0
+    if (options.limit && options.limit > 0) {
+      baseObj.Limit = options.limit;
+    }
 
-      // If the option LastEvaluatedKey is provided, set it for pagination
-      if (this.options.LastEvaluatedKey) {
-        baseObj.LastEvaluatedKey = this.options.LastEvaluatedKey;
-      }
+    // If the option LastEvaluatedKey is provided, set it for pagination
+    if (options.LastEvaluatedKey) {
+      baseObj.LastEvaluatedKey = options.LastEvaluatedKey;
+    }
+
+    return baseObj;
+  }
+
+  /**
+   * @description Creates and returns a query, properly formatted to be used
+   * in DynamoDB's DocumentClient.update(). Please view the following links for
+   * more information:
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#updateItem-property updateItem()}
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#update-property DocumentClient.update()}.
+   *
+   * @param {object} filter - The filter to parse, used to find the document to
+   * updated.
+   * @param {object} doc - An object containing the updates to be made to the
+   * found document.
+   *
+   * @returns {object} - The properly formatted update() query.
+   */
+  update(filter, doc) {
+    const updateExpressionObj = this.parseUpdateExpression(doc);
+
+    const baseObj = {
+      TableName: this.model.TableName,
+      ReturnValues: 'ALL_NEW',
+      Key: this.parseRequestItemsKeys(filter)[0]
+    };
+
+    // Add on the ExpressionAttributeNames if defined
+    if (Object.keys(updateExpressionObj.ExpressionAttributeNames).length !== 0) {
+      baseObj.ExpressionAttributeNames = updateExpressionObj.ExpressionAttributeNames;
+    }
+
+    // Add on ExpressionAttributeValues and UpdateExpression if defined
+    if (updateExpressionObj.UpdateExpression.length) {
+      baseObj.UpdateExpression = updateExpressionObj.UpdateExpression;
+    }
+    if (Object.keys(updateExpressionObj.ExpressionAttributeValues).length !== 0) {
+      baseObj.ExpressionAttributeValues = updateExpressionObj.ExpressionAttributeValues;
     }
 
     return baseObj;
@@ -880,7 +884,7 @@ class Model {
    * @async
    *
    * @param {object} document -  The documents to properly format.
-   * @param {string} [projection] - A space separated string containing a list
+   * @param {string|null} [projection] - A space separated string containing a list
    * of fields to return (or not return).
    * @param {object} [options={}] - The options supplied to the function.
    * @param {boolean} [recurse=false] - A boolean value which if true, specifies
@@ -892,43 +896,14 @@ class Model {
     const promises = [];
     // For each field in the document
     Object.keys(document).forEach((field) => {
-      // If the string null, convert to actual value. The value null is allowed
-      // in MBEE for strings, but not supported in DynamoDB on a string field
-      if (Object.values(document[field])[0] === 'null') {
-        document[field][Object.keys(document[field])[0]] = null;
+      if (document[field] === 'null') {
+        document[field] = null;
       }
-
-      // If the field type is 'M', meaning a JSON object/map or 'L' meaning a array/list
-      if (Object.keys(document[field])[0] === 'M' || Object.keys(document[field])[0] === 'L') {
-        const type = Object.keys(document[field])[0];
-        // Recursively call this function with the field contents and no options
-        promises.push(this.formatDocument(document[field][type], null, {}, true)
+      else if (typeof document[field] === 'object') {
+        promises.push(this.formatDocument(document[field], null, {}, true)
         .then((retDoc) => {
           document[field] = retDoc;
         }));
-      }
-      // If the field type is 'N', meaning a number and its not null
-      else if (Object.keys(document[field])[0] === 'N'
-        && Object.values(document[field])[0] !== null) {
-        // Convert the field to a Number, and remove the type
-        document[field] = Number(Object.values(document[field])[0]);
-      }
-      else {
-        // Remove the type from the value, ex: hello: { S: 'world' } --> hello: 'world'
-        document[field] = Object.values(document[field])[0];
-      }
-
-      // Handle the special case where the type is a string, it defaults to null,
-      // and the value in the database is the string null. This was done to work
-      // around the existence of a NULL type in DynamoDB
-      // TODO: is this still needed? We have a similar case above
-      if (this.definition[field]
-        && this.definition[field].hasOwnProperty('default')
-        && this.definition[field].default === null
-        && this.definition[field].type === 'S'
-        && document[field] === 'null') {
-        // Set value equal to null
-        document[field] = null;
       }
     });
 
@@ -1066,7 +1041,7 @@ class Model {
   async countDocuments(filter, cb) {
     try {
       // Create a new query object
-      const query = new Query(this, {});
+      const query = new Query(this);
       // Get a formatted scan query
       const scanObj = query.scan(filter);
 
@@ -1074,7 +1049,7 @@ class Model {
       scanObj.Select = 'COUNT';
 
       // Connect to the database
-      const conn = await connect();
+      const conn = await connectDocument();
 
       // Perform the scan query and return the count
       M.log.debug(`DB OPERATION: ${this.TableName} countDocuments`);
@@ -1151,16 +1126,16 @@ class Model {
     try {
       let docs = [];
       let more = true;
-      // Connect to the database
-      const conn = await connect();
+      // Connect to the DocumentClient
+      const conn = await connectDocument();
 
       // Find all documents which match the provided conditions
       while (more) {
         // Find the max number of documents
         // Create a new DynamoDB query
-        const query = new Query(this, options);
+        const query = new Query(this);
         // Get the formatted scan query
-        const scanObj = query.scan(conditions);
+        const scanObj = query.scan(conditions, options);
 
         // If there is no filter. block from finding all documents to delete
         if (!scanObj.hasOwnProperty('FilterExpression')) {
@@ -1187,19 +1162,19 @@ class Model {
       docs = await this.formatDocuments(docs, null, options);
 
       // Create a new query object
-      const query = new Query(this, options);
-      // Get the formatted batchWriteItem query, used for deletion
-      const deleteQueries = query.batchWriteItem(docs, 'delete');
+      const query = new Query(this);
+      // Get the formatted batchWrite query, used for deletion
+      const deleteQueries = query.batchWrite(docs, 'delete');
 
       const promises = [];
 
       // For each delete query
       deleteQueries.forEach((q) => {
-        // Perform the batchWriteItem operation
-        promises.push(conn.batchWriteItem(q, options).promise());
+        // Perform the batchWrite operation
+        promises.push(conn.batchWrite(q, options).promise());
       });
 
-      // Wait for all batchWriteItem operations to complete
+      // Wait for all batchWrite operations to complete
       await Promise.all(promises);
 
       // Return an object specifying the success of the delete operation
@@ -1261,25 +1236,25 @@ class Model {
         options = {}; // eslint-disable-line no-param-reassign
       }
 
-      // Connect to the database
-      const conn = await connect();
+      // Connect to the DocumentClient
+      const conn = await connectDocument();
 
-      // Use batchGetItem only iff the only parameter being searched is the _id
+      // Use batchGet iff the only parameter being searched is the _id
       if (Object.keys(filter).length === 1 && Object.keys(filter)[0] === '_id') {
         // Create the new query object
-        const query = new Query(this, options);
-        // Get an array of properly formatted batchGetItem queries
-        const queriesToMake = query.batchGetItem(filter);
+        const query = new Query(this);
+        // Get an array of properly formatted batchGet queries
+        const queriesToMake = query.batchGet(filter);
 
         const promises = [];
         // For each query
         queriesToMake.forEach((q) => {
           // Log the database operation
-          M.log.debug(`DB OPERATION: ${this.TableName} batchGetItem`);
+          M.log.debug(`DB OPERATION: ${this.TableName} batchGet`);
           // Append operation to promises array
           promises.push(
-            // Make the batchGetItem request
-            conn.batchGetItem(q).promise()
+            // Make the batchGet request
+            conn.batchGet(q).promise()
             .then((found) => {
               // Append the found documents to the function-global array
               docs = docs.concat(found.Responses[this.TableName]);
@@ -1296,9 +1271,9 @@ class Model {
         // Find all documents which match the query
         while (more) {
           // Create a new DynamoDB query
-          const query = new Query(this, options);
+          const query = new Query(this);
           // Get the formatted scan query
-          const scanObj = query.scan(filter);
+          const scanObj = query.scan(filter, options);
 
           M.log.debug(`DB OPERATION: ${this.TableName} scan`);
           // Find the documents
@@ -1388,10 +1363,10 @@ class Model {
         }
       });
 
-      // Connect to the database
-      const conn = await connect();
+      // Connect to the DocumentClient
+      const conn = await connectDocument();
       // Create a new query object
-      const query = new Query(this, options);
+      const query = new Query(this);
 
       // If all fields are indexed, use getItem as it will be significantly faster
       if (allIndexed) {
@@ -1400,7 +1375,7 @@ class Model {
 
         // Make the getItem request
         M.log.debug(`DB OPERATION: ${this.TableName} getItem`);
-        const result = await conn.getItem(getObj).promise();
+        const result = await conn.get(getObj).promise();
 
         // If document was found, set it
         if (Object.keys(result).length !== 0) {
@@ -1410,7 +1385,7 @@ class Model {
       // Not all fields have indexes, use scan to find the document
       else {
         // Get the formatted scan query
-        const scanObj = query.scan(conditions);
+        const scanObj = query.scan(conditions, options);
 
         // Make the scan request
         M.log.debug(`DB OPERATION: ${this.TableName} scan`);
@@ -1494,21 +1469,21 @@ class Model {
       else {
         const promises = [];
 
-        // Connect to the database
-        const conn = await connect();
+        // Connect to the DocumentClient
+        const conn = await connectDocument();
 
         // Create a new query object
-        const query = new Query(this, options);
-        // Get the formatted batchWriteItem queries
-        const batchWriteQueries = query.batchWriteItem(formattedDocs, 'insert');
+        const query = new Query(this);
+        // Get the formatted batchWrite queries
+        const batchWriteQueries = query.batchWrite(formattedDocs, 'insert');
 
         // For each query
         batchWriteQueries.forEach((q) => {
-          // Perform the batchWriteItem operation
-          promises.push(conn.batchWriteItem(q).promise());
+          // Perform the batchWrite operation
+          promises.push(conn.batchWrite(q).promise());
         });
 
-        // Wait for batchWriteItem operations to complete
+        // Wait for batchWrite operations to complete
         await Promise.all(promises);
       }
 
@@ -1570,58 +1545,6 @@ class Model {
     return doc;
   }
 
-  // TODO: Come back to this function, we SHOULDNT need this after making the Query class better
-  /**
-   * @description Formats a document or query to support DynamoDB's structure.
-   *
-   * @param {object} obj - The object to format.
-   *
-   * @returns {object} The formatted object.
-   */
-  formatObject(obj) {
-    const returnObj = {};
-
-    Object.keys(obj).forEach((key) => {
-      switch (typeof obj[key]) {
-        case 'string': returnObj[key] = { S: obj[key] }; break;
-        case 'number': returnObj[key] = { N: obj[key].toString() }; break;
-        case 'boolean': returnObj[key] = { BOOL: obj[key] }; break;
-        case 'object': {
-          // If the object is an array, call recursively
-          if (Array.isArray(obj[key])) {
-            // Handle an array of strings
-            if (obj[key].every(v => typeof v === 'string')) {
-              if (obj[key].length !== 0) {
-                returnObj[key] = { SS: obj[key] };
-              }
-            }
-            // Handle an array of numbers
-            else if (obj[key].every(v => typeof v === 'number')) {
-              returnObj[key] = { NS: obj[key] };
-            }
-            // Handle all other arrays
-            else {
-              // console.log(obj[key])
-              returnObj[key] = { L: obj[key].map(o => this.formatObject(o)) };
-            }
-          }
-          else if (obj[key] === null) {
-            // TODO: Should we explicitly handle this case or not?
-            // returnObj[key] = { NULL: true };
-          }
-          else {
-            returnObj[key] = { M: this.formatObject(obj[key]) };
-          }
-          break;
-        }
-        default:
-          throw new M.DataFormatError(`Unsupported type ${key}.`);
-      }
-    });
-
-    return returnObj;
-  }
-
   /**
    * @description Updates multiple documents matched by the filter with the same
    * changes in the provided doc.
@@ -1680,16 +1603,16 @@ class Model {
   async updateOne(filter, doc, options, cb) {
     try {
       // Create a new query object
-      const query = new Query(this, options);
+      const query = new Query(this);
       // Get the properly formatted updateItem query
-      const updateObj = query.updateItem(filter, doc);
+      const updateObj = query.update(filter, doc);
 
       // Connect to the database
-      const conn = await connect();
+      const conn = await connectDocument();
 
       M.log.debug(`DB OPERATION: ${this.TableName} updateItem`);
       // Update the single item
-      const updatedItem = await conn.updateItem(updateObj).promise();
+      const updatedItem = await conn.update(updateObj).promise();
       // Return the properly formatted, newly updated document
       return await this.formatDocument(updatedItem.Attributes, null, options);
     }

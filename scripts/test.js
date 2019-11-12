@@ -131,6 +131,8 @@ function test(_args) {
   // Call the mochaWalk function to load in all of the test files
   mochaWalk(testDir, mocha);
 
+  // TODO THIS WILL HAVE TO BE REMOVED BEFORE MERGE..... Find a better wat to
+  //  init models synchronously in test.js
   Artifact.init()
   .then(() => Branch.init())
   .then(() => Element.init())
