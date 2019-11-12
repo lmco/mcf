@@ -115,10 +115,11 @@ function postArtifact(done) {
   // Create request body
   const body = {
     id: artData.id,
-    name: artData.name,
+    description: artData.description,
     filename: artData.filename,
     location: artData.location,
-    custom: artData.custom
+    custom: artData.custom,
+    size: artData.size
   };
 
   // Create request params
@@ -144,7 +145,7 @@ function postArtifact(done) {
     const createdArtifact = JSON.parse(_data);
     // Verify artifact created properly
     chai.expect(createdArtifact.id).to.equal(artData.id);
-    chai.expect(createdArtifact.name).to.equal(artData.name);
+    chai.expect(createdArtifact.description).to.equal(artData.description);
     chai.expect(createdArtifact.branch).to.equal(branchID);
     chai.expect(createdArtifact.project).to.equal(projID);
     chai.expect(createdArtifact.org).to.equal(orgID);
@@ -154,6 +155,7 @@ function postArtifact(done) {
     chai.expect(createdArtifact.custom || {}).to.deep.equal(
       artData.custom
     );
+    chai.expect(createdArtifact.size).to.equal(artData.size);
 
     // Verify additional properties
     chai.expect(createdArtifact.createdBy).to.equal(adminUser._id);
@@ -212,7 +214,7 @@ function getArtifact(done) {
 
     // Verify artifact created properly
     chai.expect(foundArtifact.id).to.equal(artData.id);
-    chai.expect(foundArtifact.name).to.equal(artData.name);
+    chai.expect(foundArtifact.description).to.equal(artData.description);
     chai.expect(foundArtifact.branch).to.equal(branchID);
     chai.expect(foundArtifact.project).to.equal(projID);
     chai.expect(foundArtifact.org).to.equal(orgID);
@@ -457,7 +459,7 @@ function patchArtifact(done) {
 
   // Create request body
   const body = {
-    name: 'edited_name'
+    description: 'edited_description'
   };
 
   // Create request params
@@ -484,7 +486,7 @@ function patchArtifact(done) {
 
     // Verify artifact created properly
     chai.expect(updatedArtifact.id).to.equal(artData.id);
-    chai.expect(updatedArtifact.name).to.equal('edited_name');
+    chai.expect(updatedArtifact.description).to.equal('edited_description');
     chai.expect(updatedArtifact.project).to.equal(projID);
     chai.expect(updatedArtifact.branch).to.equal(branchID);
     chai.expect(updatedArtifact.org).to.equal(orgID);
@@ -494,6 +496,7 @@ function patchArtifact(done) {
     chai.expect(updatedArtifact.custom || {}).to.deep.equal(
       artData.custom
     );
+    chai.expect(updatedArtifact.size).to.equal(artData.size);
 
     // Verify additional properties
     chai.expect(updatedArtifact.createdBy).to.equal(adminUser._id);

@@ -119,10 +119,11 @@ async function createArtifact() {
   const artData = testData.artifacts[0];
   const artObj = {
     id: artData.id,
-    name: artData.name,
+    description: artData.description,
     filename: artData.filename,
     location: artData.location,
-    custom: artData.custom
+    custom: artData.custom,
+    size: artData.size
   };
 
   try {
@@ -133,12 +134,14 @@ async function createArtifact() {
     chai.expect(createdArtifact[0]._id).to.equal(
       utils.createID(orgID, projectID, branchID, artData.id)
     );
+    chai.expect(createdArtifact[0].description).to.equal(artData.description);
     chai.expect(createdArtifact[0].filename).to.equal(artData.filename);
     chai.expect(createdArtifact[0].project).to.equal(project._id);
     chai.expect(createdArtifact[0].branch).to.equal(utils.createID(orgID, projectID, branchID));
     chai.expect(createdArtifact[0].location).to.equal(artData.location);
     chai.expect(createdArtifact[0].strategy).to.equal(M.config.artifact.strategy);
     chai.expect(createdArtifact[0].custom || {}).to.deep.equal(artData.custom);
+    chai.expect(createdArtifact[0].size).to.equal(artData.size);
 
     // Verify additional properties
     chai.expect(createdArtifact[0].createdBy).to.equal(adminUser._id);
@@ -179,7 +182,7 @@ async function createArtifacts() {
 
       // Verify artifacts created properly
       chai.expect(createdArt._id).to.equal(artifactID);
-      chai.expect(createdArt.name).to.equal(artObj.name);
+      chai.expect(createdArt.description).to.equal(artObj.description);
       chai.expect(createdArt.custom || {}).to.deep.equal(artObj.custom);
       chai.expect(createdArt.project).to.equal(utils.createID(orgID, projectID));
       chai.expect(createdArt.branch).to.equal(utils.createID(orgID, projectID, branchID));
@@ -188,6 +191,7 @@ async function createArtifacts() {
       chai.expect(createdArt.location).to.equal(artObj.location);
       chai.expect(createdArt.strategy).to.equal(M.config.artifact.strategy);
       chai.expect(createdArt.custom || {}).to.deep.equal(artObj.custom);
+      chai.expect(createdArt.size).to.equal(artObj.size);
 
       // Verify additional properties
       chai.expect(createdArt.createdBy).to.equal(adminUser._id);
@@ -223,13 +227,14 @@ async function getArtifact() {
     chai.expect(foundArtifact[0]._id).to.equal(
       utils.createID(orgID, projectID, branchID, artData.id)
     );
-    chai.expect(foundArtifact[0].name).to.equal(artData.name);
+    chai.expect(foundArtifact[0].description).to.equal(artData.description);
     chai.expect(foundArtifact[0].filename).to.equal(artData.filename);
     chai.expect(foundArtifact[0].project).to.equal(project._id);
     chai.expect(foundArtifact[0].branch).to.equal(utils.createID(orgID, projectID, branchID));
     chai.expect(foundArtifact[0].location).to.equal(artData.location);
     chai.expect(foundArtifact[0].strategy).to.equal(M.config.artifact.strategy);
     chai.expect(foundArtifact[0].custom || {}).to.deep.equal(artData.custom);
+    chai.expect(foundArtifact[0].size).to.equal(artData.size);
 
     // Verify additional properties
     chai.expect(foundArtifact[0].createdBy).to.equal(adminUser._id);
@@ -271,7 +276,7 @@ async function getArtifacts() {
 
       // Verify artifacts created properly
       chai.expect(foundArt._id).to.equal(artifactID);
-      chai.expect(foundArt.name).to.equal(artObj.name);
+      chai.expect(foundArt.description).to.equal(artObj.description);
       chai.expect(foundArt.custom || {}).to.deep.equal(artObj.custom);
       chai.expect(foundArt.project).to.equal(utils.createID(orgID, projectID));
       chai.expect(foundArt.branch).to.equal(utils.createID(orgID, projectID, branchID));
@@ -280,6 +285,7 @@ async function getArtifacts() {
       chai.expect(foundArt.location).to.equal(artObj.location);
       chai.expect(foundArt.strategy).to.equal(M.config.artifact.strategy);
       chai.expect(foundArt.custom || {}).to.deep.equal(artObj.custom);
+      chai.expect(foundArt.size).to.equal(artObj.size);
 
       // Verify additional properties
       chai.expect(foundArt.createdBy).to.equal(adminUser._id);
@@ -306,10 +312,11 @@ async function updateArtifact() {
   const artObj = {
     id: testData.artifacts[0].id,
     filename: artUpdateData.filename,
-    name: artUpdateData.name,
+    description: artUpdateData.description,
     location: artUpdateData.location,
     archived: false,
-    custom: artUpdateData.custom
+    custom: artUpdateData.custom,
+    size: artUpdateData.size
   };
 
   try {
@@ -322,13 +329,14 @@ async function updateArtifact() {
     chai.expect(updatedArtifact[0]._id).to.equal(
       utils.createID(orgID, projectID, branchID, testData.artifacts[0].id)
     );
-    chai.expect(updatedArtifact[0].name).to.equal(artUpdateData.name);
+    chai.expect(updatedArtifact[0].description).to.equal(artUpdateData.description);
     chai.expect(updatedArtifact[0].filename).to.equal(artUpdateData.filename);
     chai.expect(updatedArtifact[0].project).to.equal(project._id);
     chai.expect(updatedArtifact[0].branch).to.equal(utils.createID(orgID, projectID, branchID));
     chai.expect(updatedArtifact[0].location).to.equal(artUpdateData.location);
     chai.expect(updatedArtifact[0].strategy).to.equal(M.config.artifact.strategy);
     chai.expect(updatedArtifact[0].custom || {}).to.deep.equal(artUpdateData.custom);
+    chai.expect(updatedArtifact[0].size).to.equal(artUpdateData.size);
 
     // Verify additional properties
     chai.expect(updatedArtifact[0].createdBy).to.equal(adminUser._id);
@@ -358,7 +366,7 @@ async function updateArtifacts() {
 
   // Create objects to update artifacts
   const updateObjects = artUpdateData.map(a => ({
-    name: `${a.name}_edit`,
+    description: `${a.description}_edit`,
     id: a.id
   }));
 
@@ -377,13 +385,14 @@ async function updateArtifacts() {
 
       // Verify artifacts updated properly
       chai.expect(updatedArt._id).to.equal(artifactID);
-      chai.expect(updatedArt.name).to.equal(`${artObj.name}_edit`);
+      chai.expect(updatedArt.description).to.equal(`${artObj.description}_edit`);
       chai.expect(updatedArt.filename).to.equal(artObj.filename);
       chai.expect(updatedArt.project).to.equal(project._id);
       chai.expect(updatedArt.branch).to.equal(utils.createID(orgID, projectID, branchID));
       chai.expect(updatedArt.location).to.equal(artObj.location);
       chai.expect(updatedArt.strategy).to.equal(M.config.artifact.strategy);
       chai.expect(updatedArt.custom || {}).to.deep.equal(artObj.custom);
+      chai.expect(updatedArt.size).to.equal(artObj.size);
 
       // Verify additional properties
       chai.expect(updatedArt.createdBy).to.equal(adminUser._id);
