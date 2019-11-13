@@ -337,18 +337,10 @@ class Query {
    * object.
    *
    * @returns {string} The formatted key.
-   *
-   * @throws {NotImplementedError} If the key is '$text', an error is thrown
-   * stating that text search is not supported.
    */
   parseExpressionAttributeNames(obj, key) { // eslint-disable-line class-methods-use-this
     // Handle special case where key name starts with an underscore
     let keyName = (key === '_id') ? 'id' : key;
-
-    // TODO: SUPPORT TEXT SEARCH
-    if (keyName === '$text') {
-      throw new M.NotImplementedError('Text search is currently not supported.');
-    }
 
     // Handle case where updating an object
     if (keyName.includes('.')) {
