@@ -362,7 +362,7 @@ function patchWebhook(done) {
   };
   // Create request object
   const body = webhookUpdate;
-  const params = {};
+  const params = { webhookid: webhookData.id };
   const method = 'PATCH';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
