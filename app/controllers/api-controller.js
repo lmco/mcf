@@ -6137,8 +6137,8 @@ async function triggerWebhook(req, res) {
   const webhookID = Buffer.from(req.params.base64id, 'base64').toString('ascii');
 
   try {
-    // Note: this implies that incoming webhooks can only be found at the server level
-    const webhooks = await WebhookController.find(req.user, null, null, null, webhookID);
+    const webhooks = await WebhookController.find(req.user, null, null, null, webhookID,
+      { server: false });
     const webhook = webhooks[0];
 
     if (webhook.type !== 'Incoming') {

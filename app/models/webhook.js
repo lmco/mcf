@@ -37,7 +37,7 @@
  * to every url contained in their "responses" array upon being triggered. The url is the only
  * required field, while the method defaults to POST and the headers to
  * {'Content-Type': 'application/json'}. The auth field allows the user to specifiy a username and
- * password, and the ca field allows space for a certificate authority.</p> TODO: should the password be encoded? probably   also todo: ca?
+ * password, and the ca field allows space for a certificate authority.</p>
  *
  * <h4>Incoming</h4>
  * <p>The incoming field is used to store a token which is subsequently used upon triggering to
@@ -85,7 +85,7 @@ const extensions = M.require('models.plugin.extensions');
  * provided.
  * @property {object} responses.data - An optional field for data to send with the request.
  * @property {string} token - The token to validate incoming requests against.
- * @property {string} tokenLocation - The location of the incoming requests.  TODO: allow one webhook to have multiple incoming tokens and locations?
+ * @property {string} tokenLocation - The location of the token in the external request.
  * @property {string} org - An optional field to specify which org events the webhook listens for.
  * Exclusive with project and branch fields.
  * @property {string} project - An optional field to specify which project events the webhook

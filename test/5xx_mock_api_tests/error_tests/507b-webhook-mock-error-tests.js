@@ -80,7 +80,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a GET users request with invalid options', invalidOptions('getWebhooks'));
   it('should reject a GET user request with invalid options', invalidOptions('getWebhook'));
   it('should reject a POST user request with invalid options', invalidOptions('postWebhook'));
-  it('should reject a PATCH user request with invalid options', invalidOptions('patchWebhook'));;
+  it('should reject a PATCH user request with invalid options', invalidOptions('patchWebhook'));
   it('should reject a DELETE users request with invalid options', invalidOptions('deleteWebhooks'));
   it('should reject a DELETE user request with invalid options', invalidOptions('deleteWebhook'));
   // ------- Non matching ids in body vs url -------

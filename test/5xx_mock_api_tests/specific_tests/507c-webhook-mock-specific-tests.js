@@ -24,7 +24,6 @@ const APIController = M.require('controllers.api-controller');
 const WebhookController = M.require('controllers.webhook-controller');
 const Webhook = M.require('models.webhook');
 const jmi = M.require('lib.jmi-conversions');
-const events = M.require('lib.events');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
@@ -407,7 +406,8 @@ function getMultipleFromOrg(done) {
       if (foundWebhook.responses.length) {
         chai.expect(foundWebhook.responses[0].url).to.equal(webhookDataObj.responses[0].url);
         chai.expect(foundWebhook.responses[0].method).to.equal(webhookDataObj.responses[0].method || 'POST');
-      } else {
+      }
+      else {
         chai.expect(foundWebhook.token).to.equal(webhookDataObj.token);
         chai.expect(foundWebhook.tokenLocation).to.equal(webhookDataObj.tokenLocation);
       }
@@ -474,7 +474,8 @@ function getAllFromOrg(done) {
       if (foundWebhook.responses.length) {
         chai.expect(foundWebhook.responses[0].url).to.equal(webhookDataObj.responses[0].url);
         chai.expect(foundWebhook.responses[0].method).to.equal(webhookDataObj.responses[0].method || 'POST');
-      } else {
+      }
+      else {
         chai.expect(foundWebhook.token).to.equal(webhookDataObj.token);
         chai.expect(foundWebhook.tokenLocation).to.equal(webhookDataObj.tokenLocation);
       }
@@ -593,7 +594,8 @@ function getMultipleFromProject(done) {
       if (foundWebhook.responses.length) {
         chai.expect(foundWebhook.responses[0].url).to.equal(webhookDataObj.responses[0].url);
         chai.expect(foundWebhook.responses[0].method).to.equal(webhookDataObj.responses[0].method || 'POST');
-      } else {
+      }
+      else {
         chai.expect(foundWebhook.token).to.equal(webhookDataObj.token);
         chai.expect(foundWebhook.tokenLocation).to.equal(webhookDataObj.tokenLocation);
       }
@@ -660,7 +662,8 @@ function getAllFromProject(done) {
       if (foundWebhook.responses.length) {
         chai.expect(foundWebhook.responses[0].url).to.equal(webhookDataObj.responses[0].url);
         chai.expect(foundWebhook.responses[0].method).to.equal(webhookDataObj.responses[0].method || 'POST');
-      } else {
+      }
+      else {
         chai.expect(foundWebhook.token).to.equal(webhookDataObj.token);
         chai.expect(foundWebhook.tokenLocation).to.equal(webhookDataObj.tokenLocation);
       }
@@ -780,7 +783,8 @@ function getMultipleFromBranch(done) {
       if (foundWebhook.responses.length) {
         chai.expect(foundWebhook.responses[0].url).to.equal(webhookDataObj.responses[0].url);
         chai.expect(foundWebhook.responses[0].method).to.equal(webhookDataObj.responses[0].method || 'POST');
-      } else {
+      }
+      else {
         chai.expect(foundWebhook.token).to.equal(webhookDataObj.token);
         chai.expect(foundWebhook.tokenLocation).to.equal(webhookDataObj.tokenLocation);
       }
@@ -847,7 +851,8 @@ function getAllFromBranch(done) {
       if (foundWebhook.responses.length) {
         chai.expect(foundWebhook.responses[0].url).to.equal(webhookDataObj.responses[0].url);
         chai.expect(foundWebhook.responses[0].method).to.equal(webhookDataObj.responses[0].method || 'POST');
-      } else {
+      }
+      else {
         chai.expect(foundWebhook.token).to.equal(webhookDataObj.token);
         chai.expect(foundWebhook.tokenLocation).to.equal(webhookDataObj.tokenLocation);
       }
@@ -886,7 +891,7 @@ function getMultiple(done) {
   const webhookData = [orgWebhooks[0], projWebhooks[0], branchWebhooks[0]];
   // Create request object
   const body = webhookData.map((w) => w._id);
-  const params = {} ;
+  const params = {};
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, body, method);
   // Set server to false to specify to search through webhooks at every level
@@ -919,7 +924,8 @@ function getMultiple(done) {
       if (foundWebhook.responses.length) {
         chai.expect(foundWebhook.responses[0].url).to.equal(webhookDataObj.responses[0].url);
         chai.expect(foundWebhook.responses[0].method).to.equal(webhookDataObj.responses[0].method || 'POST');
-      } else {
+      }
+      else {
         chai.expect(foundWebhook.token).to.equal(webhookDataObj.token);
         chai.expect(foundWebhook.tokenLocation).to.equal(webhookDataObj.tokenLocation);
       }
@@ -956,7 +962,7 @@ function getAll(done) {
   const webhookData = [...orgWebhooks, ...projWebhooks, ...branchWebhooks];
   // Create request object
   const body = null;
-  const params = {} ;
+  const params = {};
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, body, method);
   // Set server to false to specify to search through webhooks at every level
@@ -989,7 +995,8 @@ function getAll(done) {
       if (foundWebhook.responses.length) {
         chai.expect(foundWebhook.responses[0].url).to.equal(webhookDataObj.responses[0].url);
         chai.expect(foundWebhook.responses[0].method).to.equal(webhookDataObj.responses[0].method || 'POST');
-      } else {
+      }
+      else {
         chai.expect(foundWebhook.token).to.equal(webhookDataObj.token);
         chai.expect(foundWebhook.tokenLocation).to.equal(webhookDataObj.tokenLocation);
       }
@@ -1142,7 +1149,8 @@ function patchOnBranch(done) {
   };
   // Create request object
   const body = webhookUpdate;
-  const params = { webhookid: webhookData._id, orgid: org._id, projectid: projID, branchid: branchID };
+  const params = {
+    webhookid: webhookData._id, orgid: org._id, projectid: projID, branchid: branchID };
   const method = 'PATCH';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -1229,7 +1237,7 @@ function deleteOnOrg(done) {
  */
 function deleteMultipleOnOrg(done) {
   // Create request object
-  const deleteIDs = orgWebhooks.slice(1,3).map((w) => w._id);
+  const deleteIDs = orgWebhooks.slice(1, 3).map((w) => w._id);
   const body = deleteIDs;
   const params = { orgid: org._id };
   const method = 'DELETE';
@@ -1303,7 +1311,7 @@ function deleteOnProject(done) {
  */
 function deleteMultipleOnProject(done) {
   // Create request object
-  const deleteIDs = projWebhooks.slice(1,3).map((w) => w._id);
+  const deleteIDs = projWebhooks.slice(1, 3).map((w) => w._id);
   const body = deleteIDs;
   const params = { orgid: org._id, projectid: projID };
   const method = 'DELETE';
@@ -1377,7 +1385,7 @@ function deleteOnBranch(done) {
  */
 function deleteMultipleOnBranch(done) {
   // Create request object
-  const deleteIDs = branchWebhooks.slice(1,3).map((w) => w._id);
+  const deleteIDs = branchWebhooks.slice(1, 3).map((w) => w._id);
   const body = deleteIDs;
   const params = { orgid: org._id, projectid: projID, branchid: branchID };
   const method = 'DELETE';

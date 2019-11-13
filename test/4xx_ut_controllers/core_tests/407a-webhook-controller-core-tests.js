@@ -74,8 +74,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should find multiple webhooks', findWebhooks);
   it('should find all webhooks', findAllWebhooks);
   // ------------- Update -------------
-  //it('should update a webhook', updateWebhook);
-  //it('should update multiple webhooks', updateWebhooks);
+  it('should update a webhook', updateWebhook);
+  it('should update multiple webhooks', updateWebhooks);
   // ------------- Remove -------------
   it('should delete a webhook', deleteWebhook);
   it('should delete multiple webhooks', deleteWebhooks);
@@ -300,6 +300,104 @@ async function findAllWebhooks() {
       chai.expect(foundWebhook.createdOn).to.not.equal(null);
       chai.expect(foundWebhook.updatedOn).to.not.equal(null);
       chai.expect(foundWebhook.archivedOn).to.equal(null);
+    });
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that the Webhook Controller can create a webhook.
+ */
+async function updateWebhook() {
+  try {
+    const webhookData = testData.webhooks[0];
+    const webhookUpdate = {
+      id: webhookData._id,
+      name: 'test update'
+    };
+
+    // Update webhook via controller
+    const updatedWebhooks = await WebhookController.update(adminUser, null, null, null,
+      webhookUpdate);
+
+    // Expect updatedWebhooks array to contain 1 webhook
+    chai.expect(updatedWebhooks.length).to.equal(1);
+    const updatedWebhook = updatedWebhooks[0];
+
+    // Verify webhook
+    chai.expect(updatedWebhook.name).to.equal('test update');
+    chai.expect(updatedWebhook.type).to.equal(webhookData.type);
+    chai.expect(updatedWebhook.description).to.equal(webhookData.description);
+    chai.expect(updatedWebhook.triggers).to.deep.equal(webhookData.triggers);
+    chai.expect(updatedWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
+    chai.expect(updatedWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
+    chai.expect(updatedWebhook.custom).to.deep.equal(webhookData.custom || {});
+
+    // Verify additional properties
+    chai.expect(updatedWebhook.createdBy).to.equal(adminUser._id);
+    chai.expect(updatedWebhook.lastModifiedBy).to.equal(adminUser._id);
+    chai.expect(updatedWebhook.archivedBy).to.equal(null);
+    chai.expect(updatedWebhook.createdOn).to.not.equal(null);
+    chai.expect(updatedWebhook.updatedOn).to.not.equal(null);
+    chai.expect(updatedWebhook.archivedOn).to.equal(null);
+
+    // Save the generated UUID to be used later in find() tests
+    webhookData._id = updatedWebhook._id;
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that the Webhook Controller can create a webhook.
+ */
+async function updateWebhooks() {
+  try {
+    const webhookData = testData.webhooks.slice(1, 3);
+    const webhookUpdate = [{
+      id: webhookData[0]._id,
+      name: 'test update'
+    },
+    {
+      id: webhookData[1]._id,
+      name: 'test update'
+    }];
+
+    // Update webhooks via controller
+    const updatedWebhooks = await WebhookController.update(adminUser, null, null, null,
+      webhookUpdate);
+
+    // Expect updatedWebhooks array to contain 2 webhooks
+    chai.expect(updatedWebhooks.length).to.equal(2);
+
+    // Convert createdWebhooks to JMI type 2 for easier lookup
+    const jmi2 = jmi.convertJMI(1, 2, updatedWebhooks);
+
+    webhookData.forEach((webhookDataObj) => {
+      const webhook = jmi2[webhookDataObj._id];
+
+      // Verify webhook
+      chai.expect(webhook._id).to.equal(webhookDataObj._id);
+      chai.expect(webhook.name).to.equal('test update');
+      chai.expect(webhook.type).to.equal(webhookDataObj.type);
+      chai.expect(webhook.description).to.equal(webhookDataObj.description);
+      chai.expect(webhook.triggers).to.deep.equal(webhookDataObj.triggers);
+      chai.expect(webhook.custom).to.deep.equal(webhookDataObj.custom || {});
+
+      // Verify additional properties
+      chai.expect(webhook.createdBy).to.equal(adminUser._id);
+      chai.expect(webhook.lastModifiedBy).to.equal(adminUser._id);
+      chai.expect(webhook.archivedBy).to.equal(null);
+      chai.expect(webhook.createdOn).to.not.equal(null);
+      chai.expect(webhook.updatedOn).to.not.equal(null);
+      chai.expect(webhook.archivedOn).to.equal(null);
     });
   }
   catch (error) {

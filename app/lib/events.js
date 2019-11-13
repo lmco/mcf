@@ -39,7 +39,7 @@ class CustomEmitter extends EventEmitter {
       webhooks.forEach((webhook) => {
         if (webhook.type === 'Outgoing') {
           // Send the requests with the provided arguments.
-          webhook.sendRequest(args);
+          Webhook.sendRequest(webhook, args);
         }
       });
     }

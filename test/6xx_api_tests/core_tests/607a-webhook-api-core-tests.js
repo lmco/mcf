@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.507a-webhook-mock-core-tests
+ * @module test.607a-webhook-api-core-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -11,24 +11,24 @@
  *
  * @author Connor Doyle
  *
- * @description This tests mock requests of the API controller functionality:
+ * @description This tests the webhook API controller functionality:
  * GET, POST, PATCH, and DELETE webhooks.
  */
 
 // NPM modules
 const chai = require('chai');
+const request = require('request');
 
 // MBEE modules
 const db = M.require('lib.db');
-const APIController = M.require('controllers.api-controller');
 const WebhookController = M.require('controllers.webhook-controller');
 const jmi = M.require('lib.jmi-conversions');
-const events = M.require('lib.events');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const test = M.config.test;
 let adminUser = null;
 const webhookIDs = [];
 
@@ -102,34 +102,39 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies mock POST request to create a webhook.
+ * @description Verifies POST /api/webhooks creates a single webhook.
  *
  * @param {Function} done - The mocha callback.
  */
 function postWebhook(done) {
   const webhookData = testData.webhooks[2];
-  // Create request object
-  const body = webhookData;
-  const params = {};
-  const method = 'POST';
-  const req = testUtils.createRequest(adminUser, params, body, method);
 
-  // Set response as empty object
-  const res = {};
+  request({
+    url: `${test.url}/api/webhooks`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'POST',
+    body: JSON.stringify(webhookData)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
 
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const postedWebhook = JSON.parse(_data);
+    const postedWebhook = JSON.parse(body);
     chai.expect(postedWebhook.name).to.equal(webhookData.name);
     chai.expect(postedWebhook.triggers).to.deep.equal(webhookData.triggers);
     chai.expect(postedWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
     chai.expect(postedWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
     chai.expect(postedWebhook.reference).to.equal('');
     chai.expect(postedWebhook.custom).to.deep.equal(webhookData.custom || {});
+
+    // If description was provided, verify it
+    if (webhookData.hasOwnProperty('description')) {
+      chai.expect(postedWebhook.description).to.equal(webhookData.description);
+    }
 
     // Verify additional properties
     chai.expect(postedWebhook.createdBy).to.equal(adminUser._id);
@@ -142,50 +147,47 @@ function postWebhook(done) {
     chai.expect(postedWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
 
-    // Expect the statusCode to be 200
-    chai.expect(res.statusCode).to.equal(200);
-
-    // Save the id for later use
-    webhookIDs.push(postedWebhook.id);
+    // Save webhook id for later use
     webhookData.id = postedWebhook.id;
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
-  };
-
-  // POSTs a webhook
-  APIController.postWebhook(req, res);
+    done();
+  });
 }
 
 /**
- * @description Verifies mock GET request to find a webhook.
+ * @description Verifies GET /api/webhooks/:webhookid can find a single webhook.
  *
  * @param {Function} done - The mocha callback.
  */
 function getWebhook(done) {
   const webhookData = testData.webhooks[0];
-  // Create request object
-  const body = null;
-  const params = { webhookid: webhookIDs[0] };
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, body, method);
 
-  // Set response as empty object
-  const res = {};
+  request({
+    url: `${test.url}/api/webhooks/${webhookData.id}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'GET',
+    body: null
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
 
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const foundWebhook = JSON.parse(_data);
+    const foundWebhook = JSON.parse(body);
     chai.expect(foundWebhook.name).to.equal(webhookData.name);
     chai.expect(foundWebhook.triggers).to.deep.equal(webhookData.triggers);
     chai.expect(foundWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
     chai.expect(foundWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
     chai.expect(foundWebhook.reference).to.equal('');
     chai.expect(foundWebhook.custom).to.deep.equal(webhookData.custom || {});
+
+    // If description was provided, verify it
+    if (webhookData.hasOwnProperty('description')) {
+      chai.expect(foundWebhook.description).to.equal(webhookData.description);
+    }
 
     // Verify additional properties
     chai.expect(foundWebhook.createdBy).to.equal(adminUser._id);
@@ -197,41 +199,33 @@ function getWebhook(done) {
     // Verify specific fields not returned
     chai.expect(foundWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
-
-    // Expect the statusCode to be 200
-    chai.expect(res.statusCode).to.equal(200);
-
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
-  };
-
-  // GETs a webhook
-  APIController.getWebhook(req, res);
+    done();
+  });
 }
 
 /**
- * @description Verifies mock GET request to find multiple webhooks.
+ * @description Verifies GET /api/webhooks can find multiple webhooks.
  *
  * @param {Function} done - The mocha callback.
  */
 function getWebhooks(done) {
-  const webhookData = testData.webhooks;
-  // Create request object
-  const body = webhookIDs;
-  const params = {};
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, body, method);
+  const webhookData = testData.webhooks.slice(0, 2);
 
-  // Set response as empty object
-  const res = {};
+  request({
+    url: `${test.url}/api/webhooks`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'GET',
+    body: JSON.stringify(webhookData.map(w => w.id))
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
 
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const foundWebhooks = JSON.parse(_data);
+    const foundWebhooks = JSON.parse(body);
 
     // Convert foundWebhooks to JMI type 2 for easier lookup
     const jmi2 = jmi.convertJMI(1, 2, foundWebhooks, 'id');
@@ -266,43 +260,33 @@ function getWebhooks(done) {
       chai.expect(foundWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
-
-    // Expect the statusCode to be 200
-    chai.expect(res.statusCode).to.equal(200);
-
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
-  };
-
-  // GETs webhooks
-  APIController.getWebhooks(req, res);
+    done();
+  });
 }
 
 /**
- * @description Verifies mock GET request to find all webhooks.
+ * @description Verifies GET /api/webhooks can find all webhooks.
  *
  * @param {Function} done - The mocha callback.
  */
 function getAllWebhooks(done) {
   const webhookData = testData.webhooks;
-  // Create request object
-  const body = null;
-  const params = {};
-  const method = 'GET';
-  const req = testUtils.createRequest(adminUser, params, body, method);
-  // Set server to false to search through all webhooks
-  req.query = { server: false };
 
-  // Set response as empty object
-  const res = {};
+  request({
+    url: `${test.url}/api/webhooks`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'GET',
+    body: null
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
 
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const foundWebhooks = JSON.parse(_data);
+    const foundWebhooks = JSON.parse(body);
 
     // Convert foundWebhooks to JMI type 2 for easier lookup
     const jmi2 = jmi.convertJMI(1, 2, foundWebhooks, 'id');
@@ -337,210 +321,165 @@ function getAllWebhooks(done) {
       chai.expect(foundWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
-
-    // Expect the statusCode to be 200
-    chai.expect(res.statusCode).to.equal(200);
-
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
-  };
-
-  // GETs all webhooks
-  APIController.getWebhooks(req, res);
+    done();
+  });
 }
 
 /**
- * @description Verifies mock PATCH request to update a webhook.
+ * @description Verifies PATCH /api/webhooks/:webhookid can update a single webhook.
  *
  * @param {Function} done - The mocha callback.
  */
 function patchWebhook(done) {
   const webhookData = testData.webhooks[0];
   const webhookUpdate = {
-    id: webhookIDs[0],
-    name: 'Patch test'
+    id: webhookData.id,
+    name: 'test update'
   };
-  // Create request object
-  const body = webhookUpdate;
-  const params = {};
-  const method = 'PATCH';
-  const req = testUtils.createRequest(adminUser, params, body, method);
 
-  // Set response as empty object
-  const res = {};
+  request({
+    url: `${test.url}/api/webhooks/${webhookData.id}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'PATCH',
+    body: JSON.stringify(webhookUpdate)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
 
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const patchedWebhook = JSON.parse(_data);
-    chai.expect(patchedWebhook.name).to.equal('Patch test');
-    chai.expect(patchedWebhook.triggers).to.deep.equal(webhookData.triggers);
-    chai.expect(patchedWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
-    chai.expect(patchedWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
-    chai.expect(patchedWebhook.reference).to.equal('');
-    chai.expect(patchedWebhook.custom).to.deep.equal(webhookData.custom || {});
+    const postedWebhook = JSON.parse(body);
+    chai.expect(postedWebhook.name).to.equal('test update');
+    chai.expect(postedWebhook.triggers).to.deep.equal(webhookData.triggers);
+    chai.expect(postedWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
+    chai.expect(postedWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
+    chai.expect(postedWebhook.reference).to.equal('');
+    chai.expect(postedWebhook.custom).to.deep.equal(webhookData.custom || {});
+
+    // If description was provided, verify it
+    if (webhookData.hasOwnProperty('description')) {
+      chai.expect(postedWebhook.description).to.equal(webhookData.description);
+    }
 
     // Verify additional properties
-    chai.expect(patchedWebhook.createdBy).to.equal(adminUser._id);
-    chai.expect(patchedWebhook.lastModifiedBy).to.equal(adminUser._id);
-    chai.expect(patchedWebhook.createdOn).to.not.equal(null);
-    chai.expect(patchedWebhook.updatedOn).to.not.equal(null);
-    chai.expect(patchedWebhook.archived).to.equal(false);
+    chai.expect(postedWebhook.createdBy).to.equal(adminUser._id);
+    chai.expect(postedWebhook.lastModifiedBy).to.equal(adminUser._id);
+    chai.expect(postedWebhook.createdOn).to.not.equal(null);
+    chai.expect(postedWebhook.updatedOn).to.not.equal(null);
+    chai.expect(postedWebhook.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(patchedWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
+    chai.expect(postedWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
 
-    // Expect the statusCode to be 200
-    chai.expect(res.statusCode).to.equal(200);
-
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
-  };
-
-  // PATCHes a webhook
-  APIController.patchWebhook(req, res);
+    done();
+  });
 }
 
 /**
- * @description Verifies mock DELETE request to remove a webhook.
+ * @description Verifies DELETE /api/webhooks/:webhookid can delete a single webhook.
  *
  * @param {Function} done - The mocha callback.
  */
 function deleteWebhook(done) {
-  // Create request object
-  const webhookID = webhookIDs[0];
-  const body = null;
-  const params = { webhookid: webhookID };
-  const method = 'DELETE';
-  const req = testUtils.createRequest(adminUser, params, body, method);
+  const deleteID = testData.webhooks[0].id;
 
-  // Set response as empty object
-  const res = {};
+  request({
+    url: `${test.url}/api/webhooks/${deleteID}`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'DELETE',
+    body: null
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
 
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const deletedWebhooks = JSON.parse(_data);
+    const deletedWebhooks = JSON.parse(body);
     chai.expect(deletedWebhooks.length).to.equal(1);
-    chai.expect(deletedWebhooks[0]).to.equal(webhookID);
+    chai.expect(deletedWebhooks[0]).to.equal(deleteID);
 
-    // Expect the statusCode to be 200
-    chai.expect(res.statusCode).to.equal(200);
-
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
-  };
-
-  // DELETEs a webhook
-  APIController.deleteWebhook(req, res);
+    done();
+  });
 }
 
 /**
- * @description Verifies mock DELETE request to remove a webhook.
+ * @description Verifies DELETE /api/webhooks/ can delete multiple webhooks.
  *
  * @param {Function} done - The mocha callback.
  */
 function deleteWebhooks(done) {
-  // Create request object
-  const deleteIDs = webhookIDs.slice(1, 3);
-  const body = deleteIDs;
-  const params = {};
-  const method = 'DELETE';
-  const req = testUtils.createRequest(adminUser, params, body, method);
+  const deleteIDs = testData.webhooks.slice(1, 3).map((w) => w.id);
 
-  // Set response as empty object
-  const res = {};
+  request({
+    url: `${test.url}/api/webhooks`,
+    headers: testUtils.getHeaders(),
+    ca: testUtils.readCaFile(),
+    method: 'DELETE',
+    body: JSON.stringify(deleteIDs)
+  },
+  (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
 
-  // Verifies status code and headers
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const deletedWebhooks = JSON.parse(_data);
+    const deletedWebhooks = JSON.parse(body);
     chai.expect(deletedWebhooks.length).to.equal(2);
-    deletedWebhooks.forEach((webhookID) => {
-      chai.expect(deleteIDs.includes(webhookID)).to.equal(true);
-    });
+    chai.expect(deletedWebhooks).to.have.members(deleteIDs);
 
-    // Expect the statusCode to be 200
-    chai.expect(res.statusCode).to.equal(200);
-
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
-  };
-
-  // DELETEs multiple webhooks
-  APIController.deleteWebhooks(req, res);
+    done();
+  });
 }
 
 /**
- * @description A function that registers a listener for an incoming webhook and then proceeds
- * to make a mock API request to trigger that webhook. Verifies that the webhook emits the event
- * when its endpoint is called.
+ * @description Verifies POST /api/webhooks/trigger/:base64id can trigger a webhook.
  *
  * @param {Function} done - The mocha callback.
- **/
+ */
 function triggerWebhook(done) {
   // Get data for an incoming webhook
-  const webhookData = {
-    name: 'test_webhook01',
-    type: 'Incoming',
-    description: 'test webhook description 1',
-    triggers: ['test-event'],
-    token: 'test token',
-    tokenLocation: 'test location'
-  };
+  const webhookData = testData.webhooks[1];
+  delete webhookData.id;
 
+  // Note: registering a listener here would not work because the event occurs on a
+  // separately running server. All we can test here is that we get a 200 response.
 
-  // Register a listener for the incoming webhook event
-  events.on(webhookData.triggers[0], function() {
-    done();
-  });
-
-  // Create the incoming webhook
   WebhookController.create(adminUser, null, null, null, webhookData)
-  .then((incomingWebhooks) => {
+  .then((webhooks) => {
+    const webhook = webhooks[0];
     // Get the base64 of the webhook id
-    const triggerID = incomingWebhooks[0]._id;
+    const triggerID = webhook._id;
     const base64ID = Buffer.from(triggerID).toString('base64');
 
-    // Create request object
-    const body = {
-      token: 'test token',
-      data: 'test data'
-    };
-    const params = { base64id: base64ID };
-    const method = 'POST';
-    const req = testUtils.createRequest(adminUser, params, body, method);
+    request({
+      url: `${test.url}/api/webhooks/trigger/${base64ID}`,
+      headers: testUtils.getHeaders(),
+      ca: testUtils.readCaFile(),
+      method: 'POST',
+      body: JSON.stringify({
+        token: 'test token'
+      })
+    },
+    (err, response, body) => {
+      // Expect no error
+      chai.expect(err).to.equal(null);
 
-    // Set response as empty object
-    const res = {};
+      // Expect response status: 200 OK
+      chai.expect(response.statusCode).to.equal(200);
 
-    // Verifies status code and headers
-    testUtils.createResponse(res);
-
-    // Verifies the response data
-    res.send = function send(_data) {
-      // Verify response body
-      chai.expect(_data).to.equal('success');
-
-      // Expect the statusCode to be 200
-      chai.expect(res.statusCode).to.equal(200);
-
-      // TODO: replace done with a custom function for testResponseLogging
-      // Ensure the response was logged correctly
-      // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
-    };
-
-    // GETs the webhook trigger endpoint
-    APIController.triggerWebhook(req, res);
+      done();
+    });
+  })
+  .catch((error) => {
+    M.log.error(error);
+    chai.expect(error).to.equal(null);
   });
 }
