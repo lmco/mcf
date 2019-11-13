@@ -26,6 +26,7 @@ const path = require('path'); // Find directory paths
 // MBEE modules
 const db = M.require('db');
 const utils = M.require('lib.utils');
+const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
@@ -94,13 +95,17 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute tests */
   it('should POST an artifact', postArtifact);
+  it('should POST multiple artifacts', postArtifacts);
   it('should GET an artifact', getArtifact);
+  it('should GET multiple artifacts', getArtifacts);
   it('should POST an artifact blob', postBlob);
   it('should GET an artifact blob', getBlob);
   it('should GET an artifact blob by ID', getBlobById);
   it('should DELETE an artifact', deleteBlob);
   it('should PATCH an artifact', patchArtifact);
+  it('should PATCH multiple artifacts', patchArtifacts);
   it('should DELETE an artifact', deleteArtifact);
+  it('should DELETE multiple artifacts', deleteArtifacts);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -125,28 +130,94 @@ function postArtifact(done) {
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const postedArtifact = JSON.parse(body);
+    const createdArtifact = JSON.parse(body);
 
     // Verify artifact created properly
-    chai.expect(postedArtifact.id).to.equal(artData.id);
-    chai.expect(postedArtifact.branch).to.equal(branchID);
-    chai.expect(postedArtifact.project).to.equal(projID);
-    chai.expect(postedArtifact.org).to.equal(orgID);
-    chai.expect(postedArtifact.location).to.equal(artData.location);
-    chai.expect(postedArtifact.filename).to.equal(artData.filename);
-    chai.expect(postedArtifact.strategy).to.equal(M.config.artifact.strategy);
-    chai.expect(postedArtifact.size).to.equal(artData.size);
+    chai.expect(createdArtifact.id).to.equal(artData.id);
+    chai.expect(createdArtifact.branch).to.equal(branchID);
+    chai.expect(createdArtifact.project).to.equal(projID);
+    chai.expect(createdArtifact.org).to.equal(orgID);
+    chai.expect(createdArtifact.description).to.equal(artData.description);
+    chai.expect(createdArtifact.location).to.equal(artData.location);
+    chai.expect(createdArtifact.filename).to.equal(artData.filename);
+    chai.expect(createdArtifact.strategy).to.equal(M.config.artifact.strategy);
+    chai.expect(createdArtifact.size).to.equal(artData.size);
 
     // Verify additional properties
-    chai.expect(postedArtifact.createdBy).to.equal(adminUser._id);
-    chai.expect(postedArtifact.lastModifiedBy).to.equal(adminUser._id);
-    chai.expect(postedArtifact.createdOn).to.not.equal(null);
-    chai.expect(postedArtifact.updatedOn).to.not.equal(null);
-    chai.expect(postedArtifact.archived).to.equal(false);
+    chai.expect(createdArtifact.createdBy).to.equal(adminUser._id);
+    chai.expect(createdArtifact.lastModifiedBy).to.equal(adminUser._id);
+    chai.expect(createdArtifact.createdOn).to.not.equal(null);
+    chai.expect(createdArtifact.updatedOn).to.not.equal(null);
+    chai.expect(createdArtifact.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(postedArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
+    chai.expect(createdArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+    done();
+  });
+}
+
+/**
+ * @description Verifies POST request to create multiple artifacts.
+ *
+ * @param {Function} done - The mocha callback.
+ */
+function postArtifacts(done) {
+  // Define artifact metadata
+  const artData = [
+    testData.artifacts[1],
+    testData.artifacts[2]
+  ];
+
+  const options = {
+    method: 'POST',
+    url: `${test.url}/api/orgs/${orgID}/projects/${projID}/branches/${branchID}/artifacts`,
+    headers: testUtils.getHeaders(),
+    body: JSON.stringify(artData)
+  };
+
+  request(options, (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+
+    // Verify response body
+    const createdArtifacts = JSON.parse(body);
+
+    // Expect createdArtifacts not to be empty
+    chai.expect(createdArtifacts.length).to.equal(artData.length);
+
+    // Convert to JMI type 2 for easier lookup
+    const jmi2Artifacts = jmi.convertJMI(1, 2, createdArtifacts, 'id');
+
+    // Loop through each artifact data object
+    artData.forEach((artObj) => {
+      const artifactID = utils.createID(artObj.id);
+      const createdArtifact = jmi2Artifacts[artifactID];
+
+      // Verify artifact created properly
+      chai.expect(createdArtifact.id).to.equal(artObj.id);
+      chai.expect(createdArtifact.branch).to.equal(branchID);
+      chai.expect(createdArtifact.project).to.equal(projID);
+      chai.expect(createdArtifact.org).to.equal(orgID);
+      chai.expect(createdArtifact.description).to.equal(artObj.description);
+      chai.expect(createdArtifact.location).to.equal(artObj.location);
+      chai.expect(createdArtifact.filename).to.equal(artObj.filename);
+      chai.expect(createdArtifact.strategy).to.equal(M.config.artifact.strategy);
+      chai.expect(createdArtifact.size).to.equal(artObj.size);
+
+      // Verify additional properties
+      chai.expect(createdArtifact.createdBy).to.equal(adminUser._id);
+      chai.expect(createdArtifact.lastModifiedBy).to.equal(adminUser._id);
+      chai.expect(createdArtifact.createdOn).to.not.equal(null);
+      chai.expect(createdArtifact.updatedOn).to.not.equal(null);
+      chai.expect(createdArtifact.archived).to.equal(false);
+
+      // Verify specific fields not returned
+      chai.expect(createdArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
+    });
     done();
   });
 }
@@ -171,30 +242,101 @@ function getArtifact(done) {
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const createdArtifact = JSON.parse(body);
+    const foundArtifact = JSON.parse(body);
 
-    // Verify artifact created properly
-    chai.expect(createdArtifact.id).to.equal(artData.id);
-    chai.expect(createdArtifact.branch).to.equal(branchID);
-    chai.expect(createdArtifact.project).to.equal(projID);
-    chai.expect(createdArtifact.org).to.equal(orgID);
-    chai.expect(createdArtifact.description).to.equal(artData.description);
-    chai.expect(createdArtifact.location).to.equal(artData.location);
-    chai.expect(createdArtifact.filename).to.equal(artData.filename);
-    chai.expect(createdArtifact.strategy).to.equal(M.config.artifact.strategy);
-    chai.expect(createdArtifact.custom).to.deep.equal(artData.custom);
-    chai.expect(createdArtifact.size).to.equal(artData.size);
+    // Verify artifact found
+    chai.expect(foundArtifact.id).to.equal(artData.id);
+    chai.expect(foundArtifact.branch).to.equal(branchID);
+    chai.expect(foundArtifact.project).to.equal(projID);
+    chai.expect(foundArtifact.org).to.equal(orgID);
+    chai.expect(foundArtifact.description).to.equal(artData.description);
+    chai.expect(foundArtifact.location).to.equal(artData.location);
+    chai.expect(foundArtifact.filename).to.equal(artData.filename);
+    chai.expect(foundArtifact.strategy).to.equal(M.config.artifact.strategy);
+    chai.expect(foundArtifact.custom).to.deep.equal(artData.custom);
+    chai.expect(foundArtifact.size).to.equal(artData.size);
 
     // Verify additional properties
-    chai.expect(createdArtifact.createdBy).to.equal(adminUser._id);
-    chai.expect(createdArtifact.lastModifiedBy).to.equal(adminUser._id);
-    chai.expect(createdArtifact.createdOn).to.not.equal(null);
-    chai.expect(createdArtifact.updatedOn).to.not.equal(null);
-    chai.expect(createdArtifact.archived).to.equal(false);
+    chai.expect(foundArtifact.createdBy).to.equal(adminUser._id);
+    chai.expect(foundArtifact.lastModifiedBy).to.equal(adminUser._id);
+    chai.expect(foundArtifact.createdOn).to.not.equal(null);
+    chai.expect(foundArtifact.updatedOn).to.not.equal(null);
+    chai.expect(foundArtifact.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(createdArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
+    chai.expect(foundArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+    done();
+  });
+}
+
+/**
+ * @description Verifies GET request to get multiple artifacts.
+ *
+ * @param {Function} done - The mocha callback.
+ */
+function getArtifacts(done) {
+  // Define artifact metadata
+  const artData = [
+    testData.artifacts[1],
+    testData.artifacts[2]
+  ];
+
+  const artIDs = [
+    testData.artifacts[1].id,
+    testData.artifacts[2].id
+  ];
+
+  const options = {
+    method: 'GET',
+    url: `${test.url}/api/orgs/${orgID}/projects/${projID}/branches/${branchID}/artifacts`,
+    headers: testUtils.getHeaders(),
+    body: JSON.stringify(artIDs)
+  };
+
+  request(options, (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const foundArtifacts = JSON.parse(body);
+
+    // Verify expected number of documents
+
+    chai.expect(foundArtifacts.length).to.equal(artData.length);
+
+    // Convert to JMI type 2 for easier lookup
+    const jmi2Artifacts = jmi.convertJMI(1, 2, foundArtifacts, 'id');
+
+    // Loop through each artifact data object
+    artData.forEach((artObj) => {
+      const artifactID = utils.createID(artObj.id);
+      const foundArtifact = jmi2Artifacts[artifactID];
+
+      // Verify artifact
+      chai.expect(foundArtifact.id).to.equal(artObj.id);
+      chai.expect(foundArtifact.branch).to.equal(branchID);
+      chai.expect(foundArtifact.project).to.equal(projID);
+      chai.expect(foundArtifact.org).to.equal(orgID);
+      chai.expect(foundArtifact.description).to.equal(artObj.description);
+      chai.expect(foundArtifact.location).to.equal(artObj.location);
+      chai.expect(foundArtifact.filename).to.equal(artObj.filename);
+      chai.expect(foundArtifact.strategy).to.equal(M.config.artifact.strategy);
+      chai.expect(foundArtifact.custom).to.deep.equal(artObj.custom);
+      chai.expect(foundArtifact.size).to.equal(artObj.size);
+
+      // Verify additional properties
+      chai.expect(foundArtifact.createdBy).to.equal(adminUser._id);
+      chai.expect(foundArtifact.lastModifiedBy).to.equal(adminUser._id);
+      chai.expect(foundArtifact.createdOn).to.not.equal(null);
+      chai.expect(foundArtifact.updatedOn).to.not.equal(null);
+      chai.expect(foundArtifact.archived).to.equal(false);
+
+      // Verify specific fields not returned
+      chai.expect(foundArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
+    });
     done();
   });
 }
@@ -410,6 +552,76 @@ function patchArtifact(done) {
 }
 
 /**
+ * @description Verifies PATCH request to update multiple artifacts.
+ *
+ * @param {Function} done - The mocha callback.
+ */
+function patchArtifacts(done) {
+  // Define artifact metadata
+  const artData = [
+    testData.artifacts[1],
+    testData.artifacts[2]
+  ];
+
+  const updateObj = artData.map(a => ({
+    id: a.id,
+    description: `${a.description}_edit`
+  }));
+
+  const options = {
+    method: 'PATCH',
+    url: `${test.url}/api/orgs/${orgID}/projects/${projID}/branches/${branchID}/artifacts`,
+    headers: testUtils.getHeaders(),
+    body: JSON.stringify(updateObj)
+  };
+
+  request(options, (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const patchedArtifacts = JSON.parse(body);
+
+    // Verify expected number of documents
+    chai.expect(patchedArtifacts.length).to.equal(artData.length);
+
+    // Convert to JMI type 2 for easier lookup
+    const jmi2Artifacts = jmi.convertJMI(1, 2, patchedArtifacts, 'id');
+
+    // Loop through each artifact data object
+    artData.forEach((artObj) => {
+      const artifactID = utils.createID(artObj.id);
+      const patchedArtifact = jmi2Artifacts[artifactID];
+
+      // Verify artifact updated properly
+      chai.expect(patchedArtifact.id).to.equal(artObj.id);
+      chai.expect(patchedArtifact.branch).to.equal(branchID);
+      chai.expect(patchedArtifact.project).to.equal(projID);
+      chai.expect(patchedArtifact.org).to.equal(orgID);
+      chai.expect(patchedArtifact.description).to.equal(`${artObj.description}_edit`);
+      chai.expect(patchedArtifact.location).to.equal(artObj.location);
+      chai.expect(patchedArtifact.filename).to.equal(artObj.filename);
+      chai.expect(patchedArtifact.strategy).to.equal(M.config.artifact.strategy);
+      chai.expect(patchedArtifact.custom).to.deep.equal(artObj.custom);
+      chai.expect(patchedArtifact.size).to.equal(artObj.size);
+
+      // Verify additional properties
+      chai.expect(patchedArtifact.createdBy).to.equal(adminUser._id);
+      chai.expect(patchedArtifact.lastModifiedBy).to.equal(adminUser._id);
+      chai.expect(patchedArtifact.createdOn).to.not.equal(null);
+      chai.expect(patchedArtifact.updatedOn).to.not.equal(null);
+      chai.expect(patchedArtifact.archived).to.equal(false);
+
+      // Verify specific fields not returned
+      chai.expect(patchedArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
+    });
+    done();
+  });
+}
+
+/**
  * @description Verifies DELETE request to delete an artifact.
  *
  * @param {Function} done - The mocha callback.
@@ -434,6 +646,39 @@ function deleteArtifact(done) {
     const deletedArtifact = JSON.parse(body);
     // Verify artifact created properly
     chai.expect(deletedArtifact).to.equal(artData.id);
+    done();
+  });
+}
+
+/**
+ * @description Verifies DELETE request to delete multiple artifacts.
+ *
+ * @param {Function} done - The mocha callback.
+ */
+function deleteArtifacts(done) {
+  // Define artifact metadata
+  const artIDs = [
+    testData.artifacts[1].id,
+    testData.artifacts[2].id
+  ];
+
+  const options = {
+    method: 'DELETE',
+    url: `${test.url}/api/orgs/${orgID}/projects/${projID}/branches/${branchID}/artifacts`,
+    headers: testUtils.getHeaders(),
+    body: JSON.stringify(artIDs)
+  };
+
+  request(options, (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+
+    // Verify response body
+    const deletedArtifactIDs = JSON.parse(body);
+
+    chai.expect(deletedArtifactIDs).to.have.members(artIDs);
     done();
   });
 }
