@@ -380,6 +380,36 @@ class Model {
       options.lean = true;
     }
 
+    // Handle text search
+    if (Object.keys(filter).includes('$text')) {
+      // If there is already a projection defined
+      if (projection) {
+        const newProj = {};
+        // Split the projection on spaces
+        const keys = projection.split(' ');
+        // For each key in the projection
+        keys.forEach((k) => {
+          // If it starts with a '-', we want to remove it from the document on return
+          if (k.startsWith('-')) {
+            newProj[k] = -1;
+          }
+          else {
+            newProj[k] = 1;
+          }
+        });
+
+        projection = newProj; // eslint-disable-line no-param-reassign
+      }
+      else {
+        // Make projection an object
+        projection = {}; // eslint-disable-line no-param-reassign
+      }
+
+      // Add the text search specific fields to the projection
+      projection.score = {};
+      projection.score.$meta = 'textScore';
+    }
+
     // Call model.find()
     return this.model.find(filter, projection, options, cb);
   }

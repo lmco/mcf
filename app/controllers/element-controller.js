@@ -1787,18 +1787,8 @@ async function search(requestingUser, organizationID, projectID, branchID, query
       validatedOptions.sort.score = { $meta: 'textScore' };
     }
 
-    let projections = {};
-
-    // Check if filters are selected
-    if (validatedOptions.fieldsString) {
-      projections = helper.parseFieldsString(validatedOptions.fieldsString);
-    }
-
-    projections.score = {};
-    projections.score.$meta = 'textScore';
-
     // Search for the elements
-    return await Element.find(searchQuery, projections,
+    return await Element.find(searchQuery, validatedOptions.fieldsString,
       { skip: validatedOptions.skip,
         limit: validatedOptions.limit,
         sort: validatedOptions.sort,

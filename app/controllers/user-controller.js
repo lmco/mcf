@@ -941,7 +941,7 @@ async function search(requestingUser, query, options) {
       validatedOptions.sort.score = { $meta: 'textScore' };
     }
 
-    return await User.find(searchQuery, { score: { $meta: 'textScore' } },
+    return await User.find(searchQuery, null,
       { limit: validatedOptions.limit,
         skip: validatedOptions.skip,
         sort: validatedOptions.sort,
