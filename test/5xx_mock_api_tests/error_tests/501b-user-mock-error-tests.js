@@ -263,7 +263,7 @@ function notFound(endpoint) {
   const name = testData.users[4].username;
   // Parse the method
   const method = testUtils.parseMethod(endpoint);
-  // Body must be an array of ids for delete; key-value pair for anything else
+  // Body must be an array of ids for get and delete; key-value pair for anything else
   const body = (endpoint === 'deleteUsers' || endpoint === 'getUsers')
     ? [name] : { username: name };
   // Add in a params field for singular user endpoints

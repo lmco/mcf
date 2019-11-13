@@ -502,8 +502,9 @@ async function update(requestingUser, organizationID, projectID, branchID, webho
     if (foundWebhooks.length !== webhooksToUpdate.length) {
       const foundIDs = foundWebhooks.map((w) => w._id);
       const notFound = webhookIDs.filter((w) => !foundIDs.includes(w));
+      const refLevel = refID === '' ? '[server-wide]' : `[${refID}]`;
       throw new M.NotFoundError('The following webhooks were not found at the specified '
-      + `reference level ${refID}: [${notFound}]`, 'warn');
+      + `reference level ${refLevel}: [${notFound}]`, 'warn');
     }
 
     // Convert webhook updates to jmi for efficiency

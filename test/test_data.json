@@ -381,7 +381,7 @@
       "description": "test webhook description 1",
       "triggers": ["test-event"],
       "token": "test token",
-      "tokenLocation": "test location"
+      "tokenLocation": "body.test.token"
     },
     {
       "name": "test_webhook02",

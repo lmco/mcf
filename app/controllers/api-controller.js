@@ -6078,12 +6078,6 @@ async function deleteWebhook(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // Singular api: should not accept arrays
-  if (Array.isArray(req.body)) {
-    const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
-
   // Attempt to parse query options
   try {
     // Extract options from request query
@@ -6125,7 +6119,7 @@ async function deleteWebhook(req, res) {
 /**
  * POST /api/webhooks/trigger/:base64id
  *
- * @description Deletes the specified webhook
+ * @description Triggers the specified webhook
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
@@ -6141,13 +6135,36 @@ async function triggerWebhook(req, res) {
       { server: false });
     const webhook = webhooks[0];
 
+    // Sanity check: ensure the webhook is incoming and has a token and tokenLocation field
     if (webhook.type !== 'Incoming') {
       throw new M.ServerError(`Webhook [${webhook._id}] is not listening for external calls`, 'warn');
     }
+    if (typeof webhook.tokenLocation !== 'string') {
+      throw new M.ServerError(`Webhook [${webhook._id}] does not have a tokenLocation`, 'warn');
+    }
+    if (typeof webhook.token !== 'string') {
+      throw new M.ServerError(`Webhook [${webhook._id}] does not have a token`, 'warn');
+    }
 
-    // Parse the token from the request
-    if (!req.body.token) throw new M.AuthorizationError('Token not found in request body.', 'warn');
-    const token = req.body.token;
+    // Get the token from an arbitrary depth of key nesting
+    let token = req;
+    try {
+      const tokenPath = webhook.tokenLocation.split('.');
+      for (let i = 0; i < tokenPath.length; i++) {
+        const key = tokenPath[i];
+        token = token[key];
+      }
+    }
+    catch (error) {
+      M.log.warn(error);
+      console.log(1)
+      throw new M.DataFormatError('Token could not be found in the request.', 'warn');
+    }
+
+    if (typeof token !== 'string') {
+      console.log(2)
+      throw new M.DataFormatError('Token is not a string', 'warn');
+    }
 
     // Parse data from request
     const data = req.body.data ? req.body.data : null;

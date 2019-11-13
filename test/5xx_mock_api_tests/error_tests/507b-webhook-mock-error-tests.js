@@ -20,12 +20,15 @@ const chai = require('chai');
 
 // MBEE modules
 const APIController = M.require('controllers.api-controller');
+const WebhookController = M.require('controllers.webhook-controller');
 const db = M.require('db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
+const testData = testUtils.importTestData('test_data.json');
 let adminUser = null;
+let webhookID;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -40,10 +43,13 @@ describe(M.getModuleName(module.filename), () => {
    */
   before(async () => {
     try {
-      // Connect to the database
       await db.connect();
-      // Create test admin
       adminUser = await testUtils.createTestAdmin();
+
+      // Create an incoming webhook for the trigger tests
+      const webhookData = testData.webhooks[1];
+      const webhooks = await WebhookController.create(adminUser, null, null, null, webhookData);
+      webhookID = webhooks[0]._id;
     }
     catch (error) {
       M.log.error(error);
@@ -57,7 +63,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after(async () => {
     try {
-      // Delete test admin
+      await WebhookController.remove(adminUser, null, null, null, webhookID);
       await testUtils.removeTestAdmin();
       await db.disconnect();
     }
@@ -94,10 +100,9 @@ describe(M.getModuleName(module.filename), () => {
   // ------------- No arrays in singular endpoints -------------
   it('should reject a POST singular webhook request containing an array in the body', noArrays('postWebhook'));
   it('should reject a PATCH singular webhook request containing an array in the body', noArrays('patchWebhook'));
-  it('should reject a DELETE singular webhook request containing an array in the body', noArrays('deleteWebhook'));
   //  ------------- Trigger -------------
-  // it('should reject a POST request to trigger a webhook if the token cannot be found', tokenNotFound);
-  // it('should reject a POST request to trigger a webhook if the token is invalid', tokenNotFound);
+  it('should reject a POST request to trigger a webhook if the token cannot be found', tokenNotFound);
+  it('should reject a POST request to trigger a webhook if the token is invalid', tokenInvalid);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -231,7 +236,7 @@ function notFound(endpoint) {
   const id = 'definitely not a webhook id';
   // Parse the method
   const method = testUtils.parseMethod(endpoint);
-  // Body must be an array of ids for delete; key-value pair for anything else
+  // Body must be an array of ids for get and delete; key-value pair for anything else
   const body = (endpoint === 'deleteWebhooks' || endpoint === 'getWebhooks')
     ? [id] : { id: id };
   // Add in a params field for singular endpoints
@@ -298,4 +303,78 @@ function noArrays(endpoint) {
     // Sends the mock request
     APIController[endpoint](req, res);
   };
+}
+
+/**
+ * @description Verifies that the API Controller throws an error when it can not find the token
+ * in the request for triggering a webhook.
+ *
+ * @param {Function} done - The Mocha callback.
+ */
+function tokenNotFound(done) {
+  // Get the base 64 encoded id of the incoming webhook
+  const base64ID = Buffer.from(webhookID).toString('base64');
+
+  const method = 'POST';
+  const body = { notToken: 'no token' };
+  const params = { base64id: base64ID };
+
+  // Create request object
+  const req = testUtils.createRequest(adminUser, params, body, method);
+
+  // Create response object
+  const res = {};
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Expect an error message
+    _data.should.equal('Token could not be found in the request.');
+
+    // Expect the statusCode to be 400
+    res.statusCode.should.equal(400);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // Sends the mock request
+  APIController.triggerWebhook(req, res);
+}
+
+/**
+ * @description Verifies that the API Controller throws an error when the token provided to trigger
+ * a webhook is invalid.
+ *
+ * @param {Function} done - The Mocha callback.
+ */
+function tokenInvalid(done) {
+  // Get the base 64 encoded id of the incoming webhook
+  const base64ID = Buffer.from(webhookID).toString('base64');
+
+  const method = 'POST';
+  const body = { test: { token: 'invalid token' } };
+  const params = { base64id: base64ID };
+
+  // Create request object
+  const req = testUtils.createRequest(adminUser, params, body, method);
+
+  // Create response object
+  const res = {};
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Expect an error message
+    _data.should.equal('Token received from request does not match stored token.');
+
+    // Expect the statusCode to be 403
+    res.statusCode.should.equal(403);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // Sends the mock request
+  APIController.triggerWebhook(req, res);
 }

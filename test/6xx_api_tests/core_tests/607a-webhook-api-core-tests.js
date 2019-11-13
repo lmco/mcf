@@ -123,32 +123,32 @@ function postWebhook(done) {
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
     // Verify response body
-    const postedWebhook = JSON.parse(body);
-    chai.expect(postedWebhook.name).to.equal(webhookData.name);
-    chai.expect(postedWebhook.triggers).to.deep.equal(webhookData.triggers);
-    chai.expect(postedWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
-    chai.expect(postedWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
-    chai.expect(postedWebhook.reference).to.equal('');
-    chai.expect(postedWebhook.custom).to.deep.equal(webhookData.custom || {});
+    const createdWebhook = JSON.parse(body);
+    chai.expect(createdWebhook.name).to.equal(webhookData.name);
+    chai.expect(createdWebhook.triggers).to.deep.equal(webhookData.triggers);
+    chai.expect(createdWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
+    chai.expect(createdWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
+    chai.expect(createdWebhook.reference).to.equal('');
+    chai.expect(createdWebhook.custom).to.deep.equal(webhookData.custom || {});
 
     // If description was provided, verify it
     if (webhookData.hasOwnProperty('description')) {
-      chai.expect(postedWebhook.description).to.equal(webhookData.description);
+      chai.expect(createdWebhook.description).to.equal(webhookData.description);
     }
 
     // Verify additional properties
-    chai.expect(postedWebhook.createdBy).to.equal(adminUser._id);
-    chai.expect(postedWebhook.lastModifiedBy).to.equal(adminUser._id);
-    chai.expect(postedWebhook.createdOn).to.not.equal(null);
-    chai.expect(postedWebhook.updatedOn).to.not.equal(null);
-    chai.expect(postedWebhook.archived).to.equal(false);
+    chai.expect(createdWebhook.createdBy).to.equal(adminUser._id);
+    chai.expect(createdWebhook.lastModifiedBy).to.equal(adminUser._id);
+    chai.expect(createdWebhook.createdOn).to.not.equal(null);
+    chai.expect(createdWebhook.updatedOn).to.not.equal(null);
+    chai.expect(createdWebhook.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(postedWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
+    chai.expect(createdWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
 
     // Save webhook id for later use
-    webhookData.id = postedWebhook.id;
+    webhookData.id = createdWebhook.id;
 
     done();
   });
