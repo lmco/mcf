@@ -772,6 +772,7 @@ function deleteElements(done) {
     chai.expect(err).to.equal(null);
     // Expect response status: 200 OK
     chai.expect(response.statusCode).to.equal(200);
+
     // Verify response body
     const deletedElementIDs = JSON.parse(body);
     chai.expect(deletedElementIDs).to.have.members(elemData.map(p => p.id));
