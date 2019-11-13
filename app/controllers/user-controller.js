@@ -931,17 +931,7 @@ async function search(requestingUser, query, options) {
       delete searchQuery.archived;
     }
 
-    // Add sorting by metadata
-    // If no sorting option was specified ($natural is the default) then remove
-    // $natural. $natural does not work with metadata sorting
-    if (validatedOptions.sort.$natural) {
-      validatedOptions.sort = { score: { $meta: 'textScore' } };
-    }
-    else {
-      validatedOptions.sort.score = { $meta: 'textScore' };
-    }
-
-    return await User.find(searchQuery, { score: { $meta: 'textScore' } },
+    return await User.find(searchQuery, null,
       { limit: validatedOptions.limit,
         skip: validatedOptions.skip,
         sort: validatedOptions.sort,
