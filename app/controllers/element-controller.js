@@ -1777,16 +1777,6 @@ async function search(requestingUser, organizationID, projectID, branchID, query
       searchQuery.archived = true;
     }
 
-    // Add sorting by metadata
-    // If no sorting option was specified ($natural is the default) then remove
-    // $natural. $natural does not work with metadata sorting
-    if (validatedOptions.sort.$natural) {
-      validatedOptions.sort = { score: { $meta: 'textScore' } };
-    }
-    else {
-      validatedOptions.sort.score = { $meta: 'textScore' };
-    }
-
     // Search for the elements
     return await Element.find(searchQuery, validatedOptions.fieldsString,
       { skip: validatedOptions.skip,

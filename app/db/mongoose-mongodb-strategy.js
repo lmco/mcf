@@ -380,6 +380,11 @@ class Model {
       options.lean = true;
     }
 
+    // If options.sort is not defined, set it to $natural
+    if (!options.sort) {
+      options.sort = { $natural: 1 };
+    }
+
     // Handle text search
     if (Object.keys(filter).includes('$text')) {
       // If there is already a projection defined
@@ -408,6 +413,11 @@ class Model {
       // Add the text search specific fields to the projection
       projection.score = {};
       projection.score.$meta = 'textScore';
+
+      // Delete the $natural sort option
+      delete options.sort.$natural;
+      // Add the text search specific sorting
+      options.sort.score = { $meta: 'textScore' };
     }
 
     // Call model.find()
