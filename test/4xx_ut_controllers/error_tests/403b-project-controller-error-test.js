@@ -83,7 +83,7 @@ describe(M.getModuleName(module.filename), () => {
     ProjectController.remove(adminUser, org._id,
       [testData.projects[0].id, testData.projects[1].id])
     // Removing the organization created
-    .then(() => testUtils.removeTestOrg(adminUser))
+    .then(() => testUtils.removeTestOrg())
     // Removing admin user
     .then(() => testUtils.removeTestAdmin())
     .then(() => db.disconnect())

@@ -72,7 +72,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing the test organization
-    testUtils.removeTestOrg(adminUser)
+    testUtils.removeTestOrg()
     .then(() => testUtils.removeTestAdmin())
     .then(() => db.disconnect())
     .then(() => done())

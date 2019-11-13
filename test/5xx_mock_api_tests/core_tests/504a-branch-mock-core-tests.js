@@ -83,7 +83,7 @@ describe(M.getModuleName(module.filename), () => {
   after((done) => {
     // Remove organization
     // Note: Projects under organization will also be removed
-    testUtils.removeTestOrg(adminUser)
+    testUtils.removeTestOrg()
     .then(() => testUtils.removeTestAdmin())
     .then(() => db.disconnect())
     .then(() => done())

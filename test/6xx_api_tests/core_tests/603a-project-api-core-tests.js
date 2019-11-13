@@ -64,7 +64,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after(async () => {
     try {
-      await testUtils.removeTestOrg(adminUser);
+      await testUtils.removeTestOrg();
       await testUtils.removeTestAdmin();
       await db.disconnect();
     }
