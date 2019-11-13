@@ -1062,10 +1062,10 @@ class Model {
   }
 
   /**
-   * @description Deletes any documents that match the provided conditions.
+   * @description Deletes any documents that match the provided filter.
    * @async
    *
-   * @param {object} conditions - An object containing parameters to filter the
+   * @param {object} filter - An object containing parameters to filter the
    * find query by, and thus delete documents by.
    * @param {object} [options] - An object containing options.
    * @param {Function} [cb] - A callback function to run.
@@ -1073,20 +1073,20 @@ class Model {
    * @returns {Promise<object>} An object denoting the success of the delete
    * operation.
    */
-  async deleteMany(conditions, options, cb) {
+  async deleteMany(filter, options, cb) {
     try {
       let docs = [];
       let more = true;
       // Connect to the DocumentClient
       const conn = await connectDocument();
 
-      // Find all documents which match the provided conditions
+      // Find all documents which match the provided filter
       while (more) {
         // Find the max number of documents
         // Create a new DynamoDB query
         const query = new Query(this);
         // Get the formatted scan query
-        const scanObj = query.scan(conditions, options);
+        const scanObj = query.scan(filter, options);
 
         // If there is no filter. block from finding all documents to delete
         if (!scanObj.hasOwnProperty('FilterExpression')) {
@@ -1525,9 +1525,6 @@ class Model {
       if (!searchString) {
         return [];
       }
-
-      // TODO: Remove
-      delete options.sort.score;
 
       // Set the skip and limit options
       const skip = options.skip || 0;

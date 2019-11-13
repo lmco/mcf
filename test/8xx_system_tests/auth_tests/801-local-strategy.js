@@ -64,7 +64,7 @@ describe(M.getModuleName(module.filename), () => {
   after(async function() {
     try {
       // Delete adminUser and test user (if they exist)
-      await User.deleteMany({ _id: { $in: [adminUser.username, testData.users[0].id] } });
+      await User.deleteMany({ _id: { $in: [adminUser._id, testData.users[0].username] } });
       await db.disconnect();
     }
     catch (error) {
