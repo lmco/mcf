@@ -29,7 +29,7 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 const User = M.require('models.user');
 const UserController = M.require('controllers.user-controller');
 const APIController = M.require('controllers.api-controller');
-const db = M.require('lib.db');
+const db = M.require('db');
 const localAuth = M.require('auth.local-strategy');
 
 /* --------------------( Test Data )-------------------- */

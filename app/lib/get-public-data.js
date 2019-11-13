@@ -141,7 +141,8 @@ function getArtifactPublicData(artifact, options) {
 
   const data = {
     id: idParts.pop(),
-    name: artifact.name,
+    description: artifact.description,
+    size: artifact.size,
     branch: branch,
     project: project,
     org: idParts[0],

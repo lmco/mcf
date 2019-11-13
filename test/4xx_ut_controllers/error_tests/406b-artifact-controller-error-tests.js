@@ -5,11 +5,11 @@
  *
  * @copyright Copyright (C) 2019, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Phillip Lee <phillip.lee@lmco.com>
+ * @owner Phillip Lee
  *
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Phillip Lee
  *
  * @description This tests for expected errors within the artifact controller.
  */
@@ -29,7 +29,7 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const ArtifactController = M.require('controllers.artifact-controller');
-const db = M.require('lib.db');
+const db = M.require('db');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */

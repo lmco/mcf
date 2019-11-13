@@ -21,7 +21,7 @@ const chai = require('chai');
 
 // MBEE modules
 const APIController = M.require('controllers.api-controller');
-const db = M.require('lib.db');
+const db = M.require('db');
 const jmi = M.require('lib.jmi-conversions');
 const utils = M.require('lib.utils');
 

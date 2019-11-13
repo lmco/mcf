@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module lib.db
+ * @module db
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

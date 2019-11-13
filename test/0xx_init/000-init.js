@@ -34,7 +34,7 @@ const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const ServerData = M.require('models.server-data');
 const User = M.require('models.user');
-const db = M.require('lib.db');
+const db = M.require('db');
 
 /* --------------------( Main )-------------------- */
 /**
