@@ -21,7 +21,7 @@ const chai = require('chai');
 // MBEE modules
 const WebhookController = M.require('controllers.webhook-controller');
 const Webhook = M.require('models.webhook');
-const db = M.require('lib.db');
+const db = M.require('db');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */

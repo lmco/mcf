@@ -20,7 +20,7 @@ const chai = require('chai');
 
 // MBEE modules
 const APIController = M.require('controllers.api-controller');
-const db = M.require('lib.db');
+const db = M.require('db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -70,33 +70,34 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute tests */
   // ------------- No Requesting User -------------
-  it('should reject a GET users request with no requesting user', noReqUser('getWebhooks'));
-  it('should reject a GET user request with no requesting user', noReqUser('getWebhook'));
-  it('should reject a POST user request with no requesting user', noReqUser('postWebhook'));
-  it('should reject a PATCH user request with no requesting user', noReqUser('patchWebhook'));
-  it('should reject a DELETE users request with no requesting user', noReqUser('deleteWebhooks'));
-  it('should reject a DELETE user request with no requesting user', noReqUser('deleteWebhook'));
+  it('should reject a GET webhooks request with no requesting user', noReqUser('getWebhooks'));
+  it('should reject a GET webhook request with no requesting user', noReqUser('getWebhook'));
+  it('should reject a POST webhook request with no requesting user', noReqUser('postWebhook'));
+  it('should reject a PATCH webhook request with no requesting user', noReqUser('patchWebhook'));
+  it('should reject a DELETE webhooks request with no requesting user', noReqUser('deleteWebhooks'));
+  it('should reject a DELETE webhook request with no requesting user', noReqUser('deleteWebhook'));
   // ------------- Invalid options -------------
-  it('should reject a GET users request with invalid options', invalidOptions('getWebhooks'));
-  it('should reject a GET user request with invalid options', invalidOptions('getWebhook'));
-  it('should reject a POST user request with invalid options', invalidOptions('postWebhook'));
-  it('should reject a PATCH user request with invalid options', invalidOptions('patchWebhook'));
-  it('should reject a DELETE users request with invalid options', invalidOptions('deleteWebhooks'));
-  it('should reject a DELETE user request with invalid options', invalidOptions('deleteWebhook'));
+  it('should reject a GET webhooks request with invalid options', invalidOptions('getWebhooks'));
+  it('should reject a GET webhook request with invalid options', invalidOptions('getWebhook'));
+  it('should reject a POST webhook request with invalid options', invalidOptions('postWebhook'));
+  it('should reject a PATCH webhook request with invalid options', invalidOptions('patchWebhook'));
+  it('should reject a DELETE webhooks request with invalid options', invalidOptions('deleteWebhooks'));
+  it('should reject a DELETE webhook request with invalid options', invalidOptions('deleteWebhook'));
   // ------- Non matching ids in body vs url -------
-  it('should reject a PATCH user request with conflicting ids in the body and url', conflictingIDs('patchWebhook'));
+  it('should reject a PATCH webhook request with conflicting ids in the body and url', conflictingIDs('patchWebhook'));
   // ------------- 404 Not Found -------------
-  it('should return 404 for a GET users request that returned no results', notFound('getWebhooks'));
-  it('should return 404 for a GET user request for a nonexistent user', notFound('getWebhook'));
-  it('should return 404 for a PATCH user request for a nonexistent user', notFound('patchWebhook'));
-  it('should return 404 for a DELETE users request for a nonexistent user', notFound('deleteWebhooks'));
-  it('should return 404 for a DELETE user request for a nonexistent user', notFound('deleteWebhook'));
+  it('should return 404 for a GET webhooks request that returned no results', notFound('getWebhooks'));
+  it('should return 404 for a GET webhook request for a nonexistent user', notFound('getWebhook'));
+  it('should return 404 for a PATCH webhook request for a nonexistent user', notFound('patchWebhook'));
+  it('should return 404 for a DELETE webhooks request for a nonexistent user', notFound('deleteWebhooks'));
+  it('should return 404 for a DELETE webhook request for a nonexistent user', notFound('deleteWebhook'));
   // ------------- No arrays in singular endpoints -------------
-  it('should reject a POST singular user request containing an array in the body', noArrays('postWebhook'));
-  it('should reject a PATCH singular user request containing an array in the body', noArrays('patchWebhook'));
-  it('should reject a DELETE singular user request containing an array in the body', noArrays('deleteWebhook'));
+  it('should reject a POST singular webhook request containing an array in the body', noArrays('postWebhook'));
+  it('should reject a PATCH singular webhook request containing an array in the body', noArrays('patchWebhook'));
+  it('should reject a DELETE singular webhook request containing an array in the body', noArrays('deleteWebhook'));
   //  ------------- Trigger -------------
-  // it('should throw errors if you do the trigger wrong')
+  // it('should reject a POST request to trigger a webhook if the token cannot be found', tokenNotFound);
+  // it('should reject a POST request to trigger a webhook if the token is invalid', tokenNotFound);
 });
 
 /* --------------------( Tests )-------------------- */

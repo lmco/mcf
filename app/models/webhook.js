@@ -59,7 +59,7 @@
 const request = require('request');
 
 // MBEE modules
-const db = M.require('lib.db');
+const db = M.require('db');
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
 

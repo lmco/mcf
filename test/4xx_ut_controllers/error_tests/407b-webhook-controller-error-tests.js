@@ -30,7 +30,7 @@ const Webhook = M.require('models.webhook');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const Branch = M.require('models.branch');
-const db = M.require('lib.db');
+const db = M.require('db');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
