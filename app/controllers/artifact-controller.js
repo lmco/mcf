@@ -595,7 +595,6 @@ async function update(requestingUser, organizationID, projectID, branchID,
         }
       });
     });
-
     await Artifact.bulkWrite(bulkArray);
 
     const foundArtifacts = await Artifact.find(searchQuery, validatedOptions.fieldsString,

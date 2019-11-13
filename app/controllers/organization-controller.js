@@ -933,6 +933,7 @@ async function remove(requestingUser, orgs, options) {
 
     // Delete any branches in the found projects
     await Branch.deleteMany({ project: { $in: projectIDs } });
+
     // Delete any projects in the org
     await Project.deleteMany({ org: { $in: searchedIDs } });
     // Delete the orgs
