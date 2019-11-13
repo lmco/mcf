@@ -154,8 +154,9 @@ class Schema {
     this.definition.populate = {};
     this.add(definition);
 
-    // Define statics
+    // Define statics and text indexes
     this.definition.statics = [];
+    this.definition.text = [];
 
     // Remove GlobalSecondaryIndex array if empty, meaning there are no additional indexes
     if (this.schema.GlobalSecondaryIndexes.length === 0) {
@@ -258,9 +259,13 @@ class Schema {
    * defines a text index.
    * @param {object} [options] - An object containing options.
    */
-  // TODO
   index(fields, options) {
-    // return super.index(fields, options);
+    // TODO: Handle other compound indexes
+    // If every value is text, we have a text index
+    if (Object.values(fields).every(v => v === 'text')) {
+      // Add keys to the text array, only 1 text index per schema so no worry of duplicate keys
+      this.definition.text = Object.keys(fields);
+    }
   }
 
   /**
@@ -1177,6 +1182,11 @@ class Model {
    */
   async find(filter, projection, options, cb) {
     try {
+      // If $text in query, performing a text search
+      if (Object.keys(filter).includes('$text')) {
+        return await this.textSearch(filter, projection, options);
+      }
+
       let docs = [];
       let limit;
       let skip;
@@ -1497,6 +1507,128 @@ class Model {
       await Promise.all(promises);
     }
     return doc;
+  }
+
+  /**
+   * @description Preforms a text search of fields which have a text index.
+   * Please note that this function is very inefficient. Because of a lack of
+   * support for text based search in DynamoDB, this function must use scan()
+   * to find all documents, and preform parsing via regex post-find.
+   *
+   * @param {object} filter - The query to filter on.
+   * @param {string} projection - A space delimited string containing the fields
+   * to return or not return.
+   * @param {object} options - An object containing valid options.
+   *
+   * @returns {Promise<object[]>} An array containing the found documents, if
+   * any. Defaults to an empty array if no documents are found.
+   */
+  async textSearch(filter, projection, options) {
+    try {
+      // Get the text search and remove it from the filter
+      const searchString = filter.$text.$search;
+      delete filter.$text;
+
+      // Handle case where there is no query
+      if (!searchString) {
+        return [];
+      }
+
+      // TODO: Remove
+      delete options.sort.score;
+
+      // Set the skip and limit options
+      const skip = options.skip || 0;
+      const limit = options.limit;
+      delete options.skip;
+      delete options.limit;
+
+      // If double quotes are found, its an exact match
+      const exactMatch = searchString.includes('"');
+
+      // Get an array of the base words to search;
+      const baseWords = (exactMatch)
+        ? searchString.replace(/"/g, '') // if "" included, its an exact match
+        : searchString.split(' ');  // Split string by space, these are all the words to search
+      const regexString = (exactMatch)
+        ? RegExp(`(${baseWords})`)
+        : RegExp(`(${baseWords.join('|')})`, 'i');
+
+      let matchingDocs = [];
+
+      let more = true;
+
+      // Connect to the DocumentClient
+      const conn = await connectDocument();
+
+      // Find all documents which match the query
+      while (more) {
+        // Create a new DynamoDB query
+        const query = new Query(this);
+        // Get the formatted scan query
+        const scanObj = query.scan(filter, options);
+
+        M.log.debug(`DB OPERATION: ${this.TableName} scan`);
+        // Find the documents
+        const result = await conn.scan(scanObj).promise(); // eslint-disable-line
+        const docs = result.Items;
+
+        // For each document found
+        docs.forEach((d) => { // eslint-disable-line no-loop-func
+          let matched = false;
+          // For each field in the text index
+          this.definition.text.forEach((f) => {
+            // If the field matches, set matched to true
+            if (regexString.test(d[f])) matched = true;
+          });
+          // If matched is true, add the doc to the matchingDocs array
+          if (matched) matchingDocs.push(d);
+        });
+
+        // If there are no more documents to find, exit loop
+        if (!result.LastEvaluatedKey) {
+          more = false;
+        }
+
+        // Set LastEvaluatedKey, used to paginate
+        options.LastEvaluatedKey = result.LastEvaluatedKey;
+      }
+
+      // Count the number of matches in each document
+      const matches = {};
+      matchingDocs.forEach((d) => {
+        matches[d._id] = 0;
+        // For each field in the text index, add the number of matches
+        this.definition.text.forEach((f) => {
+          // If the field is defined
+          if (d[f]) {
+            const numMatches = d[f].match(regexString); // null if no matches
+            if (numMatches) matches[d._id] += numMatches.length;
+          }
+        });
+      });
+
+      // Sort the matching documents
+      matchingDocs.sort((a, b) => {
+        return matches[a._id] < matches[b._id];
+      });
+
+      // Handle the limit and skip options
+      if (limit || skip) {
+        // Skip the specified number of documents
+        matchingDocs = matchingDocs.slice(skip);
+
+        // Limit the specified number of documents
+        matchingDocs = matchingDocs.slice(0, limit);
+      }
+
+      // Format and return the documents
+      return await this.formatDocuments(matchingDocs, projection, options);
+    }
+    catch (error) {
+      M.log.verbose(`Failed in ${this.modelName}.textSearch().`);
+      throw errors.captureError(error);
+    }
   }
 
   /**
