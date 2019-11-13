@@ -4135,8 +4135,9 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
- *                      createdOn, custom, lastModifiedBy, name, org, project,
- *                      updatedOn, branch, filename, location, strategy]
+ *                      createdOn, custom, lastModifiedBy, description, org,
+ *                      project, updatedOn, branch, filename, location, strategy,
+ *                      size]
  *         in: query
  *         type: string
  *       - name: limit
@@ -4173,8 +4174,8 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *         in: query
  *         type: boolean
  *         default: false
- *       - name: name
- *         description: Search for artifacts with a specific name.
+ *       - name: description
+ *         description: Search for artifacts with a specific description.
  *         in: query
  *         type: string
  *       - name: createdBy
@@ -4260,7 +4261,7 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *               id:
  *                 type: string
  *                 description: The ID of the artifact.
- *               name:
+ *               description:
  *                 type: string
  *               filename:
  *                 type: string
@@ -4270,6 +4271,8 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *                 description: Blob storage location.
  *               custom:
  *                 type: object
+ *               size:
+ *                 type: number
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -4281,8 +4284,9 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
- *                      createdOn, custom, lastModifiedBy, name, org, project,
- *                      updatedOn, branch, filename, location, strategy]
+ *                      createdOn, custom, lastModifiedBy, description, org,
+ *                      project, updatedOn, branch, filename, location, strategy,
+ *                      size]
  *         in: query
  *         type: string
  *       - name: minified
@@ -4351,9 +4355,9 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *               id:
  *                 type: string
  *                 description: The current ID of the artifact, cannot be updated.
- *               name:
+ *               description:
  *                 type: string
- *                 description: Name of Artifact.
+ *                 description: Description of Artifact.
  *               filename:
  *                 type: string
  *                 description: Filename of Artifact.
@@ -4364,6 +4368,8 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *                 type: object
  *                 description: NOTE when updating the custom data, the object
  *                              is completely replaced.
+ *               size:
+ *                 type: number
  *               archived:
  *                 type: boolean
  *       - name: populate
@@ -4377,8 +4383,9 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
- *                      createdOn, custom, lastModifiedBy, name, org, project,
- *                      updatedOn, branch, filename, location, strategy]
+ *                      createdOn, custom, lastModifiedBy, description, org,
+ *                      project, updatedOn, branch, filename, location, strategy,
+ *                      size]
  *         in: query
  *         type: string
  *       - name: minified
@@ -4539,8 +4546,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
- *                      createdOn, custom, lastModifiedBy, name, org, project,
- *                      updatedOn, branch, filename, location, strategy]
+ *                      createdOn, custom, lastModifiedBy, description, org, project,
+ *                      updatedOn, branch, filename, location, strategy, size]
  *         in: query
  *         type: string
  *       - name: minified
@@ -4610,7 +4617,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
  *               type: string
  *               description: The ID of the artifact. If provided, it must
  *                      match the artifact ID provided in the path.
- *             name:
+ *             description:
  *               type: string
  *             filename:
  *               type: string
@@ -4620,6 +4627,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
  *               description: Blob storage location.
  *             custom:
  *               type: object
+ *             size:
+ *               type: number
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object.
@@ -4631,8 +4640,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
- *                      createdOn, custom, lastModifiedBy, name, org, project,
- *                      updatedOn, branch, filename, location, strategy]
+ *                      createdOn, custom, lastModifiedBy, description, org,
+ *                      project, updatedOn, branch, filename, location, strategy,
+ *                      size]
  *         in: query
  *         type: string
  *       - name: minified
@@ -4699,9 +4709,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
  *         schema:
  *           type: object
  *           properties:
- *             name:
+ *             description:
  *               type: string
- *               description: Name of Artifact.
+ *               description: Description of Artifact.
  *             filename:
  *               type: string
  *               description: Filename of Artifact.
@@ -4712,6 +4722,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
  *               type: object
  *               description: NOTE when updating the custom data, the object
  *                            is completely replaced.
+ *             size:
+ *               type: number
  *             archived:
  *               type: boolean
  *       - name: populate
@@ -4725,8 +4737,9 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
  *                      default the id field is returned. To specifically NOT
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
- *                      createdOn, custom, lastModifiedBy, name, org, project,
- *                      updatedOn, branch, filename, location, strategy]
+ *                      createdOn, custom, lastModifiedBy, description, org,
+ *                      project, updatedOn, branch, filename, location, strategy,
+ *                      size]
  *         in: query
  *         type: string
  *       - name: minified

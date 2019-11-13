@@ -4715,7 +4715,7 @@ async function getArtifacts(req, res) {
     ids: 'array',
     format: 'string',
     minified: 'boolean',
-    name: 'string',
+    description: 'string',
     createdBy: 'string',
     lastModifiedBy: 'string',
     archivedBy: 'string'

@@ -28,7 +28,7 @@ const flash = require('express-flash');
 const compression = require('compression');
 
 // MBEE modules
-const db = M.require('lib.db');
+const db = M.require('db');
 const utils = M.require('lib.utils');
 const middleware = M.require('lib.middleware');
 const migrate = M.require('lib.migrate');

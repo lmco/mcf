@@ -26,7 +26,7 @@ const chai = require('chai');
 // MBEE modules
 const BranchController = M.require('controllers.branch-controller');
 const apiController = M.require('controllers.api-controller');
-const db = M.require('lib.db');
+const db = M.require('db');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */

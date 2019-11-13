@@ -23,7 +23,7 @@ const chai = require('chai');
 
 // MBEE modules
 const ServerData = M.require('models.server-data');
-const db = M.require('lib.db');
+const db = M.require('db');
 
 /* --------------------( Main )-------------------- */
 /**
