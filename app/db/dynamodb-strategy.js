@@ -815,9 +815,7 @@ class Model {
       const key = Object.keys(options.sort)[0];
 
       // Sort the documents using custom sort function
-      documents.sort((a, b) => {
-        return a[key] > b[key];
-      });
+      documents.sort((a, b) => a[key] > b[key]);
 
       // If sorting in reverse order, reverse the sorted array
       if (order === -1) {
@@ -1598,9 +1596,7 @@ class Model {
       });
 
       // Sort the matching documents
-      matchingDocs.sort((a, b) => {
-        return matches[a._id] < matches[b._id];
-      });
+      matchingDocs.sort((a, b) => matches[a._id] < matches[b._id]);
 
       // Handle the limit and skip options
       if (limit || skip) {
