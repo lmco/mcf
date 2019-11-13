@@ -69,7 +69,7 @@ describe(M.getModuleName(module.filename), () => {
   after(async () => {
     try {
       // Delete organization
-      await testUtils.removeTestOrg(adminUser);
+      await testUtils.removeTestOrg();
       // Delete admin user
       await testUtils.removeTestAdmin();
       await db.disconnect();
