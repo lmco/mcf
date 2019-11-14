@@ -789,7 +789,7 @@ async function remove(requestingUser, users, options) {
 
     // Create memberQuery
     foundUsers.forEach((user) => {
-      memberQuery[`permissions.${user._id}`] = 'read';
+      memberQuery[`permissions.${user._id}`] = { $all: ['read'] };
     });
 
     // Check that user can remove each user
