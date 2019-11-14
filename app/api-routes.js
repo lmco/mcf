@@ -894,7 +894,7 @@ api.route('/orgs/:orgid')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      org, project, branch]
+ *                      reference]
  *         in: query
  *         type: string
  *         required: false
@@ -909,8 +909,8 @@ api.route('/orgs/:orgid')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, updatedOn, custom, description, lastModifiedBy,
- *                      name, org, project, branch, type, triggers, responses,
- *                      incoming]
+ *                      name, reference, type, triggers, responses, token,
+ *                      tokenLocation]
  *         in: query
  *         type: string
  *       - name: limit
@@ -1060,7 +1060,7 @@ api.route('/orgs/:orgid/webhooks')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      org, project, branch]
+ *                      reference]
  *         in: query
  *         type: string
  *         required: false
@@ -1075,8 +1075,8 @@ api.route('/orgs/:orgid/webhooks')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, updatedOn, custom, description, lastModifiedBy,
- *                      name, org, project, branch, type, triggers, responses,
- *                      incoming]
+ *                      name, reference, type, triggers, responses, token,
+ *                      tokenLocation]
  *         in: query
  *         type: string
  *       - name: minified
@@ -2137,7 +2137,7 @@ api.route('/orgs/:orgid/projects/:projectid')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      org, project, branch]
+ *                      reference]
  *         in: query
  *         type: string
  *         required: false
@@ -2152,8 +2152,8 @@ api.route('/orgs/:orgid/projects/:projectid')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, updatedOn, custom, description, lastModifiedBy,
- *                      name, org, project, branch, type, triggers, responses,
- *                      incoming]
+ *                      name, reference, type, triggers, responses, token,
+ *                      tokenLocation]
  *         in: query
  *         type: string
  *       - name: limit
@@ -2304,7 +2304,7 @@ api.route('/orgs/:orgid/projects/:projectid/webhooks')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      org, project, branch]
+ *                      reference]
  *         in: query
  *         type: string
  *         required: false
@@ -2319,8 +2319,8 @@ api.route('/orgs/:orgid/projects/:projectid/webhooks')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, updatedOn, custom, description, lastModifiedBy,
- *                      name, org, project, branch, type, triggers, responses,
- *                      incoming]
+ *                      name, reference, type, triggers, responses, token,
+ *                      tokenLocation]
  *         in: query
  *         type: string
  *       - name: minified
@@ -3144,7 +3144,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      org, project, branch]
+ *                      reference]
  *         in: query
  *         type: string
  *         required: false
@@ -3159,8 +3159,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, updatedOn, custom, description, lastModifiedBy,
- *                      name, org, project, branch, type, triggers, responses,
- *                      incoming]
+ *                      name, reference, type, triggers, responses, token,
+ *                      tokenLocation]
  *         in: query
  *         type: string
  *       - name: limit
@@ -3311,7 +3311,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/webhooks')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      org, project, branch]
+ *                      reference]
  *         in: query
  *         type: string
  *         required: false
@@ -3326,8 +3326,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/webhooks')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, updatedOn, custom, description, lastModifiedBy,
- *                      name, org, project, branch, type, triggers, responses,
- *                      incoming]
+ *                      name, reference, type, triggers, responses, token,
+ *                      tokenLocation]
  *         in: query
  *         type: string
  *       - name: minified
@@ -6802,7 +6802,7 @@ api.route('/users/:username/password')
  *       - webhooks
  *     description: Finds and returns webhooks from an array of ids. If no array
  *                  provided, returns every webhook the requesting user has access
- *                  to at the specified level of server, org, project, branch, or
+ *                  to at the specified level of server, reference, or
  *                  all.
  *     produces:
  *       - application/json
@@ -6834,7 +6834,7 @@ api.route('/users/:username/password')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      org, project, branch]
+ *                      reference]
  *         in: query
  *         type: string
  *         required: false
@@ -6849,8 +6849,8 @@ api.route('/users/:username/password')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, updatedOn, custom, description, lastModifiedBy,
- *                      name, org, project, branch, type, triggers, responses,
- *                      incoming]
+ *                      name, reference, type, triggers, responses, token,
+ *                      tokenLocation]
  *         in: query
  *         type: string
  *       - name: limit
@@ -7021,7 +7021,7 @@ api.route('/users/:username/password')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      org, project, branch]
+ *                      reference]
  *         in: query
  *         type: string
  *         required: false
@@ -7031,8 +7031,8 @@ api.route('/users/:username/password')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, updatedOn, custom, description, lastModifiedBy,
- *                      name, org, project, branch, type, triggers, responses,
- *                      incoming]
+ *                      name, reference, type, triggers, responses, token,
+ *                      tokenLocation]
  *         in: query
  *         type: string
  *       - name: minified
@@ -7174,7 +7174,7 @@ api.route('/webhooks/trigger/:base64id')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      org, project, branch]
+ *                      reference]
  *         in: query
  *         type: string
  *         required: false
@@ -7189,8 +7189,8 @@ api.route('/webhooks/trigger/:base64id')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, updatedOn, custom, description, lastModifiedBy,
- *                      name, org, project, branch, type, triggers, responses,
- *                      incoming]
+ *                      name, reference, type, triggers, responses, token,
+ *                      tokenLocation]
  *         in: query
  *         type: string
  *       - name: minified
@@ -7225,7 +7225,7 @@ api.route('/webhooks/trigger/:base64id')
  *                  body. Webhook that are currently archived must first
  *                  be unarchived before making any other updates. The following
  *                  fields can be updated [name, description, archived,
- *                  triggers, incoming, requests, org, project, branch].
+ *                  triggers, token, tokenLocation, requests].
  *     produces:
  *       - application/json
  *     parameters:
@@ -7312,7 +7312,7 @@ api.route('/webhooks/trigger/:base64id')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      org, project, branch]
+ *                      reference]
  *         in: query
  *         type: string
  *         required: false
@@ -7322,8 +7322,8 @@ api.route('/webhooks/trigger/:base64id')
  *                      include a field, include a '-' in front of the field
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, updatedOn, custom, description, lastModifiedBy,
- *                      name, org, project, branch, type, triggers, responses,
- *                      incoming]
+ *                      name, reference, type, triggers, responses, token,
+ *                      tokenLocation]
  *         in: query
  *         type: string
  *       - name: minified
