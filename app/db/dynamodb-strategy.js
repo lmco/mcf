@@ -1530,7 +1530,7 @@ class Model {
   async textSearch(filter, projection, options) {
     try {
       // Get the text search and remove it from the filter
-      const searchString = filter.$text.$search;
+      const searchString = filter.$text;
       delete filter.$text;
 
       // Handle case where there is no query
