@@ -871,7 +871,8 @@ api.route('/orgs/:orgid')
  *     tags:
  *       - webhooks
  *     description: Finds and returns webhooks registered on the specified organization
- *                  from an array of ids.
+ *                  from an array of ids. A user must be an admin on the organization
+ *                  to see the webhooks.
  *     produces:
  *       - application/json
  *     parameters:
@@ -881,14 +882,12 @@ api.route('/orgs/:orgid')
  *           items:
  *             type: string
  *         description: An array of webhook IDs to search for. If both query
- *                      parameter and body are not provided, all webhooks the
- *                      user has access to (at the specified level) are
- *                      found.
+ *                      parameter and body are not provided, all webhooks on
+ *                      the specified organization are found.
  *       - name: ids
  *         description: Comma separated list of IDs to search for. If both query
- *                      parameter and body are not provided, all webhooks the
- *                      user has access to (at the specified level) are
- *                      found.
+ *                      parameter and body are not provided, all webhooks on
+ *                      the specified organization are found.
  *         in: query
  *         type: string
  *       - name: populate
@@ -2114,7 +2113,8 @@ api.route('/orgs/:orgid/projects/:projectid')
  *     tags:
  *       - webhooks
  *     description: Finds and returns webhooks registered on the specified project
- *                  from an array of ids.
+ *                  from an array of ids. A user must be an admin on the project
+ *                  to see the webhooks.
  *     produces:
  *       - application/json
  *     parameters:
@@ -2124,14 +2124,12 @@ api.route('/orgs/:orgid/projects/:projectid')
  *           items:
  *             type: string
  *         description: An array of webhook IDs to search for. If both query
- *                      parameter and body are not provided, all webhooks the
- *                      user has access to (at the specified level) are
- *                      found.
+ *                      parameter and body are not provided, all webhooks on
+ *                      the specified project are found.
  *       - name: ids
  *         description: Comma separated list of IDs to search for. If both query
- *                      parameter and body are not provided, all webhooks the
- *                      user has access to (at the specified level) are
- *                      found.
+ *                      parameter and body are not provided, all webhooks on
+ *                      the specified project are found.
  *         in: query
  *         type: string
  *       - name: populate
@@ -3121,7 +3119,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
  *     tags:
  *       - webhooks
  *     description: Finds and returns webhooks registered on the specified branch
- *                  from an array of ids.
+ *                  from an array of ids. A user must be an admin on the project
+ *                  to see webhooks on the branch.
  *     produces:
  *       - application/json
  *     parameters:
@@ -3131,14 +3130,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
  *           items:
  *             type: string
  *         description: An array of webhook IDs to search for. If both query
- *                      parameter and body are not provided, all webhooks the
- *                      user has access to (at the specified level) are
- *                      found.
+ *                      parameter and body are not provided, all webhooks on
+ *                      the specified branch are found.
  *       - name: ids
  *         description: Comma separated list of IDs to search for. If both query
- *                      parameter and body are not provided, all webhooks the
- *                      user has access to (at the specified level) are
- *                      found.
+ *                      parameter and body are not provided, all webhooks on
+ *                      the specified branch are found.
  *         in: query
  *         type: string
  *       - name: populate
@@ -6802,8 +6799,9 @@ api.route('/users/:username/password')
  *       - webhooks
  *     description: Finds and returns webhooks from an array of ids. If no array
  *                  provided, returns every webhook the requesting user has access
- *                  to at the specified level of server, reference, or
- *                  all.
+ *                  to at the specified level of server, org, project, branch, or
+ *                  all. A user must be an admin at the respective level to see
+ *                  webhooks.
  *     produces:
  *       - application/json
  *     parameters:
