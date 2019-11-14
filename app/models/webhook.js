@@ -235,7 +235,7 @@ WebhookSchema.plugin(extensions);
  * @description Send the requests stored in the webhook.
  * @memberOf WebhookSchema
  */
-WebhookSchema.static('sendRequest', function(that, data) {
+WebhookSchema.static('sendRequests', function(that, data) {
   // Verify that the webhook matches the org, project, or branch of the data or that this is
   // a generic, server-wide webbhook
   if ((that.org && that.org === data.org)
