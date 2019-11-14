@@ -866,7 +866,7 @@ api.route('/orgs/:orgid')
 
 /**
  * @swagger
- * /api/orgs/:orgid/webhooks:
+ * /api/orgs/{orgid}/webhooks:
  *   get:
  *     tags:
  *       - webhooks
@@ -1042,7 +1042,7 @@ api.route('/orgs/:orgid/webhooks')
 
 /**
  * @swagger
- * /api/orgs/:orgid/webhooks/:webhookid:
+ * /api/orgs/{orgid}/webhooks/{webhookid}:
  *   get:
  *     tags:
  *       - webhooks
@@ -2107,7 +2107,7 @@ api.route('/orgs/:orgid/projects/:projectid')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid/webhooks:
+ * /api/orgs/{orgid}/projects/{projectid}/webhooks:
  *   get:
  *     tags:
  *       - webhooks
@@ -2283,7 +2283,7 @@ api.route('/orgs/:orgid/projects/:projectid/webhooks')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid:
+ * /api/orgs/{orgid}/projects/{projectid}/webhooks/{webhookid}:
  *   get:
  *     tags:
  *       - webhooks
@@ -3111,7 +3111,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid/branches/:branchid/webhooks:
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/webhooks:
  *   get:
  *     tags:
  *       - webhooks
@@ -3287,7 +3287,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/webhooks')
 
 /**
  * @swagger
- * /api/orgs/:orgid/projects/:projectid/branches/:branchid/webhooks/:webhookid:
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/webhooks/{webhookid}:
  *   get:
  *     tags:
  *       - webhooks
@@ -7148,7 +7148,7 @@ api.route('/webhooks/trigger/:base64id')
 
 /**
  * @swagger
- * /api/webhooks/:webhookid:
+ * /api/webhooks/{webhookid}:
  *   get:
  *     tags:
  *       - webhooks
