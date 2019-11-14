@@ -1298,7 +1298,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
  * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @returns {Promise<object[]>} Array of deleted element ids.
+ * @returns {Promise<string[]>} Array of deleted element ids.
  *
  * @example
  * remove({User}, 'orgID', 'projID', 'branch', ['elem1', 'elem2'])
