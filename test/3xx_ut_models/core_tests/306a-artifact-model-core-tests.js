@@ -136,7 +136,6 @@ async function findArtifact() {
     );
 
     // Verify output
-    // Check if artifact found
     chai.expect(foundArtifact._id).to.equal(
       utils.createID(org.id, project.id, branch.id, testData.artifacts[0].id)
     );
