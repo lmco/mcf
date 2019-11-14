@@ -14,13 +14,13 @@
  * @author Connor Doyle <connor.p.doyle@lmco.com>
  *
  * @description
- * <p>This module defines the webhook model. Webhooks can
- * be used for a wide range of purposes that fall under the category of automating responses to
- * specific events. Webhook documents store triggers and responses for asynchronous events and api
- * calls within the server. For example, an outgoing webhook may be triggered by a project creation
- * event, and notify the admins of that organization through an http request stored in the
- * webhook's responses field. Conversely, an incoming webhook may be triggered by a request to the
- * api endpoint /api/webhooks/trigger/:base64webhookid. </p>
+ * <p>This module defines the webhook model. Webhooks can be used for a wide range of purposes
+ * that fall under the category of automating responses to specific events. Webhook documents store
+ * triggers and responses for asynchronous events and api calls within the server. For example, an
+ * outgoing webhook may be triggered by a project creation event, and notify the admins of that
+ * organization through an http request stored in the webhook's responses field. Conversely,
+ * an incoming webhook may be triggered by a request to the api endpoint
+ * /api/webhooks/trigger/:base64id.</p>
  *
  * <h4>Type</h4>
  * <p>The type of the webhook specifies outgoing or incoming.  An outgoing webhook will only react
@@ -39,14 +39,20 @@
  * {'Content-Type': 'application/json'}. The auth field allows the user to specifiy a username and
  * password, and the ca field allows space for a certificate authority.</p>
  *
- * <h4>Incoming</h4>
- * <p>The incoming field is used to store a token which is subsequently used upon triggering to
- * verify the external request.</p>
+ * <h4>Token</h4>
+ * <p>The token is a string used to verify permissions for external http requests to trigger a
+ * webhook. External requests must contain a matching token in order to trigger the webhook.</p>
  *
- * <h4>Server, Org, Project, and Branch</h4>
- * <p>A webhook can be registered at four levels: server, org, project, and branch.  A server-
- * level webhook can listen for server-wide events, such as user creation, while the scope
- * gets progressively narrower at the org, project, and branch level.</p>
+ * <h4>TokenLocation</h4>
+ * <p>The tokenLocation is a dot-delimited string used to find the token in the request object
+ * sent to trigger a webhook. For example, a tokenLocation of "body.secret_token" would look for
+ * a secret_token field in the body of the request.</p>
+ *
+ * <h4>Reference</h4>
+ * <p>A webhook can be registered at one of four levels: server, org, project, and branch.  A
+ * server-level webhook can listen for server-wide events, such as user creation, while the scope
+ * gets progressively narrower at the org, project, and branch level. The server level is
+ * represented by an empty string, while the other levels are represented by their _ids.</p>
  *
  * <h4>Custom Data</h4>
  * <p>Custom data is designed to store any arbitrary JSON meta-data. Custom data is stored in an
