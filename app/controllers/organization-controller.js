@@ -153,7 +153,7 @@ async function find(requestingUser, orgs, options) {
     // If not system admin, add permissions check
     // TODO: Rewrite using Permissions library
     if (!reqUser.admin) {
-      searchQuery[`permissions.${reqUser._id}`] = 'read';
+      searchQuery[`permissions.${reqUser._id}`] = { $all: ['read'] };
     }
     // If the includeArchived field is true, remove archived from the query; return everything
     if (validatedOptions.includeArchived) {

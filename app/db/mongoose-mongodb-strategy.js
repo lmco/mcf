@@ -564,7 +564,7 @@ class Model {
         this.validateQuery(query[k]);
       }
 
-      const validKeys = ['$in', '$search', '$text'];
+      const validKeys = ['$in', '$search', '$text', '$all'];
       // If the key starts with '$' and is not in the validKeys array, throw an error
       if (k.startsWith('$') && !validKeys.includes(k)) {
         throw new M.ServerError(`The mongo keyword ${k} is no longer supported`
