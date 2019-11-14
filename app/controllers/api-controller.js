@@ -5651,6 +5651,10 @@ async function getWebhooks(req, res) {
     // want to search through every webhook.
     options.server = true;
   }
+  else if (req.query.hasOwnProperty('server') && (org || project || branch)) {
+    // if there is an org, project, or branch specified, server is not an option
+    delete options.server;
+  }
 
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
@@ -5735,13 +5739,15 @@ async function deleteWebhooks(req, res) {
   if (req.params.hasOwnProperty('orgid')) org = req.params.orgid;
   if (req.params.hasOwnProperty('projectid')) project = req.params.projectid;
   if (req.params.hasOwnProperty('branchid')) branch = req.params.branchid;
-  if (req.query.hasOwnProperty('server') && !org && !project && !branch) {
-    options.server = req.query.server;
-  }
-  else if (!org && !project && !branch) {
+  if (!req.query.hasOwnProperty('server') && !org && !project && !branch) {
     // Set server true by default if no org, project, or branch is being searched for.
     options.server = true;
   }
+  else if (req.query.hasOwnProperty('server') && (org || project || branch)) {
+    // if there is an org, project, or branch specified, server is not an option
+    delete options.server;
+  }
+
 
   // Check options for minified
   if (options.hasOwnProperty('minified')) {

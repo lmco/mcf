@@ -79,7 +79,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject creating an incoming webhook with responses', responsesIncoming);
   it('should reject creating a webhook with a response missing a url', noUrlInResponses);
   it('should reject creating a webhook with an invalid method in a response', invalidMethodInResponse);
-  it('should reject creating a webhook with an invalid auth in a response', invalidAuthInResponse);
+  it('should reject creating a webhook with an invalid auth in a response', invalidTokenInResponse);
   it('should reject creating an incoming webhook with no token', noTokenIncoming);
   it('should reject creating an incoming webhook with no tokenLocation', noTokenLocationIncoming);
   it('should reject creating an outgoing webhook with an incoming field', tokenOutgoing);
@@ -316,21 +316,21 @@ async function invalidMethodInResponse() {
 
 /**
  * @description Validates that a webhook cannot be created with a response that has an invalid
- * auth field.
+ * token field.
  */
-async function invalidAuthInResponse() {
+async function invalidTokenInResponse() {
   try {
     const webhookData = Object.assign({}, testData.webhooks[0]);
     webhookData._id = webhookID;
 
     webhookData.responses = [{
       url: 'test',
-      auth: 'invalid'
+      token: {}
     }];
 
     // Save webhook; expect specific error message
     await Webhook.insertMany(webhookData).should.eventually.be.rejectedWith('Webhook validation '
-      + 'failed: responses.0.auth: Auth field does not contain a username or the username is not a string.');
+      + 'failed: responses.0.token: Cast to String failed for value "{}" at path "token"');
   }
   catch (error) {
     M.log.error(error);

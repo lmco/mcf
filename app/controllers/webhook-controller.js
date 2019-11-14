@@ -77,24 +77,27 @@ const validators = M.require('lib.validators');
  * instead of converting the data to objects.
  * @param {string} [options.sort] - Provide a particular field to sort the results by. To sort
  * in reverse order, provide a '-' in front.
- * @param {string} [options.server] - Search only for server-wide webhooks.
+ * @param {boolean} [options.server] - The API Controller automatically sets server to true if
+ * there is no org, project or branch id in the params, so that only server level webhooks are
+ * searched for. However, the user may explicitly specify server:false to indicate that they wish
+ * to search webhooks across any reference level.
  * @param {string} [options.type] - Search for webhooks with a specific type.
  * @param {string} [options.name] - Search for webhooks with a specific name.
  * @param {string} [options.createdBy] - Search for webhooks with a specific createdBy value.
- * @param {string} [options.lastModifiedBy] - Search for elements with a specific lastModifiedBy
+ * @param {string} [options.lastModifiedBy] - Search for webhooks with a specific lastModifiedBy
  * value.
- * @param {string} [options.archived] - Search only for archived elements.  If false, only
- * returns unarchived elements.  Overrides the includeArchived option.
- * @param {string} [options.archivedBy] - Search for elements with a specific archivedBy value.
+ * @param {string} [options.archived] - Search only for archived webhooks.  If false, only
+ * returns unarchived webhooks.  Overrides the includeArchived option.
+ * @param {string} [options.archivedBy] - Search for webhooks with a specific archivedBy value.
  * @param {string} [options.custom....] - Search for any key in custom data. Use dot notation
  * for the keys. Ex: custom.hello = 'world'.
  *
- * @returns {Promise<object[]>} Array of found element objects.
+ * @returns {Promise<object[]>} Array of found webhook objects.
  *
  * @example
  * find({User}, 'orgID', 'projID', 'branchID', ['webhook1', 'webhook2'], { type: 'Outgoing' })
  * .then(function(webhooks) {
- *   // Do something with the found webhookss
+ *   // Do something with the found webhooks
  * })
  * .catch(function(error) {
  *   M.log.error(error);
@@ -194,7 +197,7 @@ async function find(requestingUser, organizationID, projectID, branchID, webhook
     if (validatedOptions.includeArchived) {
       delete searchQuery.archived;
     }
-    // If the archived field is true, query only for archived elements
+    // If the archived field is true, query only for archived webhooks
     if (validatedOptions.archived) {
       searchQuery.archived = true;
     }
@@ -640,8 +643,11 @@ async function update(requestingUser, organizationID, projectID, branchID, webho
  * @param {string|null} branchID - The ID of the owning branch.
  * @param {(string|string[])} webhooks - The webhooks to remove. Can either be an array of webhook
  * ids or a single webhook id.
- * @param {object} [options] - A parameter that provides supported options. Currently there are no
- * supported options.
+ * @param {object} [options] - A parameter that provides supported options.
+ * @param {boolean} [options.server] - The API Controller automatically sets server to true if
+ * there is no org, project or branch id in the params, so that only server level webhooks are
+ * searched for. However, the user may explicitly specify server:false to indicate that they wish
+ * to search/delete multiple webhooks across any reference level.
  *
  * @returns {Promise<object[]>} Array of deleted webhook ids.
  *
@@ -676,6 +682,12 @@ async function remove(requestingUser, organizationID, projectID, branchID, webho
       webhooksToDelete = [saniWebhooks];
     }
 
+    // Validate the provided options
+    const validatedOptions = utils.validateOptions(options, ['server'], Webhook);
+
+    // Initialize search query
+    const searchQuery = { _id: { $in: webhooksToDelete } };
+
     let organization;
     let project;
     let branch;
@@ -695,6 +707,20 @@ async function remove(requestingUser, organizationID, projectID, branchID, webho
     // Note: This assumes that all webhooks passed in are on the same org/project/branch
     // Permissions check
     permissions.deleteWebhook(reqUser, organization, project, branch);
+
+    // Add the webhook level to the search query
+    if (branID) {
+      searchQuery.reference = utils.createID(orgID, projID, branID);
+    }
+    else if (projID) {
+      searchQuery.reference = utils.createID(orgID, projID);
+    }
+    else if (orgID) {
+      searchQuery.reference = orgID;
+    }
+    else if (validatedOptions.server) {
+      searchQuery.reference = '';
+    }
 
     // Find webhooks to delete
     const foundWebhooks = await Webhook.find({ _id: webhooksToDelete },
