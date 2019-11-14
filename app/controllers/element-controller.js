@@ -1286,8 +1286,8 @@ async function createOrReplace(requestingUser, organizationID, projectID,
 
 /**
  * @description This function removes one or many elements as well as the
- * subtree under those elements. Once the elements are deleted, the elements
- * as they were before deletion are returned.
+ * subtree under those elements. Once the elements are deleted, the IDs of the
+ * deleted elements are returned.
  *
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {string} organizationID - The ID of the owning organization.
@@ -1298,7 +1298,7 @@ async function createOrReplace(requestingUser, organizationID, projectID,
  * @param {object} [options] - A parameter that provides supported options.
  * Currently there are no supported options.
  *
- * @returns {Promise<object[]>} Array of deleted element objects.
+ * @returns {Promise<object[]>} Array of deleted element ids.
  *
  * @example
  * remove({User}, 'orgID', 'projID', 'branch', ['elem1', 'elem2'])
