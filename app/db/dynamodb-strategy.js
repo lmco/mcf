@@ -559,12 +559,11 @@ class Query {
       Object.keys(query).forEach((k) => {
         const keyName = this.parseExpressionAttributeNames(findQuery, k);
         const valueKey = (k.includes('.')) ? k.split('.').join('_') : k;
+        let filterString = '';
 
         // Handle the special $in case
         if (typeof query[k] === 'object' && query[k] !== null
           && Object.keys(query[k])[0] === '$in') {
-          // Init the filter string
-          let filterString = '';
           const arr = Object.values(query[k])[0];
 
           if (arr.length > 0) {
@@ -589,15 +588,30 @@ class Query {
             findQuery.FilterExpression += filterString;
           }
         }
+        // Handle the special $all case
+        else if (typeof query[k] === 'object' && query[k] !== null
+          && Object.keys(query[k])[0] === '$all') {
+          const arr = Object.values(query[k])[0];
+
+          // Loop over each item in arr
+          for (let i = 0; i < arr.length; i++) {
+            // Add value to ExpressionAttributeValues
+            findQuery.ExpressionAttributeValues[`:${valueKey}${i}`] = arr[i];
+
+            // If FilterExpression is empty, init it
+            if (!findQuery.FilterExpression && !filterString) {
+              filterString = `contains (#${keyName}, :${valueKey}${i})`;
+            }
+            else {
+              filterString += ` AND contains (#${keyName}, :${valueKey}${i})`;
+            }
+          }
+
+          findQuery.FilterExpression += filterString;
+        }
         else {
           findQuery.ExpressionAttributeValues[`:${valueKey}`] = this.formatJSON(query[k]);
-
-          // TODO: SUPER HARDCODED
-          // Handle special case where searching an array of permissions
-          const filterString = (keyName.startsWith('permissions.'))
-            ? `contains (#${keyName}, :${valueKey})`
-            : `#${keyName} = :${valueKey}`;
-
+          filterString = `#${keyName} = :${valueKey}`;
           // Set the FilterExpression
           findQuery.FilterExpression = (!findQuery.FilterExpression)
             ? filterString
