@@ -121,9 +121,10 @@ module.exports = {
   deleteBlob,
   getBlobById,
   getWebhooks,
+  postWebhooks,
+  patchWebhooks,
   deleteWebhooks,
   getWebhook,
-  postWebhook,
   patchWebhook,
   deleteWebhook,
   triggerWebhook,
@@ -5690,10 +5691,147 @@ async function getWebhooks(req, res) {
 }
 
 /**
+ * POST /api/webhooks
+ *
+ * @description Creates multiple webhooks.
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {object} Response object with the created webhook.
+ */
+async function postWebhooks(req, res) {
+  // Define options
+  let options;
+  let minified = false;
+  let org = null;
+  let project = null;
+  let branch = null;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'string',
+    fields: 'string',
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  try {
+    // Create the webhook with provided parameters
+    const webhooks = await WebhookController.create(req.user, org, project, branch, req.body,
+      options);
+
+    // Get the webhooks' public data
+    const webhookPublicData = sani.html(
+      publicData.getPublicData(webhooks, 'webhook', options)
+    );
+
+    // Format JSON
+    const json = formatJSON(webhookPublicData, minified);
+
+    // Return 200: OK and the created webhook
+    return returnResponse(req, res, json, 200);
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+/**
+ * PATCH /api/webhooks/
+ *
+ * @description Updates the specified webhooks.
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ *
+ * @returns {object} Response object with the updated webhooks.
+ */
+async function patchWebhooks(req, res) {
+  // Define options
+  let options;
+  let minified = false;
+  let org;
+  let project;
+  let branch;
+
+  // Define valid option type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array',
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) {
+    M.log.critical('No requesting user available.');
+    const error = new M.ServerError('Request Failed');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  try {
+    // Updates the specified webhooks
+    const webhooks = await WebhookController.update(req.user, org, project, branch, req.body,
+      options);
+
+    // Get the webhooks' public data
+    const webhookPublicData = sani.html(
+      publicData.getPublicData(webhooks, 'webhook', options)
+    );
+
+    // Format JSON
+    const json = formatJSON(webhookPublicData, minified);
+
+    // Return 200: OK and the updated webhook
+    return returnResponse(req, res, json, 200);
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+}
+
+/**
  * DELETE /api/webhooks
- * DELETE /api/orgs/:orgid/webhooks
- * DELETE /api/orgs/:orgid/projects/:projectid/webhooks
- * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/webhooks
  *
  * @description Deletes the specified webhooks
  *
@@ -5773,9 +5911,6 @@ async function deleteWebhooks(req, res) {
 
 /**
  * GET /api/webhooks/:webhookid
- * GET /api/orgs/:orgid/webhooks/:webhookid
- * GET /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
- * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/webhooks/:webhookid
  *
  * @description Gets a single webhook by id
  *
@@ -5861,97 +5996,6 @@ async function getWebhook(req, res) {
     const json = formatJSON(webhookPublicData, minified);
 
     // Return 200: OK and the found webhook
-    return returnResponse(req, res, json, 200);
-  }
-  catch (error) {
-    // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
-}
-
-/**
- * POST /api/webhooks
- *
- * @description Creates a webhook.
- *
- * @param {object} req - Request express object
- * @param {object} res - Response express object
- *
- * @returns {object} Response object with the created webhook.
- */
-async function postWebhook(req, res) {
-  // Define options
-  let options;
-  let minified = false;
-  let org = null;
-  let project = null;
-  let branch = null;
-
-  // Define valid option and its parsed type
-  const validOptions = {
-    populate: 'string',
-    fields: 'string',
-    minified: 'boolean'
-  };
-
-  // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
-
-  // Singular api: should not accept arrays
-  if (Array.isArray(req.body)) {
-    const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
-
-  // Attempt to parse query options
-  try {
-    // Extract options from request query
-    options = utils.parseOptions(req.query, validOptions);
-  }
-  catch (error) {
-    // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
-
-  // Extract org, project, and branch from reference field of webhook object
-  if (req.body.hasOwnProperty('reference')) {
-    try {
-      const ids = utils.parseID(req.body.reference);
-      if (ids.length > 0) org = ids.shift();
-      if (ids.length > 0) project = ids.shift();
-      if (ids.length > 0) branch = ids.shift();
-      delete req.body.reference;
-    }
-    catch (error) {
-      throw new M.DataFormatError('Reference field improperly formatted', 'warn');
-    }
-  }
-
-  // Check options for minified
-  if (options.hasOwnProperty('minified')) {
-    minified = options.minified;
-    delete options.minified;
-  }
-
-  try {
-    // Create the webhook with provided parameters
-    const webhooks = await WebhookController.create(req.user, org, project, branch, req.body,
-      options);
-    const webhook = webhooks[0];
-
-    // Get the webhook public data
-    const webhookPublicData = sani.html(
-      publicData.getPublicData(webhook, 'webhook', options)
-    );
-
-    // Format JSON
-    const json = formatJSON(webhookPublicData, minified);
-
-    // Return 200: OK and the created webhook
     return returnResponse(req, res, json, 200);
   }
   catch (error) {
@@ -6144,7 +6188,7 @@ async function deleteWebhook(req, res) {
 }
 
 /**
- * POST /api/webhooks/trigger/:base64id
+ * POST /api/webhooks/trigger/:encodedid
  *
  * @description Triggers the specified webhook
  *
@@ -6155,7 +6199,7 @@ async function deleteWebhook(req, res) {
  */
 async function triggerWebhook(req, res) {
   // Parse the webhook id from the base64 encoded url
-  const webhookID = Buffer.from(req.params.base64id, 'base64').toString('ascii');
+  const webhookID = Buffer.from(req.params.encodedid, 'base64').toString('ascii');
 
   try {
     // Note: this will search for ANY webhook in the database
