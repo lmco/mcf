@@ -234,12 +234,12 @@ async function find(requestingUser, organizationID, projectID, branchID, webhook
  * http requests upon the webhook triggering. Each response must contain a url field, while the
  * method field defaults to 'POST' and the headers field defaults to
  * {'Content-Type': 'application/json'}. Each response may also contain a ca field for a
- * certificate authority, an auth object that contains a username and password, and a data field
+ * certificate authority, a token field for token validation, and a data field
  * that contains data to send with the request. Outgoing webhooks must have a responses field.
- * @param {object} [webhooks.incoming] - An object that contains a token string and a
- * tokenLocation string. The token is a key that external requests to trigger the webhook must
- * provide, and the tokenLocation is the expected url of the external request. Incoming webhooks
- * must have an incoming field.
+ * @param {string} [webhooks.token] - A key that external requests to trigger the webhook must
+ * provide in order to verify the request.
+ * @param {string} [webhooks.tokenLocation] - A dot-delimited string that represents the location
+ * of the token within an external request to trigger a webhook.
  * @param {string} webhooks.reference - The level at which the webhook listens for events. Can be
  * either an empty string to indicate server level or an org, project, or branch id.
  * @param {object} [webhooks.custom] - Any additional key/value pairs for an
@@ -389,8 +389,10 @@ async function create(requestingUser, organizationID, projectID, branchID, webho
  * @param {string[]} [webhooks.triggers] - The updated list of triggers for the webhook.
  * @param {object[]} [webhooks.responses] - The updated list of response objects for an
  * outgoing webhook.
- * @param {object} [webhooks.incoming] - The updated field containing a token and token location
- * for an incoming webhook.
+ * @param {string} [webhooks.token] - A key that external requests to trigger the webhook must
+ * provide in order to verify the request.
+ * @param {string} [webhooks.tokenLocation] - A dot-delimited string that represents the location
+ * of the token within an external request to trigger a webhook.
  * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.

@@ -141,8 +141,7 @@ const WebhookSchema = new db.Schema({
         }
       },
       message: () => 'An incoming webhook cannot have a responses field.'
-    }
-    ]
+    }]
   },
   description: {
     type: 'String'
@@ -158,14 +157,7 @@ const WebhookSchema = new db.Schema({
   responses: [{
     url: {
       type: 'String',
-      required: true,
-      validate: [{
-        validator: function(v) {
-          return true; // TODO: validate the url?
-        },
-        message: () => 'The URL field does not contain a valid url.'
-      }
-      ]
+      required: true
     },
     method: {
       type: 'String',
@@ -176,19 +168,8 @@ const WebhookSchema = new db.Schema({
       type: 'Object',
       default: { 'Content-Type': 'application/json' }
     },
-    auth: { // TODO: hash the password
-      type: 'Object',
-      validate: [{
-        validator: function(v) {
-          return (Object.keys(v).includes('username') && typeof v.username === 'string');
-        },
-        message: () => 'Auth field does not contain a username or the username is not a string.'
-      }, {
-        validator: function(v) {
-          return (Object.keys(v).includes('password') && typeof v.password === 'string');
-        },
-        message: () => 'Auth field does not contain a password or the password is not a string.'
-      }]
+    token: {
+      type: 'String'
     },
     ca: {
       type: 'String'
@@ -267,8 +248,7 @@ WebhookSchema.static('sendRequest', function(that, data) {
         url: response.url,
         headers: response.headers,
         method: response.method,
-        body: JSON.stringify(response.data || data || undefined),
-        rejectUnauthorized: false // TODO: don't do this
+        body: JSON.stringify(response.data || data || undefined)
       };
       if (response.ca) options.ca = response.ca;
       if (response.auth) options.auth = response.auth;
