@@ -453,7 +453,7 @@ async function updateNotFound() {
 
     await WebhookController.update(adminUser, null, null, null, webhookData)
     .should.eventually.be.rejectedWith('The following webhooks were not found at the specified '
-      + `reference level : [${webhookData.id}]`);
+      + `reference level [server-wide]: [${webhookData.id}]`);
   }
   catch (error) {
     M.log.error(error);

@@ -22,6 +22,7 @@ const chai = require('chai');
 const db = M.require('db');
 const APIController = M.require('controllers.api-controller');
 const WebhookController = M.require('controllers.webhook-controller');
+const Webhook = M.require('models.webhook');
 const jmi = M.require('lib.jmi-conversions');
 const events = M.require('lib.events');
 
@@ -72,6 +73,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after(async () => {
     try {
+      await Webhook.deleteMany({ _id: { $in: webhookIDs } });
       await testUtils.removeTestAdmin();
       await db.disconnect();
     }
@@ -490,15 +492,8 @@ function deleteWebhooks(done) {
  **/
 function triggerWebhook(done) {
   // Get data for an incoming webhook
-  const webhookData = {
-    name: 'test_webhook01',
-    type: 'Incoming',
-    description: 'test webhook description 1',
-    triggers: ['test-event'],
-    token: 'test token',
-    tokenLocation: 'test location'
-  };
-
+  const webhookData = testData.webhooks[1];
+  delete webhookData.id;
 
   // Register a listener for the incoming webhook event
   events.on(webhookData.triggers[0], function() {
@@ -514,7 +509,7 @@ function triggerWebhook(done) {
 
     // Create request object
     const body = {
-      token: 'test token',
+      test: { token: 'test token' },
       data: 'test data'
     };
     const params = { base64id: base64ID };

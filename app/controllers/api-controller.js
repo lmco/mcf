@@ -5645,10 +5645,7 @@ async function getWebhooks(req, res) {
   if (req.params.hasOwnProperty('orgid')) org = req.params.orgid;
   if (req.params.hasOwnProperty('projectid')) project = req.params.projectid;
   if (req.params.hasOwnProperty('branchid')) branch = req.params.branchid;
-  if (req.query.hasOwnProperty('server') && !org && !project && !branch) {
-    options.server = req.query.server;
-  }
-  else if (!org && !project && !branch) {
+  if (!req.query.hasOwnProperty('server') && !org && !project && !branch) {
     // Set server true by default if no org, project, or branch is being searched for.
     // The user must explicitly set server to false and query /api/webhooks if they
     // want to search through every webhook.
@@ -5916,10 +5913,19 @@ async function postWebhook(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // Extract org, project, and branch from params
-  if (req.params.hasOwnProperty('orgid')) org = req.params.orgid;
-  if (req.params.hasOwnProperty('projectid')) project = req.params.projectid;
-  if (req.params.hasOwnProperty('branchid')) branch = req.params.branchid;
+  // Extract org, project, and branch from reference field of webhook object
+  if (req.body.hasOwnProperty('reference')) {
+    try {
+      const ids = utils.parseID(req.body.reference);
+      if (ids.length > 0) org = ids.shift();
+      if (ids.length > 0) project = ids.shift();
+      if (ids.length > 0) branch = ids.shift();
+      delete req.body.reference;
+    }
+    catch (error) {
+      throw new M.DataFormatError('Reference field improperly formatted', 'warn');
+    }
+  }
 
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
@@ -6011,10 +6017,19 @@ async function patchWebhook(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // Extract org, project, and branch from params
-  if (req.params.hasOwnProperty('orgid')) org = req.params.orgid;
-  if (req.params.hasOwnProperty('projectid')) project = req.params.projectid;
-  if (req.params.hasOwnProperty('branchid')) branch = req.params.branchid;
+  // Extract org, project, and branch from reference field of webhook object
+  if (req.body.hasOwnProperty('reference')) {
+    try {
+      const ids = utils.parseID(req.body.reference);
+      if (ids.length > 0) org = ids.shift();
+      if (ids.length > 0) project = ids.shift();
+      if (ids.length > 0) branch = ids.shift();
+      delete req.body.reference;
+    }
+    catch (error) {
+      throw new M.DataFormatError('Reference field improperly formatted', 'warn');
+    }
+  }
 
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
@@ -6157,12 +6172,10 @@ async function triggerWebhook(req, res) {
     }
     catch (error) {
       M.log.warn(error);
-      console.log(1)
       throw new M.DataFormatError('Token could not be found in the request.', 'warn');
     }
 
     if (typeof token !== 'string') {
-      console.log(2)
       throw new M.DataFormatError('Token is not a string', 'warn');
     }
 

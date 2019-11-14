@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.507a-webhook-mock-core-tests
+ * @module test.507c-webhook-mock-specific-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -156,10 +156,10 @@ describe(M.getModuleName(module.filename), () => {
 function postOnOrg(done) {
   const webhookData = testData.webhooks[2];
   // Create request object
+  webhookData.reference = org._id;
   const body = webhookData;
-  const params = { orgid: org._id };
   const method = 'POST';
-  const req = testUtils.createRequest(adminUser, params, body, method);
+  const req = testUtils.createRequest(adminUser, {}, body, method);
 
   // Set response as empty object
   const res = {};
@@ -170,31 +170,32 @@ function postOnOrg(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Verify response body
-    const postedWebhook = JSON.parse(_data);
-    chai.expect(postedWebhook.name).to.equal(webhookData.name);
-    chai.expect(postedWebhook.triggers).to.deep.equal(webhookData.triggers);
-    chai.expect(postedWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
-    chai.expect(postedWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
-    chai.expect(postedWebhook.reference).to.equal(org._id);
-    chai.expect(postedWebhook.custom).to.deep.equal(webhookData.custom || {});
+    const createdWebhook = JSON.parse(_data);
+    chai.expect(createdWebhook.name).to.equal(webhookData.name);
+    chai.expect(createdWebhook.triggers).to.deep.equal(webhookData.triggers);
+    chai.expect(createdWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
+    chai.expect(createdWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
+    chai.expect(createdWebhook.reference).to.equal(org._id);
+    chai.expect(createdWebhook.custom).to.deep.equal(webhookData.custom || {});
 
     // Verify additional properties
-    chai.expect(postedWebhook.createdBy).to.equal(adminUser._id);
-    chai.expect(postedWebhook.lastModifiedBy).to.equal(adminUser._id);
-    chai.expect(postedWebhook.createdOn).to.not.equal(null);
-    chai.expect(postedWebhook.updatedOn).to.not.equal(null);
-    chai.expect(postedWebhook.archived).to.equal(false);
+    chai.expect(createdWebhook.createdBy).to.equal(adminUser._id);
+    chai.expect(createdWebhook.lastModifiedBy).to.equal(adminUser._id);
+    chai.expect(createdWebhook.createdOn).to.not.equal(null);
+    chai.expect(createdWebhook.updatedOn).to.not.equal(null);
+    chai.expect(createdWebhook.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(postedWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
+    chai.expect(createdWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
     // Save the webhook for later use
-    postedWebhook._id = postedWebhook.id;
-    orgWebhooks.push(postedWebhook);
+    createdWebhook._id = createdWebhook.id;
+    orgWebhooks.push(createdWebhook);
+    webhookIDs.push(createdWebhook.id);
 
     // Ensure the response was logged correctly
     setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
@@ -211,11 +212,11 @@ function postOnOrg(done) {
  */
 function postOnProject(done) {
   const webhookData = testData.webhooks[2];
+  webhookData.reference = utils.createID(org._id, projID);
   // Create request object
   const body = webhookData;
-  const params = { orgid: org._id, projectid: projID };
   const method = 'POST';
-  const req = testUtils.createRequest(adminUser, params, body, method);
+  const req = testUtils.createRequest(adminUser, {}, body, method);
 
   // Set response as empty object
   const res = {};
@@ -226,31 +227,32 @@ function postOnProject(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Verify response body
-    const postedWebhook = JSON.parse(_data);
-    chai.expect(postedWebhook.name).to.equal(webhookData.name);
-    chai.expect(postedWebhook.triggers).to.deep.equal(webhookData.triggers);
-    chai.expect(postedWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
-    chai.expect(postedWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
-    chai.expect(postedWebhook.reference).to.equal(utils.createID(org._id, projID));
-    chai.expect(postedWebhook.custom).to.deep.equal(webhookData.custom || {});
+    const createdWebhook = JSON.parse(_data);
+    chai.expect(createdWebhook.name).to.equal(webhookData.name);
+    chai.expect(createdWebhook.triggers).to.deep.equal(webhookData.triggers);
+    chai.expect(createdWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
+    chai.expect(createdWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
+    chai.expect(createdWebhook.reference).to.equal(utils.createID(org._id, projID));
+    chai.expect(createdWebhook.custom).to.deep.equal(webhookData.custom || {});
 
     // Verify additional properties
-    chai.expect(postedWebhook.createdBy).to.equal(adminUser._id);
-    chai.expect(postedWebhook.lastModifiedBy).to.equal(adminUser._id);
-    chai.expect(postedWebhook.createdOn).to.not.equal(null);
-    chai.expect(postedWebhook.updatedOn).to.not.equal(null);
-    chai.expect(postedWebhook.archived).to.equal(false);
+    chai.expect(createdWebhook.createdBy).to.equal(adminUser._id);
+    chai.expect(createdWebhook.lastModifiedBy).to.equal(adminUser._id);
+    chai.expect(createdWebhook.createdOn).to.not.equal(null);
+    chai.expect(createdWebhook.updatedOn).to.not.equal(null);
+    chai.expect(createdWebhook.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(postedWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
+    chai.expect(createdWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
     // Save the webhook for later use
-    postedWebhook._id = postedWebhook.id;
-    projWebhooks.push(postedWebhook);
+    createdWebhook._id = createdWebhook.id;
+    projWebhooks.push(createdWebhook);
+    webhookIDs.push(createdWebhook.id);
 
     // Ensure the response was logged correctly
     setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
@@ -267,11 +269,11 @@ function postOnProject(done) {
  */
 function postOnBranch(done) {
   const webhookData = testData.webhooks[2];
+  webhookData.reference = utils.createID(org._id, projID, branchID);
   // Create request object
   const body = webhookData;
-  const params = { orgid: org._id, projectid: projID, branchid: branchID };
   const method = 'POST';
-  const req = testUtils.createRequest(adminUser, params, body, method);
+  const req = testUtils.createRequest(adminUser, {}, body, method);
 
   // Set response as empty object
   const res = {};
@@ -282,31 +284,32 @@ function postOnBranch(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Verify response body
-    const postedWebhook = JSON.parse(_data);
-    chai.expect(postedWebhook.name).to.equal(webhookData.name);
-    chai.expect(postedWebhook.triggers).to.deep.equal(webhookData.triggers);
-    chai.expect(postedWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
-    chai.expect(postedWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
-    chai.expect(postedWebhook.reference).to.equal(utils.createID(org._id, projID, branchID));
-    chai.expect(postedWebhook.custom).to.deep.equal(webhookData.custom || {});
+    const createdWebhook = JSON.parse(_data);
+    chai.expect(createdWebhook.name).to.equal(webhookData.name);
+    chai.expect(createdWebhook.triggers).to.deep.equal(webhookData.triggers);
+    chai.expect(createdWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
+    chai.expect(createdWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
+    chai.expect(createdWebhook.reference).to.equal(utils.createID(org._id, projID, branchID));
+    chai.expect(createdWebhook.custom).to.deep.equal(webhookData.custom || {});
 
     // Verify additional properties
-    chai.expect(postedWebhook.createdBy).to.equal(adminUser._id);
-    chai.expect(postedWebhook.lastModifiedBy).to.equal(adminUser._id);
-    chai.expect(postedWebhook.createdOn).to.not.equal(null);
-    chai.expect(postedWebhook.updatedOn).to.not.equal(null);
-    chai.expect(postedWebhook.archived).to.equal(false);
+    chai.expect(createdWebhook.createdBy).to.equal(adminUser._id);
+    chai.expect(createdWebhook.lastModifiedBy).to.equal(adminUser._id);
+    chai.expect(createdWebhook.createdOn).to.not.equal(null);
+    chai.expect(createdWebhook.updatedOn).to.not.equal(null);
+    chai.expect(createdWebhook.archived).to.equal(false);
 
     // Verify specific fields not returned
-    chai.expect(postedWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
+    chai.expect(createdWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
     // Save the webhook for later use
-    postedWebhook._id = postedWebhook.id;
-    branchWebhooks.push(postedWebhook);
+    createdWebhook._id = createdWebhook.id;
+    branchWebhooks.push(createdWebhook);
+    webhookIDs.push(createdWebhook.id);
 
     // Ensure the response was logged correctly
     setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
@@ -1033,11 +1036,12 @@ function patchOnOrg(done) {
   const webhookData = orgWebhooks[0];
   const webhookUpdate = {
     id: webhookData._id,
+    reference: org._id,
     name: 'Patch test'
   };
   // Create request object
   const body = webhookUpdate;
-  const params = { webhookid: webhookData._id, orgid: org._id };
+  const params = { webhookid: webhookData._id };
   const method = 'PATCH';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -1089,11 +1093,12 @@ function patchOnProject(done) {
   const webhookData = projWebhooks[0];
   const webhookUpdate = {
     id: webhookData._id,
+    reference: utils.createID(org._id, projID),
     name: 'Patch test'
   };
   // Create request object
   const body = webhookUpdate;
-  const params = { webhookid: webhookData._id, orgid: org._id, projectid: projID };
+  const params = { webhookid: webhookData._id };
   const method = 'PATCH';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -1145,12 +1150,12 @@ function patchOnBranch(done) {
   const webhookData = branchWebhooks[0];
   const webhookUpdate = {
     id: webhookData._id,
+    reference: utils.createID(org._id, projID, branchID),
     name: 'Patch test'
   };
   // Create request object
   const body = webhookUpdate;
-  const params = {
-    webhookid: webhookData._id, orgid: org._id, projectid: projID, branchid: branchID };
+  const params = { webhookid: webhookData._id };
   const method = 'PATCH';
   const req = testUtils.createRequest(adminUser, params, body, method);
 

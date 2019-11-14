@@ -20,6 +20,7 @@ const request = require('request');
 
 // MBEE modules
 const WebhookController = M.require('controllers.webhook-controller');
+const Webhook = M.require('models.webhook');
 const db = M.require('db');
 
 /* --------------------( Test Data )-------------------- */
@@ -59,11 +60,12 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Runs after all the tests. Removes the test admin and disconnects from the database.
+   * After: Runs after all tests. Removes test data, deletes admin user, and disconnects from
+   * database.
    */
   after(async () => {
     try {
-      await WebhookController.remove(adminUser, null, null, null, incomingWebhookID);
+      await Webhook.deleteMany({ _id: incomingWebhookID });
       await testUtils.removeTestAdmin();
       await db.disconnect();
     }

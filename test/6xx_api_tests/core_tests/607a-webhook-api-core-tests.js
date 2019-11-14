@@ -22,6 +22,7 @@ const request = require('request');
 // MBEE modules
 const db = M.require('db');
 const WebhookController = M.require('controllers.webhook-controller');
+const Webhook = M.require('models.webhook');
 const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */
@@ -68,10 +69,12 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Runs after all tests. Deletes admin user and disconnects from database.
+   * After: Runs after all tests. Removes test data, deletes admin user, and disconnects from
+   * database.
    */
   after(async () => {
     try {
+      await Webhook.deleteMany({ _id: { $in: webhookIDs } });
       await testUtils.removeTestAdmin();
       await db.disconnect();
     }
@@ -131,11 +134,6 @@ function postWebhook(done) {
     chai.expect(createdWebhook.reference).to.equal('');
     chai.expect(createdWebhook.custom).to.deep.equal(webhookData.custom || {});
 
-    // If description was provided, verify it
-    if (webhookData.hasOwnProperty('description')) {
-      chai.expect(createdWebhook.description).to.equal(webhookData.description);
-    }
-
     // Verify additional properties
     chai.expect(createdWebhook.createdBy).to.equal(adminUser._id);
     chai.expect(createdWebhook.lastModifiedBy).to.equal(adminUser._id);
@@ -183,11 +181,6 @@ function getWebhook(done) {
     chai.expect(foundWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
     chai.expect(foundWebhook.reference).to.equal('');
     chai.expect(foundWebhook.custom).to.deep.equal(webhookData.custom || {});
-
-    // If description was provided, verify it
-    if (webhookData.hasOwnProperty('description')) {
-      chai.expect(foundWebhook.description).to.equal(webhookData.description);
-    }
 
     // Verify additional properties
     chai.expect(foundWebhook.createdBy).to.equal(adminUser._id);
@@ -359,11 +352,6 @@ function patchWebhook(done) {
     chai.expect(postedWebhook.reference).to.equal('');
     chai.expect(postedWebhook.custom).to.deep.equal(webhookData.custom || {});
 
-    // If description was provided, verify it
-    if (webhookData.hasOwnProperty('description')) {
-      chai.expect(postedWebhook.description).to.equal(webhookData.description);
-    }
-
     // Verify additional properties
     chai.expect(postedWebhook.createdBy).to.equal(adminUser._id);
     chai.expect(postedWebhook.lastModifiedBy).to.equal(adminUser._id);
@@ -449,6 +437,8 @@ function triggerWebhook(done) {
   const webhookData = testData.webhooks[1];
   delete webhookData.id;
 
+  const body = { test: { token: 'test token' } };
+
   // Note: registering a listener here would not work because the event occurs on a
   // separately running server. All we can test here is that we get a 200 response.
 
@@ -464,11 +454,9 @@ function triggerWebhook(done) {
       headers: testUtils.getHeaders(),
       ca: testUtils.readCaFile(),
       method: 'POST',
-      body: JSON.stringify({
-        token: 'test token'
-      })
+      body: JSON.stringify(body)
     },
-    (err, response, body) => {
+    (err, response) => {
       // Expect no error
       chai.expect(err).to.equal(null);
 

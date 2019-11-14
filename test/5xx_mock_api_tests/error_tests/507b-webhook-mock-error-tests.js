@@ -21,6 +21,7 @@ const chai = require('chai');
 // MBEE modules
 const APIController = M.require('controllers.api-controller');
 const WebhookController = M.require('controllers.webhook-controller');
+const Webhook = M.require('models.webhook');
 const db = M.require('db');
 
 /* --------------------( Test Data )-------------------- */
@@ -63,7 +64,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after(async () => {
     try {
-      await WebhookController.remove(adminUser, null, null, null, webhookID);
+      await Webhook.deleteMany({ _id: webhookID });
       await testUtils.removeTestAdmin();
       await db.disconnect();
     }
