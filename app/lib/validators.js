@@ -36,7 +36,7 @@ const reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
   'login', 'about', 'assets', 'static', 'public', 'api', 'organizations',
   'orgs', 'projects', 'users', 'plugins', 'ext', 'extension', 'search',
   'whoami', 'profile', 'edit', 'proj', 'elements', 'branch', 'anonymous',
-  'server', 'blob', 'artifact', 'artifacts'];
+  'blob', 'artifact', 'artifacts'];
 
 // The custom data validator used in all models
 const customDataValidator = function(v) {
@@ -202,6 +202,10 @@ const user = {
  *   - MUST be an array of strings
  * responses:
  *   - MUST be an array of objects that have at least a url field
+ * token:
+ *   - MUST be a string
+ * tokenLocation:
+ *   - MUST be a string
  */
 const webhook = {
   type: function(data) {

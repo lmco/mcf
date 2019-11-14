@@ -6936,59 +6936,59 @@ api.route('/users/:username/password')
  *         description: An array of objects containing new webhook data.
  *         schema:
  *           type: object
- *             properties:
- *               name:
- *                 type: string
- *               type:
- *                 type: string
- *                 description: Must be either 'Outgoing' or 'Incoming'.
- *               description:
- *                 type: string
- *               triggers:
- *                 type: Array
- *                 description: An array of strings that refer to the events that
- *                              trigger the webhook. All Outgoing webhooks must
- *                              have at least one trigger.
- *               responses:
- *                 type: Array
- *                 description: An array of objects that contain information for
- *                              http requests.
- *                 items:
- *                   type: object
- *                   required:
- *                     - url
- *                   properties:
- *                     url:
- *                       type: string
- *                     method:
- *                       type: string
- *                       default: 'POST'
- *                     headers:
- *                       type: object
- *                       default: { 'Content-Type': 'application/json' }
- *                     token:
- *                       type: string
- *                     ca:
- *                       type: string
- *                     data:
- *                       type: object
- *                       description: an optional field to store data to send with the
- *                                    http requests upon webhook triggering.
- *               token:
- *                 type: string
- *                 description: A secret token used to verify external requests to
- *                              trigger the incoming webhook.
- *               tokenLocation:
- *                 type: string
- *                 description: A dot-delimited string specifying where to find the
- *                              token in the external request.
- *               reference:
- *                 type: string
- *                 description: The id of the org, project, or branch the webhook is
- *                              registered to. An empty string indicates a server-
- *                              level webhook.
- *               custom:
+ *           properties:
+ *             name:
+ *               type: string
+ *             type:
+ *               type: string
+ *               description: Must be either 'Outgoing' or 'Incoming'.
+ *             description:
+ *               type: string
+ *             triggers:
+ *               type: Array
+ *               description: An array of strings that refer to the events that
+ *                            trigger the webhook. All Outgoing webhooks must
+ *                            have at least one trigger.
+ *             responses:
+ *               type: Array
+ *               description: An array of objects that contain information for
+ *                            http requests.
+ *               items:
  *                 type: object
+ *                 required:
+ *                   - url
+ *                 properties:
+ *                   url:
+ *                     type: string
+ *                   method:
+ *                     type: string
+ *                     default: 'POST'
+ *                   headers:
+ *                     type: object
+ *                     default: { 'Content-Type': 'application/json' }
+ *                   token:
+ *                     type: string
+ *                   ca:
+ *                     type: string
+ *                   data:
+ *                     type: object
+ *                     description: an optional field to store data to send with the
+ *                                  http requests upon webhook triggering.
+ *             token:
+ *               type: string
+ *               description: A secret token used to verify external requests to
+ *                            trigger the incoming webhook.
+ *             tokenLocation:
+ *               type: string
+ *               description: A dot-delimited string specifying where to find the
+ *                            token in the external request.
+ *             reference:
+ *               type: string
+ *               description: The id of the org, project, or branch the webhook is
+ *                            registered to. An empty string indicates a server-
+ *                            level webhook.
+ *             custom:
+ *               type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy]
