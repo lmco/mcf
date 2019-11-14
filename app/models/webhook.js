@@ -302,7 +302,7 @@ WebhookSchema.static('getValidUpdateFields', function() {
  * @memberOf WebhookSchema
  */
 WebhookSchema.static('getValidPopulateFields', function() {
-  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'reference'];
+  return ['archivedBy', 'lastModifiedBy', 'createdBy'];
 });
 
 

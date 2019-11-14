@@ -43,12 +43,12 @@ const webhookIDs = [];
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: runs before all tests. Opens database connection.
+   * Before: runs before all tests. Opens database connection, creates test admin,
+   * test org, and test project.
    */
   before(async () => {
     try {
       await db.connect();
-      await testUtils.removeTestOrg();
 
       adminUser = await testUtils.createTestAdmin();
       org = await testUtils.createTestOrg(adminUser);
@@ -63,7 +63,8 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: runs after all tests. Closes database connection.
+   * After: runs after all tests. Removes test webhooks, test org, test admin, and
+   * disconnects from the database.
    */
   after(async () => {
     try {
@@ -129,6 +130,7 @@ async function createOnOrg() {
     chai.expect(createdWebhook.type).to.equal(testData.webhooks[0].type);
     chai.expect(createdWebhook.description).to.equal(testData.webhooks[0].description);
     chai.expect(createdWebhook.triggers).to.deep.equal(testData.webhooks[0].triggers);
+    chai.expect(createdWebhook.reference).to.equal(org._id);
     chai.expect(createdWebhook.custom).to.deep.equal(testData.webhooks[0].custom || {});
 
     // Verify additional properties
