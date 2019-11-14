@@ -79,7 +79,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Delete organization
-    testUtils.removeTestOrg(adminUser)
+    testUtils.removeTestOrg()
     // Delete admin user
     .then(() => testUtils.removeTestAdmin())
     .then(() => db.disconnect())

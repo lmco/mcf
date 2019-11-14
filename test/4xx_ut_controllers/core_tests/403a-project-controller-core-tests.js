@@ -76,7 +76,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after((done) => {
     // Removing the organization created
-    testUtils.removeTestOrg(adminUser)
+    testUtils.removeTestOrg()
     // Remove the admin user
     .then(() => testUtils.removeTestAdmin())
     .then(() => db.disconnect())

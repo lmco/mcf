@@ -100,7 +100,7 @@ describe(M.getModuleName(module.filename), () => {
     try {
       // Remove organization
       // Note: Projects and elements under organization will also be removed
-      await testUtils.removeTestOrg(adminUser);
+      await testUtils.removeTestOrg();
       await testUtils.removeTestAdmin();
       await db.disconnect();
     }
@@ -1144,7 +1144,7 @@ async function optionLimitSearch() {
     // Create the options object with a limit of 2
     const options = { limit: 2 };
     // Create the text string to search for, should find more than 2 elements
-    const query = 'model';
+    const query = 'batch';
 
     // Search for elements
     const foundElements = await ElementController.search(adminUser, org._id, projIDs[0],
@@ -1170,7 +1170,7 @@ async function optionSkipSearch() {
     // Create the second options object with a limit and skip
     const secondOptions = { limit: 2, skip: 2 };
     // Create the query
-    const query = 'model';
+    const query = 'batch';
 
     // Search for elements
     const firstElements = await ElementController.search(adminUser, org._id, projIDs[0],

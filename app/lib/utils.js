@@ -275,7 +275,7 @@ module.exports.parseOptions = function(options, validOptions) {
  */
 module.exports.validateOptions = function(options, validOptions, model) {
   // Initialize the object to be returned to the user
-  const validatedOptions = { populateString: '', sort: { $natural: 1 } };
+  const validatedOptions = { populateString: '' };
 
   // Define valid search options depending on the model
   let validSearchOptions = [];

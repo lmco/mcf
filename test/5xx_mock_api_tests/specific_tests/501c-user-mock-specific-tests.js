@@ -70,7 +70,7 @@ describe(M.getModuleName(module.filename), () => {
   after(async () => {
     try {
       // Remove organization
-      await testUtils.removeTestOrg(adminUser);
+      await testUtils.removeTestOrg();
       await testUtils.removeTestAdmin();
       await fs.unlinkSync(filepath);
       await db.disconnect();
