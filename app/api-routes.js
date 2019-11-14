@@ -6794,9 +6794,10 @@ api.route('/users/:username/password')
  *       - webhooks
  *     description: Finds and returns webhooks from an array of ids. If no array
  *                  provided, returns every webhook the requesting user has access
- *                  to at the specified level of server, org, project, branch, or
- *                  all. A user must be an admin at the respective level to see
- *                  webhooks.
+ *                  to at the the server level.  If the option server is provided
+ *                  as false, every webhook the user has access to across every
+ *                  referene level is returned. A user must be a system-wide admin
+ *                  for either search option.
  *     produces:
  *       - application/json
  *     parameters:
@@ -6922,7 +6923,7 @@ api.route('/users/:username/password')
  *   post:
  *     tags:
  *       - webhooks
- *     description: Creates new webhooks from given data in the request body.
+ *     description: Creates a new webhook from given data in the request body.
  *                  The user must have admin permissions at the specified level.
  *                  System-wide admin for system level webhooks, org admin for
  *                  org level webhooks, and project admin for project and branch
@@ -6934,12 +6935,7 @@ api.route('/users/:username/password')
  *         in: body
  *         description: An array of objects containing new webhook data.
  *         schema:
- *           type: array
- *           items:
- *             type: object
- *             required:
- *               - type
- *               - responses
+ *           type: object
  *             properties:
  *               name:
  *                 type: string
@@ -6970,13 +6966,8 @@ api.route('/users/:username/password')
  *                     headers:
  *                       type: object
  *                       default: { 'Content-Type': 'application/json' }
- *                     auth:
- *                       type: object
- *                       properties:
- *                         username:
- *                           type: string
- *                         password:
- *                           type: string
+ *                     token:
+ *                       type: string
  *                     ca:
  *                       type: string
  *                     data:
@@ -6991,23 +6982,11 @@ api.route('/users/:username/password')
  *                 type: string
  *                 description: A dot-delimited string specifying where to find the
  *                              token in the external request.
- *               org:
+ *               reference:
  *                 type: string
- *                 description: An organization id, exclusive with project, branch,
- *                              and server fields.
- *               project:
- *                 type: string
- *                 description: A project id, exclusive with org, branch, and
- *                              server fields.
- *               branch:
- *                 type: string
- *                 description: A branch id, exclusive with org, project, and
- *                              server fields.
- *               server:
- *                 type: boolean
- *                 description: A boolean to indicate that the webhook listens for
- *                              server-wide events. Defaults to true upon webhook
- *                              creation if no org, project, or branch .
+ *                 description: The id of the org, project, or branch the webhook is
+ *                              registered to. An empty string indicates a server-
+ *                              level webhook.
  *               custom:
  *                 type: object
  *       - name: populate
@@ -7035,28 +7014,27 @@ api.route('/users/:username/password')
  *         default: false
  *     responses:
  *       200:
- *         description: OK, Succeeded to POST webhooks, return webhook public
+ *         description: OK, Succeeded to POST webhook, return webhook public
  *                      data.
  *       400:
- *         description: Bad Request, Failed to POST webhooks due to invalid
+ *         description: Bad Request, Failed to POST webhook due to invalid
  *                      webhook data.
  *       401:
- *         description: Unauthorized, Failed to POST webhooks due to not being
+ *         description: Unauthorized, Failed to POST webhook due to not being
  *                      logged in.
  *       403:
- *         description: Forbidden, Failed to POST webhooks due to permissions
- *                      or already existing webhooks with matching ids.
+ *         description: Forbidden, Failed to POST webhook due to permissions
+ *                      or already existing webhook with matching id.
  *       404:
- *         description: Not Found, Failed to POST webhooks due to org, project,
+ *         description: Not Found, Failed to POST webhook due to org, project,
  *                      or branch not existing.
  *       500:
- *         description: Internal Server Error, Failed to POST webhooks due to a
+ *         description: Internal Server Error, Failed to POST webhook due to a
  *                      server side issue.
  *   delete:
  *     tags:
  *       - webhooks
- *     description: Deletes multiple webhooks and returns the webhook documents
- *                  as they were before deletion.
+ *     description: Deletes multiple webhooks and returns the deleted ids.
  *     produces:
  *       - application/json
  *     parameters:
@@ -7162,6 +7140,11 @@ api.route('/webhooks/trigger/:base64id')
  *         in: path
  *         required: true
  *         type: string
+ *       - name: server
+ *         description: A boolean to specify whether to search for server-level
+ *                      webhooks. Defaults to true if no org, project, or branch
+ *                      is specified. Must explicitly be set to false if the
+ *                      user wants to return every available webhook.
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy]
@@ -7255,46 +7238,27 @@ api.route('/webhooks/trigger/:base64id')
  *                     type: string
  *                   headers:
  *                     type: object
- *                   auth:
- *                     type: object
- *                     properties:
- *                       username:
- *                         type: string
- *                       password:
- *                         type: string
+ *                   token:
+ *                     type: string
  *                   ca:
  *                     type: string
  *                   data:
  *                     type: object
  *                     description: an optional field to store data to send with the
  *                                  http requests upon webhook triggering.
- *             incoming:
- *               type: object
- *               description: A field that stores a token and a token location for
- *                            verifying external requests to trigger the webhook via
- *                            the api endpoint /api/webhooks/triggers/:base64id
- *               properties:
- *                 token:
- *                   type: string
- *                 tokenLocation:
- *                   type: string
- *             org:
- *               type: string
- *               description: An organization id, exclusive with project, branch,
- *                            and server fields.
- *             project:
- *               type: string
- *               description: A project id, exclusive with org, branch, and
- *                            server fields.
- *             branch:
- *               type: string
- *               description: A branch id, exclusive with org, project, and
- *                            server fields.
- *             server:
- *               type: boolean
- *               description: A boolean to indicate that the webhook listens for
- *                            server-wide events. Defaults to true upon webhook
- *                            creation if no org, project, or branch .
+ *             token:
+ *                 type: string
+ *                 description: A secret token used to verify external requests to
+ *                              trigger the incoming webhook.
+ *             tokenLocation:
+ *                 type: string
+ *                 description: A dot-delimited string specifying where to find the
+ *                              token in the external request.
+ *             reference:
+ *                 type: string
+ *                 description: The id of the org, project, or branch the webhook is
+ *                              registered to. An empty string indicates a server-
+ *                              level webhook.
  *             custom:
  *               type: object
  *             archived:
