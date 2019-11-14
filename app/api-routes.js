@@ -1058,8 +1058,7 @@ api.route('/orgs/:orgid/webhooks')
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      reference]
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -2134,8 +2133,7 @@ api.route('/orgs/:orgid/projects/:projectid')
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      reference]
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -2301,8 +2299,7 @@ api.route('/orgs/:orgid/projects/:projectid/webhooks')
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      reference]
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -3140,8 +3137,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      reference]
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -3307,8 +3303,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/webhooks')
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      reference]
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -6831,8 +6826,7 @@ api.route('/users/:username/password')
  *         required: false
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      reference]
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -7018,8 +7012,7 @@ api.route('/users/:username/password')
  *                 type: object
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      reference]
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -7171,8 +7164,7 @@ api.route('/webhooks/trigger/:base64id')
  *         type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      reference]
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
@@ -7309,8 +7301,7 @@ api.route('/webhooks/trigger/:base64id')
  *               type: boolean
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      reference]
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
  *         in: query
  *         type: string
  *         required: false
