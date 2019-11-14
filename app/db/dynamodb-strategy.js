@@ -1782,23 +1782,6 @@ class Model {
             + `${param}: \`${doc[param]}\` is not a valid enum value for path`
             + ` \`${param}\`.`);
         }
-
-        // Handle special case where the field should be a string, and defaults to null
-        if (this.definition[param].hasOwnProperty('default')
-          && this.definition[param].default === null && doc[param] === null) {
-          // The string null is a reserved keyword for string fields with null defaults
-          if (doc[param] === 'null') {
-            throw new M.DataFormatError('The string \'null\' is a reserved '
-              + `keyword for the parameter [${param}].`);
-          }
-          // Set the value to the string null
-          else {
-            doc[param] = 'null';
-          }
-        }
-
-        // If value is a blank string, delete key; blank strings are not allowed in DynamoDB
-        if (doc[param] === '') delete doc[param];
       }
       // If the parameter is required and no default is provided, throw an error
       else if (this.definition[param].required
@@ -1812,6 +1795,26 @@ class Model {
         throw new M.DataFormatError(`${this.modelName} validation failed: `
           + `${param}: ${message}`);
       }
+    });
+
+    // Convert any instances of null to the string "null" after validators run to avoid conflicts
+    Object.keys(this.definition).forEach((param) => {
+      // Handle special case where the field should be a string, and defaults to null
+      if (this.definition[param].hasOwnProperty('default')
+        && this.definition[param].default === null && doc[param] === null) {
+        // The string null is a reserved keyword for string fields with null defaults
+        if (doc[param] === 'null') {
+          throw new M.DataFormatError('The string \'null\' is a reserved '
+            + `keyword for the parameter [${param}].`);
+        }
+        // Set the value to the string null
+        else {
+          doc[param] = 'null';
+        }
+      }
+
+      // If value is a blank string, delete key; blank strings are not allowed in DynamoDB
+      if (doc[param] === '') delete doc[param];
     });
 
     return doc;
