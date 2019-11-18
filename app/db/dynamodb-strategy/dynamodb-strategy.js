@@ -24,7 +24,7 @@ const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 
 // Define a function wide variable models, which stores each model when it gets created
-// this is later used for population of documents across models
+// This is later used for population of documents across models
 const models = {};
 
 /**
@@ -49,7 +49,11 @@ async function connect() {
 
 /**
  * @description Returns an AWS DocumentClient instance, used for simplifying
- * specific requests to the database.
+ * specific requests to the database. The DocumentClient supports similar
+ * functions as the base DynamoDB client, but accepts raw JSON as input rather
+ * than JSON formatted specifically for the DynamoDB client. View the
+ * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#constructor-property DocumentClient constructor}
+ * for more information.
  * @async
  *
  * @returns {Promise<object>} The AWS DynamoDB DocumentClient instance.
@@ -72,7 +76,7 @@ async function connectDocument() {
 
 /**
  * @description Disconnects from the database. This function is not necessary
- * for DynamoDB.
+ * for DynamoDB, but is required for the database abstraction layer.
  * @async
  *
  * @returns {Promise} Resolves every time.
@@ -82,7 +86,7 @@ async function disconnect() {
 }
 
 /**
- * @description Deletes all tables and the documents in them from the database.
+ * @description Deletes all tables, documents and indexes from the database.
  * @async
  *
  * @returns {Promise} Resolves upon completion.
@@ -126,7 +130,7 @@ class Schema {
 
   /**
    * @description The Schema constructor. Accepts a definition object and
-   * options, and converts to definition into a DynamoDB friendly schema. Stores
+   * options and converts the definition into a DynamoDB friendly schema. Stores
    * hooks, methods, statics and fields that can be populated on the definition.
    *
    * @param {object} definition - The schema definition object. Specifies fields
@@ -195,7 +199,7 @@ class Schema {
       }
 
       // If the field has an index defined
-      if (obj[key].index) {
+      if (obj[key].hasOwnProperty('index') && obj[key].index === true) {
         // Create attribute object
         const attributeObj = {
           AttributeName: key,
@@ -206,7 +210,7 @@ class Schema {
 
         // Create index object
         const indexObj = {
-          IndexName: `${key}_1`,
+          IndexName: `${key}_1`, // Append _1, this is similar to MongoDB
           KeySchema: [
             {
               AttributeName: key,
@@ -223,8 +227,9 @@ class Schema {
       }
 
       // If the field references a document in another model
-      if (obj[key].ref) {
+      if (obj[key].hasOwnProperty('ref')) {
         // Add reference object to the schema populate object
+        // References allow for population
         this.definition.populate[key] = {
           ref: obj[key].ref,
           localField: key,
@@ -269,25 +274,19 @@ class Schema {
   }
 
   /**
-   * @description Defines a virtual field for the schema. Virtuals are not
-   * stored in the database and rather are calculated post-find. Virtuals
-   * generally will require a second request to retrieve referenced documents.
-   * Populated virtuals contains a localField and foreignField which must match
-   * for a document to be added to the virtual collection. For example, the
-   * organization schema contains a virtual called "projects". This virtual
-   * returns all projects who "org" field matches the organization's "_id".
+   * @description Defines a virtual field for the schema.
    *
-   * @param {string} name - The name of the field to be added to the schema
+   * @param {string} name - The name of the field to be added to the document
    * post-find.
    * @param {object} [options] - An object containing options.
-   * @param {(string|Model)} [options.ref] - The name of the model which the
-   * virtual references.
-   * @param {(string|Function)} [options.localField] - The field on the current
-   * schema which is being used to match the foreignField.
-   * @param {(string|Function)} [options.foreignField] - The field on the
-   * referenced schema which is being used to match the localField.
-   * @param {(boolean|Function)} [options.justOne] - If true, the virtual should
-   * only return a single document. If false, the virtual will be an array of
+   * @param {string} [options.ref] - The name of the model which the virtual
+   * references.
+   * @param {Function} [options.localField] - The field on the current schema
+   * which is being used to match the foreignField.
+   * @param {string} [options.foreignField] - The field on the referenced schema
+   * which is being used to match the localField.
+   * @param {boolean} [options.justOne] - If true, the virtual should only
+   * return a single document. If false, the virtual will be an array of
    * documents.
    */
   virtual(name, options) {
@@ -299,7 +298,7 @@ class Schema {
 
   /**
    * @description Adds a static method to the schema. This method should later
-   * be an accessible static method on the model.
+   * be an accessible static method on the model. For example, Model.myFunc().
    *
    * @param {string} name - The name of the static function.
    * @param {Function} fn - The function to be added to the model.
@@ -328,10 +327,10 @@ class Query {
 
   /**
    * @description A helper function formats a key to be used in some
-   * objects ExpressionAttributeNames. Returns the formatted key and modifies
+   * object's ExpressionAttributeNames. Returns the formatted key and modifies
    * the object by reference.
    *
-   * @param {object} obj - A query object which contains a ExpressionAttributeNames
+   * @param {object} obj - A query object which contains an ExpressionAttributeNames
    * object. This object is modified by reference.
    * @param {string} key - The key to format for the ExpressionAttributeNames
    * object.
@@ -340,13 +339,15 @@ class Query {
    */
   parseExpressionAttributeNames(obj, key) { // eslint-disable-line class-methods-use-this
     // Handle special case where key name starts with an underscore
-    let keyName = (key === '_id') ? 'id' : key;
+    let keyName = (key.startsWith('_')) ? key.slice(1) : key;
 
-    // Handle case where updating an object
+    // Handle case where the key includes a '.'
+    // This would occur if querying a nested object
     if (keyName.includes('.')) {
       const split = keyName.split('.');
+      // Handle each piece of the key separately
       split.forEach((s) => {
-        const kName = (s === '_id') ? 'id' : s;
+        const kName = (s.startsWith('_')) ? s.slice(1) : s;
         // Add key to ExpressionAttributeNames
         obj.ExpressionAttributeNames[`#${kName}`] = s;
       });
@@ -373,7 +374,7 @@ class Query {
   formatJSON(obj) {
     // If the value is an object
     if (typeof obj === 'object') {
-      // If null, return the string null since in DynamoDB you cannot store null in a string field
+      // If null, return the string "null" since in DynamoDB you cannot store null in a string field
       if (obj === null) {
         return 'null';
       }
@@ -401,7 +402,6 @@ class Query {
    * @returns {object[]} - An array of properly formatted batchGet() queries.
    */
   batchGet(filter) {
-    // Format the filter into a RequestItems object
     const base = {};
     const inVals = {};
     const keys = [];
@@ -414,16 +414,13 @@ class Query {
 
     // For each key in the query
     Object.keys(filter).forEach((key) => {
-      if (typeof filter[key] === 'object') {
-        if (filter[key] === null) {
-          base[key] = 'null';
-        }
-        else {
-          inVals[key] = Object.values(filter[key])[0];
-        }
+      // If the value is an object, and the first key is $in, handle it separately
+      if (typeof filter[key] === 'object' && filter[key] !== null
+        && Object.keys(filter[key])[0] === '$in') {
+        inVals[key] = Object.values(filter[key])[0];
       }
       else {
-        base[key] = filter[key];
+        base[key] = this.formatJSON(filter[key]);
       }
     });
 
@@ -450,7 +447,8 @@ class Query {
       baseFindQuery.RequestItems[this.model.TableName].Keys = keys
       .slice(i * 25, i * 25 + 25);
 
-      // Add query to array, copying the object to avoid modifying by reference
+      // Add query to array, copying the object to avoid modifying
+      // the base query by reference
       queries.push(JSON.parse(JSON.stringify(baseFindQuery)));
     }
 
@@ -1802,15 +1800,7 @@ class Model {
       // Handle special case where the field should be a string, and defaults to null
       if (this.definition[param].hasOwnProperty('default')
         && this.definition[param].default === null && doc[param] === null) {
-        // The string null is a reserved keyword for string fields with null defaults
-        if (doc[param] === 'null') {
-          throw new M.DataFormatError('The string \'null\' is a reserved '
-            + `keyword for the parameter [${param}].`);
-        }
-        // Set the value to the string null
-        else {
-          doc[param] = 'null';
-        }
+        doc[param] = 'null';
       }
 
       // If value is a blank string, delete key; blank strings are not allowed in DynamoDB

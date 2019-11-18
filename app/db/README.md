@@ -231,9 +231,9 @@ with MBEE.
 The first is that the value `null` cannot be stored in string fields,
 unlike MongoDB. Because of this, the value `null` must first be converted to a
 string before being saved to the database. Due to this issue, users cannot
-explicitly pass in the string `'null'`. There is logic which exists in the
-`dynamodb-strategy` which will throw an error if a user attempts to use the
-string `'null'`.
+explicitly pass in the string `'null'` if the field which they are trying to
+set has a default of `null`. If a user attempts this, an error will be thrown
+from the `dynamodb-strategy`.
 
 Second, blank strings are also not allowed to be stored in DynamoDB. By default,
 if a string field is not provided, the default value is often times a blank
