@@ -47,7 +47,7 @@ module.exports = app;
 /**
  * Connect to database, initialize application, and create default admin and
  * default organization if needed.
- */43
+ */
 db.connect()
 .then(() => initModels())
 .then(() => migrate.getVersion())

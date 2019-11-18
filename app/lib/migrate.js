@@ -154,7 +154,7 @@ async function runMigrations(versions) {
       }
 
       // Upgrade schema version number
-      await ServerData.deleteMany({}); // eslint-disable-line no-await-in-loop
+      await ServerData.deleteMany({ _id: 'server_data' }); // eslint-disable-line no-await-in-loop
       await ServerData.insertMany({ _id: 'server_data', version: versions[i] }); // eslint-disable-line
       M.log.info(`Upgraded to version ${versions[i]}.`);
     }
