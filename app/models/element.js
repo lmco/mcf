@@ -210,6 +210,10 @@ const ElementSchema = new db.Schema({
           // Reject if target is null
           return this.target;
         }
+        // Source null, return true
+        else {
+          return true;
+        }
       },
       message: props => 'Target is required if source is provided.'
     }]
@@ -236,6 +240,10 @@ const ElementSchema = new db.Schema({
         if (v) {
           // Reject if source is null
           return this.source;
+        }
+        // Target null, return true
+        else {
+          return true;
         }
       },
       message: props => 'Source is required if target is provided.'

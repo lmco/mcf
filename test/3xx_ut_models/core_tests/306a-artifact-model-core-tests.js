@@ -131,13 +131,20 @@ async function createArtifact() {
 async function findArtifact() {
   try {
     // Find the artifact previously uploaded.
-    const artifactToUpdate = await Artifact.find(
+    const foundArtifact = await Artifact.findOne(
       { _id: utils.createID(org.id, project.id, branch.id, testData.artifacts[0].id) }
     );
 
     // Verify output
-    // Check if artifact found
-    chai.expect(artifactToUpdate.length).to.equal(1);
+    chai.expect(foundArtifact._id).to.equal(
+      utils.createID(org.id, project.id, branch.id, testData.artifacts[0].id)
+    );
+    chai.expect(foundArtifact.filename).to.equal(
+      testData.artifacts[0].filename
+    );
+    chai.expect(foundArtifact.project).to.equal(utils.createID(org.id, project.id));
+    chai.expect(foundArtifact.branch).to.equal(utils.createID(org.id, project.id, branch.id));
+    chai.expect(foundArtifact.location).to.equal(testData.artifacts[0].location);
   }
   catch (error) {
     M.log.error(error);
