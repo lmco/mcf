@@ -145,7 +145,6 @@ async function findArtifact() {
     chai.expect(foundArtifact.project).to.equal(utils.createID(org.id, project.id));
     chai.expect(foundArtifact.branch).to.equal(utils.createID(org.id, project.id, branch.id));
     chai.expect(foundArtifact.location).to.equal(testData.artifacts[0].location);
-
   }
   catch (error) {
     M.log.error(error);
