@@ -1067,12 +1067,11 @@ class Model {
    * @param {object} filter - An object containing parameters to filter the
    * find query by, and thus delete documents by.
    * @param {object} [options] - An object containing options.
-   * @param {Function} [cb] - A callback function to run.
    *
    * @returns {Promise<object>} An object denoting the success of the delete
    * operation.
    */
-  async deleteMany(filter, options, cb) {
+  async deleteMany(filter, options) {
     try {
       let docs = [];
       let more = true;
@@ -1161,12 +1160,11 @@ class Model {
    * @param {boolean} [options.lean] - If false (by default), every document
    * returned will contain methods that were declared in the Schema. If true,
    * just the raw JSON will be returned from the database.
-   * @param {Function} [cb] - A callback function to run.
    *
    * @returns {Promise<object[]>} An array containing the found documents, if
    * any. Defaults to an empty array if no documents are found.
    */
-  async find(filter, projection, options, cb) {
+  async find(filter, projection, options) {
     try {
       // If $text in query, performing a text search
       if (Object.keys(filter).includes('$text')) {
@@ -1290,12 +1288,11 @@ class Model {
    * @param {boolean} [options.lean] - If false (by default), every document
    * returned will contain methods that were declared in the Schema. If true,
    * just the raw JSON will be returned from the database.
-   * @param {Function} [cb] - A callback function to run.
    *
    * @returns {Promise<object|null>} The found document, if any. Returns null if
    * no document is found.
    */
-  async findOne(conditions, projection, options, cb) {
+  async findOne(conditions, projection, options) {
     try {
       let allIndexed = true;
       let doc;
@@ -1387,11 +1384,10 @@ class Model {
    * just the raw JSON will be returned from the database.
    * @param {boolean} [options.skipValidation] - If true, will not validate
    * the documents which are being created.
-   * @param {Function} [cb] - A callback function to run.
    *
    * @returns {Promise<object[]>} The created documents.
    */
-  async insertMany(docs, options, cb) {
+  async insertMany(docs, options) {
     try {
       // If only a single document, add to array
       if (!Array.isArray(docs)) {
@@ -1611,13 +1607,12 @@ class Model {
    * find query by.
    * @param {object} doc - The object containing updates to the found documents.
    * @param {object} [options] - An object containing options.
-   * @param {Function} [cb] - A callback function to run.
    *
    * @returns {object} Query containing information about the number of
    * documents which matched the filter (n) and the number of documents which
    * were modified (nModified).
    */
-  async updateMany(filter, doc, options, cb) {
+  async updateMany(filter, doc, options) {
     try {
       // Find each document which matches the filter
       const docs = await this.find(filter, null, options);
@@ -1644,20 +1639,17 @@ class Model {
 
   /**
    * @description Updates a single document which is matched by the filter, and
-   * is updated with the doc provided. See the
-   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#updateItem-property updateItem}
-   * documentation for more information.
+   * is updated with the doc provided.
    * @async
    *
    * @param {object} filter - An object containing parameters to filter the
    * find query by.
    * @param {object} doc - The object containing updates to the found document.
    * @param {object} [options] - An object containing options.
-   * @param {Function} [cb] - A callback function to run.
    *
    * @returns {Promise<object>} The updated document.
    */
-  async updateOne(filter, doc, options, cb) {
+  async updateOne(filter, doc, options) {
     try {
       // Get the properly formatted updateItem query
       const updateObj = this.query.update(filter, doc);
