@@ -464,7 +464,8 @@ class Query {
    *
    * @param {object[]} docs - An array of documents to be inserted/deleted.
    * @param {string} operation - The operation being preformed, can either be
-   * 'insert' or 'delete'.
+   * 'insert' or 'delete'; batchWrite() supports both operations but the queries
+   * are formatted differently for each.
    *
    * @returns {object[]} - An array of properly formatted batchWrite() queries.
    */
@@ -484,7 +485,9 @@ class Query {
       const batch = docs.slice(i * 25, i * 25 + 25);
       const tmpQuery = JSON.parse(JSON.stringify(baseObj));
 
+      // For each document in the batch of no more than 25
       batch.forEach((doc) => {
+        // If preforming an insert
         if (op === 'PutRequest') {
           const putObj = {
             PutRequest: {
@@ -494,6 +497,7 @@ class Query {
           putObj.PutRequest.Item = this.formatJSON(doc);
           tmpQuery.RequestItems[this.model.TableName].push(putObj);
         }
+        // If preforming a deletion
         else {
           const deleteObj = {
             DeleteRequest: {
@@ -669,7 +673,7 @@ class Query {
       ExpressionAttributeValues: {},
       UpdateExpression: '',
       TableName: this.model.TableName,
-      ReturnValues: 'ALL_NEW',
+      ReturnValues: 'ALL_NEW', // Return the entire modified document
       Key: {
         [Object.keys(filter)[0]]: String(Object.values(filter)[0]) // Set the key to filter on
       }
@@ -692,7 +696,7 @@ class Query {
           : `${updateQuery.UpdateExpression}, #${key} = :${value}`;
       });
     }
-    // No updates are actually being preformed
+    // No updates are actually being preformed. This should rarely/never happen
     else {
       // Delete ExpressionAttributeNames, ExpressionAttributeValues and
       // UpdateExpression from the query. These cannot be empty if provided
@@ -706,14 +710,7 @@ class Query {
 
 }
 
-/**
- * @description Defines the Model class. Models are used to create documents and
- * to directly manipulate the database. Operations should be defined to perform
- * all basic CRUD operations on the database. The Model class requirements are
- * closely based on the Mongoose.js Model class
- * {@link https://mongoosejs.com/docs/api/model.html} with an important
- * exception, the constructor creates an instance of the model, not a document.
- */
+
 class Model {
 
   /**
@@ -725,13 +722,15 @@ class Model {
    * @param {Schema} schema - The schema which is being turned into a model.
    * Should be an instance of the Schema class.
    * @param {string} [collection] - Optional name of the collection in the
-   * database, if not provided the name should be used.
+   * database, if not provided the name should be used instead.
    */
   constructor(name, schema, collection) {
     this.schema = schema.schema;
     this.definition = schema.definition;
     this.TableName = collection;
     this.modelName = name;
+    // Create a new query object
+    this.query = new Query(this);
 
     // Create a list of indexed fields on the schema, splitting off the _1
     this.indexes = (schema.schema.GlobalSecondaryIndexes) ? schema.schema.GlobalSecondaryIndexes
@@ -750,7 +749,10 @@ class Model {
 
   /**
    * @description Creates a table if it does not already exist in the database.
+   * If the table does already exist, it is updated with any new indexes.
    * @async
+   *
+   * @returns {Promise} Resolves upon completion.
    */
   async init() {
     // Create connection to the database
@@ -799,7 +801,7 @@ class Model {
 
   /**
    * @description Formats documents to return them in the proper format
-   * expected in controllers.
+   * expected in the controllers.
    * @async
    *
    * @param {object[]} documents -  The documents to properly format.
@@ -822,6 +824,7 @@ class Model {
     // Wait for all promises to complete
     await Promise.all(promises);
 
+    // If the sort option is provided
     if (options.sort) {
       const order = Object.values(options.sort)[0];
       const key = Object.keys(options.sort)[0];
@@ -844,9 +847,9 @@ class Model {
    * expected in the controllers.
    * @async
    *
-   * @param {object} document -  The documents to properly format.
-   * @param {string|null} [projection] - A space separated string containing a list
-   * of fields to return (or not return).
+   * @param {object} document -  The document to properly format.
+   * @param {string|null} [projection] - A space separated string containing a
+   * list of fields to return (or not return).
    * @param {object} [options={}] - The options supplied to the function.
    * @param {boolean} [recurse=false] - A boolean value which if true, specifies
    * that this function was called recursively.
@@ -857,9 +860,11 @@ class Model {
     const promises = [];
     // For each field in the document
     Object.keys(document).forEach((field) => {
+      // If the string null, convert back to null
       if (document[field] === 'null') {
         document[field] = null;
       }
+      // If an object, recursively call this function on the object
       else if (typeof document[field] === 'object') {
         promises.push(this.formatDocument(document[field], null, {}, true)
         .then((retDoc) => {
@@ -941,32 +946,14 @@ class Model {
    * @param {object} [ops.deleteMany.filter] - An object containing parameters
    * to filter the find query by, for deleteMany.
    * @param {object} [options] - An object containing options.
-   * @param {Function} [cb] - A callback function to run.
    *
-   * @example
-   * await bulkWrite([
-   *   {
-   *     insertOne: {
-   *       document: {
-   *         name: 'Sample Name',
-   *       }
-   *     }
-   *   },
-   *   {
-   *     updateOne: {
-   *       filter: { _id: 'sample-id' },
-   *       update: { name: 'Sample Name Updated' }
-   *     }
-   *   },
-   *   {
-   *     deleteOne: {
-   *       filter: { _id: 'sample-id-to-delete' }
-   *     }
-   *   }
-   * ]);
+   * @returns {Promise<object>} An object specifying the number of documents
+   * inserted (insertedCount), the number updated (modifiedCount), the number
+   * deleted (deletedCount) and the result of the operation (result: 1|0).
    */
-  async bulkWrite(ops, options, cb) {
+  async bulkWrite(ops, options) {
     const promises = [];
+    let modifiedCount = 0;
 
     // For each operation in the ops array
     ops.forEach((op) => {
@@ -977,7 +964,10 @@ class Model {
         const update = Object.values(op)[0].update;
 
         // Perform the updateOne operation
-        promises.push(this.updateOne(filter, update, options));
+        promises.push(this.updateOne(filter, update, options)
+        .then(() => {
+          modifiedCount += 1;
+        }));
       }
       // TODO: Handle insertOne
       // TODO: Handle deleteOne
@@ -986,6 +976,8 @@ class Model {
 
     // Wait for promises to complete
     await Promise.all(promises);
+
+    return { modifiedCount: modifiedCount, result: 1 };
   }
 
   /**
@@ -994,17 +986,14 @@ class Model {
    *
    * @param {object} filter - An object containing parameters to filter the
    * find query by.
-   * @param {Function} [cb] - A callback function to run.
    *
    * @returns {Promise<number>} The number of documents which matched the
    * filter.
    */
-  async countDocuments(filter, cb) {
+  async countDocuments(filter) {
     try {
-      // Create a new query object
-      const query = new Query(this);
       // Get a formatted scan query
-      const scanObj = query.scan(filter);
+      const scanObj = this.query.scan(filter);
 
       // Tell the query to only return the count
       scanObj.Select = 'COUNT';
@@ -1061,7 +1050,7 @@ class Model {
         const deletedIndex = result.TableDescription.GlobalSecondaryIndexes
         .filter(f => f.IndexName === name)[0];
         if (deletedIndex.IndexStatus !== 'DELETING') {
-          throw new M.DatabaseError(`Index ${name} may not have been deleted.`);
+          throw new M.DatabaseError(`Index ${name} was NOT successfully deleted.`);
         }
       }
     }
@@ -1092,11 +1081,8 @@ class Model {
 
       // Find all documents which match the provided filter
       while (more) {
-        // Find the max number of documents
-        // Create a new DynamoDB query
-        const query = new Query(this);
         // Get the formatted scan query
-        const scanObj = query.scan(filter, options);
+        const scanObj = this.query.scan(filter, options);
 
         // If there is no filter. block from finding all documents to delete
         if (!scanObj.hasOwnProperty('FilterExpression')) {
@@ -1122,10 +1108,8 @@ class Model {
       // Format the documents
       docs = await this.formatDocuments(docs, null, options);
 
-      // Create a new query object
-      const query = new Query(this);
       // Get the formatted batchWrite query, used for deletion
-      const deleteQueries = query.batchWrite(docs, 'delete');
+      const deleteQueries = this.query.batchWrite(docs, 'delete');
 
       const promises = [];
 
@@ -1207,10 +1191,8 @@ class Model {
 
       // Use batchGet iff the only parameter being searched is the _id
       if (Object.keys(filter).length === 1 && Object.keys(filter)[0] === '_id') {
-        // Create the new query object
-        const query = new Query(this);
         // Get an array of properly formatted batchGet queries
-        const queriesToMake = query.batchGet(filter);
+        const queriesToMake = this.query.batchGet(filter);
 
         const promises = [];
         // For each query
@@ -1236,10 +1218,8 @@ class Model {
 
         // Find all documents which match the query
         while (more) {
-          // Create a new DynamoDB query
-          const query = new Query(this);
           // Get the formatted scan query
-          const scanObj = query.scan(filter, options);
+          const scanObj = this.query.scan(filter, options);
 
           M.log.debug(`DB OPERATION: ${this.TableName} scan`);
           // Find the documents
@@ -1331,13 +1311,11 @@ class Model {
 
       // Connect to the DocumentClient
       const conn = await connectDocument();
-      // Create a new query object
-      const query = new Query(this);
 
       // If all fields are indexed, use getItem as it will be significantly faster
       if (allIndexed) {
         // Get a formatted getItem query
-        const getObj = query.getItem(conditions);
+        const getObj = this.query.getItem(conditions);
 
         // Make the getItem request
         M.log.debug(`DB OPERATION: ${this.TableName} getItem`);
@@ -1351,7 +1329,7 @@ class Model {
       // Not all fields have indexes, use scan to find the document
       else {
         // Get the formatted scan query
-        const scanObj = query.scan(conditions, options);
+        const scanObj = this.query.scan(conditions, options);
 
         // Make the scan request
         M.log.debug(`DB OPERATION: ${this.TableName} scan`);
@@ -1438,10 +1416,8 @@ class Model {
         // Connect to the DocumentClient
         const conn = await connectDocument();
 
-        // Create a new query object
-        const query = new Query(this);
         // Get the formatted batchWrite queries
-        const batchWriteQueries = query.batchWrite(formattedDocs, 'insert');
+        const batchWriteQueries = this.query.batchWrite(formattedDocs, 'insert');
 
         // For each query
         batchWriteQueries.forEach((q) => {
@@ -1562,10 +1538,8 @@ class Model {
 
       // Find all documents which match the query
       while (more) {
-        // Create a new DynamoDB query
-        const query = new Query(this);
         // Get the formatted scan query
-        const scanObj = query.scan(filter, options);
+        const scanObj = this.query.scan(filter, options);
 
         M.log.debug(`DB OPERATION: ${this.TableName} scan`);
         // Find the documents
@@ -1685,10 +1659,8 @@ class Model {
    */
   async updateOne(filter, doc, options, cb) {
     try {
-      // Create a new query object
-      const query = new Query(this);
       // Get the properly formatted updateItem query
-      const updateObj = query.update(filter, doc);
+      const updateObj = this.query.update(filter, doc);
 
       // Connect to the database
       const conn = await connectDocument();
