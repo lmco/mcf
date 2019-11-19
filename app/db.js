@@ -269,7 +269,7 @@ class Model extends DBModule.Model {
 
   /**
    * @description Performs a large write operation on a collection. Can create,
-   * update, or delete multiple documents.
+   * update, replace, or delete multiple documents.
    * @async
    *
    * @param {object[]} ops - An array of objects detailing what operations to
@@ -288,6 +288,11 @@ class Model extends DBModule.Model {
    * @param {object} [ops.deleteMany] - Specifies a deleteMany operation.
    * @param {object} [ops.deleteMany.filter] - An object containing parameters
    * to filter the find query by, for deleteMany.
+   * @param {object} [ops.replaceOne] - Specifies a replace operation.
+   * @param {object} [ops.replaceOne.filter] - An object containing parameters
+   * to filter the find query by, for replaceOne.
+   * @param {object} [ops.replaceOne.replacement] - The document to replace the
+   * found document with.
    * @param {object} [options] - An object containing options.
    *
    * @example
@@ -308,6 +313,15 @@ class Model extends DBModule.Model {
    *   {
    *     deleteOne: {
    *       filter: { _id: 'sample-id-to-delete' }
+   *     }
+   *   },
+   *   {
+   *     replaceOne: {
+   *       filter: { _id: 'sample-id-to-replace' },
+   *       replacement: {
+   *         _id: 'sample-id-to-replace',
+   *         name: 'Sample Name'
+   *       }
    *     }
    *   }
    * ]);
