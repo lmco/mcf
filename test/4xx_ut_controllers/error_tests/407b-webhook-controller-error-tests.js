@@ -45,9 +45,9 @@ const branchID = 'master';
 let webhookID;
 let incomingWebhookID;
 let webhookIDs;
-let orgWebhooks = [];
-let projWebhooks = [];
-let branchWebhooks = [];
+const orgWebhooks = [];
+const projWebhooks = [];
+const branchWebhooks = [];
 
 /* --------------------( Main )-------------------- */
 /**
@@ -101,6 +101,9 @@ describe(M.getModuleName(module.filename), () => {
       webhookData[0].reference.branch = branchID;
       webhooks = await WebhookController.create(adminUser, webhookData[1]);
       branchWebhooks.push(webhooks[0]);
+
+      webhookIDs.push(...orgWebhooks.map((w) => w._id),
+        ...projWebhooks.map((w) => w._id), ...branchWebhooks.map((w) => w._id));
     }
     catch (error) {
       M.log.error(error);
@@ -688,7 +691,7 @@ async function deleteNotFound() {
     const webhookData = 'not a webhook id';
 
     await WebhookController.remove(adminUser, webhookData)
-    .should.eventually.be.rejectedWith(`The following webhooks were not found: [${webhookData}].`);
+    .should.eventually.be.rejectedWith(`The following webhooks were not found: [${webhookData}]`);
   }
   catch (error) {
     M.log.error(error);

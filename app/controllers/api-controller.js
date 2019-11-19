@@ -5559,9 +5559,6 @@ async function getBlobById(req, res) {
 /* -----------------------( Webhooks API Endpoints )------------------------- */
 /**
  * GET /api/webhooks
- * GET /api/orgs/:orgid/webhooks
- * GET /api/orgs/:orgid/projects/:projectid/webhooks
- * GET /api/orgs/:orgid/projects/:projectid/branches/:branchid/webhooks
  *
  * @description Gets all webhooks a user has access to at the server, org, project, or branch
  * level, or gets all webhooks specified by id
@@ -5576,9 +5573,6 @@ async function getWebhooks(req, res) {
   let webhookIDs;
   let options;
   let minified = false;
-  let org;
-  let project;
-  let branch;
 
   // Define valid options and their parsed types
   const validOptions = {
@@ -5586,11 +5580,13 @@ async function getWebhooks(req, res) {
     archived: 'boolean',
     includeArchived: 'boolean',
     fields: 'array',
-    server: 'boolean',
     limit: 'number',
     skip: 'number',
     lean: 'boolean',
     sort: 'string',
+    org: 'string',
+    project: 'string',
+    branch: 'string',
     ids: 'array',
     minified: 'boolean',
     type: 'string',
@@ -5640,21 +5636,6 @@ async function getWebhooks(req, res) {
   // Check for webhook objects in body
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
     webhookIDs = req.body.map(w => w.id);
-  }
-
-  // Extract org, project, and branch from params
-  if (req.params.hasOwnProperty('orgid')) org = req.params.orgid;
-  if (req.params.hasOwnProperty('projectid')) project = req.params.projectid;
-  if (req.params.hasOwnProperty('branchid')) branch = req.params.branchid;
-  if (!req.query.hasOwnProperty('server') && !org && !project && !branch) {
-    // Set server true by default if no org, project, or branch is being searched for.
-    // The user must explicitly set server to false and query /api/webhooks if they
-    // want to search through every webhook.
-    options.server = true;
-  }
-  else if (req.query.hasOwnProperty('server') && (org || project || branch)) {
-    // if there is an org, project, or branch specified, server is not an option
-    delete options.server;
   }
 
   // Check options for minified
@@ -5835,13 +5816,9 @@ async function deleteWebhooks(req, res) {
   // Define options
   let options = {};
   let minified = false;
-  let org;
-  let project;
-  let branch;
 
   // Define valid option and its parsed type
   const validOptions = {
-    server: 'boolean',
     minified: 'boolean'
   };
 
@@ -5904,8 +5881,10 @@ async function getWebhook(req, res) {
     populate: 'array',
     includeArchived: 'boolean',
     fields: 'array',
-    minified: 'boolean',
-    server: 'boolean'
+    org: 'string',
+    project: 'string',
+    branch: 'string',
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -6045,9 +6024,6 @@ async function patchWebhook(req, res) {
 
 /**
  * DELETE /api/webhooks/:webhookid
- * DELETE /api/orgs/:orgid/webhooks/:webhookid
- * DELETE /api/orgs/:orgid/projects/:projectid/webhooks/:webhookid
- * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/webhooks/:webhookid
  *
  * @description Deletes the specified webhook
  *
@@ -6060,13 +6036,9 @@ async function deleteWebhook(req, res) {
   // Define options
   let options;
   let minified = false;
-  let org;
-  let project;
-  let branch;
 
   // Define valid option and its parsed type
   const validOptions = {
-    server: 'boolean',
     minified: 'boolean'
   };
 
@@ -6085,21 +6057,6 @@ async function deleteWebhook(req, res) {
   catch (error) {
     // Error occurred with options, report it
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
-
-  // Extract org, project, and branch from params
-  if (req.params.hasOwnProperty('orgid')) org = req.params.orgid;
-  if (req.params.hasOwnProperty('projectid')) project = req.params.projectid;
-  if (req.params.hasOwnProperty('branchid')) branch = req.params.branchid;
-  if (!req.query.hasOwnProperty('server') && !org && !project && !branch) {
-    // Set server true by default if no org, project, or branch is being searched for.
-    // The user must explicitly set server to false and query /api/webhooks if they
-    // want to search through every webhook.
-    options.server = true;
-  }
-  else if (req.query.hasOwnProperty('server') && (org || project || branch)) {
-    // if there is an org, project, or branch specified, server is not an option
-    delete options.server;
   }
 
   // Check options for minified

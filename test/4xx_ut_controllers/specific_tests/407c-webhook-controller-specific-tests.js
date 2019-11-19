@@ -353,9 +353,11 @@ async function findOnOrg() {
   try {
     // Get the org webhook id
     const webhookData = webhookIDs[0];
+    // Set org reference
+    const options = { org: org._id };
 
     // Find webhook via controller
-    const foundWebhooks = await WebhookController.find(adminUser, webhookData);
+    const foundWebhooks = await WebhookController.find(adminUser, webhookData, options);
 
     // Expect createdWebhooks array to contain 1 webhook
     chai.expect(foundWebhooks.length).to.equal(1);
@@ -391,9 +393,11 @@ async function findOnProject() {
   try {
     // Get the project webhook id
     const webhookData = webhookIDs[1];
+    // Set project reference
+    const options = { org: org._id, project: projID };
 
     // Find webhook via controller
-    const foundWebhooks = await WebhookController.find(adminUser, webhookData);
+    const foundWebhooks = await WebhookController.find(adminUser, webhookData, options);
 
     // Expect createdWebhooks array to contain 1 webhook
     chai.expect(foundWebhooks.length).to.equal(1);
@@ -429,9 +433,11 @@ async function findOnBranch() {
   try {
     // Get the branch webhook id
     const webhookData = webhookIDs[2];
+    // Set branch reference
+    const options = { org: org._id, project: projID, branch: branchID };
 
     // Find webhook via controller
-    const foundWebhooks = await WebhookController.find(adminUser, webhookData);
+    const foundWebhooks = await WebhookController.find(adminUser, webhookData, options);
 
     // Expect createdWebhooks array to contain 1 webhook
     chai.expect(foundWebhooks.length).to.equal(1);
@@ -465,11 +471,8 @@ async function findOnBranch() {
  */
 async function optionAllFind() {
   try {
-    // Set the server option to false to find every webhook
-    const options = { server: false };
-
     // Find webhook via controller
-    const foundWebhooks = await WebhookController.find(adminUser, options);
+    const foundWebhooks = await WebhookController.find(adminUser);
 
     // Expect to find server webhooks
     const serverWebhooks = foundWebhooks.filter((w) => w.reference === '');
@@ -673,8 +676,8 @@ async function optionFieldsFind() {
  */
 async function optionLimitFind() {
   try {
-    // Create the options object with a limit of 2 and server: false to find all webhooks
-    const options = { limit: 2, server: false };
+    // Create the options object with a limit of 2
+    const options = { limit: 2 };
 
     // Find all webhooks
     const foundWebhooks = await WebhookController.find(adminUser, options);
@@ -695,9 +698,9 @@ async function optionLimitFind() {
 async function optionSkipFind() {
   try {
     // Create the first options object with just a limit
-    const firstOptions = { limit: 2, server: false };
+    const firstOptions = { limit: 2 };
     // Create the second options object with a limit and skip
-    const secondOptions = { limit: 2, skip: 2, server: false };
+    const secondOptions = { limit: 2, skip: 2 };
 
     // Find all webhooks
     const foundWebhooks = await WebhookController.find(adminUser, firstOptions);

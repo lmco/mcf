@@ -122,13 +122,13 @@ async function find(requestingUser, webhooks, options) {
 
     // Validate the provided options
     const validatedOptions = utils.validateOptions(options, ['includeArchived',
-      'populate', 'fields', 'limit', 'skip', 'lean', 'sort', 'server'], Webhook);
+      'populate', 'fields', 'limit', 'skip', 'lean', 'sort'], Webhook);
 
     // Ensure search options are valid
     if (options) {
       // Create array of valid search options
       const validSearchOptions = ['type', 'name', 'createdBy', 'lastModifiedBy', 'archived',
-        'archivedBy'];
+        'archivedBy', 'org', 'project', 'branch'];
 
       // Loop through provided options, look for validSearchOptions
       Object.keys(options).forEach((o) => {
@@ -150,6 +150,27 @@ async function find(requestingUser, webhooks, options) {
 
     // Add webhook ids to the search query
     if (saniWebhooks !== undefined) searchQuery._id = saniWebhooks;
+
+    // Add org, project, and branch to the search query
+    if (searchQuery.hasOwnProperty('branch')) {
+      if (!(searchQuery.hasOwnProperty('project') && searchQuery.hasOwnProperty('org'))) {
+        throw new M.DataFormatError('Query for branch provided but not for org or project', 'warn');
+      }
+      searchQuery.reference = utils.createID(searchQuery.org, searchQuery.project,
+        searchQuery.branch);
+      delete searchQuery.org; delete searchQuery.project; delete searchQuery.branch;
+    }
+    else if (searchQuery.hasOwnProperty('project')) {
+      if (!searchQuery.hasOwnProperty('org')) {
+        throw new M.DataFormatError('Query for project provided but not for org', 'warn');
+      }
+      searchQuery.reference = utils.createID(searchQuery.org, searchQuery.project);
+      delete searchQuery.org; delete searchQuery.project;
+    }
+    else if (searchQuery.hasOwnProperty('org')) {
+      searchQuery.reference = searchQuery.org;
+      delete searchQuery.org;
+    }
 
     // If the includeArchived field is true, remove archived from the query; return everything
     if (validatedOptions.includeArchived) {
@@ -544,11 +565,8 @@ async function update(requestingUser, webhooks, options) {
  * @param {User} requestingUser - The object containing the requesting user.
  * @param {(string|string[])} webhooks - The webhooks to remove. Can either be an array of webhook
  * ids or a single webhook id.
- * @param {object} [options] - A parameter that provides supported options.
- * @param {boolean} [options.server] - The API Controller automatically sets server to true if
- * there is no org, project or branch id in the params, so that only server level webhooks are
- * searched for. However, the user may explicitly specify server:false to indicate that they wish
- * to search/delete multiple webhooks across any reference level.
+ * @param {object} [options] - A parameter that provides supported options. There are currently
+ * no supported options.
  *
  * @returns {Promise<object[]>} Array of deleted webhook ids.
  *
@@ -579,9 +597,6 @@ async function remove(requestingUser, webhooks, options) {
     else if (typeof saniWebhooks === 'string') {
       webhooksToDelete = [saniWebhooks];
     }
-
-    // Validate the provided options
-    const validatedOptions = utils.validateOptions(options, ['server'], Webhook);
 
     // Initialize search query
     const searchQuery = { _id: { $in: webhooksToDelete } };

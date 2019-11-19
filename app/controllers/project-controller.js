@@ -41,6 +41,7 @@ const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
+const Webhook = M.require('models.webhook');
 const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
@@ -1246,6 +1247,9 @@ async function remove(requestingUser, organizationID, projects, options) {
 
     // Delete any branches in the projects
     await Branch.deleteMany(ownedQuery);
+
+    // Delete any webhooks on the projects
+    await Webhook.deleteMany({ reference: ownedQuery.project });
 
     // Delete the projects
     const retQuery = await Project.deleteMany(searchQuery);

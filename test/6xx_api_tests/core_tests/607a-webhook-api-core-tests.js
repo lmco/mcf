@@ -49,15 +49,6 @@ describe(M.getModuleName(module.filename), () => {
     try {
       await db.connect();
       adminUser = await testUtils.createTestAdmin();
-
-      // Create webhooks for later use
-      // const webhookData = testData.webhooks;
-      // const webhooks0 = await WebhookController.create(adminUser, webhookData[0]);
-      // webhookIDs.push(webhooks0[0]._id);
-      // webhookData[0].id = webhooks0[0]._id;
-      // const webhooks1 = await WebhookController.create(adminUser, webhookData[1]);
-      // webhookIDs.push(webhooks1[0]._id);
-      // webhookData[1].id = webhooks1[0]._id;
     }
     catch (error) {
       M.log.error(error);
@@ -582,6 +573,9 @@ function triggerWebhook(done) {
     // Get the base64 encoding of the webhook id
     const triggerID = webhook._id;
     const encodedID = Buffer.from(triggerID).toString('base64');
+
+    // Save the id to be deleted later
+    webhookIDs.push(triggerID);
 
     request({
       url: `${test.url}/api/webhooks/trigger/${encodedID}`,

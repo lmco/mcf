@@ -305,7 +305,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
       break;
     case 'Webhook':
       validSearchOptions = ['type', 'name', 'createdBy', 'lastModifiedBy', 'archived',
-        'archivedBy'];
+        'archivedBy', 'org', 'project', 'branch'];
       break;
     default:
       throw new M.DataFormatError('No model provided', 'warn');
@@ -472,17 +472,6 @@ module.exports.validateOptions = function(options, validOptions, model) {
       }
       // Return the parsed sort option in the format {sort_field: order}
       validatedOptions.sort[val] = order;
-    }
-
-    // Handle the server option for webhooks
-    if (opt === 'server') {
-      // Ensure the value is a boolean
-      if (typeof options.server !== 'boolean') {
-        throw new M.DataFormatError('The option \'server\' is not a boolean.', 'warn');
-      }
-
-      // Set the server option in the returnObject
-      validatedOptions.server = val;
     }
   });
 

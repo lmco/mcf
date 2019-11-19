@@ -356,8 +356,6 @@ function getAllWebhooks(done) {
   const params = {};
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, body, method);
-  // Set server to false to search through all webhooks
-  req.query = { server: false };
 
   // Set response as empty object
   const res = {};
@@ -485,8 +483,7 @@ function patchWebhooks(done) {
   }, {
     id: webhookIDs[2],
     name: 'Patch test'
-  },
-  ];
+  }];
   // Create request object
   const body = webhookUpdates;
   const method = 'PATCH';
@@ -648,6 +645,9 @@ function triggerWebhook(done) {
     // Get the base64 of the webhook id
     const triggerID = incomingWebhooks[0]._id;
     const encodedID = Buffer.from(triggerID).toString('base64');
+
+    // Save the id to be deleted later
+    webhookIDs.push(triggerID);
 
     // Create request object
     const body = {
