@@ -5965,7 +5965,7 @@ api.route('/users/:username/password')
  *         in: query
  *         type: boolean
  *         required: false
- *        - name: project
+ *       - name: project
  *         description: The ID of a project to query on. If provided, only returns
  *                      webhooks registered to the project, unless a branch is
  *                      also provided. An org must be provided with this option.
@@ -6417,7 +6417,7 @@ api.route('/webhooks/trigger/:encodedid')
  *         in: query
  *         type: boolean
  *         required: false
- *        - name: project
+ *       - name: project
  *         description: The ID of a project to query on. If provided, only returns
  *                      webhooks registered to the project, unless a branch is
  *                      also provided. An org must be provided with this option.
