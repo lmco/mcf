@@ -74,10 +74,11 @@ const validators = M.require('lib.validators');
  * instead of converting the data to objects.
  * @param {string} [options.sort] - Provide a particular field to sort the results by. To sort
  * in reverse order, provide a '-' in front.
- * @param {boolean} [options.server] - The API Controller automatically sets server to true if
- * there is no org, project or branch id in the params, so that only server level webhooks are
- * searched for. However, the user may explicitly specify server:false to indicate that they wish
- * to search webhooks across any reference level.
+ * @param {string} [options.org] - An org ID to query for webhooks on.
+ * @param {string} [options.project] - A project ID to query for webhooks on. The org must also
+ * be provided.
+ * @param {string} [options.branch] - A branch ID to query for webhooks on. The org and project
+ * must also be provided.
  * @param {string} [options.type] - Search for webhooks with a specific type.
  * @param {string} [options.name] - Search for webhooks with a specific name.
  * @param {string} [options.createdBy] - Search for webhooks with a specific createdBy value.
@@ -225,7 +226,7 @@ async function find(requestingUser, webhooks, options) {
  * @param {string} [webhooks.tokenLocation] - A dot-delimited string that represents the location
  * of the token within an external request to trigger a webhook.
  * @param {object} [webhooks.reference] - An object containing the fields 'org', 'project', and
- * 'branch', which each contain a string representing the id of the respective model.
+ * 'branch', which each contain a string representing the id of the respective level.
  * @param {object} [webhooks.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
  * @param {object} [options] - A parameter that provides supported options.
@@ -360,8 +361,6 @@ async function create(requestingUser, webhooks, options) {
  * provide in order to verify the request.
  * @param {string} [webhooks.tokenLocation] - A dot-delimited string that represents the location
  * of the token within an external request to trigger a webhook.
- * @param {object} [webhooks.reference] - An object containing the fields 'org', 'project', and
- * 'branch', which each contain a string representing the id of the respective model.
  * @param {object} [options] - A parameter that provides supported options.
  * @param {string[]} [options.populate] - A list of fields to populate on return
  * of the found objects. By default, no fields are populated.
@@ -510,7 +509,6 @@ async function update(requestingUser, webhooks, options) {
       webhookUpdate.lastModifiedBy = reqUser._id;
       webhookUpdate.updatedOn = Date.now();
 
-      // TODO: Incorporate these checks into validators.webhook?
       // --- Incoming Webhook specific checks ---
       if (webhook.type === 'Incoming') {
         if (webhookUpdate.responses !== undefined) {

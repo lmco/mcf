@@ -831,10 +831,10 @@ async function remove(requestingUser, organizationID, projectID, branches, optio
       }
     });
 
-    // Delete any elements in the branch
+    // Delete any elements in the branches
     await Element.deleteMany(ownedQuery);
 
-    // Delete any artifacts in the branch
+    // Delete any artifacts in the branches
     await Artifact.deleteMany(ownedQuery);
 
     // Delete any webhooks on the branches

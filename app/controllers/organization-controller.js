@@ -935,10 +935,10 @@ async function remove(requestingUser, orgs, options) {
     // Delete any branches in the found projects
     await Branch.deleteMany({ project: { $in: projectIDs } });
 
-    // Delete any projects in the org
+    // Delete any projects in the orgs
     await Project.deleteMany({ org: { $in: searchedIDs } });
 
-    // Delete any webhooks on the org
+    // Delete any webhooks on the orgs
     await Webhook.deleteMany({ reference: { $in: searchedIDs } });
 
     // Delete the orgs
