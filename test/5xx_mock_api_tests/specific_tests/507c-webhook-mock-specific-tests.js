@@ -68,8 +68,8 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Runs after all tests. Removes any remaining webhooks, removes the test org and test admin
-   * user, and disconnects from database.
+   * After: Runs after all tests. Removes any remaining webhooks, removes the test org and test
+   * admin user, and disconnects from database.
    */
   after(async () => {
     try {
