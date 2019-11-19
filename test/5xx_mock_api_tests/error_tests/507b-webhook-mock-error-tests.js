@@ -40,7 +40,8 @@ let webhookID;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Run before all tests. Creates the admin user.
+   * Before: Runs before all tests. Connects to the database, creates an admin user, and
+   * creates a test webhook.
    */
   before(async () => {
     try {
@@ -60,7 +61,8 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Delete admin user.
+   * After: Runs after all tests. Removes any remaining test webhooks, deletes the admin user,
+   * and disconnects from database.
    */
   after(async () => {
     try {

@@ -37,7 +37,7 @@ let adminUser;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: runs before all tests. Opens database connection.
+   * Before: runs before all tests. Opens database connection and creates a test admin.
    */
   before(async () => {
     try {
@@ -52,10 +52,11 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: runs after all tests. Closes database connection.
+   * After: runs after all tests. Removes test admin and closes database connection.
    */
   after(async () => {
     try {
+      await testUtils.removeTestAdmin();
       db.disconnect();
     }
     catch (error) {

@@ -57,7 +57,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: runs after all tests. Closes database connection.
+   * After: runs after all tests. Removes any remaining webhooks and closes database connection.
    */
   after(async () => {
     try {

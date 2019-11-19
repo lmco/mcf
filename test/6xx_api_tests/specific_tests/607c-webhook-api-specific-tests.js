@@ -52,8 +52,8 @@ let serverWebhook;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Runs before all tests. Connects to database, creates admin user, and creates
-   * webhooks to be used in the tests.
+   * Before: Runs before all tests. Connects to database, creates a test admin user, a test
+   * org, a test project, and a webhook to be used in the tests.
    */
   before(async () => {
     try {
@@ -65,7 +65,7 @@ describe(M.getModuleName(module.filename), () => {
       projID = utils.parseID(project._id).pop();
       branch._id = utils.createID(org._id, projID, branchID);
 
-      // Create webhooks for later use
+      // Create a webhook for later use
       const webhookData = testData.webhooks;
       const webhooks = await WebhookController.create(adminUser, webhookData[0]);
       serverWebhook = webhooks[0];
@@ -79,8 +79,8 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Runs after all tests. Removes test data, deletes admin user, and disconnects from
-   * database.
+   * After: Runs after all tests. Removes any remaining test webhooks, removes the test admin user,
+   * the test org, and disconnects from the database.
    */
   after(async () => {
     try {

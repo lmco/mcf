@@ -42,8 +42,7 @@ const webhookIDs = [];
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Runs before all tests. Connects to database, creates admin user, and creates
-   * webhooks to be used in the tests.
+   * Before: Runs before all tests. Connects to database, and creates an admin user.
    */
   before(async () => {
     try {
@@ -58,8 +57,8 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Runs after all tests. Removes test data, deletes admin user, and disconnects from
-   * database.
+   * After: Runs after all tests. Removes any remaining test webhooks, removes the test admin user,
+   * and disconnects from the database.
    */
   after(async () => {
     try {

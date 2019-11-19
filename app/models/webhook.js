@@ -254,8 +254,8 @@ WebhookSchema.static('sendRequests', function(webhook, data) {
  * @description Validates the token sent for an incoming webhook.
  * @memberOf WebhookSchema
  */
-WebhookSchema.static('verifyAuthority', function(that, value) {
-  if (!(that.type === 'Incoming' && that.token === value)) {
+WebhookSchema.static('verifyAuthority', function(webhook, value) {
+  if (!(webhook.type === 'Incoming' && webhook.token === value)) {
     throw new M.PermissionError('Token received from request does not match stored token.', 'warn');
   }
 });

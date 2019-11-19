@@ -48,8 +48,8 @@ const branchWebhooks = [];
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Runs before all tests. Connects to database, creates admin user, and creates
-   * webhooks to be used in the tests.
+   * Before: Runs before all tests. Connects to database, creates an admin user, a test
+   * org, and a test project.
    */
   before(async () => {
     try {
@@ -68,7 +68,8 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Runs after all tests. Deletes admin user and disconnects from database.
+   * After: Runs after all tests. Removes any remaining webhooks, removes the test org and test admin
+   * user, and disconnects from database.
    */
   after(async () => {
     try {
