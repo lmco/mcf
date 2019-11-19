@@ -537,6 +537,24 @@ class Query {
 
   /**
    * @description Creates and returns a query, properly formatted to be used
+   * in DynamoDB's DocumentClient.put(). Please view the following links for
+   * more information:
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#putItem-property putItem()}
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#put-property DocumentClient.put()}.
+   *
+   * @param {object} doc - The document to properly format for a put operation.
+   *
+   * @returns {object} - The properly formatted put() query.
+   */
+  put(doc) {
+    return {
+      TableName: this.model.TableName,
+      Item: this.formatJSON(doc)
+    };
+  }
+
+  /**
+   * @description Creates and returns a query, properly formatted to be used
    * in DynamoDB's DocumentClient.scan(). Please view the following links for
    * more information:
    * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#scan-property scan}
@@ -955,6 +973,9 @@ class Model {
     const promises = [];
     let modifiedCount = 0;
 
+    // Connect to the DocumentClient
+    const conn = await connectDocument();
+
     // For each operation in the ops array
     ops.forEach((op) => {
       // If it is an updateOne operation
@@ -965,6 +986,17 @@ class Model {
 
         // Perform the updateOne operation
         promises.push(this.updateOne(filter, update, options)
+        .then(() => {
+          modifiedCount += 1;
+        }));
+      }
+      // If it is a replaceOne operation
+      else if (Object.keys(op)[0] === 'replaceOne') {
+        // Get a properly formatted put query
+        const putQuery = this.query.put(Object.values(op)[0].replacement);
+
+        // Perform the put operation
+        promises.push(conn.put(putQuery).promise()
         .then(() => {
           modifiedCount += 1;
         }));
