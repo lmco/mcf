@@ -5932,10 +5932,7 @@ api.route('/users/:username/password')
  *       - webhooks
  *     description: Finds and returns webhooks from an array of ids. If no array
  *                  provided, returns every webhook the requesting user has access
- *                  to at the the server level.  If the option server is provided
- *                  as false, every webhook the user has access to across every
- *                  referene level is returned. A user must be a system-wide admin
- *                  for either search option.
+ *                  to.
  *     produces:
  *       - application/json
  *     parameters:
@@ -5946,13 +5943,11 @@ api.route('/users/:username/password')
  *             type: string
  *         description: An array of webhook IDs to search for. If both query
  *                      parameter and body are not provided, all webhooks the
- *                      user has access to (at the specified level) are
- *                      found.
+ *                      user has access to are found.
  *       - name: ids
  *         description: Comma separated list of IDs to search for. If both query
  *                      parameter and body are not provided, all webhooks the
- *                      user has access to (at the specified level) are
- *                      found.
+ *                      user has access to are found.
  *         in: query
  *         type: string
  *       - name: server

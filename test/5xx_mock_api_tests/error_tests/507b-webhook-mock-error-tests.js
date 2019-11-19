@@ -49,7 +49,7 @@ describe(M.getModuleName(module.filename), () => {
 
       // Create an incoming webhook for the trigger tests
       const webhookData = testData.webhooks[1];
-      const webhooks = await WebhookController.create(adminUser, null, null, null, webhookData);
+      const webhooks = await WebhookController.create(adminUser, webhookData);
       webhookID = webhooks[0]._id;
     }
     catch (error) {
@@ -79,14 +79,16 @@ describe(M.getModuleName(module.filename), () => {
   // ------------- No Requesting User -------------
   it('should reject a GET webhooks request with no requesting user', noReqUser('getWebhooks'));
   it('should reject a GET webhook request with no requesting user', noReqUser('getWebhook'));
-  it('should reject a POST webhook request with no requesting user', noReqUser('postWebhook'));
+  it('should reject a POST webhooks request with no requesting user', noReqUser('postWebhooks'));
+  it('should reject a PATCH webhooks request with no requesting user', noReqUser('patchWebhooks'));
   it('should reject a PATCH webhook request with no requesting user', noReqUser('patchWebhook'));
   it('should reject a DELETE webhooks request with no requesting user', noReqUser('deleteWebhooks'));
   it('should reject a DELETE webhook request with no requesting user', noReqUser('deleteWebhook'));
   // ------------- Invalid options -------------
   it('should reject a GET webhooks request with invalid options', invalidOptions('getWebhooks'));
   it('should reject a GET webhook request with invalid options', invalidOptions('getWebhook'));
-  it('should reject a POST webhook request with invalid options', invalidOptions('postWebhook'));
+  it('should reject a POST webhook request with invalid options', invalidOptions('postWebhooks'));
+  it('should reject a PATCH webhooks request with invalid options', invalidOptions('patchWebhooks'));
   it('should reject a PATCH webhook request with invalid options', invalidOptions('patchWebhook'));
   it('should reject a DELETE webhooks request with invalid options', invalidOptions('deleteWebhooks'));
   it('should reject a DELETE webhook request with invalid options', invalidOptions('deleteWebhook'));
@@ -95,11 +97,11 @@ describe(M.getModuleName(module.filename), () => {
   // ------------- 404 Not Found -------------
   it('should return 404 for a GET webhooks request that returned no results', notFound('getWebhooks'));
   it('should return 404 for a GET webhook request for a nonexistent user', notFound('getWebhook'));
+  it('should return 404 for a PATCH webhooks request for a nonexistent user', notFound('patchWebhooks'));
   it('should return 404 for a PATCH webhook request for a nonexistent user', notFound('patchWebhook'));
   it('should return 404 for a DELETE webhooks request for a nonexistent user', notFound('deleteWebhooks'));
   it('should return 404 for a DELETE webhook request for a nonexistent user', notFound('deleteWebhook'));
   // ------------- No arrays in singular endpoints -------------
-  it('should reject a POST singular webhook request containing an array in the body', noArrays('postWebhook'));
   it('should reject a PATCH singular webhook request containing an array in the body', noArrays('patchWebhook'));
   //  ------------- Trigger -------------
   it('should reject a POST request to trigger a webhook if the token cannot be found', tokenNotFound);
@@ -314,11 +316,11 @@ function noArrays(endpoint) {
  */
 function tokenNotFound(done) {
   // Get the base 64 encoded id of the incoming webhook
-  const base64ID = Buffer.from(webhookID).toString('base64');
+  const encodedID = Buffer.from(webhookID).toString('base64');
 
   const method = 'POST';
   const body = { notToken: 'no token' };
-  const params = { base64id: base64ID };
+  const params = { encodedid: encodedID };
 
   // Create request object
   const req = testUtils.createRequest(adminUser, params, body, method);
@@ -351,11 +353,11 @@ function tokenNotFound(done) {
  */
 function tokenInvalid(done) {
   // Get the base 64 encoded id of the incoming webhook
-  const base64ID = Buffer.from(webhookID).toString('base64');
+  const encodedID = Buffer.from(webhookID).toString('base64');
 
   const method = 'POST';
   const body = { test: { token: 'invalid token' } };
-  const params = { base64id: base64ID };
+  const params = { encodedid: encodedID };
 
   // Create request object
   const req = testUtils.createRequest(adminUser, params, body, method);

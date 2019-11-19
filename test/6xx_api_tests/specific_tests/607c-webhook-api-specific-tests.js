@@ -69,32 +69,25 @@ describe(M.getModuleName(module.filename), () => {
       const webhookData = testData.webhooks;
 
       // Server webhook
-      let webhooks = await WebhookController.create(adminUser, null, null, null,
-        webhookData[0]);
+      let webhooks = await WebhookController.create(adminUser, webhookData[0]);
       serverWebhook = webhooks[0];
 
       // Org webhooks
-      webhooks = await WebhookController.create(adminUser, org._id, null, null,
-        webhookData[0]);
+      webhooks = await WebhookController.create(adminUser, webhookData[0]);
       orgWebhooks.push(webhooks[0]);
-      webhooks = await WebhookController.create(adminUser, org._id, null, null,
-        webhookData[1]);
+      webhooks = await WebhookController.create(adminUser, webhookData[1]);
       orgWebhooks.push(webhooks[0]);
 
       // Project webhooks
-      webhooks = await WebhookController.create(adminUser, org._id, projID, null,
-        webhookData[0]);
+      webhooks = await WebhookController.create(adminUser, webhookData[0]);
       projWebhooks.push(webhooks[0]);
-      webhooks = await WebhookController.create(adminUser, org._id, projID, null,
-        webhookData[1]);
+      webhooks = await WebhookController.create(adminUser, webhookData[1]);
       projWebhooks.push(webhooks[0]);
 
       // Branch webhooks
-      webhooks = await WebhookController.create(adminUser, org._id, projID, branchID,
-        webhookData[0]);
+      webhooks = await WebhookController.create(adminUser, webhookData[0]);
       branchWebhooks.push(webhooks[0]);
-      webhooks = await WebhookController.create(adminUser, org._id, projID, branchID,
-        webhookData[1]);
+      webhooks = await WebhookController.create(adminUser, webhookData[1]);
       branchWebhooks.push(webhooks[0]);
 
       webhookIDs.push(serverWebhook._id, ...orgWebhooks.map((w) => w._id),
@@ -130,31 +123,35 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST a webhook to an org', post('org'));
   it('should POST a webhook to a project', post('project'));
   it('should POST a webhook to a branch', post('branch'));
-  // Note: POST multiple webhooks not currently supported
+  // it('should POST multiple webhooks to an org', postMany('org'));
+  // it('should POST multiple webhooks to a project', postMany('project'));
+  // it('should POST multiple webhooks to a branch', postMany('branch'));
   // ------------- GET -------------
-  it('should GET a webhook on an org', getOne('org'));
-  it('should GET multiple webhooks on an org', getManyOnReference('org'));
-  it('should GET all webhooks on an org', getAllOnReference('org'));
-  it('should GET a webhook on a project', getOne('project'));
-  it('should GET multiple webhooks on a project', getManyOnReference('project'));
-  it('should GET all webhooks on a project', getAllOnReference('project'));
-  it('should GET a webhook on a branch', getOne('branch'));
-  it('should GET multiple webhooks on a branch', getManyOnReference('branch'));
-  it('should GET all webhooks on a branch', getAllOnReference('branch'));
-  it('should GET multiple webhooks across all levels', getMany);
-  it('should GET all webhooks', getAll);
-  // ------------ PATCH ------------
-  it('should PATCH a webhook on an org', patch('org'));
-  it('should PATCH a webhook on a project', patch('project'));
-  it('should PATCH a webhook on a branch', patch('branch'));
-  // Note: PATCH multiple webhooks not currently supported
-  // ------------ DELETE ------------
-  it('should DELETE a webhook on an org', deleteOne('org'));
-  it('should DELETE multiple webhooks on an org', deleteMany('org'));
-  it('should DELETE a webhook on a project', deleteOne('project'));
-  it('should DELETE multiple webhooks on a project', deleteMany('project'));
-  it('should DELETE a webhook on a branch', deleteOne('branch'));
-  it('should DELETE multiple webhooks on a branch', deleteMany('branch'));
+  // it('should GET a webhook on an org', getOne('org'));
+  // it('should GET multiple webhooks on an org', getManyOnReference('org'));
+  // it('should GET all webhooks on an org', getAllOnReference('org'));
+  // it('should GET a webhook on a project', getOne('project'));
+  // it('should GET multiple webhooks on a project', getManyOnReference('project'));
+  // it('should GET all webhooks on a project', getAllOnReference('project'));
+  // it('should GET a webhook on a branch', getOne('branch'));
+  // it('should GET multiple webhooks on a branch', getManyOnReference('branch'));
+  // it('should GET all webhooks on a branch', getAllOnReference('branch'));
+  // it('should GET multiple webhooks across all levels', getMany);
+  // it('should GET all webhooks', getAll);
+  // // ------------ PATCH ------------
+  // it('should PATCH a webhook on an org', patch('org'));
+  // it('should PATCH a webhook on a project', patch('project'));
+  // it('should PATCH a webhook on a branch', patch('branch'));
+  // it('should PATCH multiple webhooks on an org', patchMany('org'));
+  // it('should PATCH multiple webhooks on a project', patchMany('project'));
+  // it('should PATCH multiple webhooks on a branch', patchMany('branch'));
+  // // ------------ DELETE ------------
+  // it('should DELETE a webhook on an org', deleteOne('org'));
+  // it('should DELETE multiple webhooks on an org', deleteMany('org'));
+  // it('should DELETE a webhook on a project', deleteOne('project'));
+  // it('should DELETE multiple webhooks on a project', deleteMany('project'));
+  // it('should DELETE a webhook on a branch', deleteOne('branch'));
+  // it('should DELETE multiple webhooks on a branch', deleteMany('branch'));
 });
 
 /* --------------------( Tests )-------------------- */
@@ -175,16 +172,27 @@ function post(reference) {
     if (reference === 'org') {
       levelData = orgWebhooks;
       ref = org._id;
+      webhookData.reference = {
+        org: org._id
+      };
     }
     if (reference === 'project') {
       levelData = projWebhooks;
       ref = utils.createID(org._id, projID);
+      webhookData.reference = {
+        org: org._id,
+        project: projID
+      };
     }
     if (reference === 'branch') {
       levelData = branchWebhooks;
       ref = utils.createID(org._id, projID, branchID);
+      webhookData.reference = {
+        org: org._id,
+        project: projID,
+        branch: branchID
+      };
     }
-    webhookData.reference = ref;
 
     const url = `${test.url}/api/webhooks`;
 
@@ -203,7 +211,8 @@ function post(reference) {
       chai.expect(response.statusCode).to.equal(200);
 
       // Verify response body
-      const createdWebhook = JSON.parse(body);
+      const createdWebhooks = JSON.parse(body);
+      const createdWebhook = createdWebhooks[0];
       chai.expect(createdWebhook.name).to.equal(webhookData.name);
       chai.expect(createdWebhook.triggers).to.deep.equal(webhookData.triggers);
       chai.expect(createdWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
@@ -229,6 +238,92 @@ function post(reference) {
 
       done();
     });
+  };
+}
+
+/**
+ * @description A constructor for a dynamic mocha-compatible function that verifies POST
+ * requests to create multiple webhooks on an org, project, or branch.
+ *
+ * @param {string} reference - A string specifying org, project, or branch.
+ *
+ * @returns {Function} A function for mocha to use to test a specific api endpoint.
+ */
+function postMany(reference) {
+  return function(done) {
+    const webhookData = testData.webhooks[0];
+
+    let levelData;
+    let ref;
+    if (reference === 'org') {
+      levelData = orgWebhooks;
+      ref = org._id;
+      webhookData.reference = {
+        org: org._id
+      };
+    }
+    if (reference === 'project') {
+      levelData = projWebhooks;
+      ref = utils.createID(org._id, projID);
+      webhookData.reference = {
+        org: org._id,
+        project: projID
+      };
+    }
+    if (reference === 'branch') {
+      levelData = branchWebhooks;
+      ref = utils.createID(org._id, projID, branchID);
+      webhookData.reference = {
+        org: org._id,
+        project: projID,
+        branch: branchID
+      };
+    }
+
+    const url = `${test.url}/api/webhooks`;
+
+    request({
+        url: url,
+        headers: testUtils.getHeaders(),
+        ca: testUtils.readCaFile(),
+        method: 'POST',
+        body: JSON.stringify(webhookData)
+      },
+      (err, response, body) => {
+        // Expect no error
+        chai.expect(err).to.equal(null);
+
+        // Expect response status: 200 OK
+        chai.expect(response.statusCode).to.equal(200);
+
+        // Verify response body
+        const createdWebhooks = JSON.parse(body);
+        const createdWebhook = createdWebhooks[0];
+        chai.expect(createdWebhook.name).to.equal(webhookData.name);
+        chai.expect(createdWebhook.triggers).to.deep.equal(webhookData.triggers);
+        chai.expect(createdWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
+        chai.expect(createdWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
+        chai.expect(createdWebhook.reference).to.equal(ref);
+        chai.expect(createdWebhook.custom).to.deep.equal(webhookData.custom || {});
+
+        // Verify additional properties
+        chai.expect(createdWebhook.createdBy).to.equal(adminUser._id);
+        chai.expect(createdWebhook.lastModifiedBy).to.equal(adminUser._id);
+        chai.expect(createdWebhook.createdOn).to.not.equal(null);
+        chai.expect(createdWebhook.updatedOn).to.not.equal(null);
+        chai.expect(createdWebhook.archived).to.equal(false);
+
+        // Verify specific fields not returned
+        chai.expect(createdWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
+          '__v', '_id');
+
+        // Save the webhook for later use
+        createdWebhook._id = createdWebhook.id;
+        levelData.push(createdWebhook);
+        webhookIDs.push(createdWebhook.id);
+
+        done();
+      });
   };
 }
 
@@ -615,6 +710,81 @@ function patch(reference) {
     };
 
     const url = `${test.url}/api/webhooks/${levelData[0]._id}`;
+
+    request({
+      url: url,
+      headers: testUtils.getHeaders(),
+      ca: testUtils.readCaFile(),
+      method: 'PATCH',
+      body: JSON.stringify(webhookUpdate)
+    },
+    (err, response, body) => {
+      // Expect no error
+      chai.expect(err).to.equal(null);
+
+      // Expect response status: 200 OK
+      chai.expect(response.statusCode).to.equal(200);
+
+      // Verify response body
+      const updatedWebhook = JSON.parse(body);
+      chai.expect(updatedWebhook.name).to.equal('Update');
+      chai.expect(updatedWebhook.triggers).to.deep.equal(webhookData.triggers);
+      chai.expect(updatedWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
+      chai.expect(updatedWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
+      chai.expect(updatedWebhook.reference).to.equal(ref);
+      chai.expect(updatedWebhook.custom).to.deep.equal(webhookData.custom || {});
+
+      // Verify additional properties
+      chai.expect(updatedWebhook.createdBy).to.equal(adminUser._id);
+      chai.expect(updatedWebhook.lastModifiedBy).to.equal(adminUser._id);
+      chai.expect(updatedWebhook.createdOn).to.not.equal(null);
+      chai.expect(updatedWebhook.updatedOn).to.not.equal(null);
+      chai.expect(updatedWebhook.archived).to.equal(false);
+
+      // Verify specific fields not returned
+      chai.expect(updatedWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
+
+      done();
+    });
+  };
+}
+
+/**
+ * @description A constructor for a dynamic mocha-compatible function that verifies PATCH
+ * requests to update a single webhook on an org, project, or branch.
+ *
+ * @param {string} reference - A string specifying org, project, or branch.
+ *
+ * @returns {Function} A function for mocha to use to test a specific api endpoint.
+ */
+function patchMany(reference) {
+  return function(done) {
+    let levelData;
+    let ref;
+    if (reference === 'org') {
+      levelData = orgWebhooks;
+      ref = org._id;
+    }
+    if (reference === 'project') {
+      levelData = projWebhooks;
+      ref = utils.createID(org._id, projID);
+    }
+    if (reference === 'branch') {
+      levelData = branchWebhooks;
+      ref = utils.createID(org._id, projID, branchID);
+    }
+
+    const webhookData = levelData.slice(1, 3);
+    const webhookUpdate = [{
+      id: webhookData[0].id,
+      name: 'Update'
+    }, {
+      id: webhookData[1].id,
+      name: 'Update'
+    }];
+
+    const url = `${test.url}/api/webhooks`;
 
     request({
       url: url,

@@ -45,6 +45,9 @@ const branchID = 'master';
 let webhookID;
 let incomingWebhookID;
 let webhookIDs;
+let orgWebhooks = [];
+let projWebhooks = [];
+let branchWebhooks = [];
 
 /* --------------------( Main )-------------------- */
 /**
@@ -60,7 +63,6 @@ describe(M.getModuleName(module.filename), () => {
   before(async () => {
     try {
       await db.connect();
-      await testUtils.removeTestOrg();
 
       adminUser = await testUtils.createTestAdmin();
       nonAdminUser = await testUtils.createNonAdminUser();
@@ -68,13 +70,37 @@ describe(M.getModuleName(module.filename), () => {
       project = await testUtils.createTestProject(adminUser, org._id);
       projID = utils.parseID(project._id).pop();
 
-      const outgoingWebhooks = await WebhookController.create(adminUser, null, null, null,
-        testData.webhooks[0]);
+      const webhookData = testData.webhooks;
+
+      const outgoingWebhooks = await WebhookController.create(adminUser, webhookData[0]);
       webhookID = outgoingWebhooks[0]._id;
-      const incomingWebhooks = await WebhookController.create(adminUser, null, null, null,
-        testData.webhooks[1]);
+      const incomingWebhooks = await WebhookController.create(adminUser, webhookData[1]);
       incomingWebhookID = incomingWebhooks[0]._id;
       webhookIDs = [webhookID, incomingWebhookID];
+
+      // Org webhooks
+      webhookData[0].reference = { org: org._id };
+      let webhooks = await WebhookController.create(adminUser, webhookData[0]);
+      orgWebhooks.push(webhooks[0]);
+      webhookData[1].reference = { org: org._id };
+      webhooks = await WebhookController.create(adminUser, webhookData[1]);
+      orgWebhooks.push(webhooks[0]);
+
+      // Project webhooks
+      webhookData[0].reference.project = projID;
+      webhooks = await WebhookController.create(adminUser, webhookData[0]);
+      projWebhooks.push(webhooks[0]);
+      webhookData[1].reference.project = projID;
+      webhooks = await WebhookController.create(adminUser, webhookData[1]);
+      projWebhooks.push(webhooks[0]);
+
+      // Branch webhooks
+      webhookData[0].reference.branch = branchID;
+      webhooks = await WebhookController.create(adminUser, webhookData[0]);
+      branchWebhooks.push(webhooks[0]);
+      webhookData[0].reference.branch = branchID;
+      webhooks = await WebhookController.create(adminUser, webhookData[1]);
+      branchWebhooks.push(webhooks[0]);
     }
     catch (error) {
       M.log.error(error);
@@ -160,59 +186,81 @@ describe(M.getModuleName(module.filename), () => {
  */
 function unauthorizedTest(level, operation) {
   return async function() {
-    let webhookData;
+    let webhookData = testData.webhooks[0];
+    webhookData.id = webhookID;
+    webhookData.reference = {};
     let id;
-    const o = org._id;
-    let p = projID;
-    let b = branchID;
     let op = operation;
-    if (operation === 'find') {
-      webhookData = webhookID;
-      op = 'read';  // Changing this here because the permissions errors say "read" instead of "find"
-    }
-    else if (operation === 'create') {
-      webhookData = testData.webhooks[0];
-    }
-    else if (operation === 'update') {
-      webhookData = {
-        id: webhookID,
-        description: 'update'
-      };
-    }
-    else if (operation === 'remove') {
-      webhookData = webhookID;
-      op = 'delete'; // Changing this because permissions errors say "delete" instead of "remove"
-    }
     // Set up org, project, and branch id variables
     if (level === 'org') {
-      // Set id to org id and project and branch id parameters to null
-      id = o;
-      p = null;
-      b = null;
+      // Set id to org id
+      id = org._id;
+      webhookData.id = orgWebhooks[0]._id;
+      // Set the reference namespace
+      if (typeof webhookData === 'object') {
+        webhookData.reference = {
+          org: org._id
+        };
+      }
     }
     if (level === 'project') {
-      // Set id to project id and branch id parameter to null
-      id = p;
-      b = null;
+      // Set id to project id
+      id = projID;
+      webhookData.id = projWebhooks[0]._id;
+      // Set the reference namespace
+      if (typeof webhookData === 'object') {
+        webhookData.reference = {
+          org: org._id,
+          project: projID
+        };
+      }
     }
     if (level === 'branch') {
       // The error message for branch will be also refer to the project
       // Set id to project id
-      id = p;
+      id = projID;
+      webhookData.id = branchWebhooks[0]._id;
+      // Set the reference namespace
+      if (typeof webhookData === 'object') {
+        webhookData.reference = {
+          org: org._id,
+          project: projID,
+          branch: branchID
+        };
+      }
       // eslint-disable-next-line no-param-reassign
       level = 'project';
     }
+
+    if (operation === 'find') {
+      webhookData = webhookData.id;
+      op = 'read';  // Changing this because permissions errors say "read" instead of "find"
+    }
+    else if (operation === 'create') {
+      delete webhookData.id;
+    }
+    else if (operation === 'update') {
+      webhookData = {
+        id: webhookData.id,
+        description: 'update'
+      };
+    }
+    else if (operation === 'remove') {
+      webhookData = webhookData.id;
+      op = 'delete'; // Changing this because permissions errors say "delete" instead of "remove"
+    }
+
     try {
       // There will be a different error message for the server level
       if (level === 'server') {
         // Attempt to perform unauthorized operation
-        await WebhookController[operation](nonAdminUser, null, null, null, webhookData)
+        await WebhookController[operation](nonAdminUser, webhookData)
         .should.eventually.be.rejectedWith(`User does not have permission to ${op} server level `
         + 'webhooks.');
       }
       else {
         // Attempt to perform the unauthorized operation
-        await WebhookController[operation](nonAdminUser, o, p, b, webhookData)
+        await WebhookController[operation](nonAdminUser, webhookData)
         .should.eventually.be.rejectedWith(`User does not have permission to ${op} webhooks on the `
         + `${level} [${id}].`);
       }
@@ -233,54 +281,70 @@ function unauthorizedTest(level, operation) {
  */
 function archivedTest(model, operation) {
   return async function() {
-    let webhookData;
+    let webhookData = testData.webhooks[0];
     let id;
-    let o = org._id;
-    let p = projID;
-    let b = branchID;
     let name;
-    if (operation === 'find' || operation === 'remove') {
-      webhookData = webhookID;
-    }
-    else if (operation === 'create') {
-      webhookData = testData.webhooks[0];
-    }
-    else if (operation === 'update') {
-      webhookData = {
-        id: webhookID,
-        description: 'update'
-      };
-    }
+
     if (model === Organization) {
-      // Set id to org id and project and branch id parameters to null
+      // Set id to org id
       id = org._id;
-      p = null;
-      b = null;
+      webhookData.id = orgWebhooks[0]._id;
+      // Set the reference namespace
+      webhookData.reference = {
+        org: org._id
+      };
       name = 'Organization';
     }
     if (model === Project) {
-      // Set id to project id and branch id parameter to null
-      id = utils.createID(o, p);
-      b = null;
+      // Set id to project id
+      id = utils.createID(org._id, projID);
+      webhookData.id = projWebhooks[0]._id;
+      // Set the reference namespace
+      webhookData.reference = {
+        org: org._id,
+        project: projID
+      };
       name = 'Project';
     }
     if (model === Branch) {
       // Set id to branch id
-      id = utils.createID(o, p, b);
+      id = utils.createID(org._id, projID, branchID);
+      webhookData.id = branchWebhooks[0]._id;
+      // Set the reference namespace
+      webhookData.reference = {
+        org: org._id,
+        project: projID,
+        branch: branchID
+      };
       name = 'Branch';
     }
     if (model === Webhook) {
-      // Set id to webhook id and org, project, and branch id parameters to null
+      // Set id to webhook id
       id = webhookID;
-      o = null;
-      b = null;
-      p = null;
+      webhookData.id = webhookID;
       name = 'Webhook';
     }
+
+    if (operation === 'find') {
+      webhookData = webhookData.id;
+    }
+    else if (operation === 'create') {
+      delete webhookData.id;
+    }
+    else if (operation === 'update') {
+      webhookData = {
+        id: webhookData.id,
+        description: 'update'
+      };
+    }
+    else if (operation === 'remove') {
+      webhookData = webhookData.id;
+    }
+
     // Archive the object of interest
     await model.updateOne({ _id: id }, { archived: true });
 
-    await WebhookController[operation](adminUser, o, p, b, webhookData)
+    await WebhookController[operation](adminUser, webhookData)
     .should.eventually.be.rejectedWith(`The ${name} [${utils.parseID(id).pop()}] is archived. `
       + 'It must first be unarchived before performing this operation.');
 
@@ -298,9 +362,11 @@ async function createInvalidKey() {
   try {
     // Get data for an outgoing webhook
     const webhookData = testData.webhooks[0];
+    delete webhookData.reference;
+
     webhookData.wrong_key = 'invalid';
 
-    await WebhookController.create(nonAdminUser, org._id, projID, branchID, webhookData)
+    await WebhookController.create(adminUser, webhookData)
     .should.eventually.be.rejectedWith('Invalid key: [wrong_key]');
   }
   catch (error) {
@@ -318,31 +384,31 @@ async function createInvalidWebhook() {
     // Create invalid webhook data
     let webhookData = null;
 
-    await WebhookController.create(nonAdminUser, org._id, projID, branchID, webhookData)
+    await WebhookController.create(nonAdminUser, webhookData)
     .should.eventually.be.rejectedWith('Webhooks parameter cannot be null.');
 
     // Create invalid webhook data
     webhookData = true;
 
-    await WebhookController.create(nonAdminUser, org._id, projID, branchID, webhookData)
+    await WebhookController.create(nonAdminUser, webhookData)
     .should.eventually.be.rejectedWith('Webhooks parameter cannot be of type boolean.');
 
     // Create invalid webhook data
     webhookData = 'webhook';
 
-    await WebhookController.create(nonAdminUser, org._id, projID, branchID, webhookData)
+    await WebhookController.create(nonAdminUser, webhookData)
     .should.eventually.be.rejectedWith('Webhooks parameter cannot be of type string.');
 
     // Create invalid webhook data
     webhookData = [true, true];
 
-    await WebhookController.create(nonAdminUser, org._id, projID, branchID, webhookData)
+    await WebhookController.create(nonAdminUser, webhookData)
     .should.eventually.be.rejectedWith('Not every item in Webhooks is an object.');
 
     // Create invalid webhook data
     webhookData = undefined;
 
-    await WebhookController.create(nonAdminUser, org._id, projID, branchID, webhookData)
+    await WebhookController.create(nonAdminUser, webhookData)
     .should.eventually.be.rejectedWith('Webhooks parameter cannot be of type undefined.');
   }
   catch (error) {
@@ -362,7 +428,7 @@ async function updateMissingID() {
       description: 'update'
     };
 
-    await WebhookController.update(adminUser, null, null, null, webhookData)
+    await WebhookController.update(adminUser, webhookData)
     .should.eventually.be.rejectedWith('One or more webhook updates does not have an id.');
   }
   catch (error) {
@@ -382,7 +448,7 @@ async function updateType() {
       type: 'update'
     };
 
-    await WebhookController.update(adminUser, null, null, null, webhookData)
+    await WebhookController.update(adminUser, webhookData)
     .should.eventually.be.rejectedWith(`Problem with update for webhook ${webhookID}: `
       + 'A webhook\'s type cannot be changed.');
   }
@@ -404,9 +470,8 @@ async function updateReference() {
       reference: 'wrong'
     };
 
-    await WebhookController.update(adminUser, null, null, null, webhookData)
-    .should.eventually.be.rejectedWith(`Problem with update for webhook ${webhookID}: `
-      + 'A webhook\'s reference id cannot be changed.');
+    await WebhookController.update(adminUser, webhookData)
+    .should.eventually.be.rejectedWith('Webhook property [reference] cannot be changed.');
   }
   catch (error) {
     M.log.error(error);
@@ -429,7 +494,7 @@ async function updateDuplicate() {
       description: 'update'
     }];
 
-    await WebhookController.update(adminUser, null, null, null, webhookData)
+    await WebhookController.update(adminUser, webhookData)
     .should.eventually.be.rejectedWith('Duplicate ids found in update array: '
       + `${webhookID}`);
   }
@@ -451,9 +516,8 @@ async function updateNotFound() {
       description: 'update'
     };
 
-    await WebhookController.update(adminUser, null, null, null, webhookData)
-    .should.eventually.be.rejectedWith('The following webhooks were not found at the specified '
-      + `reference level [server-wide]: [${webhookData.id}]`);
+    await WebhookController.update(adminUser, webhookData)
+    .should.eventually.be.rejectedWith(`The following webhooks were not found: [${webhookData.id}]`);
   }
   catch (error) {
     M.log.error(error);
@@ -473,7 +537,7 @@ async function updateAddResponses() {
       responses: [{ url: 'test' }]
     };
 
-    await WebhookController.update(adminUser, null, null, null, webhookData)
+    await WebhookController.update(adminUser, webhookData)
     .should.eventually.be.rejectedWith(`Problem with update for webhook ${incomingWebhookID}: `
         + 'An incoming webhook cannot have a responses field.');
   }
@@ -496,7 +560,7 @@ async function updateInvalidToken() {
       token: null
     };
 
-    await WebhookController.update(adminUser, null, null, null, webhookData)
+    await WebhookController.update(adminUser, webhookData)
     .should.eventually.be.rejectedWith(`Problem with update for webhook ${incomingWebhookID}: `
         + 'Invalid token: [null]');
   }
@@ -518,7 +582,7 @@ async function updateInvalidTokenLocation() {
       tokenLocation: null
     };
 
-    await WebhookController.update(adminUser, null, null, null, webhookData)
+    await WebhookController.update(adminUser, webhookData)
     .should.eventually.be.rejectedWith(`Problem with update for webhook ${incomingWebhookID}: `
       + 'Invalid tokenLocation: [null]');
   }
@@ -540,7 +604,7 @@ async function updateAddToken() {
       token: 'test'
     };
 
-    await WebhookController.update(adminUser, null, null, null, webhookData)
+    await WebhookController.update(adminUser, webhookData)
     .should.eventually.be.rejectedWith(`Problem with update for webhook ${webhookID}: `
       + 'An outgoing webhook cannot have a token.');
   }
@@ -562,7 +626,7 @@ async function updateAddTokenLocation() {
       tokenLocation: 'test'
     };
 
-    await WebhookController.update(adminUser, null, null, null, webhookData)
+    await WebhookController.update(adminUser, webhookData)
     .should.eventually.be.rejectedWith(`Problem with update for webhook ${webhookID}: `
       + 'An outgoing webhook cannot have a tokenLocation.');
   }
@@ -584,7 +648,7 @@ async function updateInvalidResponses() {
       responses: { url: 'test' } // This is wrong because responses must be an array
     };
 
-    await WebhookController.update(adminUser, null, null, null, webhookData)
+    await WebhookController.update(adminUser, webhookData)
     .should.eventually.be.rejectedWith(`Problem with update for webhook ${webhookID}: `
       + 'Invalid responses: [[object Object]]');
 
@@ -594,7 +658,7 @@ async function updateInvalidResponses() {
       responses: [{ method: 'test' }] // This is wrong because responses must have a url
     };
 
-    await WebhookController.update(adminUser, null, null, null, webhookData)
+    await WebhookController.update(adminUser, webhookData)
     .should.eventually.be.rejectedWith(`Problem with update for webhook ${webhookID}: `
       + 'Invalid responses: [[object Object]]');
 
@@ -604,7 +668,7 @@ async function updateInvalidResponses() {
       responses: [] // This is wrong because responses cannot be empty
     };
 
-    await WebhookController.update(adminUser, null, null, null, webhookData)
+    await WebhookController.update(adminUser, webhookData)
     .should.eventually.be.rejectedWith(`Problem with update for webhook ${webhookID}: `
       + 'Invalid responses: []');
   }
@@ -623,7 +687,7 @@ async function deleteNotFound() {
     // Create a fake id for a webhook
     const webhookData = 'not a webhook id';
 
-    await WebhookController.remove(adminUser, null, null, null, webhookData)
+    await WebhookController.remove(adminUser, webhookData)
     .should.eventually.be.rejectedWith(`The following webhooks were not found: [${webhookData}].`);
   }
   catch (error) {

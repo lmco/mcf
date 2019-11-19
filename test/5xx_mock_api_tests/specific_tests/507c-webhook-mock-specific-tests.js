@@ -65,27 +65,27 @@ describe(M.getModuleName(module.filename), () => {
       const webhookData = testData.webhooks;
 
       // Org webhooks
-      let webhooks = await WebhookController.create(adminUser, org._id, null, null,
-        webhookData[0]);
+      webhookData[0].reference = { org: org._id };
+      let webhooks = await WebhookController.create(adminUser, webhookData[0]);
       orgWebhooks.push(webhooks[0]);
-      webhooks = await WebhookController.create(adminUser, org._id, null, null,
-        webhookData[1]);
+      webhookData[1].reference = { org: org._id };
+      webhooks = await WebhookController.create(adminUser, webhookData[1]);
       orgWebhooks.push(webhooks[0]);
 
       // Project webhooks
-      webhooks = await WebhookController.create(adminUser, org._id, projID, null,
-        webhookData[0]);
+      webhookData[0].reference.project = projID;
+      webhooks = await WebhookController.create(adminUser, webhookData[0]);
       projWebhooks.push(webhooks[0]);
-      webhooks = await WebhookController.create(adminUser, org._id, projID, null,
-        webhookData[1]);
+      webhookData[1].reference.project = projID;
+      webhooks = await WebhookController.create(adminUser, webhookData[1]);
       projWebhooks.push(webhooks[0]);
 
       // Branch webhooks
-      webhooks = await WebhookController.create(adminUser, org._id, projID, branchID,
-        webhookData[0]);
+      webhookData[0].reference.branch = branchID;
+      webhooks = await WebhookController.create(adminUser, webhookData[0]);
       branchWebhooks.push(webhooks[0]);
-      webhooks = await WebhookController.create(adminUser, org._id, projID, branchID,
-        webhookData[1]);
+      webhookData[1].reference.branch = branchID;
+      webhooks = await WebhookController.create(adminUser, webhookData[1]);
       branchWebhooks.push(webhooks[0]);
 
       webhookIDs.push(...orgWebhooks.map((w) => w._id),
@@ -137,7 +137,9 @@ describe(M.getModuleName(module.filename), () => {
   it('should PATCH a webhook on an org', patchOnOrg);
   it('should PATCH a webhook on a project', patchOnProject);
   it('should PATCH a webhook on a branch', patchOnBranch);
-  // Note: PATCH multiple webhooks not currently supported
+
+  // multiple
+
   // ------------ DELETE ------------
   it('should DELETE a webhook on an org', deleteOnOrg);
   it('should DELETE multiple webhooks on an org', deleteMultipleOnOrg);
@@ -155,8 +157,10 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postOnOrg(done) {
   const webhookData = testData.webhooks[2];
+  webhookData.reference = {
+    org: org._id
+  };
   // Create request object
-  webhookData.reference = org._id;
   const body = webhookData;
   const method = 'POST';
   const req = testUtils.createRequest(adminUser, {}, body, method);
@@ -170,7 +174,8 @@ function postOnOrg(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Verify response body
-    const createdWebhook = JSON.parse(_data);
+    const createdWebhooks = JSON.parse(_data);
+    const createdWebhook = createdWebhooks[0];
     chai.expect(createdWebhook.name).to.equal(webhookData.name);
     chai.expect(createdWebhook.triggers).to.deep.equal(webhookData.triggers);
     chai.expect(createdWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
@@ -202,7 +207,7 @@ function postOnOrg(done) {
   };
 
   // POSTs a webhook
-  APIController.postWebhook(req, res);
+  APIController.postWebhooks(req, res);
 }
 
 /**
@@ -212,7 +217,10 @@ function postOnOrg(done) {
  */
 function postOnProject(done) {
   const webhookData = testData.webhooks[2];
-  webhookData.reference = utils.createID(org._id, projID);
+  webhookData.reference = {
+    org: org._id,
+    project: projID
+  };
   // Create request object
   const body = webhookData;
   const method = 'POST';
@@ -227,7 +235,8 @@ function postOnProject(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Verify response body
-    const createdWebhook = JSON.parse(_data);
+    const createdWebhooks = JSON.parse(_data);
+    const createdWebhook = createdWebhooks[0];
     chai.expect(createdWebhook.name).to.equal(webhookData.name);
     chai.expect(createdWebhook.triggers).to.deep.equal(webhookData.triggers);
     chai.expect(createdWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
@@ -259,7 +268,7 @@ function postOnProject(done) {
   };
 
   // POSTs a webhook
-  APIController.postWebhook(req, res);
+  APIController.postWebhooks(req, res);
 }
 
 /**
@@ -269,7 +278,11 @@ function postOnProject(done) {
  */
 function postOnBranch(done) {
   const webhookData = testData.webhooks[2];
-  webhookData.reference = utils.createID(org._id, projID, branchID);
+  webhookData.reference = {
+    org: org._id,
+    project: projID,
+    branch: branchID
+  };
   // Create request object
   const body = webhookData;
   const method = 'POST';
@@ -284,7 +297,8 @@ function postOnBranch(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Verify response body
-    const createdWebhook = JSON.parse(_data);
+    const createdWebhooks = JSON.parse(_data);
+    const createdWebhook = createdWebhooks[0];
     chai.expect(createdWebhook.name).to.equal(webhookData.name);
     chai.expect(createdWebhook.triggers).to.deep.equal(webhookData.triggers);
     chai.expect(createdWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
@@ -316,7 +330,7 @@ function postOnBranch(done) {
   };
 
   // POSTs a webhook
-  APIController.postWebhook(req, res);
+  APIController.postWebhooks(req, res);
 }
 
 /**
@@ -328,7 +342,7 @@ function getFromOrg(done) {
   const webhookData = testData.webhooks[0];
   // Create request object
   const body = null;
-  const params = { webhookid: webhookIDs[0], orgid: org._id };
+  const params = { webhookid: webhookIDs[0] };
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -380,7 +394,7 @@ function getMultipleFromOrg(done) {
   const webhookData = orgWebhooks;
   // Create request object
   const body = orgWebhooks.map((w) => w._id);
-  const params = { orgid: org._id };
+  const params = {};
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -448,7 +462,7 @@ function getAllFromOrg(done) {
   const webhookData = orgWebhooks;
   // Create request object
   const body = null;
-  const params = { orgid: org._id };
+  const params = {};
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -516,7 +530,7 @@ function getFromProject(done) {
   const webhookData = projWebhooks[0];
   // Create request object
   const body = null;
-  const params = { webhookid: projWebhooks[0]._id, orgid: org._id, projectid: projID };
+  const params = { webhookid: projWebhooks[0]._id };
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -568,7 +582,7 @@ function getMultipleFromProject(done) {
   const webhookData = projWebhooks;
   // Create request object
   const body = projWebhooks.map((w) => w._id);
-  const params = { orgid: org._id, projectid: projID };
+  const params = {};
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -636,7 +650,7 @@ function getAllFromProject(done) {
   const webhookData = projWebhooks;
   // Create request object
   const body = null;
-  const params = { orgid: org._id, projectid: projID };
+  const params = {};
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -704,8 +718,7 @@ function getFromBranch(done) {
   const webhookData = branchWebhooks[0];
   // Create request object
   const body = null;
-  const params = {
-    webhookid: branchWebhooks[0]._id, orgid: org._id, projectid: projID, branchid: branchID };
+  const params = { webhookid: branchWebhooks[0]._id };
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -757,7 +770,7 @@ function getMultipleFromBranch(done) {
   const webhookData = branchWebhooks;
   // Create request object
   const body = branchWebhooks.map((w) => w._id);
-  const params = { orgid: org._id, projectid: projID, branchid: branchID };
+  const params = {};
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -825,7 +838,7 @@ function getAllFromBranch(done) {
   const webhookData = branchWebhooks;
   // Create request object
   const body = null;
-  const params = { orgid: org._id, projectid: projID, branchid: branchID };
+  const params = {};
   const method = 'GET';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -1036,7 +1049,6 @@ function patchOnOrg(done) {
   const webhookData = orgWebhooks[0];
   const webhookUpdate = {
     id: webhookData._id,
-    reference: org._id,
     name: 'Patch test'
   };
   // Create request object
@@ -1093,7 +1105,6 @@ function patchOnProject(done) {
   const webhookData = projWebhooks[0];
   const webhookUpdate = {
     id: webhookData._id,
-    reference: utils.createID(org._id, projID),
     name: 'Patch test'
   };
   // Create request object
@@ -1150,7 +1161,6 @@ function patchOnBranch(done) {
   const webhookData = branchWebhooks[0];
   const webhookUpdate = {
     id: webhookData._id,
-    reference: utils.createID(org._id, projID, branchID),
     name: 'Patch test'
   };
   // Create request object
@@ -1207,7 +1217,7 @@ function deleteOnOrg(done) {
   // Create request object
   const webhookID = orgWebhooks[0]._id;
   const body = null;
-  const params = { webhookid: webhookID, orgid: org._id };
+  const params = { webhookid: webhookID };
   const method = 'DELETE';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -1244,7 +1254,7 @@ function deleteMultipleOnOrg(done) {
   // Create request object
   const deleteIDs = orgWebhooks.slice(1, 3).map((w) => w._id);
   const body = deleteIDs;
-  const params = { orgid: org._id };
+  const params = {};
   const method = 'DELETE';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -1281,7 +1291,7 @@ function deleteOnProject(done) {
   // Create request object
   const webhookID = projWebhooks[0]._id;
   const body = null;
-  const params = { webhookid: webhookID, orgid: org._id, projectid: projID };
+  const params = { webhookid: webhookID };
   const method = 'DELETE';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -1318,7 +1328,7 @@ function deleteMultipleOnProject(done) {
   // Create request object
   const deleteIDs = projWebhooks.slice(1, 3).map((w) => w._id);
   const body = deleteIDs;
-  const params = { orgid: org._id, projectid: projID };
+  const params = {};
   const method = 'DELETE';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -1355,7 +1365,7 @@ function deleteOnBranch(done) {
   // Create request object
   const webhookID = branchWebhooks[0]._id;
   const body = null;
-  const params = { webhookid: webhookID, orgid: org._id, projectid: projID, branchid: branchID };
+  const params = { webhookid: webhookID };
   const method = 'DELETE';
   const req = testUtils.createRequest(adminUser, params, body, method);
 
@@ -1392,7 +1402,7 @@ function deleteMultipleOnBranch(done) {
   // Create request object
   const deleteIDs = branchWebhooks.slice(1, 3).map((w) => w._id);
   const body = deleteIDs;
-  const params = { orgid: org._id, projectid: projID, branchid: branchID };
+  const params = {};
   const method = 'DELETE';
   const req = testUtils.createRequest(adminUser, params, body, method);
 

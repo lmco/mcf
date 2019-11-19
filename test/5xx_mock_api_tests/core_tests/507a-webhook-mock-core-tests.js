@@ -49,17 +49,6 @@ describe(M.getModuleName(module.filename), () => {
     try {
       await db.connect();
       adminUser = await testUtils.createTestAdmin();
-
-      // Create webhooks for later use
-      const webhookData = testData.webhooks;
-      const webhooks0 = await WebhookController.create(adminUser, null, null, null,
-        webhookData[0]);
-      webhookIDs.push(webhooks0[0]._id);
-      webhookData[0].id = webhooks0[0]._id;
-      const webhooks1 = await WebhookController.create(adminUser, null, null, null,
-        webhookData[1]);
-      webhookIDs.push(webhooks1[0]._id);
-      webhookData[1].id = webhooks1[0]._id;
     }
     catch (error) {
       M.log.error(error);
@@ -87,14 +76,14 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute tests */
   // ------------- POST -------------
   it('should POST a webhook', postWebhook);
-  // Note: POST multiple webhooks not currently supported
+  it('should POST multiple webhooks', postWebhooks);
   // ------------- GET -------------
   it('should GET a webhook', getWebhook);
   it('should GET multiple webhooks', getWebhooks);
   it('should GET all webhooks', getAllWebhooks);
   // ------------ PATCH ------------
   it('should PATCH a webhook', patchWebhook);
-  // Note: PATCH multiple webhooks not currently supported
+  it('should PATCH multiple webhooks', patchWebhooks);
   // ------------ DELETE ------------
   it('should DELETE a webhook', deleteWebhook);
   it('should DELETE multiple webhooks', deleteWebhooks);
@@ -109,7 +98,7 @@ describe(M.getModuleName(module.filename), () => {
  * @param {Function} done - The mocha callback.
  */
 function postWebhook(done) {
-  const webhookData = testData.webhooks[2];
+  const webhookData = testData.webhooks[0];
   // Create request object
   const body = webhookData;
   const params = {};
@@ -125,7 +114,8 @@ function postWebhook(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Verify response body
-    const postedWebhook = JSON.parse(_data);
+    const postedWebhooks = JSON.parse(_data);
+    const postedWebhook = postedWebhooks[0];
     chai.expect(postedWebhook.name).to.equal(webhookData.name);
     chai.expect(postedWebhook.triggers).to.deep.equal(webhookData.triggers);
     chai.expect(postedWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
@@ -156,7 +146,80 @@ function postWebhook(done) {
   };
 
   // POSTs a webhook
-  APIController.postWebhook(req, res);
+  APIController.postWebhooks(req, res);
+}
+
+/**
+ * @description Verifies mock POST request to create a webhook.
+ *
+ * @param {Function} done - The mocha callback.
+ */
+function postWebhooks(done) {
+  const webhookData = testData.webhooks.slice(1, 3);
+  // Create request object
+  const body = webhookData;
+  const params = {};
+  const method = 'POST';
+  const req = testUtils.createRequest(adminUser, params, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    const createdWebhooks = JSON.parse(_data);
+
+    // Convert createdWebhooks to JMI type 2 for easier lookup
+    // Note: using the name field because the test data object will not have the _id field
+    const jmi2 = jmi.convertJMI(1, 2, createdWebhooks, 'name');
+
+    webhookData.forEach((webhookDataObj) => {
+      const createdWebhook = jmi2[webhookDataObj.name];
+
+      // Verify webhook created properly
+      chai.expect(createdWebhook.name).to.equal(webhookDataObj.name);
+      chai.expect(createdWebhook.type).to.equal(webhookDataObj.type);
+      chai.expect(createdWebhook.description).to.equal(webhookDataObj.description);
+      chai.expect(createdWebhook.triggers).to.deep.equal(webhookDataObj.triggers);
+      if (createdWebhook.responses.length) {
+        chai.expect(createdWebhook.responses[0].url).to.equal(webhookDataObj.responses[0].url);
+        chai.expect(createdWebhook.responses[0].method).to.equal(webhookDataObj.responses[0].method || 'POST');
+      }
+      else {
+        chai.expect(createdWebhook.token).to.equal(webhookDataObj.token);
+        chai.expect(createdWebhook.tokenLocation).to.equal(webhookDataObj.tokenLocation);
+      }
+      chai.expect(createdWebhook.reference).to.equal('');
+      chai.expect(createdWebhook.custom).to.deep.equal(webhookDataObj.custom || {});
+
+      // Verify additional properties
+      chai.expect(createdWebhook.createdBy).to.equal(adminUser._id);
+      chai.expect(createdWebhook.lastModifiedBy).to.equal(adminUser._id);
+      chai.expect(createdWebhook.createdOn).to.not.equal(null);
+      chai.expect(createdWebhook.updatedOn).to.not.equal(null);
+      chai.expect(createdWebhook.archived).to.equal(false);
+
+      // Verify specific fields not returned
+      chai.expect(createdWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
+
+      // Expect the statusCode to be 200
+      chai.expect(res.statusCode).to.equal(200);
+
+      // Save the id for later use
+      webhookIDs.push(createdWebhook.id);
+      webhookDataObj.id = createdWebhook.id;
+    });
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // POSTs multiple webhooks
+  APIController.postWebhooks(req, res);
 }
 
 /**
@@ -263,6 +326,7 @@ function getWebhooks(done) {
       chai.expect(foundWebhook.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundWebhook.createdOn).to.not.equal(null);
       chai.expect(foundWebhook.updatedOn).to.not.equal(null);
+      chai.expect(foundWebhook.archived).to.equal(false);
 
       // Verify specific fields not returned
       chai.expect(foundWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
@@ -334,6 +398,7 @@ function getAllWebhooks(done) {
       chai.expect(foundWebhook.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundWebhook.createdOn).to.not.equal(null);
       chai.expect(foundWebhook.updatedOn).to.not.equal(null);
+      chai.expect(foundWebhook.archived).to.equal(false);
 
       // Verify specific fields not returned
       chai.expect(foundWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
@@ -405,6 +470,83 @@ function patchWebhook(done) {
 
   // PATCHes a webhook
   APIController.patchWebhook(req, res);
+}
+
+/**
+ * @description Verifies mock PATCH request to update a webhook.
+ *
+ * @param {Function} done - The mocha callback.
+ */
+function patchWebhooks(done) {
+  const webhookData = testData.webhooks.slice(1, 3);
+  const webhookUpdates = [{
+    id: webhookIDs[1],
+    name: 'Patch test'
+  }, {
+    id: webhookIDs[2],
+    name: 'Patch test'
+  },
+  ];
+  // Create request object
+  const body = webhookUpdates;
+  const method = 'PATCH';
+  const req = testUtils.createRequest(adminUser, {}, body, method);
+
+  // Set response as empty object
+  const res = {};
+
+  // Verifies status code and headers
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Verify response body
+    const updatedWebhooks = JSON.parse(_data);
+
+    // Convert updatedWebhooks to JMI type 2 for easier lookup
+    const jmi2 = jmi.convertJMI(1, 2, updatedWebhooks, 'id');
+
+    webhookData.forEach((webhookDataObj) => {
+      const updatedWebhook = jmi2[webhookDataObj.id];
+
+      // Verify webhook
+      chai.expect(updatedWebhook.id).to.equal(webhookDataObj.id);
+      chai.expect(updatedWebhook.name).to.equal('Patch test');
+      chai.expect(updatedWebhook.type).to.equal(webhookDataObj.type);
+      chai.expect(updatedWebhook.description).to.equal(webhookDataObj.description);
+      chai.expect(updatedWebhook.triggers).to.deep.equal(webhookDataObj.triggers);
+      if (updatedWebhook.responses.length) {
+        chai.expect(updatedWebhook.responses[0].url).to.equal(webhookDataObj.responses[0].url);
+        chai.expect(updatedWebhook.responses[0].method).to.equal(webhookDataObj.responses[0].method || 'POST');
+      }
+      else {
+        chai.expect(updatedWebhook.token).to.equal(webhookDataObj.token);
+        chai.expect(updatedWebhook.tokenLocation).to.equal(webhookDataObj.tokenLocation);
+      }
+      chai.expect(updatedWebhook.reference).to.equal('');
+      chai.expect(updatedWebhook.custom).to.deep.equal(webhookDataObj.custom || {});
+
+      // Verify additional properties
+      chai.expect(updatedWebhook.createdBy).to.equal(adminUser._id);
+      chai.expect(updatedWebhook.lastModifiedBy).to.equal(adminUser._id);
+      chai.expect(updatedWebhook.createdOn).to.not.equal(null);
+      chai.expect(updatedWebhook.updatedOn).to.not.equal(null);
+      chai.expect(updatedWebhook.archived).to.equal(false);
+
+      // Verify specific fields not returned
+      chai.expect(updatedWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
+        '__v', '_id');
+    });
+
+    // Expect the statusCode to be 200
+    chai.expect(res.statusCode).to.equal(200);
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // PATCHes multiple webhooks
+  APIController.patchWebhooks(req, res);
 }
 
 /**
@@ -501,18 +643,18 @@ function triggerWebhook(done) {
   });
 
   // Create the incoming webhook
-  WebhookController.create(adminUser, null, null, null, webhookData)
+  WebhookController.create(adminUser, webhookData)
   .then((incomingWebhooks) => {
     // Get the base64 of the webhook id
     const triggerID = incomingWebhooks[0]._id;
-    const base64ID = Buffer.from(triggerID).toString('base64');
+    const encodedID = Buffer.from(triggerID).toString('base64');
 
     // Create request object
     const body = {
       test: { token: 'test token' },
       data: 'test data'
     };
-    const params = { base64id: base64ID };
+    const params = { encodedid: encodedID };
     const method = 'POST';
     const req = testUtils.createRequest(adminUser, params, body, method);
 

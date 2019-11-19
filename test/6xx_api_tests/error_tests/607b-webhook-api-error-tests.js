@@ -49,7 +49,7 @@ describe(M.getModuleName(module.filename), () => {
 
       // Create an incoming webhook for the trigger tests
       const webhookData = testData.webhooks[1];
-      const webhooks = await WebhookController.create(adminUser, null, null, null, webhookData);
+      const webhooks = await WebhookController.create(adminUser, webhookData);
       incomingWebhookID = webhooks[0]._id;
     }
     catch (error) {
@@ -80,14 +80,16 @@ describe(M.getModuleName(module.filename), () => {
   // ------------- No Requesting User -------------
   it('should reject a GET webhooks request with no requesting user', noReqUser('GET', false));
   it('should reject a GET webhook request with no requesting user', noReqUser('GET', true));
-  it('should reject a POST webhook request with no requesting user', noReqUser('POST', false));
+  it('should reject a POST webhooks request with no requesting user', noReqUser('POST', false));
+  it('should reject a PATCH webhooks request with no requesting user', noReqUser('PATCH', false));
   it('should reject a PATCH webhook request with no requesting user', noReqUser('PATCH', true));
   it('should reject a DELETE webhooks request with no requesting user', noReqUser('DELETE', false));
   it('should reject a DELETE webhook request with no requesting user', noReqUser('DELETE', true));
   // ------------- Invalid options -------------
   it('should reject a GET webhooks request with invalid options', invalidOptions('GET', false));
   it('should reject a GET webhook request with invalid options', invalidOptions('GET', true));
-  it('should reject a POST webhook request with invalid options', invalidOptions('POST', false));
+  it('should reject a POST webhooks request with invalid options', invalidOptions('POST', false));
+  it('should reject a PATCH webhooks request with invalid options', invalidOptions('PATCH', false));
   it('should reject a PATCH webhook request with invalid options', invalidOptions('PATCH', true));
   it('should reject a DELETE webhooks request with invalid options', invalidOptions('DELETE', false));
   it('should reject a DELETE webhook request with invalid options', invalidOptions('DELETE', true));
@@ -95,12 +97,12 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a PATCH webhook request with conflicting ids in the body and url', conflictingIDs('PATCH', true));
   // ------------- 404 Not Found -------------
   it('should return 404 for a GET webhooks request that returned no results', notFound('GET', false));
-  it('should return 404 for a GET webhook request for a nonexistent user', notFound('GET', true));
-  it('should return 404 for a PATCH webhook request for a nonexistent user', notFound('PATCH', true));
-  it('should return 404 for a DELETE webhooks request for a nonexistent user', notFound('DELETE', false));
-  it('should return 404 for a DELETE webhook request for a nonexistent user', notFound('DELETE', true));
+  it('should return 404 for a GET webhook request that returned no results', notFound('GET', true));
+  it('should return 404 for a PATCH webhooks request for nonexistent webhooks', notFound('PATCH', false));
+  it('should return 404 for a PATCH webhook request for a nonexistent webhook', notFound('PATCH', true));
+  it('should return 404 for a DELETE webhooks request for nonexistent webhooks', notFound('DELETE', false));
+  it('should return 404 for a DELETE webhook request for a nonexistent webhook', notFound('DELETE', true));
   // ------------- No arrays in singular endpoints -------------
-  it('should reject a POST singular webhook request containing an array in the body', noArrays('POST'));
   it('should reject a PATCH singular webhook request containing an array in the body', noArrays('PATCH'));
   //  ------------- Trigger -------------
   it('should reject a POST request to trigger a webhook if the token cannot be found', tokenNotFound);
@@ -268,12 +270,8 @@ function notFound(method, singular) {
   if (method === 'GET' && singular === true) {
     message = `Webhook [${webhookID}] not found.`;
   }
-  else if (method === 'PATCH') {
-    message = 'The following webhooks were not found at the specified reference level [server-wide]: '
-      + `[${webhookID}]`;
-  }
-  else if (method === 'DELETE') {
-    message = `The following webhooks were not found: [${webhookID}].`;
+  else if (method === 'PATCH' || method === 'DELETE') {
+    message = `The following webhooks were not found: [${webhookID}]`;
   }
 
   // Create the customized mocha function

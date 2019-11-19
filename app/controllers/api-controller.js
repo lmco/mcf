@@ -5665,8 +5665,7 @@ async function getWebhooks(req, res) {
 
   try {
     // Find webhooks
-    const webhooks = await WebhookController.find(req.user, org, project, branch, webhookIDs,
-      options);
+    const webhooks = await WebhookController.find(req.user, webhookIDs, options);
 
     // Get public data of webhooks
     const webhooksPublicData = sani.html(
@@ -5704,9 +5703,6 @@ async function postWebhooks(req, res) {
   // Define options
   let options;
   let minified = false;
-  let org = null;
-  let project = null;
-  let branch = null;
 
   // Define valid option and its parsed type
   const validOptions = {
@@ -5740,12 +5736,11 @@ async function postWebhooks(req, res) {
 
   try {
     // Create the webhook with provided parameters
-    const webhooks = await WebhookController.create(req.user, org, project, branch, req.body,
-      options);
+    const webhooks = await WebhookController.create(req.user, req.body, options);
 
     // Get the webhooks' public data
     const webhookPublicData = sani.html(
-      publicData.getPublicData(webhooks, 'webhook', options)
+      webhooks.map((w) => publicData.getPublicData(w, 'webhook', options))
     );
 
     // Format JSON
@@ -5774,9 +5769,6 @@ async function patchWebhooks(req, res) {
   // Define options
   let options;
   let minified = false;
-  let org;
-  let project;
-  let branch;
 
   // Define valid option type
   const validOptions = {
@@ -5810,12 +5802,11 @@ async function patchWebhooks(req, res) {
 
   try {
     // Updates the specified webhooks
-    const webhooks = await WebhookController.update(req.user, org, project, branch, req.body,
-      options);
+    const webhooks = await WebhookController.update(req.user, req.body, options);
 
     // Get the webhooks' public data
     const webhookPublicData = sani.html(
-      publicData.getPublicData(webhooks, 'webhook', options)
+      webhooks.map((w) => publicData.getPublicData(w, 'webhook', options))
     );
 
     // Format JSON
@@ -5871,21 +5862,6 @@ async function deleteWebhooks(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // Extract org, project, and branch from params
-  if (req.params.hasOwnProperty('orgid')) org = req.params.orgid;
-  if (req.params.hasOwnProperty('projectid')) project = req.params.projectid;
-  if (req.params.hasOwnProperty('branchid')) branch = req.params.branchid;
-  if (!req.query.hasOwnProperty('server') && !org && !project && !branch) {
-    // Set server true by default if no org, project, or branch is being searched for.
-    // The user must explicitly set server to false and query /api/webhooks if they
-    // want to search through every webhook.
-    options.server = true;
-  }
-  else if (req.query.hasOwnProperty('server') && (org || project || branch)) {
-    // if there is an org, project, or branch specified, server is not an option
-    delete options.server;
-  }
-
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
@@ -5894,8 +5870,7 @@ async function deleteWebhooks(req, res) {
 
   try {
     // Remove the specified webhooks
-    const webhooks = await WebhookController.remove(req.user, org, project, branch, req.body,
-      options);
+    const webhooks = await WebhookController.remove(req.user, req.body, options);
 
     // Format JSON
     const json = formatJSON(webhooks, minified);
@@ -5923,9 +5898,6 @@ async function getWebhook(req, res) {
   // Define options
   let options;
   let minified = false;
-  let org;
-  let project;
-  let branch;
 
   // Define valid option type
   const validOptions = {
@@ -5953,21 +5925,6 @@ async function getWebhook(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // Extract org, project, and branch from params
-  if (req.params.hasOwnProperty('orgid')) org = req.params.orgid;
-  if (req.params.hasOwnProperty('projectid')) project = req.params.projectid;
-  if (req.params.hasOwnProperty('branchid')) branch = req.params.branchid;
-  if (!req.query.hasOwnProperty('server') && !org && !project && !branch) {
-    // Set server true by default if no org, project, or branch is being searched for.
-    // The user must explicitly set server to false and query /api/webhooks if they
-    // want to search through every webhook.
-    options.server = true;
-  }
-  else if (req.query.hasOwnProperty('server') && (org || project || branch)) {
-    // if there is an org, project, or branch specified, server is not an option
-    delete options.server;
-  }
-
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
@@ -5976,8 +5933,7 @@ async function getWebhook(req, res) {
 
   try {
     // Find the webhook
-    const webhooks = await WebhookController.find(req.user, org, project, branch,
-      req.params.webhookid, options);
+    const webhooks = await WebhookController.find(req.user, req.params.webhookid, options);
 
     // If no webhook was found, return 404
     if (webhooks.length === 0) {
@@ -6018,9 +5974,6 @@ async function patchWebhook(req, res) {
   // Define options
   let options;
   let minified = false;
-  let org;
-  let project;
-  let branch;
 
   // Define valid option type
   const validOptions = {
@@ -6062,20 +6015,6 @@ async function patchWebhook(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // Extract org, project, and branch from reference field of webhook object
-  if (req.body.hasOwnProperty('reference')) {
-    try {
-      const ids = utils.parseID(req.body.reference);
-      if (ids.length > 0) org = ids.shift();
-      if (ids.length > 0) project = ids.shift();
-      if (ids.length > 0) branch = ids.shift();
-      delete req.body.reference;
-    }
-    catch (error) {
-      throw new M.DataFormatError('Reference field improperly formatted', 'warn');
-    }
-  }
-
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
@@ -6084,8 +6023,7 @@ async function patchWebhook(req, res) {
 
   try {
     // Updates the specified webhook
-    const webhooks = await WebhookController.update(req.user, org, project, branch, req.body,
-      options);
+    const webhooks = await WebhookController.update(req.user, req.body, options);
     const webhook = webhooks[0];
 
     // Get the webhook public data
@@ -6172,8 +6110,7 @@ async function deleteWebhook(req, res) {
 
   try {
     // Remove the specified webhook
-    const webhooks = await WebhookController.remove(req.user, org, project, branch,
-      req.params.webhookid, options);
+    const webhooks = await WebhookController.remove(req.user, req.params.webhookid, options);
 
     // Format JSON
     const json = formatJSON(webhooks, minified);
@@ -6202,9 +6139,7 @@ async function triggerWebhook(req, res) {
   const webhookID = Buffer.from(req.params.encodedid, 'base64').toString('ascii');
 
   try {
-    // Note: this will search for ANY webhook in the database
-    const webhooks = await WebhookController.find(req.user, null, null, null, webhookID,
-      { server: false });
+    const webhooks = await WebhookController.find(req.user, webhookID);
     const webhook = webhooks[0];
 
     // Sanity check: ensure the webhook is incoming and has a token and tokenLocation field
