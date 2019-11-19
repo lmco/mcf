@@ -691,7 +691,7 @@ function deleteBlob(user, org, project) {
 }
 
 /**
- * @description Verifies if user has permission to create webhooks.
+ * @description Verifies that the user has permission to create webhooks.
  *
  * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object to check permissions on.
@@ -724,7 +724,7 @@ function createWebhook(user, org = null, project = null, branch = null) {
 }
 
 /**
- * @description Verifies if user has permission to read webhooks.
+ * @description Verifies that the user has permission to read webhooks.
  *
  * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object to check permissions on.
@@ -757,7 +757,7 @@ function readWebhook(user, org = null, project = null, branch = null) {
 }
 
 /**
- * @description Verifies if user has permission to update webhooks.
+ * @description Verifies that the user has permission to update webhooks.
  *
  * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object to check permissions on.
@@ -790,7 +790,7 @@ function updateWebhook(user, org = null, project = null, branch = null) {
 }
 
 /**
- * @description Verifies if user has permission to delete webhooks.
+ * @description Verifies that the user has permission to delete webhooks.
  *
  * @param {User} user - The user object to check permissions for.
  * @param {Organization} org - The org object to check permissions on.
