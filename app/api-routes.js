@@ -76,6 +76,7 @@ api.get('/doc/swagger.json',
   Middleware.logRoute,
   APIController.swaggerJSON);
 
+
 /**
  * @swagger
  * /api/login:
@@ -104,6 +105,7 @@ api.route('/login')
   AuthController.doLogin,
   APIController.login
 );
+
 
 /**
  * @swagger
@@ -2209,6 +2211,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches')
   APIController.deleteBranches
 );
 
+
 /**
  * @swagger
  * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}:
@@ -3892,6 +3895,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
   APIController.deleteElement
 );
 
+
 /**
  * @swagger
  * /api/orgs/{orgid}/projects/{projectid}/artifacts/blob:
@@ -4498,6 +4502,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
   APIController.deleteArtifacts
 );
 
+
 /**
  * @swagger
  * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/artifacts/{artifactid}:
@@ -4848,6 +4853,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
   APIController.deleteArtifact
 );
 
+
 /**
  * @swagger
  * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/artifacts/{artifactid}/blob:
@@ -4909,6 +4915,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
   Middleware.logRoute,
   APIController.getBlobById
 );
+
 
 /**
  * @swagger
@@ -5924,6 +5931,7 @@ api.route('/users/:username/password')
   APIController.patchPassword
 );
 
+
 /**
  * @swagger
  * /api/webhooks:
@@ -5950,11 +5958,24 @@ api.route('/users/:username/password')
  *                      user has access to are found.
  *         in: query
  *         type: string
- *       - name: server
- *         description: A boolean to specify whether to search for server-level
- *                      webhooks. Defaults to true if no org, project, or branch
- *                      is specified. Must explicitly be set to false if the
- *                      user wants to return every available webhook.
+ *       - name: org
+ *         description: The ID of an org to query on. If provided, only returns
+ *                      webhooks registered to the org, unless project and/or
+ *                      branch are also provided.
+ *         in: query
+ *         type: boolean
+ *         required: false
+ *        - name: project
+ *         description: The ID of a project to query on. If provided, only returns
+ *                      webhooks registered to the project, unless a branch is
+ *                      also provided. An org must be provided with this option.
+ *         in: query
+ *         type: boolean
+ *         required: false
+ *       - name: branch
+ *         description: The ID of a branch to query on. If provided, only returns
+ *                      webhooks registered to the branch. Both an org and a project
+ *                      must be provided with this option.
  *         in: query
  *         type: boolean
  *         required: false
@@ -6116,10 +6137,18 @@ api.route('/users/:username/password')
  *               description: A dot-delimited string specifying where to find the
  *                            token in the external request.
  *             reference:
- *               type: string
- *               description: The id of the org, project, or branch the webhook is
- *                            registered to. An empty string indicates a server-
- *                            level webhook.
+ *               type: object
+ *               description: An object defining the namespace of the webhook.
+ *               properties:
+ *                 org:
+ *                   type: string
+ *                   description: An org ID.
+ *                 project:
+ *                   type: string
+ *                   description: A project ID.
+ *                 branch:
+ *                   type: string
+ *                   description: A branch ID.
  *             custom:
  *               type: object
  *       - name: populate
@@ -6222,11 +6251,6 @@ api.route('/users/:username/password')
  *                 type: string
  *                 description: A dot-delimited string specifying where to find the
  *                              token in the external request.
- *             reference:
- *                 type: string
- *                 description: The id of the org, project, or branch the webhook is
- *                              registered to. An empty string indicates a server-
- *                              level webhook.
  *             custom:
  *               type: object
  *             archived:
@@ -6386,11 +6410,27 @@ api.route('/webhooks/trigger/:encodedid')
  *         in: path
  *         required: true
  *         type: string
- *       - name: server
- *         description: A boolean to specify whether to search for server-level
- *                      webhooks. Defaults to true if no org, project, or branch
- *                      is specified. Must explicitly be set to false if the
- *                      user wants to return every available webhook.
+ *       - name: org
+ *         description: The ID of an org to query on. If provided, only returns
+ *                      webhooks registered to the org, unless project and/or
+ *                      branch are also provided.
+ *         in: query
+ *         type: boolean
+ *         required: false
+ *        - name: project
+ *         description: The ID of a project to query on. If provided, only returns
+ *                      webhooks registered to the project, unless a branch is
+ *                      also provided. An org must be provided with this option.
+ *         in: query
+ *         type: boolean
+ *         required: false
+ *       - name: branch
+ *         description: The ID of a branch to query on. If provided, only returns
+ *                      webhooks registered to the branch. Both an org and a project
+ *                      must be provided with this option.
+ *         in: query
+ *         type: boolean
+ *         required: false
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy]
@@ -6500,11 +6540,6 @@ api.route('/webhooks/trigger/:encodedid')
  *                 type: string
  *                 description: A dot-delimited string specifying where to find the
  *                              token in the external request.
- *             reference:
- *                 type: string
- *                 description: The id of the org, project, or branch the webhook is
- *                              registered to. An empty string indicates a server-
- *                              level webhook.
  *             custom:
  *               type: object
  *             archived:
@@ -6601,6 +6636,7 @@ api.route('/webhooks/:webhookid')
   Middleware.logRoute,
   APIController.deleteWebhook
 );
+
 
 // Catches any invalid api route not defined above.
 api.use('*', APIController.invalidRoute);
