@@ -1767,7 +1767,7 @@ async function search(requestingUser, organizationID, projectID, branchID, query
     // Permissions check
     permissions.readElement(reqUser, organization, project, branch);
 
-    searchQuery.$text = { $search: query };
+    searchQuery.$text = query;
     // If the includeArchived field is true, remove archived from the query; return everything
     if (validatedOptions.includeArchived) {
       delete searchQuery.archived;

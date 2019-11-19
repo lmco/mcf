@@ -191,7 +191,7 @@ async function createDefaultOrganization() {
  * @description Creates a default admin if a global admin does not already exist.
  * @async
  *
- * @returns {Promise} Resolves an empty promise upon completion.
+ * @returns {Promise} Returns an empty promise upon completion.
  */
 async function createDefaultAdmin() {
   try {

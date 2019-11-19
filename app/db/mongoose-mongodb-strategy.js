@@ -383,6 +383,9 @@ class Model {
 
     // Handle text search
     if (Object.keys(filter).includes('$text')) {
+      // Modify to user proper mongoDB format, { $text: { $search: 'query-string' } }
+      filter.$text = { $search: filter.$text };
+
       // If there is already a projection defined
       if (projection) {
         const newProj = {};
@@ -564,7 +567,7 @@ class Model {
         this.validateQuery(query[k]);
       }
 
-      const validKeys = ['$in', '$search', '$text'];
+      const validKeys = ['$in', '$text', '$all'];
       // If the key starts with '$' and is not in the validKeys array, throw an error
       if (k.startsWith('$') && !validKeys.includes(k)) {
         throw new M.ServerError(`The mongo keyword ${k} is no longer supported`

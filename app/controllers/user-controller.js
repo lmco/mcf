@@ -789,7 +789,7 @@ async function remove(requestingUser, users, options) {
 
     // Create memberQuery
     foundUsers.forEach((user) => {
-      memberQuery[`permissions.${user._id}`] = 'read';
+      memberQuery[`permissions.${user._id}`] = { $all: ['read'] };
     });
 
     // Check that user can remove each user
@@ -925,7 +925,7 @@ async function search(requestingUser, query, options) {
     }
 
     // Add text to search query
-    searchQuery.$text = { $search: query };
+    searchQuery.$text = query;
     // If the includeArchived field is true, remove archived from the query; return everything
     if (validatedOptions.includeArchived) {
       delete searchQuery.archived;
