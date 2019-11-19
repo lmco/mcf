@@ -235,26 +235,19 @@ WebhookSchema.plugin(extensions);
  * @memberOf WebhookSchema
  */
 WebhookSchema.static('sendRequests', function(webhook, data) {
-  // Verify that the webhook matches the org, project, or branch of the data or that this is
-  // a generic, server-wide webbhook
-  if ((webhook.org && webhook.org === data.org)
-    || (webhook.project && webhook.project === data.project)
-    || (webhook.branch && webhook.branch === data.branch)
-    || (!webhook.org && !webhook.project && !webhook.branch)) {
-    // For every response in the webhook responses list
-    webhook.responses.forEach((response) => {
-      const options = {
-        url: response.url,
-        headers: response.headers,
-        method: response.method,
-        body: JSON.stringify(response.data || data || undefined)
-      };
-      if (response.ca) options.ca = response.ca;
-      if (response.token) options.token = response.token;
-      // Send an HTTP request to given URL
-      request(options);
-    });
-  }
+  // For every response in the webhook responses list
+  webhook.responses.forEach((response) => {
+    const options = {
+      url: response.url,
+      headers: response.headers,
+      method: response.method,
+      body: JSON.stringify(response.data || data || undefined)
+    };
+    if (response.ca) options.ca = response.ca;
+    if (response.token) options.token = response.token;
+    // Send an HTTP request to given URL
+    request(options);
+  });
 });
 
 /**
