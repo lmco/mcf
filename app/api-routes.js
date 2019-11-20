@@ -5938,7 +5938,7 @@ api.route('/users/:username/password')
  *   get:
  *     tags:
  *       - webhooks
- *     description: Finds and returns webhooks from an array of ids. If no array
+ *     description: Finds and returns webhooks from an array of ids. If no array is
  *                  provided, returns every webhook the requesting user has access
  *                  to.
  *     produces:
@@ -5963,21 +5963,21 @@ api.route('/users/:username/password')
  *                      webhooks registered to the org, unless project and/or
  *                      branch are also provided.
  *         in: query
- *         type: boolean
+ *         type: string
  *         required: false
  *       - name: project
  *         description: The ID of a project to query on. If provided, only returns
  *                      webhooks registered to the project, unless a branch is
  *                      also provided. An org must be provided with this option.
  *         in: query
- *         type: boolean
+ *         type: string
  *         required: false
  *       - name: branch
  *         description: The ID of a branch to query on. If provided, only returns
  *                      webhooks registered to the branch. Both an org and a project
  *                      must be provided with this option.
  *         in: query
- *         type: boolean
+ *         type: string
  *         required: false
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
@@ -6200,7 +6200,7 @@ api.route('/users/:username/password')
  *                  body. Webhooks that are currently archived must first
  *                  be unarchived before making any other updates. The following
  *                  fields can be updated [name, description, archived,
- *                  triggers, requestsm token, tokenLocation].
+ *                  triggers, requests, token, tokenLocation].
  *     produces:
  *       - application/json
  *     parameters:

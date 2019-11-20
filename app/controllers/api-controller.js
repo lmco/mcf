@@ -6097,6 +6097,11 @@ async function triggerWebhook(req, res) {
 
   try {
     const webhooks = await WebhookController.find(req.user, webhookID);
+
+    if (webhooks.length < 1) {
+      throw new M.NotFoundError('No webhooks found', 'warn');
+    }
+
     const webhook = webhooks[0];
 
     // Sanity check: ensure the webhook is incoming and has a token and tokenLocation field
