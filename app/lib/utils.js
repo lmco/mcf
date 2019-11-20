@@ -292,7 +292,7 @@ module.exports.validateOptions = function(options, validOptions, model) {
       break;
     case 'Element':
       validSearchOptions = ['parent', 'source', 'target', 'type', 'name', 'createdBy',
-        'lastModifiedBy', 'archived', 'archivedBy'];
+        'lastModifiedBy', 'archived', 'archivedBy', 'artifact'];
       // Set populateString to include require virtuals
       validatedOptions.populateString = 'contains sourceOf targetOf ';
       break;

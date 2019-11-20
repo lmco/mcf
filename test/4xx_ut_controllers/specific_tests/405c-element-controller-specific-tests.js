@@ -36,6 +36,9 @@ let org = null;
 const projIDs = [];
 let branchID = null;
 let elements = [];
+let artifacts = null;
+let artifactID = null;
+
 
 /* --------------------( Main )-------------------- */
 /**
@@ -76,8 +79,19 @@ describe(M.getModuleName(module.filename), () => {
       // Add project to array of created projects
       projIDs.push(utils.parseID(intProj[0]._id).pop());
 
+      // Create artifact
+      artifacts = await testUtils.createTestArt(adminUser, org._id, projIDs[0], branchID);
+      artifactID = utils.parseID(artifacts._id).pop();
+
       // Create test elements for the main project
       const elems = testData.elements;
+
+      // Set element with artifact reference
+      elems[5].artifact = artifactID;
+      elems[10].artifact = artifactID;
+      elems[11].artifact = artifactID;
+      elems[12].artifact = artifactID;
+
       elements = await ElementController.create(adminUser, org._id, projIDs[0], branchID, elems);
       // Sort the elements; they will be returned out of order if custom id validators are used
       elements = elements.sort((a, b) => {
@@ -124,6 +138,7 @@ describe(M.getModuleName(module.filename), () => {
     + ' from find()', optionSkipFind);
   it('should sort find results', optionSortFind);
   it('should return every parent up to root with the rootpath option', optionRootpathFind);
+  it('should find an element via artifact reference', findArtifactRef);
   // ------------- Create -------------
   it('should create an archived element', createArchivedElement);
   it('should create an element whose source is on a different project', createExternalSource);
@@ -152,6 +167,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should return a second batch of elements with the limit and skip option '
     + 'from search()', optionSkipSearch);
   it('should sort search results', optionSortSearch);
+  it('should search element via artifact reference.', artRefSearch);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -482,6 +498,35 @@ async function optionRootpathFind() {
     chai.expect(foundIDs).to.include(elements[1]._id);
     chai.expect(foundIDs).to.include(elements[2]._id);
     chai.expect(foundIDs).to.include(elements[4]._id);
+  }
+  catch (error) {
+    M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that an element can be found by artifact reference.
+ */
+async function findArtifactRef() {
+  try {
+    const elemID = utils.parseID(elements[5]._id).pop();
+    // Create the options object
+    const options = { artifact: artifactID };
+
+    // Find element with artifact reference
+    const foundElements = await ElementController.find(adminUser, org._id, projIDs[0],
+      branchID, elemID, options);
+
+    // Verify output
+    chai.expect(foundElements.length).to.equal(1);
+    chai.expect(foundElements[0]._id).to.equal(
+      utils.createID(org._id, projIDs[0], branchID, elemID)
+    );
+    chai.expect(foundElements[0].artifact).to.equal(
+      utils.createID(org._id, projIDs[0], branchID, artifactID)
+    );
   }
   catch (error) {
     M.log.error(error.message);
@@ -1266,6 +1311,35 @@ async function optionSortSearch() {
   }
   catch (error) {
     M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Validates that an element can be searched by artifact reference.
+ */
+async function artRefSearch() {
+  try {
+    // Create the options object
+    const options = { artifact: artifactID };
+
+    // Create the text string to search for, should find more than 2 elements
+    const query = 'batch';
+
+    // Search for elements
+    const foundElements = await ElementController.search(adminUser, org._id, projIDs[0],
+      branchID, query, options);
+
+    // Verify output
+    chai.expect(foundElements.length).to.equal(1);
+
+    chai.expect(foundElements[0].artifact).to.equal(
+      utils.createID(org._id, projIDs[0], branchID, artifactID)
+    );
+  }
+  catch (error) {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
   }

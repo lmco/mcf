@@ -83,11 +83,11 @@ const ArtifactSchema = new db.Schema({
   },
   description: {
     type: 'String',
-    default: null
+    default: ''
   },
   size: {
     type: 'Number',
-    default: null
+    default: 0
   },
   project: {
     type: 'String',
