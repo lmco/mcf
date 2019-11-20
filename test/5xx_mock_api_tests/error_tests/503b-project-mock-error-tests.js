@@ -259,7 +259,7 @@ function notFound(endpoint) {
     const body = (endpoint === 'deleteProjects' || endpoint === 'getProjects')
       ? [id] : { id: id };
     const params = { orgid: org._id };
-    // Add in a params field for singular user endpoints
+    // Add in a params field for singular project endpoints
     if (!endpoint.includes('Projects') && endpoint.includes('Project')) {
       params.projectid = id;
     }
@@ -286,8 +286,8 @@ function notFound(endpoint) {
 }
 
 /**
- * @description A constructor for a dynamic mocha-compatible function that tests singular user api
- * endpoints given an array of usernames in the body.
+ * @description A constructor for a dynamic mocha-compatible function that tests singular project
+ * api endpoints given an array in the body.
  *
  * @param {string} endpoint - The particular api endpoint to test.
  * @returns {Function} A function for mocha to use to test a specific api endpoint.
