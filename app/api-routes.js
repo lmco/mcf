@@ -2570,7 +2570,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      parent, source, target, project]
+ *                      parent, source, target, project, artifact]
  *         in: query
  *         type: string
  *         required: false
@@ -2657,6 +2657,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
  *                      notation. For example, custom.hello.
  *         in: query
  *         type: string
+ *       - name: artifact
+ *         description: Search for elements which reference a specific artifact.
+ *         in: query
+ *         type: string
  *     responses:
  *       200:
  *         description: OK, Succeeded to GET elements, returns elements public
@@ -2734,7 +2738,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
  *                      parent, source, target, project, branch, sourceOf,
- *                      targetOf, contains]
+ *                      targetOf, contains, artifact]
  *         in: query
  *         type: string
  *         required: false
@@ -2755,7 +2759,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, documentation, lastModifiedBy, name,
  *                      org, parent, project, source, target, type, updatedOn,
- *                      branch]
+ *                      branch, aritfact]
  *         in: query
  *         type: string
  *       - name: limit
@@ -2834,6 +2838,10 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *         description: Search for a specific key/value pair in the custom data.
  *                      To find a specific key, separate the keys using dot
  *                      notation. For example, custom.hello
+ *         in: query
+ *         type: string
+ *       - name: artifact
+ *         description: Search for elements which reference a specific artifact.
  *         in: query
  *         type: string
  *     responses:
@@ -2937,6 +2945,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                 default: ''
  *               custom:
  *                 type: object
+ *               artifact:
+ *                 type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
@@ -2952,7 +2962,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, documentation, lastModifiedBy, name,
  *                      org, parent, project, source, target, type, updatedOn,
- *                      branch]
+ *                      branch, artifact]
  *         in: query
  *         type: string
  *       - name: minified
@@ -3066,11 +3076,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                 default: ''
  *               custom:
  *                 type: object
+ *               artifact:
+ *                 type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
  *                      parent, source, target, project, branch, sourceOf,
- *                      targetOf, contains]
+ *                      targetOf, contains, artifact]
  *         in: query
  *         type: string
  *         required: false
@@ -3081,7 +3093,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, documentation, lastModifiedBy, name,
  *                      org, parent, project, source, target, type, updatedOn,
- *                      branch]
+ *                      branch, artifact]
  *         in: query
  *         type: string
  *       - name: minified
@@ -3195,11 +3207,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                              is completely replaced.
  *               archived:
  *                 type: boolean
+ *               artifact:
+ *                 type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
  *                      parent, source, target, project, branch, sourceOf,
- *                      targetOf, contains]
+ *                      targetOf, contains, artifact]
  *         in: query
  *         type: string
  *         required: false
@@ -3210,7 +3224,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, documentation, lastModifiedBy, name,
  *                      org, parent, project, source, target, type, updatedOn,
- *                      branch]
+ *                      branch, artifact]
  *         in: query
  *         type: string
  *       - name: minified
@@ -3358,7 +3372,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
  *                      parent, source, target, project, branch, sourceOf,
- *                      targetOf, contains]
+ *                      targetOf, contains, artifact]
  *         in: query
  *         type: string
  *         required: false
@@ -3380,7 +3394,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, documentation, lastModifiedBy, name,
  *                      org, parent, project, source, target, type, updatedOn,
- *                      branch]
+ *                      branch, artifact]
  *         in: query
  *         type: string
  *       - name: minified
@@ -3502,11 +3516,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               default: ''
  *             custom:
  *               type: object
+ *             artifact:
+ *               type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
  *                      parent, source, target, project, branch, sourceOf,
- *                      targetOf, contains]
+ *                      targetOf, contains, artifact]
  *         in: query
  *         type: string
  *         required: false
@@ -3517,7 +3533,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, documentation, lastModifiedBy, name,
  *                      org, parent, project, source, target, type, updatedOn,
- *                      branch]
+ *                      branch, artifact]
  *         in: query
  *         type: string
  *       - name: minified
@@ -3634,11 +3650,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *               default: ''
  *             custom:
  *               type: object
+ *             artifact:
+ *               type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
  *                      parent, source, target, project, branch, sourceOf,
- *                      targetOf, contains]
+ *                      targetOf, contains, artifact]
  *         in: query
  *         type: string
  *         required: false
@@ -3649,7 +3667,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, documentation, lastModifiedBy, name,
  *                      org, parent, project, source, target, type, updatedOn,
- *                      branch]
+ *                      branch, artifact]
  *
  *         in: query
  *         type: string
@@ -3761,11 +3779,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                            is completely replaced.
  *             archived:
  *               type: boolean
+ *             artifact:
+ *               type: string
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
  *                      parent, source, target, project, branch, sourceOf,
- *                      targetOf, contains]
+ *                      targetOf, contains, artifact]
  *         in: query
  *         type: string
  *         required: false
@@ -3776,7 +3796,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, documentation, lastModifiedBy, name,
  *                      org, parent, project, source, target, type, updatedOn,
- *                      branch]
+ *                      branch, artifact]
  *
  *         in: query
  *         type: string
