@@ -253,7 +253,7 @@ function notFound(endpoint) {
   // Body must be an array of ids for get and delete; key-value pair for anything else
   const body = (endpoint === 'deleteOrgs' || endpoint === 'getOrgs')
     ? [id] : { id: id };
-  // Add in a params field for singular user endpoints
+  // Add in a params field for singular org endpoints
   let params = {};
   if (!endpoint.includes('Orgs') && endpoint.includes('Org')) {
     params = { orgid: id };
@@ -269,7 +269,6 @@ function notFound(endpoint) {
 
     // Verifies the response data
     res.send = function send(_data) {
-      //console.log(_data)
       // Expect the statusCode to be 404
       res.statusCode.should.equal(404);
 
@@ -283,8 +282,8 @@ function notFound(endpoint) {
 }
 
 /**
- * @description A constructor for a dynamic mocha-compatible function that tests singular user api
- * endpoints given an array of usernames in the body.
+ * @description A constructor for a dynamic mocha-compatible function that tests singular org api
+ * endpoints given an array in the body.
  *
  * @param {string} endpoint - The particular api endpoint to test.
  * @returns {Function} A function for mocha to use to test a specific api endpoint.
