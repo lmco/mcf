@@ -168,7 +168,8 @@ async function createDefaultOrganization() {
       // to permissions list
       const defaultOrg = {
         _id: M.config.server.defaultOrganizationId,
-        name: M.config.server.defaultOrganizationName
+        name: M.config.server.defaultOrganizationName,
+        permissions: {}
       };
 
       // Add each existing user to default org
