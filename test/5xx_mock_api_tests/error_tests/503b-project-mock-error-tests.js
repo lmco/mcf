@@ -109,7 +109,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a PATCH project request with conflicting ids in the body and url', conflictingIDs('patchProject'));
   it('should reject a PUT project request with conflicting ids in the body and url', conflictingIDs('putProject'));
   // ------------- 404 Not Found -------------
-  it('should return 404 for a GET projects request that returned no results', notFound('getProject'));
+  it('should return 404 for a GET projects request that returned no results', notFound('getProjects'));
   it('should return 404 for a GET project request that returned no results', notFound('getProject'));
   it('should return 404 for a GET all projects request that returned no results', notFound('getAllProjects'));
   it('should return 404 for a PATCH projects request for nonexistent projects', notFound('patchProjects'));
