@@ -88,6 +88,7 @@ describe(M.getModuleName(module.filename), () => {
   // ------------- No Requesting User -------------
   it('should reject a GET elements request with no requesting user', noReqUser('getElements'));
   it('should reject a GET element request with no requesting user', noReqUser('getElement'));
+  it('should reject a GET (Search) elements request with no requesting user', noReqUser('searchElements'));
   it('should reject a POST elements request with no requesting user', noReqUser('postElements'));
   it('should reject a POST element request with no requesting user', noReqUser('postElement'));
   it('should reject a PATCH elements request with no requesting user', noReqUser('patchElements'));
@@ -96,10 +97,10 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a PUT element request with no requesting user', noReqUser('putElement'));
   it('should reject a DELETE elements request with no requesting user', noReqUser('deleteElements'));
   it('should reject a DELETE element request with no requesting user', noReqUser('deleteElement'));
-  it('should reject a Search elements request with no requesting user', noReqUser('searchElements'));
   // ------------- Invalid options -------------
   it('should reject a GET elements request with invalid options', invalidOptions('getElements'));
   it('should reject a GET element request with invalid options', invalidOptions('getElement'));
+  it('should reject a GET (Search) elements request with invalid options', invalidOptions('searchElements'));
   it('should reject a POST elements request with invalid options', invalidOptions('postElements'));
   it('should reject a POST element request with invalid options', invalidOptions('postElement'));
   it('should reject a PATCH elements request with invalid options', invalidOptions('patchElements'));
@@ -108,7 +109,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a PUT element request with invalid options', invalidOptions('putElement'));
   it('should reject a DELETE elements request with invalid options', invalidOptions('deleteElements'));
   it('should reject a DELETE element request with invalid options', invalidOptions('deleteElement'));
-  it('should reject a Search elements request with invalid options', invalidOptions('searchElements'));
   // ------- Non matching ids in body vs url -------
   it('should reject a POST element request with conflicting ids in the body and url', conflictingIDs('postElement'));
   it('should reject a PATCH element request with conflicting ids in the body and url', conflictingIDs('patchElement'));
@@ -116,17 +116,17 @@ describe(M.getModuleName(module.filename), () => {
   // ------------- 404 Not Found -------------
   it('should return 404 for a GET elements request that returned no results', notFound('getElements'));
   it('should return 404 for a GET element request that returned no results', notFound('getElement'));
+  it('should return 404 for a GET (Search) elements request for nonexistent branches', notFound('searchElements'));
   it('should return 404 for a PATCH elements request for nonexistent branches', notFound('patchElements'));
   it('should return 404 for a PATCH element request for a nonexistent branch', notFound('patchElement'));
-  it('should return 404 for a PUT elements request for nonexistent branches', notFound('patchElements'));
-  it('should return 404 for a PUT element request for a nonexistent branch', notFound('patchElement'));
+  it('should return 404 for a PUT elements request for nonexistent branches', notFound('putElements'));
+  it('should return 404 for a PUT element request for a nonexistent branch', notFound('putElement'));
   it('should return 404 for a DELETE elements request for nonexistent branches', notFound('deleteElements'));
   it('should return 404 for a DELETE element request for a nonexistent branch', notFound('deleteElement'));
-  it('should return 404 for a Search elements request for nonexistent branches', notFound('searchElements'));
   // ------------- No arrays in singular endpoints -------------
   it('should reject a POST singular element request containing an array in the body', noArrays('postElement'));
   it('should reject a PATCH singular element request containing an array in the body', noArrays('patchElement'));
-  it('should reject a PUT singular element request containing an array in the body', noArrays('postElement'));
+  it('should reject a PUT singular element request containing an array in the body', noArrays('putElement'));
   it('should reject a DELETE singular element request containing an array in the body', noArrays('deleteElement'));
 });
 
