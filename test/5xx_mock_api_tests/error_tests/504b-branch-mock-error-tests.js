@@ -103,7 +103,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a DELETE branches request with invalid options', invalidOptions('deleteBranches'));
   it('should reject a DELETE branch request with invalid options', invalidOptions('deleteBranch'));
   // ------- Non matching ids in body vs url -------
-  it('should reject a POST branch request with conflicting ids in the body and url', conflictingIDs('patchBranch'));
+  it('should reject a POST branch request with conflicting ids in the body and url', conflictingIDs('postBranch'));
   it('should reject a PATCH branch request with conflicting ids in the body and url', conflictingIDs('patchBranch'));
   // ------------- 404 Not Found -------------
   it('should return 404 for a GET branches request that returned no results', notFound('getBranches'));
