@@ -155,6 +155,7 @@ function getArtifactPublicData(artifact, options) {
     archived: artifact.archived,
     archivedOn: (artifact.archivedOn) ? artifact.archivedOn.toString() : undefined,
     archivedBy: archivedBy
+
   };
 
   // If the fields options is defined
@@ -206,6 +207,7 @@ function getElementPublicData(element, options) {
   let targetNamespace;
   let project;
   let branch;
+  let artifact;
 
   // If element.createdBy is defined
   if (element.createdBy) {
@@ -331,6 +333,18 @@ function getElementPublicData(element, options) {
     }
   }
 
+  // If element.artifact is defined
+  if (element.artifact) {
+    // If element.artifact is populated
+    if (typeof element.artifact === 'object') {
+      // Get the public data of parent
+      artifact = getArtifactPublicData(element.artifact, {});
+    }
+    else {
+      artifact = utils.parseID(element.artifact).pop();
+    }
+  }
+
   const data = {
     id: idParts.pop(),
     name: element.name,
@@ -351,7 +365,9 @@ function getElementPublicData(element, options) {
     lastModifiedBy: lastModifiedBy,
     archived: element.archived,
     archivedOn: (element.archivedOn) ? element.archivedOn.toString() : undefined,
-    archivedBy: archivedBy
+    archivedBy: archivedBy,
+    artifact: artifact
+
   };
 
   // Handle the virtual contains field
