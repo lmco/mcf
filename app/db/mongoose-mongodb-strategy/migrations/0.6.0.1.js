@@ -81,7 +81,7 @@ module.exports.up = async function() {
     // Write contents to temporary file
     fs.writeFileSync(path.join(M.root, 'data', 'users.json'), JSON.stringify(users));
 
-    // // Find all currently existing collections
+    // Find all currently existing collections
     await sixToSevenOrgHelper(orgs, jmiUsers);
     await sixToSevenProjectHelper(projects, jmiUsers, jmiOrgs);
     await sixToSevenElementHelper(elements, jmiUsers, jmiProjects, jmiElements);
