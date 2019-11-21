@@ -116,7 +116,7 @@ async function initModels() {
     await User.init();
 
     // Insert server data
-    await ServerData.insertMany([{ _id: 'server_data', version: M.schemaVersion }]);
+    await ServerData.insertMany([{ _id: 'server_data', version: M.version }]);
   }
   catch (error) {
     M.log.critical('Failed to initialize models.');
