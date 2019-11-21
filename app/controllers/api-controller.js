@@ -251,7 +251,6 @@ function version(req, res) {
   // Create version object
   const json = formatJSON({
     version: M.version,
-    schemaVersion: M.schemaVersion,
     build: `${M.build}`
   });
 

@@ -19,7 +19,7 @@
 const events = require('events');
 
 // MBEE modules
-const DBModule = M.require(`db.${M.config.db.strategy}`);
+const DBModule = M.require(`db.${M.config.db.strategy}.${M.config.db.strategy}`);
 
 const requiredFunctions = ['connect', 'disconnect', 'clear', 'sanitize',
   'Schema', 'Model', 'Store'];
