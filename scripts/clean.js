@@ -64,7 +64,7 @@ function clean(_args) {
 
   // Clean data
   if (args.includes('--all') || args.includes('--data')) {
-    M.log.info('Cleaning data...');
+    M.log.info('Cleaning data directory...');
     execSync(`${rmf} ${path.join(root, 'data', '*')}`);
   }
 
