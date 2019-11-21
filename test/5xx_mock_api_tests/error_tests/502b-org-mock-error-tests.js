@@ -200,7 +200,7 @@ function invalidOptions(endpoint) {
 
 /**
  * @description A test factory function that generates a mocha-compatible test function that can
- * test the response of any api endpoint to a request that has conflicting ids in the body and
+ * test the response of singular api endpoints to a request that has conflicting ids in the body and
  * params.
  *
  * @param {string} endpoint - The particular api endpoint to test.
