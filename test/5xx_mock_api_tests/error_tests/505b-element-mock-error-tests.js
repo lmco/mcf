@@ -127,7 +127,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a POST singular element request containing an array in the body', noArrays('postElement'));
   it('should reject a PATCH singular element request containing an array in the body', noArrays('patchElement'));
   it('should reject a PUT singular element request containing an array in the body', noArrays('putElement'));
-  it('should reject a DELETE singular element request containing an array in the body', noArrays('deleteElement'));
 });
 
 /* --------------------( Tests )-------------------- */
