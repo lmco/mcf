@@ -298,7 +298,7 @@ async function create(requestingUser, webhooks, options) {
           && (!webhookObj.reference.hasOwnProperty('project')
           || !webhookObj.reference.hasOwnProperty('org'))) {
           throw new M.DataFormatError(
-            'Webhook reference namespace contains branch but not project or org'
+            'Webhook reference contains branch but not project or org'
           );
         }
         else if (webhookObj.reference.hasOwnProperty('project')
