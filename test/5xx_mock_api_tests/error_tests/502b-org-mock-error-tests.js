@@ -116,7 +116,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a POST singular org request containing an array in the body', noArrays('postOrg'));
   it('should reject a PATCH singular org request containing an array in the body', noArrays('patchOrg'));
   it('should reject a PUT singular org request containing an array in the body', noArrays('putOrg'));
-  it('should reject a DELETE singular org request containing an array in the body', noArrays('deleteOrg'));
 });
 
 /* --------------------( Tests )-------------------- */

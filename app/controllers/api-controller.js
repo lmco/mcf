@@ -1045,12 +1045,6 @@ async function deleteOrg(req, res, next) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // Singular api: should not accept arrays
-  if (Array.isArray(req.body)) {
-    const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
-
   // Attempt to parse query options
   try {
     // Extract options from request query
