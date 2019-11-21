@@ -121,9 +121,10 @@ describe(M.getModuleName(module.filename), () => {
  * @returns {Function} A function for mocha to use to test a specific api endpoint.
  */
 function noReqUser(method, singular) {
-  // Parse the method
+  // Provide a placeholder webhook id
   const webhookID = 'fake id';
 
+  // Initialize the url
   let url = `${test.url}/api/webhooks`;
 
   // Add the webhook id parameter to the url if it's a singular endpoint
@@ -164,8 +165,10 @@ function noReqUser(method, singular) {
  * @returns {Function} A function for mocha to use to test a specific api endpoint.
  */
 function invalidOptions(method, singular) {
+  // Provide a placeholder webhook id
   const webhookID = 'fake id';
 
+  // Initialize the url
   let url = `${test.url}/api/webhooks`;
 
   // Add the webhook id parameter to the url if it's a singular endpoint
@@ -192,6 +195,8 @@ function invalidOptions(method, singular) {
       // Expect response status: 400 Bad Request
       chai.expect(response.statusCode).to.equal(400);
 
+      chai.expect(body).to.equal('Invalid parameter: invalid_option');
+
       done();
     });
   };
@@ -207,8 +212,10 @@ function invalidOptions(method, singular) {
  * @returns {Function} A function for mocha to use to test a specific api endpoint.
  */
 function conflictingIDs(method, singular) {
+  // Provide a placeholder webhook id
   const webhookID = 'fake id';
 
+  // Initialize the url
   let url = `${test.url}/api/webhooks`;
 
   // Add the webhook id parameter to the url if it's a singular endpoint
@@ -216,6 +223,7 @@ function conflictingIDs(method, singular) {
     url += `/${webhookID}`;
   }
 
+  // Provide a conflicting id for the body of the request
   const conflictingBody = { id: 'different fake id' };
 
   // Create the customized mocha function
@@ -252,6 +260,7 @@ function conflictingIDs(method, singular) {
  * @returns {Function} A function for mocha to use to test a specific api endpoint.
  */
 function notFound(method, singular) {
+  // Provide a placeholder webhook id
   const webhookID = 'fake id';
 
   // Body must be an array of ids for get and delete; key-value pair for anything else
@@ -307,6 +316,7 @@ function notFound(method, singular) {
  * @returns {Function} A function for mocha to use to test a specific api endpoint.
  */
 function noArrays(method) {
+  // Provide a placeholder webhook id
   const webhookID = 'fake id';
 
   // Send an array in the body to trigger error
@@ -354,7 +364,8 @@ function tokenNotFound(done) {
   // Get the base 64 encoded id of the incoming webhook
   const base64ID = Buffer.from(incomingWebhookID).toString('base64');
 
-  const body = { notToken: 'no token' };
+  // Give the body the right token in the wrong location
+  const body = { notToken: 'test token' };
 
   const url = `${test.url}/api/webhooks/trigger/${base64ID}`;
 
@@ -389,6 +400,7 @@ function tokenInvalid(done) {
   // Get the base 64 encoded id of the incoming webhook
   const base64ID = Buffer.from(incomingWebhookID).toString('base64');
 
+  // Give the body a token in the right location but wrong string
   const body = { test: { token: 'invalid token' } };
 
   const url = `${test.url}/api/webhooks/trigger/${base64ID}`;
