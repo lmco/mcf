@@ -51,29 +51,30 @@ if (module.parent == null || typeof M === 'undefined') {
 function clean(_args) {
   const root = path.join(__dirname, '..');
 
-  // eslint-disable-next-line no-console
-  console.log('Cleaning MBEE...');
+  M.log.info('Cleaning MBEE...');
 
   // Assign parameters to args. If no parameters, default to '--all'
   const args = (_args === undefined) ? [] : _args;
 
   // Clean logs
   if (args.length === 0 || args.includes('--all')) {
+    M.log.info('Cleaning logs...');
     execSync(`${rmd} ${path.join(root, 'build')} ${path.join(root, 'logs')}`);
   }
 
   // Clean data
   if (args.includes('--all') || args.includes('--data')) {
+    M.log.info('Cleaning data...');
     execSync(`${rmf} ${path.join(root, 'data', '*')}`);
   }
 
   // Clean node_modules
   if (args.includes('--all') || args.includes('--node-modules')) {
+    M.log.info('Cleaning node_modules...');
     execSync(`${rmd} ${path.join(root, 'node_modules')}`);
   }
 
-  // eslint-disable-next-line no-console
-  console.log('MBEE Cleaned.');
+  M.log.info('MBEE Cleaned.');
 }
 
 module.exports = clean;
