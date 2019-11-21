@@ -292,26 +292,29 @@ async function create(requestingUser, webhooks, options) {
     // Set the fields of the webhook object
     const webhookObjects = webhooksToCreate.map((webhookObj) => {
       webhookObj._id = uuidv4();
-      let orgID; let projID; let branchID;
 
       if (webhookObj.hasOwnProperty('reference')) {
-        if (webhookObj.reference.hasOwnProperty('org')) orgID = webhookObj.reference.org;
-        if (webhookObj.reference.hasOwnProperty('project')) projID = webhookObj.reference.project;
-        if (webhookObj.reference.hasOwnProperty('branch')) branchID = webhookObj.reference.branch;
-      }
-
-      if (branchID) {
-        webhookObj.reference = utils.createID(orgID, projID, branchID);
-      }
-      else if (projID) {
-        webhookObj.reference = utils.createID(orgID, projID);
-      }
-      else if (orgID) {
-        webhookObj.reference = orgID;
+        if (webhookObj.reference.hasOwnProperty('branch')
+          && (!webhookObj.reference.hasOwnProperty('project')
+          || !webhookObj.reference.hasOwnProperty('org'))) {
+          throw new M.DataFormatError(
+            'Webhook reference namespace contains branch but not project or org'
+          );
+        }
+        else if (webhookObj.reference.hasOwnProperty('project')
+          && !webhookObj.reference.hasOwnProperty('org')) {
+          throw new M.DataFormatError('Webhook reference contains project but not org');
+        }
+        const idArray = [];
+        if (webhookObj.reference.hasOwnProperty('org')) idArray.push(webhookObj.reference.org);
+        if (webhookObj.reference.hasOwnProperty('project')) idArray.push(webhookObj.reference.project);
+        if (webhookObj.reference.hasOwnProperty('branch')) idArray.push(webhookObj.reference.branch);
+        webhookObj.reference = utils.createID(idArray);
       }
       else {
         webhookObj.reference = '';
       }
+
       webhookObj.lastModifiedBy = reqUser._id;
       webhookObj.createdBy = reqUser._id;
       webhookObj.updatedOn = Date.now();
