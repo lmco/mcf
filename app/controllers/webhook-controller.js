@@ -150,7 +150,7 @@ async function find(requestingUser, webhooks, options) {
     }
 
     // Add webhook ids to the search query
-    if (saniWebhooks !== undefined) searchQuery._id = saniWebhooks;
+    if (saniWebhooks !== undefined) searchQuery._id = { $in: saniWebhooks };
 
     // Add org, project, and branch to the search query
     if (searchQuery.hasOwnProperty('branch')) {
@@ -326,7 +326,8 @@ async function create(requestingUser, webhooks, options) {
 
     // Find the newly created webhooks
     const createdIDs = createdWebhooks.map((w) => w._id);
-    const foundWebhooks = await Webhook.find({ _id: createdIDs }, validatedOptions.fieldsString,
+    const foundWebhooks = await Webhook.find({ _id: { $in: createdIDs } },
+      validatedOptions.fieldsString,
       { populate: validatedOptions.populateString });
 
     // Emit the event for webhook creation
@@ -420,7 +421,7 @@ async function update(requestingUser, webhooks, options) {
     const webhookIDs = webhooksToUpdate.map((w) => w.id);
 
     // Find the webhooks
-    const foundWebhooks = await Webhook.find({ _id: webhookIDs });
+    const foundWebhooks = await Webhook.find({ _id: { $in: webhookIDs } });
 
     // Check that all webhooks were found
     if (foundWebhooks.length !== webhooksToUpdate.length) {
@@ -538,7 +539,7 @@ async function update(requestingUser, webhooks, options) {
     await Webhook.bulkWrite(bulkArray);
 
     // Find the updated webhooks
-    const foundUpdatedWebhooks = await Webhook.find({ _id: webhookIDs },
+    const foundUpdatedWebhooks = await Webhook.find({ _id: { $in: webhookIDs } },
       validatedOptions.fieldsString,
       { populate: validatedOptions.populateString });
 
