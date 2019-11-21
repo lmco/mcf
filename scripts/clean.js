@@ -23,6 +23,8 @@ const path = require('path');
 
 const rmd = (process.platform === 'win32') ? 'RMDIR /S /Q' : 'rm -rf';
 const rmf = (process.platform === 'win32') ? 'DEL /S /Q' : 'rm -rf';
+// eslint-disable-next-line no-console
+const log = (module.parent == null || typeof M === 'undefined') ? console.log : M.log.info;
 
 // Error Check - Check if file was run directly or global M object is undefined
 if (module.parent == null || typeof M === 'undefined') {
@@ -51,30 +53,30 @@ if (module.parent == null || typeof M === 'undefined') {
 function clean(_args) {
   const root = path.join(__dirname, '..');
 
-  M.log.info('Cleaning MBEE...');
+  log('Cleaning MBEE...');
 
   // Assign parameters to args. If no parameters, default to '--all'
   const args = (_args === undefined) ? [] : _args;
 
   // Clean logs
   if (args.length === 0 || args.includes('--all')) {
-    M.log.info('Cleaning logs...');
+    log('Cleaning logs...');
     execSync(`${rmd} ${path.join(root, 'build')} ${path.join(root, 'logs')}`);
   }
 
   // Clean data
   if (args.includes('--all') || args.includes('--data')) {
-    M.log.info('Cleaning data...');
+    log('Cleaning data...');
     execSync(`${rmf} ${path.join(root, 'data', '*')}`);
   }
 
   // Clean node_modules
   if (args.includes('--all') || args.includes('--node-modules')) {
-    M.log.info('Cleaning node_modules...');
+    log('Cleaning node_modules...');
     execSync(`${rmd} ${path.join(root, 'node_modules')}`);
   }
 
-  M.log.info('MBEE Cleaned.');
+  log('MBEE Cleaned.');
 }
 
 module.exports = clean;
