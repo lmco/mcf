@@ -124,8 +124,8 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description A constructor for a dynamic mocha-compatible function that can test the response of
- * any api endpoint to a request missing a requestingUser.
+ * @description A test factory function that generates a mocha-compatible test function that can
+ * test the response of any api endpoint to a request missing a requestingUser.
  *
  * @param {string} endpoint - The particular api endpoint to test.
  * @returns {Function} A function for mocha to use to test a specific api endpoint.
@@ -163,8 +163,8 @@ function noReqUser(endpoint) {
 }
 
 /**
- * @description A constructor for a dynamic mocha-compatible function that can test the response of
- * any api endpoint to a request that has invalid options.
+ * @description A test factory function that generates a mocha-compatible test function that can
+ * test the response of any api endpoint to a request that has invalid options.
  *
  * @param {string} endpoint - The particular api endpoint to test.
  * @returns {Function} A function for mocha to use to test a specific api endpoint.
@@ -203,8 +203,9 @@ function invalidOptions(endpoint) {
 }
 
 /**
- * @description A constructor for a dynamic mocha-compatible function that can test the response of
- * singular api endpoint to a request that has conflicting ids in the body and params.
+ * @description A test factory function that generates a mocha-compatible test function that can
+ * test the response of singular api endpoints to a request that has conflicting ids in the body and
+ * params.
  *
  * @param {string} endpoint - The particular api endpoint to test.
  * @returns {Function} A function for mocha to use to test a specific api endpoint.
@@ -242,8 +243,8 @@ function conflictingIDs(endpoint) {
 }
 
 /**
- * @description A constructor for a dynamic mocha-compatible function that can test the response of
- * any api endpoint to a request for an item that doesn't exist.
+ * @description A test factory function that generates a mocha-compatible test function that can
+ * test the response of any api endpoint to a request for an item that doesn't exist.
  *
  * @param {string} endpoint - The particular api endpoint to test.
  * @returns {Function} A function for mocha to use to test a specific api endpoint.
@@ -285,8 +286,8 @@ function notFound(endpoint) {
 }
 
 /**
- * @description A constructor for a dynamic mocha-compatible function that tests singular project
- * api endpoints given an array in the body.
+ * @description A test factory function that generates a mocha-compatible test function that can
+ * test the response of singular api endpoints given an array in the body.
  *
  * @param {string} endpoint - The particular api endpoint to test.
  * @returns {Function} A function for mocha to use to test a specific api endpoint.
