@@ -123,7 +123,7 @@ async function find(requestingUser, webhooks, options) {
 
     // Validate the provided options
     const validatedOptions = utils.validateOptions(options, ['includeArchived',
-      'populate', 'fields', 'limit', 'skip', 'lean', 'sort'], Webhook);
+      'populate', 'fields', 'limit', 'skip', 'sort'], Webhook);
 
     // Ensure search options are valid
     if (options) {
@@ -213,16 +213,16 @@ async function find(requestingUser, webhooks, options) {
  * 'Incoming'.
  * @param {string} [webhooks.description] - An optional field to provide a description for
  * the webhook.
- * @param {object} [webhooks.triggers] - An array of strings referencing the events that trigger
+ * @param {object} webhooks.triggers - An array of strings referencing the events that trigger
  * outgoing webhooks and events that incoming webhooks will emit.
- * @param {object} webhooks.responses - An array of objects containing data used to send
+ * @param {object} [webhooks.responses] - An array of objects containing data used to send
  * http requests upon the webhook triggering. Each response must contain a url field, while the
  * method field defaults to 'POST' and the headers field defaults to
  * {'Content-Type': 'application/json'}. Each response may also contain a ca field for a
  * certificate authority, a token field for token validation, and a data field
  * that contains data to send with the request. Outgoing webhooks must have a responses field.
- * @param {string} [webhooks.token] - A key that external requests to trigger the webhook must
- * provide in order to verify the request.
+ * @param {string} [webhooks.token] - An optional field used to validate an external request and
+ * trigger a webhook.
  * @param {string} [webhooks.tokenLocation] - A dot-delimited string that represents the location
  * of the token within an external request to trigger a webhook.
  * @param {object} [webhooks.reference] - An object containing the fields 'org', 'project', and
@@ -234,14 +234,11 @@ async function find(requestingUser, webhooks, options) {
  * objects. By default, no fields are populated.
  * @param {string[]} [options.fields] - An array of fields to return. By default includes the _id,
  * id, and contains. To NOT include a field, provide a '-' in front.
- * @param {boolean} [options.lean = false] - A boolean value that if true returns raw JSON instead
- * of converting the data to objects.
  *
  * @returns {Promise<object[]>} Array of created webhook objects.
  *
  * @example
- * create({User}, [{Webhook1}, {Webhook2}, ...],
- * { populate: ['createdBy'] })
+ * create({User}, [{Webhook1}, {Webhook2}, ...], { populate: ['createdBy'] })
  * .then(function(webhooks) {
  *   // Do something with the newly created webhooks
  * })
@@ -261,8 +258,7 @@ async function create(requestingUser, webhooks, options) {
     let webhooksToCreate;
 
     // Initialize and ensure options are valid
-    const validatedOptions = utils.validateOptions(options, ['populate', 'fields',
-      'lean'], Webhook);
+    const validatedOptions = utils.validateOptions(options, ['populate', 'fields'], Webhook);
 
     // Check the type of the webhooks parameter; format it into an array if it's a single object
     if (Array.isArray(saniWebhooks)) {
