@@ -135,7 +135,7 @@ async function findWebhook() {
     webhook.description.should.equal(testData.webhooks[0].description);
     webhook.triggers.should.deep.equal(testData.webhooks[0].triggers);
     webhook.response.hasOwnProperty('url').should.equal(true);
-    //webhook.response.hasOwnProperty('method').should.equal(true);
+    webhook.response.hasOwnProperty('method').should.equal(true);
   }
   catch (error) {
     M.log.error(error);
