@@ -734,19 +734,19 @@ async function optionSortFind() {
       name: 'a',
       type: testData.webhooks[0].type,
       triggers: testData.webhooks[0].triggers,
-      responses: testData.webhooks[0].responses
+      response: testData.webhooks[0].response
     },
     {
       name: 'b',
       type: testData.webhooks[0].type,
       triggers: testData.webhooks[0].triggers,
-      responses: testData.webhooks[0].responses
+      response: testData.webhooks[0].response
     },
     {
       name: 'c',
       type: testData.webhooks[0].type,
       triggers: testData.webhooks[0].triggers,
-      responses: testData.webhooks[0].responses
+      response: testData.webhooks[0].response
     }];
 
     // Create sort options

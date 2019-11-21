@@ -5882,9 +5882,6 @@ async function getWebhook(req, res) {
     populate: 'array',
     includeArchived: 'boolean',
     fields: 'array',
-    org: 'string',
-    project: 'string',
-    branch: 'string',
     minified: 'boolean'
   };
 

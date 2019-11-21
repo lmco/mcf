@@ -102,8 +102,8 @@ async function createWebhook() {
     chai.expect(createdWebhook.type).to.equal(webhookData.type);
     chai.expect(createdWebhook.description).to.equal(webhookData.description);
     chai.expect(createdWebhook.triggers).to.deep.equal(webhookData.triggers);
-    chai.expect(createdWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
-    chai.expect(createdWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
+    chai.expect(createdWebhook.response.url).to.equal(webhookData.response.url);
+    chai.expect(createdWebhook.response.method).to.equal(webhookData.response.method || 'POST');
     chai.expect(createdWebhook.custom).to.deep.equal(webhookData.custom || {});
 
     // Verify additional properties
@@ -149,9 +149,9 @@ async function createWebhooks() {
       chai.expect(createdWebhook.type).to.equal(webhookDataObj.type);
       chai.expect(createdWebhook.description).to.equal(webhookDataObj.description);
       chai.expect(createdWebhook.triggers).to.deep.equal(webhookDataObj.triggers);
-      if (createdWebhook.responses.length) {
-        chai.expect(createdWebhook.responses[0].url).to.equal(webhookDataObj.responses[0].url);
-        chai.expect(createdWebhook.responses[0].method).to.equal(webhookDataObj.responses[0].method || 'POST');
+      if (createdWebhook.response) {
+        chai.expect(createdWebhook.response.url).to.equal(webhookDataObj.response.url);
+        chai.expect(createdWebhook.response.method).to.equal(webhookDataObj.response.method || 'POST');
       }
       else {
         chai.expect(createdWebhook.token).to.equal(webhookDataObj.token);
@@ -199,8 +199,8 @@ async function findWebhook() {
     chai.expect(foundWebhook.type).to.equal(webhookData.type);
     chai.expect(foundWebhook.description).to.equal(webhookData.description);
     chai.expect(foundWebhook.triggers).to.deep.equal(webhookData.triggers);
-    chai.expect(foundWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
-    chai.expect(foundWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
+    chai.expect(foundWebhook.response.url).to.equal(webhookData.response.url);
+    chai.expect(foundWebhook.response.method).to.equal(webhookData.response.method || 'POST');
     chai.expect(foundWebhook.reference).to.equal('');
     chai.expect(foundWebhook.custom).to.deep.equal(webhookData.custom || {});
 
@@ -329,8 +329,8 @@ async function updateWebhook() {
     chai.expect(updatedWebhook.type).to.equal(webhookData.type);
     chai.expect(updatedWebhook.description).to.equal(webhookData.description);
     chai.expect(updatedWebhook.triggers).to.deep.equal(webhookData.triggers);
-    chai.expect(updatedWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
-    chai.expect(updatedWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
+    chai.expect(updatedWebhook.response.url).to.equal(webhookData.response.url);
+    chai.expect(updatedWebhook.response.method).to.equal(webhookData.response.method || 'POST');
     chai.expect(updatedWebhook.custom).to.deep.equal(webhookData.custom || {});
 
     // Verify additional properties

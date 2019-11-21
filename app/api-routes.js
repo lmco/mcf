@@ -6430,27 +6430,6 @@ api.route('/webhooks/trigger/:encodedid')
  *         in: path
  *         required: true
  *         type: string
- *       - name: org
- *         description: The ID of an org to query on. If provided, only returns
- *                      webhooks registered to the org, unless project and/or
- *                      branch are also provided.
- *         in: query
- *         type: boolean
- *         required: false
- *       - name: project
- *         description: The ID of a project to query on. If provided, only returns
- *                      webhooks registered to the project, unless a branch is
- *                      also provided. An org must be provided with this option.
- *         in: query
- *         type: boolean
- *         required: false
- *       - name: branch
- *         description: The ID of a branch to query on. If provided, only returns
- *                      webhooks registered to the branch. Both an org and a project
- *                      must be provided with this option.
- *         in: query
- *         type: boolean
- *         required: false
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy]

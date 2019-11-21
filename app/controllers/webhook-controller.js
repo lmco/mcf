@@ -215,12 +215,12 @@ async function find(requestingUser, webhooks, options) {
  * the webhook.
  * @param {object} webhooks.triggers - An array of strings referencing the events that trigger
  * outgoing webhooks and events that incoming webhooks will emit.
- * @param {object} [webhooks.responses] - An array of objects containing data used to send
- * http requests upon the webhook triggering. Each response must contain a url field, while the
- * method field defaults to 'POST' and the headers field defaults to
- * {'Content-Type': 'application/json'}. Each response may also contain a ca field for a
- * certificate authority, a token field for token validation, and a data field
- * that contains data to send with the request. Outgoing webhooks must have a responses field.
+ * @param {object} [webhooks.response] - An object containing data used to send http requests upon
+ * the webhook triggering. Each response must contain a url field, while the method field defaults
+ * to 'POST' and the headers field defaults to {'Content-Type': 'application/json'}. Each response
+ * may also contain a ca field for a certificate authority, a token field for token validation, and
+ * a data field that contains data to send with the request. Outgoing webhooks must have a response
+ * field.
  * @param {string} [webhooks.token] - An optional field used to validate an external request and
  * trigger a webhook.
  * @param {string} [webhooks.tokenLocation] - A dot-delimited string that represents the location
@@ -269,7 +269,7 @@ async function create(requestingUser, webhooks, options) {
     }
 
     // Create a list of valid keys
-    const validWebhookKeys = ['name', 'type', 'description', 'triggers', 'responses', 'token',
+    const validWebhookKeys = ['name', 'type', 'description', 'triggers', 'response', 'token',
       'tokenLocation', 'reference'];
 
     // Check that user has permission to create webhooks
@@ -355,8 +355,7 @@ async function create(requestingUser, webhooks, options) {
  * @param {string} [webhooks.name] - The updated name of the webhook.
  * @param {string} [webhooks.description] - The updated description of the webhook.
  * @param {string[]} [webhooks.triggers] - The updated list of triggers for the webhook.
- * @param {object[]} [webhooks.responses] - The updated list of response objects for an
- * outgoing webhook.
+ * @param {object[]} [webhooks.response] - The updated response objects for an outgoing webhook.
  * @param {string} [webhooks.token] - A key that external requests to trigger the webhook must
  * provide in order to verify the request.
  * @param {string} [webhooks.tokenLocation] - A dot-delimited string that represents the location
@@ -511,9 +510,9 @@ async function update(requestingUser, webhooks, options) {
 
       // --- Incoming Webhook specific checks ---
       if (webhook.type === 'Incoming') {
-        if (webhookUpdate.responses !== undefined) {
+        if (webhookUpdate.response !== undefined) {
           throw new M.DataFormatError(`Problem with update for webhook ${webhook._id}: `
-            + 'An incoming webhook cannot have a responses field.', 'warn');
+            + 'An incoming webhook cannot have a response field.', 'warn');
         }
       }
 

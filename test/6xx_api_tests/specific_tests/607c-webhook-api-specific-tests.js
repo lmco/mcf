@@ -106,13 +106,13 @@ describe(M.getModuleName(module.filename), () => {
   it('should POST multiple webhooks to a branch', postMany('branch'));
   // ------------- GET -------------
   it('should GET a webhook on an org', getOne('org'));
-  it('should GET multiple webhooks on an org', getManyOnReference('org'));
-  it('should GET all webhooks on an org', getAllOnReference('org'));
   it('should GET a webhook on a project', getOne('project'));
-  it('should GET multiple webhooks on a project', getManyOnReference('project'));
-  it('should GET all webhooks on a project', getAllOnReference('project'));
   it('should GET a webhook on a branch', getOne('branch'));
+  it('should GET multiple webhooks on an org', getManyOnReference('org'));
+  it('should GET multiple webhooks on a project', getManyOnReference('project'));
   it('should GET multiple webhooks on a branch', getManyOnReference('branch'));
+  it('should GET all webhooks on an org', getAllOnReference('org'));
+  it('should GET all webhooks on a project', getAllOnReference('project'));
   it('should GET all webhooks on a branch', getAllOnReference('branch'));
   it('should GET multiple webhooks across all levels', getMany);
   it('should GET all webhooks', getAll);

@@ -134,12 +134,8 @@ async function findWebhook() {
     webhook.type.should.equal(testData.webhooks[0].type);
     webhook.description.should.equal(testData.webhooks[0].description);
     webhook.triggers.should.deep.equal(testData.webhooks[0].triggers);
-    for (let i = 0; i < testData.webhooks[0].responses.length; i++) {
-      should.exist(webhook.responses[i].url);
-      webhook.responses[i].url.should.equal(testData.webhooks[0].responses[i].url);
-      should.exist(webhook.responses[i].method);
-      webhook.responses[i].method.should.equal(testData.webhooks[0].responses[i].method || 'POST');
-    }
+    webhook.response.hasOwnProperty('url').should.equal(true);
+    webhook.response.hasOwnProperty('method').should.equal(true);
   }
   catch (error) {
     M.log.error(error);

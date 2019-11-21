@@ -153,7 +153,7 @@ const WebhookSchema = new db.Schema({
       message: () => 'The triggers field must be an array of strings.'
     }]
   },
-  responses: [{
+  response: {
     url: {
       type: 'String',
       required: true
@@ -176,7 +176,7 @@ const WebhookSchema = new db.Schema({
     data: {
       type: 'Object'
     }
-  }],
+  },
   token: {
     type: 'String',
     validate: [{
@@ -235,19 +235,16 @@ WebhookSchema.plugin(extensions);
  * @memberOf WebhookSchema
  */
 WebhookSchema.static('sendRequests', function(webhook, data) {
-  // For every response in the webhook responses list
-  webhook.responses.forEach((response) => {
-    const options = {
-      url: response.url,
-      headers: response.headers,
-      method: response.method,
-      body: JSON.stringify(response.data || data || undefined)
-    };
-    if (response.ca) options.ca = response.ca;
-    if (response.token) options.token = response.token;
-    // Send an HTTP request to given URL
-    request(options);
-  });
+  const options = {
+    url: webhook.response.url,
+    headers: webhook.response.headers,
+    method: webhook.response.method,
+    body: JSON.stringify(webhook.response.data || data || undefined)
+  };
+  if (webhook.response.ca) options.ca = webhook.response.ca;
+  if (webhook.response.token) options.token = webhook.response.token;
+  // Send an HTTP request to given URL
+  request(options);
 });
 
 /**

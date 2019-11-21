@@ -162,12 +162,12 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject an attempt to change a webhook\'s reference id', updateReference);
   it('should reject an update array with duplicate _ids', updateDuplicate);
   it('should reject an attempt to update a webhook that doesn\'t exist', updateNotFound);
-  it('should reject an attempt to add a responses field to an incoming webhook', updateAddResponses);
+  it('should reject an attempt to add a response field to an incoming webhook', updateAddResponse);
   it('should reject an attempt to remove the token from the incoming field', updateInvalidToken);
   it('should reject an attempt to remove the tokenLocation from the incoming field', updateInvalidTokenLocation);
   it('should reject an attempt to add a token to an outgoing webhook', updateAddToken);
   it('should reject an attempt to add a tokenLocation to an outgoing webhook', updateAddTokenLocation);
-  it('should reject an attempt to add an invalid responses field', updateInvalidResponses);
+  it('should reject an attempt to add an invalid response field', updateInvalidResponse);
   // ------------- Remove -------------
   it('should reject an attempt to delete a webhook that doesn\'t exist', deleteNotFound);
   it('should reject an attempt to delete a webhook on an archived org', archivedTest(Organization, 'remove'));
@@ -532,19 +532,19 @@ async function updateNotFound() {
 
 /**
  * @description Validates that the webhook controller will reject an update to an incoming
- * webhook that attempts to add a responses field.
+ * webhook that attempts to add a response field.
  */
-async function updateAddResponses() {
+async function updateAddResponse() {
   try {
     // Create update for an incoming webhook
     const webhookData = {
       id: incomingWebhookID,
-      responses: [{ url: 'test' }]
+      response: { url: 'test' }
     };
 
     await WebhookController.update(adminUser, webhookData)
     .should.eventually.be.rejectedWith(`Problem with update for webhook ${incomingWebhookID}: `
-        + 'An incoming webhook cannot have a responses field.');
+        + 'An incoming webhook cannot have a response field.');
   }
   catch (error) {
     M.log.error(error);
@@ -643,39 +643,29 @@ async function updateAddTokenLocation() {
 
 /**
  * @description Validates that the webhook controller will reject an update to an outgoing
- * webhook changing the responses to an invalid format.
+ * webhook changing the response to an invalid format.
  */
-async function updateInvalidResponses() {
+async function updateInvalidResponse() {
   try {
     // Create invalid update for an outgoing webhook
     let webhookData = {
       id: webhookID,
-      responses: { url: 'test' } // This is wrong because responses must be an array
+      response: []
     };
 
     await WebhookController.update(adminUser, webhookData)
     .should.eventually.be.rejectedWith(`Problem with update for webhook ${webhookID}: `
-      + 'Invalid responses: [[object Object]]');
+      + 'Invalid response: [[object Object]]');
 
     // Create invalid update for an outgoing webhook
     webhookData = {
       id: webhookID,
-      responses: [{ method: 'test' }] // This is wrong because responses must have a url
+      response: { method: 'test' } // This is wrong because a response must have a url
     };
 
     await WebhookController.update(adminUser, webhookData)
     .should.eventually.be.rejectedWith(`Problem with update for webhook ${webhookID}: `
-      + 'Invalid responses: [[object Object]]');
-
-    // Create invalid update for an outgoing webhook
-    webhookData = {
-      id: webhookID,
-      responses: [] // This is wrong because responses cannot be empty
-    };
-
-    await WebhookController.update(adminUser, webhookData)
-    .should.eventually.be.rejectedWith(`Problem with update for webhook ${webhookID}: `
-      + 'Invalid responses: []');
+      + 'Invalid response: [[object Object]]');
   }
   catch (error) {
     M.log.error(error);
