@@ -50,7 +50,7 @@ module.exports = app;
  */
 db.connect()
 .then(() => initModels())
-.then(() => migrate.getSchemaVersion())
+.then(() => migrate.getVersion())
 .then(() => createDefaultOrganization())
 .then(() => createDefaultAdmin())
 .then(() => initApp())
