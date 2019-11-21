@@ -224,6 +224,10 @@
     {
       "id": "batchelem12",
       "name": "Batch Element 12"
+    },
+    {
+      "id": "batchelem13",
+      "name": "Batch Element 13"
     }
   ],
   "artifacts": [

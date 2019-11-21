@@ -43,32 +43,34 @@ async function projectHelper() {
   // Find all projects in the database
   const projects = await Project.find({});
 
-  // If the data directory does not exist, create it
-  if (!fs.existsSync(path.join(M.root, 'data'))) {
-    fs.mkdirSync(path.join(M.root, 'data'));
-  }
+  if (projects.length > 0) {
+    // If the data directory does not exist, create it
+    if (!fs.existsSync(path.join(M.root, 'data'))) {
+      fs.mkdirSync(path.join(M.root, 'data'));
+    }
 
-  // Save all projects to a JSON file in the data directory
-  fs.writeFileSync(path.join(M.root, 'data', 'projects-082.json'), JSON.stringify(projects));
+    // Save all projects to a JSON file in the data directory
+    fs.writeFileSync(path.join(M.root, 'data', 'projects-082.json'), JSON.stringify(projects));
 
-  const bulkWrite = [];
-  // Delete the projectReferences from each project, and add to bulkWrite array
-  projects.forEach((p) => {
-    delete p.projectReferences;
+    const bulkWrite = [];
+    // Delete the projectReferences from each project, and add to bulkWrite array
+    projects.forEach((p) => {
+      delete p.projectReferences;
 
-    bulkWrite.push({
-      replaceOne: {
-        filter: { _id: p._id },
-        replacement: p
-      }
+      bulkWrite.push({
+        replaceOne: {
+          filter: { _id: p._id },
+          replacement: p
+        }
+      });
     });
-  });
 
-  // Replace all projects
-  await Project.bulkWrite(bulkWrite);
+    // Replace all projects
+    await Project.bulkWrite(bulkWrite);
 
-  // If the backup file exists, remove it
-  if (fs.existsSync(path.join(M.root, 'data', 'projects-082.json'))) {
-    fs.unlinkSync(path.join(M.root, 'data', 'projects-082.json'));
+    // If the backup file exists, remove it
+    if (fs.existsSync(path.join(M.root, 'data', 'projects-082.json'))) {
+      fs.unlinkSync(path.join(M.root, 'data', 'projects-082.json'));
+    }
   }
 }

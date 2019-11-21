@@ -3086,7 +3086,8 @@ async function getElements(req, res) {
     name: 'string',
     createdBy: 'string',
     lastModifiedBy: 'string',
-    archivedBy: 'string'
+    archivedBy: 'string',
+    artifact: 'string'
   };
 
   // Loop through req.query
@@ -3554,7 +3555,8 @@ async function searchElements(req, res) {
     name: 'string',
     createdBy: 'string',
     lastModifiedBy: 'string',
-    archivedBy: 'string'
+    archivedBy: 'string',
+    artifact: 'string'
   };
 
   // Loop through req.query
