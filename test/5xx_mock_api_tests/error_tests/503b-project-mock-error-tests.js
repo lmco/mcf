@@ -120,7 +120,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a POST singular project request containing an array in the body', noArrays('postProject'));
   it('should reject a PATCH singular project request containing an array in the body', noArrays('patchProject'));
   it('should reject a PUT singular project request containing an array in the body', noArrays('putProject'));
-  it('should reject a DELETE singular project request containing an array in the body', noArrays('deleteProject'));
 });
 
 /* --------------------( Tests )-------------------- */
