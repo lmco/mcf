@@ -655,7 +655,7 @@ async function updateInvalidResponse() {
 
     await WebhookController.update(adminUser, webhookData)
     .should.eventually.be.rejectedWith(`Problem with update for webhook ${webhookID}: `
-      + 'Invalid response: [[object Object]]');
+      + 'Invalid response: []');
 
     // Create invalid update for an outgoing webhook
     webhookData = {

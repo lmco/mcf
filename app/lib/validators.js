@@ -214,13 +214,26 @@ const webhook = {
   triggers: function(data) {
     return Array.isArray(data) && data.every((s) => typeof s === 'string');
   },
-  responses: function(data) {
-    // Responses must be an array with at least one item
-    return Array.isArray(data) && data.length > 0
-      // Every item in the array must be an object
-      && data.every((response) => (typeof response === 'object'
-      // Every object in the array must have a url
-      && typeof response.url === 'string'));
+  response: {
+    object: function(data) {
+      return !Array.isArray(data) && data !== null;
+    },
+    url: function(data) {
+      return typeof data.url === 'string';
+    },
+    method: function(data) {
+      if (data.method === undefined) {
+        data.method = 'POST';
+      }
+      return ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'].includes(data.method);
+    },
+    headers: function(v) {
+      if (v.headers === undefined) {
+        v.headers = { 'Content-Type': 'application/json' };
+      }
+      return typeof v.headers === 'object';
+    }
+
   },
   token: function(data) {
     // Protect against null entries

@@ -16,9 +16,9 @@
  * @description
  * <p>This module defines the webhook model. Webhooks can be used for a wide range of purposes
  * that fall under the category of automating responses to specific events. Webhook documents store
- * triggers and responses for asynchronous events and api calls within the server. For example, an
+ * triggers and a response for asynchronous events and api calls within the server. For example, an
  * outgoing webhook may be triggered by a project creation event, and notify the admins of that
- * organization through an http request stored in the webhook's responses field. Conversely,
+ * organization through an http request stored in the webhook's response field. Conversely,
  * an incoming webhook may be triggered by a request to the api endpoint
  * /api/webhooks/trigger/:base64id. The triggered webhook will then emit the events stored in its
  * triggers field with the data contained in the request body.</p>
@@ -32,10 +32,10 @@
  * <p>The triggers field is an array of strings that refer to specific events that can trigger an
  * outgoing webhook or the events an incoming webhook will emit.</p>
  *
- * <h4>Responses</h4>
- * <p>The responses field is an array of objects that contain fields required to send a request:
- * url, method, headers, token, ca, and data. Only outgoing webhooks have a responses field. The
- * url is the only required field, while the method defaults to POST and the headers to
+ * <h4>Response</h4>
+ * <p>The response field is an object that contain fields required to send a request: url, method,
+ * headers, token, ca, and data. Only outgoing webhooks have a response field. The url is the
+ * only required field, while the method defaults to POST and the headers to
  * {'Content-Type': 'application/json'}. The token field allows for extra security with token
  * verification by external recipients of the request, and the ca field allows space for a
  * certificate authority. The data field allows the user to specify custom data that gets sent
@@ -86,13 +86,13 @@ const extensions = M.require('models.plugin.extensions');
  * @property {string} type - The webhook's type, either incoming or outgoing.
  * @property {string} description - An optional field to provide a description for the webhook.
  * @property {Array} triggers - The events that trigger the webhook or that the webhook emits.
- * @property {Array} responses - An array of request info.
- * @property {string} responses.url - The url to send a request to.
- * @property {string} responses.method - The method of the request. Defaults to POST.
- * @property {string} responses.headers - The headers of the request. Defaults to
+ * @property {object} response - An object containing options for an http request.
+ * @property {string} response.url - The url to send a request to.
+ * @property {string} response.method - The method of the request. Defaults to POST.
+ * @property {string} response.headers - The headers of the request. Defaults to
  * {'Content-Type': 'application/json'}.
- * @property {object} responses.token - An optional field for additional verification.
- * @property {object} responses.data - An optional field for data to send with the request.
+ * @property {object} response.token - An optional field for additional verification.
+ * @property {object} response.data - An optional field for data to send with the request.
  * @property {string} token - The token to validate incoming requests against.
  * @property {string} tokenLocation - The location of the token in the external request.
  * @property {string} reference - The _id of the org, project, or branch the webhook is registered
@@ -114,10 +114,10 @@ const WebhookSchema = new db.Schema({
     validate: [{
       validator: function(v) {
         if (v === 'Outgoing') {
-          return (this.responses && this.responses.length);
+          return typeof this.response === 'object' && this.response !== null;
         }
       },
-      message: () => 'An outgoing webhook must have a responses field.'
+      message: () => 'An outgoing webhook must have a response field.'
     }, {
       validator: function(v) {
         if (v === 'Outgoing') {
@@ -136,10 +136,10 @@ const WebhookSchema = new db.Schema({
     }, {
       validator: function(v) {
         if (v === 'Incoming') {
-          return !(this.responses && this.responses.length);
+          return this.response === undefined;
         }
       },
-      message: () => 'An incoming webhook cannot have a responses field.'
+      message: () => 'An incoming webhook cannot have a response field.'
     }]
   },
   description: {
@@ -154,28 +154,64 @@ const WebhookSchema = new db.Schema({
     }]
   },
   response: {
-    url: {
-      type: 'String',
-      required: true
+    type: 'Object',
+    validate: [{
+      validator: validators.webhook.response.object,
+      message: 'Response field cannot be an array or null.'
+    }, {
+      validator: validators.webhook.response.url,
+      message: 'The response field must have a url.'
+    }, {
+      validator: validators.webhook.response.method,
+      message: 'Invalid method in response field.'
+    }, {
+      validator: validators.webhook.response.headers,
+      message: 'Invalid headers in response field.'
     },
-    method: {
-      type: 'String',
-      default: 'POST',
-      enum: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']
+    {
+      validator: function(v) {
+        if (v.token !== undefined) {
+          return typeof v.token === 'string';
+        }
+        return true;
+      },
+      message: 'Invalid token in response field.'
     },
-    headers: {
-      type: 'Object',
-      default: { 'Content-Type': 'application/json' }
+    {
+      validator: function(v) {
+        if (v.ca !== undefined) {
+          return typeof v.ca === 'string';
+        }
+        return true;
+      },
+      message: 'Invalid ca in response field.'
     },
-    token: {
-      type: 'String'
+    {
+      validator: function(v) {
+        if (v.data !== undefined) {
+          return typeof v.data === 'object';
+        }
+        return true;
+      },
+      message: 'Invalid data field in response field.'
     },
-    ca: {
-      type: 'String'
-    },
-    data: {
-      type: 'Object'
-    }
+    {
+      validator: function(v) {
+        const keys = Object.keys(v);
+        const validKeys = ['url', 'method', 'headers', 'token', 'ca', 'data'];
+        for (let i = 0; i < keys.length; i++) {
+          if (!(validKeys.includes(keys[i]))) return false;
+        }
+        return true;
+      },
+      message: props => {
+        const keys = Object.keys(props.value);
+        const validKeys = ['url', 'method', 'headers', 'token', 'ca', 'data'];
+        for (let i = 0; i < keys.length; i++) {
+          if (!(validKeys.includes(keys[i]))) return `Invalid field [${keys[i]}] in response field.`;
+        }
+      }
+    }]
   },
   token: {
     type: 'String',
@@ -237,8 +273,8 @@ WebhookSchema.plugin(extensions);
 WebhookSchema.static('sendRequests', function(webhook, data) {
   const options = {
     url: webhook.response.url,
-    headers: webhook.response.headers,
-    method: webhook.response.method,
+    headers: webhook.response.headers || { 'Content-Type': 'application/json' },
+    method: webhook.response.method || 'POST',
     body: JSON.stringify(webhook.response.data || data || undefined)
   };
   if (webhook.response.ca) options.ca = webhook.response.ca;
@@ -262,7 +298,7 @@ WebhookSchema.static('verifyAuthority', function(webhook, value) {
  * @memberOf WebhookSchema
  */
 WebhookSchema.static('getValidUpdateFields', function() {
-  return ['name', 'description', 'triggers', 'responses', 'token', 'tokenLocation',
+  return ['name', 'description', 'triggers', 'response', 'token', 'tokenLocation',
     'archived'];
 });
 

@@ -193,8 +193,8 @@ function post(reference) {
       const createdWebhook = createdWebhooks[0];
       chai.expect(createdWebhook.name).to.equal(webhookData.name);
       chai.expect(createdWebhook.triggers).to.deep.equal(webhookData.triggers);
-      chai.expect(createdWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
-      chai.expect(createdWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
+      chai.expect(createdWebhook.response.url).to.equal(webhookData.response.url);
+      chai.expect(createdWebhook.response.method).to.equal(webhookData.response.method || 'POST');
       chai.expect(createdWebhook.reference).to.equal(ref);
       chai.expect(createdWebhook.custom).to.deep.equal(webhookData.custom || {});
 
@@ -294,9 +294,9 @@ function postMany(reference) {
         chai.expect(createdWebhook.type).to.equal(webhookDataObj.type);
         chai.expect(createdWebhook.description).to.equal(webhookDataObj.description);
         chai.expect(createdWebhook.triggers).to.deep.equal(webhookDataObj.triggers);
-        if (createdWebhook.responses.length) {
-          chai.expect(createdWebhook.responses[0].url).to.equal(webhookDataObj.responses[0].url);
-          chai.expect(createdWebhook.responses[0].method).to.equal(webhookDataObj.responses[0].method || 'POST');
+        if (createdWebhook.response) {
+          chai.expect(createdWebhook.response.url).to.equal(webhookDataObj.response.url);
+          chai.expect(createdWebhook.response.method).to.equal(webhookDataObj.response.method || 'POST');
         }
         else {
           chai.expect(createdWebhook.token).to.equal(webhookDataObj.token);
@@ -375,8 +375,8 @@ function getOne(reference) {
       chai.expect(foundWebhook.id).to.equal(webhookData._id);
       chai.expect(foundWebhook.name).to.equal(webhookData.name);
       chai.expect(foundWebhook.triggers).to.deep.equal(webhookData.triggers);
-      chai.expect(foundWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
-      chai.expect(foundWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
+      chai.expect(foundWebhook.response.url).to.equal(webhookData.response.url);
+      chai.expect(foundWebhook.response.method).to.equal(webhookData.response.method || 'POST');
       chai.expect(foundWebhook.reference).to.equal(ref);
       chai.expect(foundWebhook.custom).to.deep.equal(webhookData.custom || {});
 
@@ -715,8 +715,8 @@ function patch(reference) {
       const updatedWebhook = JSON.parse(body);
       chai.expect(updatedWebhook.name).to.equal('Update');
       chai.expect(updatedWebhook.triggers).to.deep.equal(webhookData.triggers);
-      chai.expect(updatedWebhook.responses[0].url).to.equal(webhookData.responses[0].url);
-      chai.expect(updatedWebhook.responses[0].method).to.equal(webhookData.responses[0].method || 'POST');
+      chai.expect(updatedWebhook.response.url).to.equal(webhookData.response.url);
+      chai.expect(updatedWebhook.response.method).to.equal(webhookData.response.method || 'POST');
       chai.expect(updatedWebhook.reference).to.equal(ref);
       chai.expect(updatedWebhook.custom).to.deep.equal(webhookData.custom || {});
 
@@ -800,9 +800,9 @@ function patchMany(reference) {
         chai.expect(updatedWebhook.type).to.equal(webhookDataObj.type);
         chai.expect(updatedWebhook.description).to.equal(webhookDataObj.description);
         chai.expect(updatedWebhook.triggers).to.deep.equal(webhookDataObj.triggers);
-        if (updatedWebhook.responses.length) {
-          chai.expect(updatedWebhook.responses[0].url).to.equal(webhookDataObj.responses[0].url);
-          chai.expect(updatedWebhook.responses[0].method).to.equal(webhookDataObj.responses[0].method || 'POST');
+        if (updatedWebhook.response) {
+          chai.expect(updatedWebhook.response.url).to.equal(webhookDataObj.response.url);
+          chai.expect(updatedWebhook.response.method).to.equal(webhookDataObj.response.method || 'POST');
         }
         else {
           chai.expect(updatedWebhook.token).to.equal(webhookDataObj.token);

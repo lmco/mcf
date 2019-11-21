@@ -993,7 +993,7 @@ function getWebhookPublicData(webhook, options) {
     type: webhook.type,
     description: webhook.description,
     triggers: webhook.triggers,
-    responses: webhook.responses ? webhook.responses : undefined,
+    response: webhook.response ? webhook.response : undefined,
     token: webhook.token ? webhook.token : undefined,
     tokenLocation: webhook.tokenLocation ? webhook.tokenLocation : undefined,
     reference: webhook.reference,

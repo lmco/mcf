@@ -467,7 +467,6 @@ async function update(requestingUser, webhooks, options) {
 
         // Get validator for field if one exists
         if (validators.webhook.hasOwnProperty(key)) {
-          // TODO: I'm not using regex for webhook validation - still leave this in here?
           // If the validator is a regex string
           if (typeof validators.webhook[key] === 'string') {
             // If validation fails, throw error
@@ -483,10 +482,20 @@ async function update(requestingUser, webhooks, options) {
                 + `Invalid ${key}: [${webhookUpdate[key]}]`, 'warn');
             }
           }
+          else if (Object.keys(validators.webhook[key])
+          .every(subkey => typeof validators.webhook[key][subkey] === 'function')) {
+            const subkeys = Object.keys(validators.webhook[key]);
+            subkeys.forEach((subkey) => {
+              if (!validators.webhook[key][subkey](webhookUpdate[key])) {
+                throw new M.DataFormatError(`Problem with update for webhook ${webhook._id}: `
+                  + `Invalid ${key}: [${webhookUpdate[key]}]`, 'warn');
+              }
+            });
+          }
           // Improperly formatted validator
           else {
-            throw new M.ServerError(`Webhook validator [${key}] is neither a `
-              + 'function nor a regex string.');
+            throw new M.ServerError(`Webhook validator [${key}] is improperly `
+              + 'formatted.');
           }
         }
 
