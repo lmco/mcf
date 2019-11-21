@@ -5182,7 +5182,7 @@ async function postArtifact(req, res) {
   }
 
   // If artifact ID was provided in the body, ensure it matches artifact ID in params
-  if (req.params.artifactid !== req.body.id) {
+  if (req.body.hasOwnProperty('id') && req.params.artifactid !== req.body.id) {
     const error = new M.DataFormatError(
       'Artifact ID in the body does not match ID in the params.', 'warn'
     );
@@ -5266,7 +5266,7 @@ async function patchArtifact(req, res) {
   req.body = JSON.parse(JSON.stringify(req.body));
 
   // If an ID was provided in the body, ensure it matches the ID in params
-  if (req.params.artifactid !== req.body.id) {
+  if (req.body.hasOwnProperty('id') && req.params.artifactid !== req.body.id) {
     const error = new M.DataFormatError(
       'Artifact ID in the body does not match ID in the params.', 'warn'
     );
