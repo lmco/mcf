@@ -177,9 +177,7 @@ function invalidOptions(endpoint) {
   return function(done) {
     // Parse the method
     const method = testUtils.parseMethod(endpoint);
-    const params = {} /*endpoint === 'getBlobById' ? {
-      orgid: org._id, projectid: projID, branchid: branchID,
-    };*/
+    const params = {};
     const body = {};
 
     // Create request object
