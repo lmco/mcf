@@ -115,7 +115,6 @@ describe(M.getModuleName(module.filename), () => {
   // ------------- No arrays in singular endpoints -------------
   it('should reject a POST singular branch request containing an array in the body', noArrays('postBranch'));
   it('should reject a PATCH singular branch request containing an array in the body', noArrays('patchBranch'));
-  it('should reject a DELETE singular branch request containing an array in the body', noArrays('deleteBranch'));
 });
 
 /* --------------------( Tests )-------------------- */
