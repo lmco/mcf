@@ -6120,11 +6120,8 @@ async function triggerWebhook(req, res) {
       EventEmitter.emit(trigger, data);
     });
 
-    // Return message
-    const message = 'success';
-
-    // Return 200: OK and the message
-    return returnResponse(req, res, message, 200);
+    // Return 200: OK and the message 'success'
+    return returnResponse(req, res, 'success', 200);
   }
   catch (error) {
     // If an error was thrown, return it and its status

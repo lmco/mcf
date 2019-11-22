@@ -70,8 +70,6 @@ const validators = M.require('lib.validators');
  * @param {number} [options.skip = 0] - A non-negative number that specifies the number of
  * documents to skip returning. For example, if 10 documents are found and skip is 5, the first
  * 5 documents will NOT be returned.
- * @param {boolean} [options.lean = false] - A boolean value that if true returns raw JSON
- * instead of converting the data to objects.
  * @param {string} [options.sort] - Provide a particular field to sort the results by. To sort
  * in reverse order, provide a '-' in front.
  * @param {string} [options.org] - An org ID to query for webhooks on.
@@ -225,8 +223,12 @@ async function find(requestingUser, webhooks, options) {
  * trigger a webhook.
  * @param {string} [webhooks.tokenLocation] - A dot-delimited string that represents the location
  * of the token within an external request to trigger a webhook.
- * @param {object} [webhooks.reference] - An object containing the fields 'org', 'project', and
- * 'branch', which each contain a string representing the id of the respective level.
+ * @param {object} [webhooks.reference] - An object representing the level at which the webhook is
+ * registered. Can be blank to specify a server-level webhook or contain an org, project, and/or
+ * branch id.
+ * @param {string} [webhooks.reference.org] - The id of the owning organization.
+ * @param {string} [webhooks.reference.project] - The id of the owning project.
+ * @param {string} [webhooks.reference.branch] - The id of the owning branch.
  * @param {object} [webhooks.custom] - Any additional key/value pairs for an
  * object. Must be proper JSON form.
  * @param {object} [options] - A parameter that provides supported options.
