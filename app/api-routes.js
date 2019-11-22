@@ -6141,7 +6141,7 @@ api.route('/users/:username/password')
  *                   type: string
  *                 data:
  *                   type: object
- *                   description: an optional field to store data to send with the
+ *                   description: An optional field to store data to send with the
  *                                http requests upon webhook triggering.
  *             token:
  *               type: string
@@ -6253,7 +6253,7 @@ api.route('/users/:username/password')
  *                   type: string
  *                 data:
  *                   type: object
- *                   description: an optional field to store data to send with the
+ *                   description: An optional field to store data to send with the
  *                                http requests upon webhook triggering.
  *             token:
  *                 type: string
@@ -6518,7 +6518,7 @@ api.route('/webhooks/trigger/:encodedid')
  *                   type: string
  *                 data:
  *                   type: object
- *                   description: an optional field to store data to send with the
+ *                   description: An optional field to store data to send with the
  *                                http requests upon webhook triggering.
  *             token:
  *                 type: string

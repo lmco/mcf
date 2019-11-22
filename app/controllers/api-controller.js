@@ -5718,7 +5718,7 @@ async function postWebhooks(req, res) {
 }
 
 /**
- * PATCH /api/webhooks/
+ * PATCH /api/webhooks
  *
  * @description Updates the specified webhooks.
  *
