@@ -32,15 +32,16 @@ const id = customValidators.id || '([_a-z0-9])([-_a-z0-9.]){0,}';
 const idLength = customValidators.id_length || 36;
 
 // A list of reserved keywords which cannot be used in ids
-const reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
+const reservedKeywords = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
   'login', 'about', 'assets', 'static', 'public', 'api', 'organizations',
   'orgs', 'projects', 'users', 'plugins', 'ext', 'extension', 'search',
   'whoami', 'profile', 'edit', 'proj', 'elements', 'branch', 'anonymous',
   'blob', 'artifact', 'artifacts'];
+
 // Create a validator function to test ids against the reserved keywords
-reserved.test = function(data) {
+const reserved = function(data) {
   const parsedId = utils.parseID(data).pop();
-  return !reserved.includes(parsedId);
+  return !reservedKeywords.includes(parsedId);
 };
 
 
@@ -91,14 +92,10 @@ const org = {
     : `^${id}$`,
   idLength: customValidators.org_id_length || idLength,
   _id: {
-    reserved: reserved.test,
+    reserved: reserved,
     match: function(data) {
       // If the ID is invalid, reject
       return RegExp(org.id).test(data);
-    },
-    optionalMatch: function(data) {
-      // Allow either null or a matching id
-      return data === null || RegExp(org.id).test(data);
     },
     maxLength: function(data) {
       // If the ID is longer than max length, reject
@@ -136,7 +133,7 @@ const project = {
   + (customValidators.project_id_length ? parseInt(customValidators.project_id_length, 10)
     : idLength),
   _id: {
-    reserved: reserved.test,
+    reserved: reserved,
     match: function(data) {
       // If the ID is invalid, reject
       return RegExp(project.id).test(data);
@@ -182,7 +179,7 @@ const branch = {
     + (customValidators.branch_id_length ? parseInt(customValidators.branch_id_length, 10)
       : idLength),
   _id: {
-    reserved: reserved.test,
+    reserved: reserved,
     match: function(data) {
       // If the ID is invalid, reject
       return RegExp(branch.id).test(data);
@@ -232,7 +229,7 @@ const artifact = {
   filenameRegEx: (artifactVal.filename) ? artifactVal.filename : '^[^!\\<>:"\'|?*]+$',
   extension: (artifactVal.extension) ? artifactVal.extension : '^[^!\\<>:"\'|?*]+[.][\\w]+$',
   _id: {
-    reserved: reserved.test,
+    reserved: reserved,
     match: function(data) {
       // If the ID is invalid, reject
       return RegExp(artifact.id).test(data);
@@ -287,7 +284,7 @@ const element = {
     : idLength),
   custom: customDataValidator,
   _id: {
-    reserved: reserved.test,
+    reserved: reserved,
     match: function(data) {
       // If the ID is invalid, reject
       return RegExp(element.id).test(data);
@@ -356,7 +353,7 @@ const user = {
   firstName: customValidators.user_fname || '^(([a-zA-Z])([-a-zA-Z ])*)?$',
   lastName: customValidators.user_lname || '^(([a-zA-Z])([-a-zA-Z ])*)?$',
   _id: {
-    reserved: reserved.test,
+    reserved: reserved,
     match: function(data) {
       // If the username is invalid, reject
       return RegExp(user.username).test(data);
@@ -405,7 +402,6 @@ const url = {
 
 
 module.exports = {
-  reserved,
   org,
   project,
   branch,
