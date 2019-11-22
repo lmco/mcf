@@ -74,7 +74,8 @@ const permissionsValidator = function(data) {
 };
 
 /**
- * @description Regular Expressions to validate organization data.
+ * @description Regular Expressions to validate organization data and corresponding validator
+ * functions.
  *
  * id:
  *   - MUST start with a lowercase letter, number or '_'
@@ -111,7 +112,7 @@ const org = {
 };
 
 /**
- * @description Regular Expressions to validate project data
+ * @description Regular Expressions to validate project data and corresponding validator functions.
  *
  * id:
  *   - MUST start with a lowercase letter, number or '_'
@@ -157,7 +158,7 @@ const project = {
 };
 
 /**
- * @description Regular Expressions to validate branch data
+ * @description Regular Expressions to validate branch data and corresponding validator functions.
  *
  * id:
  *   - MUST start with a lowercase letter, number or '_'
@@ -204,7 +205,8 @@ const branch = {
 branch.source = branch._id.optionalMatch;
 
 /**
- * @description Regular Expressions to validate artifact data
+ * @description Regular Expressions to validate artifact data and corresponding validator
+ * functions.
  *
  * id:
  *   - MUST start with a lowercase letter, number or '_'
@@ -261,7 +263,7 @@ const artifact = {
 };
 
 /**
- * @description Regular Expressions to validate element data
+ * @description Regular Expressions to validate element data and corresponding validator functions.
  *
  * id:
  *   - MUST start with a lowercase letter, number or '_'
