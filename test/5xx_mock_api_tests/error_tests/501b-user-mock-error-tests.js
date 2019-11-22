@@ -296,7 +296,7 @@ function notFound(endpoint) {
 
 /**
  * @description A constructor for a dynamic mocha-compatible function that tests singular user api
- * endpoints given an array of usernames in the body.
+ * endpoints given an array in the body.
  *
  * @param {string} endpoint - The particular api endpoint to test.
  * @returns {Function} A function for mocha to use to test a specific api endpoint.

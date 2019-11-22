@@ -1056,12 +1056,6 @@ async function deleteOrg(req, res, next) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // Singular api: should not accept arrays
-  if (Array.isArray(req.body)) {
-    const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
-
   // Attempt to parse query options
   try {
     // Extract options from request query
@@ -1970,12 +1964,6 @@ async function deleteProject(req, res) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
-
-  // Singular api: should not accept arrays
-  if (Array.isArray(req.body)) {
-    const error = new M.DataFormatError('Input cannot be an array', 'warn');
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
@@ -3999,12 +3987,6 @@ async function deleteElement(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // Singular api: should not accept arrays
-  if (Array.isArray(req.body)) {
-    const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
-
   // Attempt to parse query options
   try {
     // Extract options from request query
@@ -4656,12 +4638,6 @@ async function deleteBranch(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // Singular api: should not accept arrays
-  if (Array.isArray(req.body)) {
-    const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
-
   // Attempt to parse query options
   try {
     // Extract options from request query
@@ -5186,9 +5162,14 @@ async function postArtifact(req, res) {
     delete options.minified;
   }
 
+  // Singular api: should not accept arrays
+  if (Array.isArray(req.body)) {
+    const error = new M.DataFormatError('Input cannot be an array', 'warn');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
   // If artifact ID was provided in the body, ensure it matches artifact ID in params
-  if (Object.prototype.hasOwnProperty.call('id')
-    && (req.params.artifactid !== req.body.id)) {
+  if (req.body.hasOwnProperty('id') && req.params.artifactid !== req.body.id) {
     const error = new M.DataFormatError(
       'Artifact ID in the body does not match ID in the params.', 'warn'
     );
@@ -5272,8 +5253,7 @@ async function patchArtifact(req, res) {
   req.body = JSON.parse(JSON.stringify(req.body));
 
   // If an ID was provided in the body, ensure it matches the ID in params
-  if (Object.prototype.hasOwnProperty.call('id')
-    && (req.params.artifactid !== req.body.id)) {
+  if (req.body.hasOwnProperty('id') && req.params.artifactid !== req.body.id) {
     const error = new M.DataFormatError(
       'Artifact ID in the body does not match ID in the params.', 'warn'
     );
@@ -5338,7 +5318,7 @@ async function deleteArtifact(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return res.status(error.status).send(error);
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
