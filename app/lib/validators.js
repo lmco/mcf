@@ -37,11 +37,39 @@ const reserved = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
   'orgs', 'projects', 'users', 'plugins', 'ext', 'extension', 'search',
   'whoami', 'profile', 'edit', 'proj', 'elements', 'branch', 'anonymous',
   'blob', 'artifact', 'artifacts'];
+// Create a validator function to test ids against the reserved keywords
+reserved.test = function(data) {
+  const parsedId = utils.parseID(data).pop();
+  return !reserved.includes(parsedId);
+};
+
 
 // The custom data validator used in all models
 const customDataValidator = function(v) {
   // Must be an object and not null
   return (typeof v === 'object' && v !== null);
+};
+
+/**
+ * @description Validator function for permissions on orgs and projects.
+ *
+ * @param {object} data - The data to validate.
+ * @returns {boolean} Returns true if data is valid.
+ */
+const permissionsValidator = function(data) {
+  let bool = true;
+  // If the permissions object is not a JSON object, reject
+  if (typeof data !== 'object' || Array.isArray(data) || data === null) {
+    bool = false;
+  }
+  // Check that each every key/value pair's value is an array of strings
+  Object.values(data).forEach((val) => {
+    if (!Array.isArray(val) || !val.every(s => typeof s === 'string')) {
+      bool = false;
+    }
+  });
+
+  return bool;
 };
 
 /**
@@ -62,6 +90,26 @@ const org = {
     ? `^${customValidators.org_id}$`
     : `^${id}$`,
   idLength: customValidators.org_id_length || idLength,
+  _id: {
+    reserved: reserved.test,
+    match: function(data) {
+      // If the ID is invalid, reject
+      return RegExp(org.id).test(data);
+    },
+    optionalMatch: function(data) {
+      // Allow either null or a matching id
+      return data === null || RegExp(org.id).test(data);
+    },
+    maxLength: function(data) {
+      // If the ID is longer than max length, reject
+      return data.length <= org.idLength;
+    },
+    minLength: function(data) {
+      // If the ID is shorter than min length, reject
+      return data.length > 1;
+    }
+  },
+  permissions: permissionsValidator,
   custom: customDataValidator
 };
 
@@ -87,6 +135,27 @@ const project = {
   idLength: org.idLength + utils.ID_DELIMITER.length
   + (customValidators.project_id_length ? parseInt(customValidators.project_id_length, 10)
     : idLength),
+  _id: {
+    reserved: reserved.test,
+    match: function(data) {
+      // If the ID is invalid, reject
+      return RegExp(project.id).test(data);
+    },
+    optionalMatch: function(data) {
+      // Allow either null or a matching id
+      return data === null || RegExp(project.id).test(data);
+    },
+    maxLength: function(data) {
+      // If the ID is longer than max length, reject
+      return data.length <= project.idLength;
+    },
+    minLength: function(data) {
+      // If the ID is shorter than min length, reject
+      return data.length > 4;
+    }
+  },
+  org: org._id.match,
+  permissions: permissionsValidator,
   custom: customDataValidator
 };
 
@@ -112,8 +181,30 @@ const branch = {
   idLength: project.idLength + utils.ID_DELIMITER.length
     + (customValidators.branch_id_length ? parseInt(customValidators.branch_id_length, 10)
       : idLength),
+  _id: {
+    reserved: reserved.test,
+    match: function(data) {
+      // If the ID is invalid, reject
+      return RegExp(branch.id).test(data);
+    },
+    optionalMatch: function(data) {
+      // Allow either null or a matching id
+      return data === null || RegExp(branch.id).test(data);
+    },
+    maxLength: function(data) {
+      // If the ID is longer than max length, reject
+      return data.length <= branch.idLength;
+    },
+    minLength: function(data) {
+      // If the ID is shorter than min length, reject
+      return data.length > 7;
+    }
+  },
+  project: project._id.match,
   custom: customDataValidator
 };
+// Define source after so that it can user branch._id.optionalMatch
+branch.source = branch._id.optionalMatch;
 
 /**
  * @description Regular Expressions to validate artifact data
@@ -137,9 +228,39 @@ const artifact = {
   idLength: branch.idLength + utils.ID_DELIMITER.length
     + (customValidators.artifact_id_length ? parseInt(customValidators.artifact_id_length, 10)
       : idLength),
-  location: (artifactVal.location) ? artifactVal.location : '^[^.]+$',
-  filename: (artifactVal.filename) ? artifactVal.filename : '^[^!\\<>:"\'|?*]+$',
-  extension: (artifactVal.extension) ? artifactVal.extension : '^[^!\\<>:"\'|?*]+[.][\\w]+$'
+  locationRegEx: (artifactVal.location) ? artifactVal.location : '^[^.]+$',
+  filenameRegEx: (artifactVal.filename) ? artifactVal.filename : '^[^!\\<>:"\'|?*]+$',
+  extension: (artifactVal.extension) ? artifactVal.extension : '^[^!\\<>:"\'|?*]+[.][\\w]+$',
+  _id: {
+    reserved: reserved.test,
+    match: function(data) {
+      // If the ID is invalid, reject
+      return RegExp(artifact.id).test(data);
+    },
+    optionalMatch: function(data) {
+      // Allow either null or a matching id
+      return data === null || RegExp(artifact.id).test(data);
+    },
+    maxLength: function(data) {
+      // If the ID is longer than max length, reject
+      return data.length <= artifact.idLength;
+    },
+    minLength: function(data) {
+      // If the ID is shorter than min length, reject
+      return data.length > 10;
+    }
+  },
+  project: project._id.match,
+  branch: branch._id.match,
+  filename: function(data) {
+    // If the filename is improperly formatted, reject
+    return (RegExp(artifact.filenameRegEx).test(data)
+      && RegExp(artifact.extension).test(data));
+  },
+  location: function(data) {
+    // If the location is improperly formatted, reject
+    return RegExp(artifact.locationRegEx).test(data);
+  }
 };
 
 /**
@@ -148,7 +269,7 @@ const artifact = {
  * id:
  *   - MUST start with a lowercase letter, number or '_'
  *   - MUST only include lowercase letters, numbers, '_' or '-'
- *   - each segment MUST be of length 1 or more
+ *   - each segment MUST be of length 2 or more
  *   Examples:
  *      - orgid:projid:branchid:elementid [valid]
  *      - orgid:projid:branchid:my-element [valid]
@@ -164,7 +285,55 @@ const element = {
   idLength: branch.idLength + utils.ID_DELIMITER.length
   + (customValidators.element_id_length ? parseInt(customValidators.element_id_length, 10)
     : idLength),
-  custom: customDataValidator
+  custom: customDataValidator,
+  _id: {
+    reserved: reserved.test,
+    match: function(data) {
+      // If the ID is invalid, reject
+      return RegExp(element.id).test(data);
+    },
+    optionalMatch: function(data) {
+      // Allow either null or a matching id
+      return data === null || RegExp(element.id).test(data);
+    },
+    maxLength: function(data) {
+      // If the ID is longer than max length, reject
+      return data.length <= element.idLength;
+    },
+    minLength: function(data) {
+      // If the ID is shorter than min length, reject
+      return data.length > 10;
+    }
+  },
+  project: project._id.match,
+  branch: branch._id.match,
+  artifact: () => artifact._id.optionalMatch
+};
+// Define parent, source, and target after so that they can access element._id.optionalMatch
+element.parent = element._id.optionalMatch;
+element.source = {
+  id: element._id.optionalMatch,
+  target: function(data) {
+    // If source is provided
+    if (data) {
+      // Reject if target is null
+      return this.target;
+    }
+    // Source null, return true
+    return true;
+  }
+};
+element.target = {
+  id: element._id.optionalMatch,
+  source: function(data) {
+    // If target is provided
+    if (data) {
+      // Reject if source is null
+      return this.source;
+    }
+    // Target null, return true
+    return true;
+  }
 };
 
 /**
@@ -184,11 +353,38 @@ const user = {
   username: customValidators.user_username || '^([a-z])([a-z0-9_]){0,}$',
   usernameLength: customValidators.user_username_length || idLength,
   email: customValidators.user_email || '^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$',
-  fname: customValidators.user_fname || '^(([a-zA-Z])([-a-zA-Z ])*)?$',
-  lname: customValidators.user_lname || '^(([a-zA-Z])([-a-zA-Z ])*)?$',
-  provider: function(v) {
-    // If the use provider is defined and does not include value, return false
-    return !(customValidators.user_provider && !customValidators.user_provider.includes(v));
+  firstName: customValidators.user_fname || '^(([a-zA-Z])([-a-zA-Z ])*)?$',
+  lastName: customValidators.user_lname || '^(([a-zA-Z])([-a-zA-Z ])*)?$',
+  _id: {
+    reserved: reserved.test,
+    match: function(data) {
+      // If the username is invalid, reject
+      return RegExp(user.username).test(data);
+    },
+    maxLength: function(data) {
+      // If the username is longer than max length, reject
+      return data.length <= user.usernameLength;
+    },
+    minLength: function(data) {
+      // If the username is shorter than min length, reject
+      return data.length > 2;
+    }
+  },
+  fname: function(data) {
+    // If the fname is invalid and provided, reject
+    return !(!RegExp(user.firstName).test(data) && data);
+  },
+  preferredName: function(data) {
+    // If the fname is invalid and provided, reject
+    return !(!RegExp(user.firstName).test(data) && data);
+  },
+  lname: function(data) {
+    // If the fname is invalid and provided, reject
+    return !(!RegExp(user.lastName).test(data) && data);
+  },
+  provider: function(data) {
+    // If the user provider is defined and does not include value, return false
+    return !(customValidators.user_provider && !customValidators.user_provider.includes(data));
   },
   custom: customDataValidator
 };
