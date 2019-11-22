@@ -949,6 +949,6 @@ async function remove(requestingUser, orgs, options) {
     return foundOrgIDs;
   }
   catch (error) {
-    throw errors.captureError(errors);
+    throw errors.captureError(error);
   }
 }
