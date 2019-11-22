@@ -213,12 +213,16 @@ async function find(requestingUser, webhooks, options) {
  * the webhook.
  * @param {object} webhooks.triggers - An array of strings referencing the events that trigger
  * outgoing webhooks and events that incoming webhooks will emit.
- * @param {object} [webhooks.response] - An object containing data used to send http requests upon
- * the webhook triggering. Each response must contain a url field, while the method field defaults
- * to 'POST' and the headers field defaults to {'Content-Type': 'application/json'}. Each response
- * may also contain a ca field for a certificate authority, a token field for token validation, and
- * a data field that contains data to send with the request. Outgoing webhooks must have a response
- * field.
+ * @param {object} [webhooks.response] - An object containing data used to send an http request upon
+ * the webhook triggering. Outgoing webhooks must have a response field.
+ * @param {object[]} [webhooks.response.url] - The url to send an http request to.
+ * @param {object[]} [webhooks.response.method] - The method of the http request to send.
+ * @param {object[]} [webhooks.response.headers] - The headers to send with the http request.
+ * @param {object[]} [webhooks.response.token] - An optional token for additional security with
+ * the http request.
+ * @param {object[]} [webhooks.response.ca] - An optional ca for additional security with the
+ * http request.
+ * @param {object[]} [webhooks.response.data] - Optional data to send with the http request.
  * @param {string} [webhooks.token] - An optional field used to validate an external request and
  * trigger a webhook.
  * @param {string} [webhooks.tokenLocation] - A dot-delimited string that represents the location
@@ -357,7 +361,15 @@ async function create(requestingUser, webhooks, options) {
  * @param {string} [webhooks.name] - The updated name of the webhook.
  * @param {string} [webhooks.description] - The updated description of the webhook.
  * @param {string[]} [webhooks.triggers] - The updated list of triggers for the webhook.
- * @param {object[]} [webhooks.response] - The updated response objects for an outgoing webhook.
+ * @param {object[]} [webhooks.response] - The updated response object for an outgoing webhook.
+ * @param {object[]} [webhooks.response.url] - The url to send an http request to.
+ * @param {object[]} [webhooks.response.method] - The method of the http request to send.
+ * @param {object[]} [webhooks.response.headers] - The headers to send with the http request.
+ * @param {object[]} [webhooks.response.token] - An optional token for additional security with
+ * the http request.
+ * @param {object[]} [webhooks.response.ca] - An optional ca for additional security with the
+ * http request.
+ * @param {object[]} [webhooks.response.data] - Optional data to send with the http request.
  * @param {string} [webhooks.token] - A key that external requests to trigger the webhook must
  * provide in order to verify the request.
  * @param {string} [webhooks.tokenLocation] - A dot-delimited string that represents the location
