@@ -967,6 +967,17 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
               );
             }
           }
+          else if (Object.keys(validators.element[key])
+          .every(subkey => typeof validators.element[key][subkey] === 'function')) {
+            const subkeys = Object.keys(validators.element[key]);
+            subkeys.forEach((subkey) => {
+              if (!validators.element[key][subkey](updateElement[key])) {
+                throw new M.DataFormatError(
+                  `Invalid ${key}: [${updateElement[key]}]`, 'warn'
+                );
+              }
+            });
+          }
           // Improperly formatted validator
           else {
             throw new M.ServerError(`Element validator [${key}] is neither a `
