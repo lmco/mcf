@@ -33,6 +33,7 @@ const db = M.require('db');
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
 const webhookID = uuidv4();
+const webhookIDs = [webhookID];
 
 /* --------------------( Main )-------------------- */
 /**
@@ -62,7 +63,7 @@ describe(M.getModuleName(module.filename), () => {
   after(async () => {
     try {
       // Remove the webhook
-      await Webhook.deleteMany({ _id: webhookID });
+      await Webhook.deleteMany({ _id: { $in: webhookIDs } });
       await db.disconnect();
     }
     catch (error) {
@@ -83,7 +84,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Creates a webhook using the Webhook model.
+ * @description Creates an outgoing webhook using the Webhook model.
  */
 async function createOutgoingWebhook() {
   try {
@@ -102,13 +103,16 @@ async function createOutgoingWebhook() {
 }
 
 /**
- * @description Creates a webhook using the Webhook model.
+ * @description Creates an incoming webhook using the Webhook model.
  */
 async function createIncomingWebhook() {
   try {
     const webhookData = testData.webhooks[0];
     // Create a new uuid
     webhookData._id = uuidv4();
+
+    // Save the id to delete later
+    webhookIDs.push(webhookData._id);
 
     // Save the webhook model object to the database
     await Webhook.insertMany(webhookData);
@@ -172,7 +176,7 @@ async function updateWebhook() {
 async function deleteWebhook() {
   try {
     // Remove the webhook
-    await Webhook.deleteMany({ _id: webhookID });
+    await Webhook.deleteMany({ _id: { $in: webhookID } });
 
     // Attempt to find the webhook
     const foundWebhook = await Webhook.findOne({ _id: webhookID });

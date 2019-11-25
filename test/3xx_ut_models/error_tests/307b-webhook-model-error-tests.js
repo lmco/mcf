@@ -237,7 +237,8 @@ async function noResponseOutgoing() {
 
     // Save webhook; expect specific error message
     await Webhook.insertMany(webhookData).should.eventually.be.rejectedWith('Webhook validation '
-      + 'failed: type: An outgoing webhook must have a response field.');
+      + 'failed: type: An outgoing webhook must have a response field and cannot have a token or'
+      + ' tokenLocation.');
   }
   catch (error) {
     M.log.error(error);
@@ -260,7 +261,8 @@ async function responseIncoming() {
 
     // Save webhook; expect specific error message
     await Webhook.insertMany(webhookData).should.eventually.be.rejectedWith('Webhook validation '
-      + 'failed: type: An incoming webhook cannot have a response field.');
+      + 'failed: type: An incoming webhook must have a token and a tokenLocation and cannot have'
+      + ' a response field.');
   }
   catch (error) {
     M.log.error(error);
@@ -378,7 +380,8 @@ async function noTokenIncoming() {
 
     // Save webhook; expect specific error message
     await Webhook.insertMany(webhookData).should.eventually.be.rejectedWith('Webhook validation '
-      + 'failed: type: An incoming webhook must have a token and a tokenLocation.');
+      + 'failed: type: An incoming webhook must have a token and a tokenLocation and cannot have'
+      + ' a response field.');
   }
   catch (error) {
     M.log.error(error);
@@ -400,7 +403,8 @@ async function noTokenLocationIncoming() {
 
     // Save webhook; expect specific error message
     await Webhook.insertMany(webhookData).should.eventually.be.rejectedWith('Webhook validation '
-      + 'failed: type: An incoming webhook must have a token and a tokenLocation.');
+      + 'failed: type: An incoming webhook must have a token and a tokenLocation and cannot have'
+      + ' a response field.');
   }
   catch (error) {
     M.log.error(error);
@@ -422,7 +426,8 @@ async function tokenOutgoing() {
 
     // Save webhook; expect specific error message
     await Webhook.insertMany(webhookData).should.eventually.be.rejectedWith('Webhook validation '
-      + 'failed: type: An outgoing webhook cannot have a token or tokenLocation.');
+      + 'failed: type: An outgoing webhook must have a response field and cannot have a token or'
+      + ' tokenLocation.');
   }
   catch (error) {
     M.log.error(error);
@@ -444,7 +449,8 @@ async function tokenLocationOutgoing() {
 
     // Save webhook; expect specific error message
     await Webhook.insertMany(webhookData).should.eventually.be.rejectedWith('Webhook validation '
-      + 'failed: type: An outgoing webhook cannot have a token or tokenLocation.');
+      + 'failed: type: An outgoing webhook must have a response field and cannot have a token or'
+      + ' tokenLocation.');
   }
   catch (error) {
     M.log.error(error);

@@ -138,27 +138,27 @@ function post(reference) {
     let ref;
     if (reference === 'org') {
       levelData = orgWebhooks;
-      ref = org._id;
-      webhookData.reference = {
+      ref = {
         org: org._id
       };
+      webhookData.reference = ref;
     }
     if (reference === 'project') {
       levelData = projWebhooks;
-      ref = utils.createID(org._id, projID);
-      webhookData.reference = {
+      ref = {
         org: org._id,
         project: projID
       };
+      webhookData.reference = ref;
     }
     if (reference === 'branch') {
       levelData = branchWebhooks;
-      ref = utils.createID(org._id, projID, branchID);
-      webhookData.reference = {
+      ref = {
         org: org._id,
         project: projID,
         branch: branchID
       };
+      webhookData.reference = ref;
     }
 
     // Create request object
@@ -181,7 +181,7 @@ function post(reference) {
       chai.expect(createdWebhook.triggers).to.deep.equal(webhookData.triggers);
       chai.expect(createdWebhook.response.url).to.equal(webhookData.response.url);
       chai.expect(createdWebhook.response.method).to.equal(webhookData.response.method || 'POST');
-      chai.expect(createdWebhook.reference).to.equal(ref);
+      chai.expect(createdWebhook.reference).to.deep.equal(ref);
       chai.expect(createdWebhook.custom).to.deep.equal(webhookData.custom || {});
 
       // Verify additional properties
@@ -228,32 +228,32 @@ function postMany(reference) {
     let ref;
     if (reference === 'org') {
       levelData = orgWebhooks;
-      ref = org._id;
+      ref = {
+        org: org._id
+      };
       webhookData.forEach((webhook) => {
-        webhook.reference = {
-          org: org._id
-        };
+        webhook.reference = ref;
       });
     }
     if (reference === 'project') {
       levelData = projWebhooks;
-      ref = utils.createID(org._id, projID);
+      ref = {
+        org: org._id,
+        project: projID
+      };
       webhookData.forEach((webhook) => {
-        webhook.reference = {
-          org: org._id,
-          project: projID
-        };
+        webhook.reference = ref;
       });
     }
     if (reference === 'branch') {
       levelData = branchWebhooks;
-      ref = utils.createID(org._id, projID, branchID);
+      ref = {
+        org: org._id,
+        project: projID,
+        branch: branchID
+      };
       webhookData.forEach((webhook) => {
-        webhook.reference = {
-          org: org._id,
-          project: projID,
-          branch: branchID
-        };
+        webhook.reference = ref;
       });
     }
 
@@ -291,7 +291,7 @@ function postMany(reference) {
           chai.expect(createdWebhook.token).to.equal(webhookDataObj.token);
           chai.expect(createdWebhook.tokenLocation).to.equal(webhookDataObj.tokenLocation);
         }
-        chai.expect(createdWebhook.reference).to.equal(ref);
+        chai.expect(createdWebhook.reference).to.deep.equal(ref);
         chai.expect(createdWebhook.custom).to.deep.equal(webhookDataObj.custom || {});
 
         // Verify additional properties
@@ -338,15 +338,24 @@ function get(reference) {
     let ref;
     if (reference === 'org') {
       levelData = orgWebhooks;
-      ref = org._id;
+      ref = {
+        org: org._id
+      };
     }
     if (reference === 'project') {
       levelData = projWebhooks;
-      ref = utils.createID(org._id, projID);
+      ref = {
+        org: org._id,
+        project: projID
+      };
     }
     if (reference === 'branch') {
       levelData = branchWebhooks;
-      ref = utils.createID(org._id, projID, branchID);
+      ref = {
+        org: org._id,
+        project: projID,
+        branch: branchID
+      };
     }
 
     // Create request object
@@ -369,7 +378,7 @@ function get(reference) {
       chai.expect(foundWebhook.triggers).to.deep.equal(webhookData.triggers);
       chai.expect(foundWebhook.response.url).to.equal(webhookData.response.url);
       chai.expect(foundWebhook.response.method).to.equal(webhookData.response.method || 'POST');
-      chai.expect(foundWebhook.reference).to.equal(ref);
+      chai.expect(foundWebhook.reference).to.deep.equal(ref);
       chai.expect(foundWebhook.custom).to.deep.equal(webhookData.custom || {});
 
       // Verify additional properties
@@ -409,21 +418,26 @@ function getMany(reference) {
     let webhookData;
 
     let ref;
-    let query;
     if (reference === 'org') {
       webhookData = orgWebhooks;
-      ref = org._id;
-      query = { org: org._id };
+      ref = {
+        org: org._id
+      };
     }
     if (reference === 'project') {
       webhookData = projWebhooks;
-      ref = utils.createID(org._id, projID);
-      query = { org: org._id, project: projID };
+      ref = {
+        org: org._id,
+        project: projID
+      };
     }
     if (reference === 'branch') {
       webhookData = branchWebhooks;
-      ref = utils.createID(org._id, projID, branchID);
-      query = { org: org._id, project: projID, branch: branchID };
+      ref = {
+        org: org._id,
+        project: projID,
+        branch: branchID
+      };
     }
     if (reference === 'all') {
       webhookData = [orgWebhooks[0], projWebhooks[0], branchWebhooks[0]];
@@ -434,7 +448,7 @@ function getMany(reference) {
     const params = {};
     const method = 'GET';
     const req = testUtils.createRequest(adminUser, params, body, method);
-    req.query = query;
+    req.query = ref;
 
     // Set response as empty object
     const res = {};
@@ -466,7 +480,7 @@ function getMany(reference) {
           chai.expect(foundWebhook.token).to.equal(webhookDataObj.token);
           chai.expect(foundWebhook.tokenLocation).to.equal(webhookDataObj.tokenLocation);
         }
-        if (reference !== 'all') chai.expect(foundWebhook.reference).to.equal(ref);
+        if (reference !== 'all') chai.expect(foundWebhook.reference).to.deep.equal(ref);
         chai.expect(foundWebhook.custom).to.deep.equal(webhookDataObj.custom || {});
 
         // Verify additional properties
@@ -506,21 +520,26 @@ function getAll(reference) {
     let webhookData;
 
     let ref;
-    let query;
     if (reference === 'org') {
       webhookData = orgWebhooks;
-      ref = org._id;
-      query = { org: org._id };
+      ref = {
+        org: org._id
+      };
     }
     if (reference === 'project') {
       webhookData = projWebhooks;
-      ref = utils.createID(org._id, projID);
-      query = { org: org._id, project: projID };
+      ref = {
+        org: org._id,
+        project: projID
+      };
     }
     if (reference === 'branch') {
       webhookData = branchWebhooks;
-      ref = utils.createID(org._id, projID, branchID);
-      query = { org: org._id, project: projID, branch: branchID };
+      ref = {
+        org: org._id,
+        project: projID,
+        branch: branchID
+      };
     }
     if (reference === 'all') {
       webhookData = [...orgWebhooks, ...projWebhooks, ...branchWebhooks];
@@ -531,7 +550,7 @@ function getAll(reference) {
     const params = {};
     const method = 'GET';
     const req = testUtils.createRequest(adminUser, params, body, method);
-    req.query = query;
+    req.query = ref;
 
     // Set response as empty object
     const res = {};
@@ -563,7 +582,7 @@ function getAll(reference) {
           chai.expect(foundWebhook.token).to.equal(webhookDataObj.token);
           chai.expect(foundWebhook.tokenLocation).to.equal(webhookDataObj.tokenLocation);
         }
-        if (reference !== 'all') chai.expect(foundWebhook.reference).to.equal(ref);
+        if (reference !== 'all') chai.expect(foundWebhook.reference).to.deep.equal(ref);
         chai.expect(foundWebhook.custom).to.deep.equal(webhookDataObj.custom || {});
 
         // Verify additional properties
@@ -603,15 +622,24 @@ function patch(reference) {
     let ref;
     if (reference === 'org') {
       webhookData = orgWebhooks[0];
-      ref = org._id;
+      ref = {
+        org: org._id
+      };
     }
     if (reference === 'project') {
       webhookData = projWebhooks[0];
-      ref = utils.createID(org._id, projID);
+      ref = {
+        org: org._id,
+        project: projID
+      };
     }
     if (reference === 'branch') {
       webhookData = branchWebhooks[0];
-      ref = utils.createID(org._id, projID, branchID);
+      ref = {
+        org: org._id,
+        project: projID,
+        branch: branchID
+      };
     }
 
     const webhookUpdate = {
@@ -638,7 +666,7 @@ function patch(reference) {
       chai.expect(updatedWebhook.triggers).to.deep.equal(webhookData.triggers);
       chai.expect(updatedWebhook.response.url).to.equal(webhookData.response.url);
       chai.expect(updatedWebhook.response.method).to.equal(webhookData.response.method || 'POST');
-      chai.expect(updatedWebhook.reference).to.equal(ref);
+      chai.expect(updatedWebhook.reference).to.deep.equal(ref);
       chai.expect(updatedWebhook.custom).to.deep.equal(webhookData.custom || {});
 
       // Verify additional properties
@@ -678,15 +706,24 @@ function patchMany(reference) {
     let ref;
     if (reference === 'org') {
       webhookData = orgWebhooks.slice(1, 3);
-      ref = org._id;
+      ref = {
+        org: org._id
+      };
     }
     if (reference === 'project') {
       webhookData = projWebhooks.slice(1, 3);
-      ref = utils.createID(org._id, projID);
+      ref = {
+        org: org._id,
+        project: projID
+      };
     }
     if (reference === 'branch') {
       webhookData = branchWebhooks.slice(1, 3);
-      ref = utils.createID(org._id, projID, branchID);
+      ref = {
+        org: org._id,
+        project: projID,
+        branch: branchID
+      };
     }
 
     const webhookUpdate = [{
@@ -730,7 +767,7 @@ function patchMany(reference) {
           chai.expect(updatedWebhook.token).to.equal(webhookDataObj.token);
           chai.expect(updatedWebhook.tokenLocation).to.equal(webhookDataObj.tokenLocation);
         }
-        chai.expect(updatedWebhook.reference).to.equal(ref);
+        chai.expect(updatedWebhook.reference).to.deep.equal(ref);
         chai.expect(updatedWebhook.custom).to.deep.equal(webhookDataObj.custom || {});
 
         // Verify additional properties

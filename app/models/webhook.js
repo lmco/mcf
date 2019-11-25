@@ -112,34 +112,14 @@ const WebhookSchema = new db.Schema({
     enum: ['Outgoing', 'Incoming'],
     immutable: true,
     validate: [{
-      validator: function(v) {
-        if (v === 'Outgoing') {
-          return typeof this.response === 'object' && this.response !== null;
-        }
-      },
-      message: () => 'An outgoing webhook must have a response field.'
-    }, {
-      validator: function(v) {
-        if (v === 'Outgoing') {
-          return !(this.token || this.tokenLocation);
-        }
-      },
-      message: () => 'An outgoing webhook cannot have a token or tokenLocation.'
+      validator: validators.webhook.type.outgoing,
+      message: 'An outgoing webhook must have a response field and cannot have a token or'
+        + ' tokenLocation.'
     },
     {
-      validator: function(v) {
-        if (v === 'Incoming') {
-          return (typeof this.token === 'string' && typeof this.tokenLocation === 'string');
-        }
-      },
-      message: () => 'An incoming webhook must have a token and a tokenLocation.'
-    }, {
-      validator: function(v) {
-        if (v === 'Incoming') {
-          return this.response === undefined;
-        }
-      },
-      message: () => 'An incoming webhook cannot have a response field.'
+      validator: validators.webhook.type.incoming,
+      message: 'An incoming webhook must have a token and a tokenLocation and cannot have a response'
+        + ' field.'
     }]
   },
   description: {
@@ -167,43 +147,17 @@ const WebhookSchema = new db.Schema({
     }, {
       validator: validators.webhook.response.headers,
       message: 'Invalid headers in response field.'
-    },
-    {
-      validator: function(v) {
-        if (v.token !== undefined) {
-          return typeof v.token === 'string';
-        }
-        return true;
-      },
+    }, {
+      validator: validators.webhook.response.token,
       message: 'Invalid token in response field.'
-    },
-    {
-      validator: function(v) {
-        if (v.ca !== undefined) {
-          return typeof v.ca === 'string';
-        }
-        return true;
-      },
+    }, {
+      validator: validators.webhook.response.ca,
       message: 'Invalid ca in response field.'
-    },
-    {
-      validator: function(v) {
-        if (v.data !== undefined) {
-          return typeof v.data === 'object';
-        }
-        return true;
-      },
+    }, {
+      validator: validators.webhook.response.data,
       message: 'Invalid data field in response field.'
-    },
-    {
-      validator: function(v) {
-        const keys = Object.keys(v);
-        const validKeys = ['url', 'method', 'headers', 'token', 'ca', 'data'];
-        for (let i = 0; i < keys.length; i++) {
-          if (!(validKeys.includes(keys[i]))) return false;
-        }
-        return true;
-      },
+    }, {
+      validator: validators.webhook.response.validFields,
       message: props => {
         const keys = Object.keys(props.value);
         const validKeys = ['url', 'method', 'headers', 'token', 'ca', 'data'];
@@ -216,41 +170,22 @@ const WebhookSchema = new db.Schema({
   token: {
     type: 'String',
     validate: [{
-      validator: function() {
-        return this.type === 'Incoming';
-      },
-      message: () => 'Only an incoming webhook can have a token.'
-    },
-    {
-      validator: function(v) {
-        return v !== null && v !== undefined;
-      },
-      message: () => 'A token cannot be null or undefined.'
+      validator: validators.webhook.token,
+      message: () => 'A token must be a string.'
     }]
   },
   tokenLocation: {
     type: 'String',
     validate: [{
-      validator: function(v) {
-        return this.type === 'Incoming';
-      },
-      message: () => 'Only an incoming webhook can have a tokenLocation.'
-    },
-    {
-      validator: function(v) {
-        return typeof v === 'string';
-      },
-      message: () => 'A tokenLocation cannot be null or undefined.'
+      validator: validators.webhook.tokenLocation,
+      message: () => 'A tokenLocation must be a string.'
     }]
   },
   reference: {
     type: 'String',
     immutabe: true,
     validate: [{
-      validator: function(v) {
-        return (v === '' || RegExp(validators.org.id).test(v)
-          || RegExp(validators.project.id).test(v) || RegExp(validators.branch.id).test(v));
-      },
+      validator: validators.webhook.reference,
       message: (v) => `Invalid reference id ${v}: reference must either be an empty string or `
         + 'match an org, project, or branch id.'
     }]

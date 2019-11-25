@@ -946,9 +946,21 @@ function getUserPublicData(user, options) {
  * @returns {object} The public data of the webhook.
  */
 function getWebhookPublicData(webhook, options) {
+  let reference = {};
   let createdBy = null;
   let lastModifiedBy = null;
   let archivedBy;
+
+  // Parse webhook reference
+  if (!webhook.reference || webhook.reference === '') {
+    reference = '';
+  }
+  else {
+    const ids = utils.parseID(webhook.reference);
+    reference.org = ids.shift();
+    if (ids.length) reference.project = ids.shift();
+    if (ids.length) reference.branch = ids.shift();
+  }
 
   // If webhook.createdBy is defined
   if (webhook.createdBy) {
@@ -996,7 +1008,7 @@ function getWebhookPublicData(webhook, options) {
     response: webhook.response ? webhook.response : undefined,
     token: webhook.token ? webhook.token : undefined,
     tokenLocation: webhook.tokenLocation ? webhook.tokenLocation : undefined,
-    reference: webhook.reference,
+    reference: reference,
     custom: webhook.custom || {},
     createdOn: (webhook.createdOn) ? webhook.createdOn.toString() : undefined,
     createdBy: createdBy,

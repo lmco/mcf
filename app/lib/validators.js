@@ -208,15 +208,28 @@ const user = {
  *   - MUST be a string
  */
 const webhook = {
-  type: function(data) {
-    return data === 'Outgoing' || data === 'Incoming';
+  type: {
+    outgoing: function(data) {
+      // An outgoing webhook must have a response object and cannot have a token or tokenLocation.
+      return data === 'Outgoing'
+        ? typeof this.response === 'object' && this.response !== null
+        && !(this.token || this.tokenLocation)
+        : true;
+    },
+    incoming: function(data) {
+      // An incoming webhook must have a token and tokenLocation and cannot have a response field.
+      return data === 'Incoming'
+        ? (typeof this.token === 'string' && typeof this.tokenLocation === 'string')
+        && this.response === undefined
+        : true;
+    }
   },
   triggers: function(data) {
     return Array.isArray(data) && data.every((s) => typeof s === 'string');
   },
   response: {
     object: function(data) {
-      return !Array.isArray(data) && data !== null;
+      return typeof data === 'object' && !Array.isArray(data) && data !== null;
     },
     url: function(data) {
       return typeof data.url === 'string';
@@ -227,11 +240,32 @@ const webhook = {
       }
       return ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'].includes(data.method);
     },
-    headers: function(v) {
-      if (v.headers === undefined) {
-        v.headers = { 'Content-Type': 'application/json' };
+    headers: function(data) {
+      if (data.headers === undefined) {
+        data.headers = { 'Content-Type': 'application/json' };
       }
-      return typeof v.headers === 'object';
+      return typeof data.headers === 'object' && data.headers !== null;
+    },
+    token: function(data) {
+      // If the response field has a token, it must be a string
+      return data.token !== undefined ? typeof data.token === 'string' : true;
+    },
+    ca: function(data) {
+      // If the response field has a ca, it must be a string
+      return data.ca !== undefined ? typeof data.ca === 'string' : true;
+    },
+    data: function(data) {
+      // If the response field has a data field, it must be an object
+      return data.data !== undefined ? typeof data.data === 'object' : true;
+    },
+    validFields: function(data) {
+      // Ensure only the response only has valid fields
+      const keys = Object.keys(data);
+      const validKeys = ['url', 'method', 'headers', 'token', 'ca', 'data'];
+      for (let i = 0; i < keys.length; i++) {
+        if (!(validKeys.includes(keys[i]))) return false;
+      }
+      return true;
     }
 
   },
@@ -242,6 +276,10 @@ const webhook = {
   tokenLocation: function(data) {
     // Protect against null entries
     return typeof data === 'string';
+  },
+  reference: function(data) {
+    return (data === '' || RegExp(org.id).test(data)
+      || RegExp(project.id).test(data) || RegExp(branch.id).test(data));
   }
 };
 
