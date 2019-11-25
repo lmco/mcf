@@ -110,7 +110,7 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies POST request 
+ * @description Verifies POST request
  * /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
  * to create an artifact.
  *
