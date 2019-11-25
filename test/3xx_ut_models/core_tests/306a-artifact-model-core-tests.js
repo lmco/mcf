@@ -39,7 +39,6 @@ const org = testData.orgs[0];
 const project = testData.projects[0];
 const branch = testData.branches[0];
 
-
 /* --------------------( Main )-------------------- */
 /**
  * The "describe" function is provided by Mocha and provides a way of wrapping
@@ -159,7 +158,6 @@ async function findArtifact() {
 async function updateArtifact() {
   try {
     const artData = testData.artifacts[0];
-
     const artID = utils.createID(org.id, project.id, branch.id, artData.id);
     // Update the name of the artifact created in the createArtifact() test
     await Artifact.updateOne({ _id: artID }, { filename: 'Updated Name' });
