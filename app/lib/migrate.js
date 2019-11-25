@@ -46,13 +46,9 @@ module.exports.migrate = async function(args) {
     await prompt(args);
 
     // Initialize models
-    await Artifact.init();
-    await Branch.init();
-    await Element.init();
-    await Organization.init();
-    await Project.init();
-    await ServerData.init();
-    await User.init();
+    const promises = [Artifact.init(), Branch.init(), Element.init(),
+      Organization.init(), Project.init(), ServerData.init(), User.init()];
+    await Promise.all(promises);
 
     // Get the server data documents
     const serverData = await ServerData.find({}, null);
@@ -209,14 +205,10 @@ module.exports.getVersion = async function() {
         // Clear the database to ensure any old indexes are removed
         await db.clear();
 
-        // Reinit models
-        await Artifact.init();
-        await Branch.init();
-        await Element.init();
-        await Organization.init();
-        await Project.init();
-        await ServerData.init();
-        await User.init();
+        // Re-initialize models
+        const promises = [Artifact.init(), Branch.init(), Element.init(),
+          Organization.init(), Project.init(), ServerData.init(), User.init()];
+        await Promise.all(promises);
 
         // Insert server data document, with current schema version
         await ServerData.insertMany({ _id: 'server_data', version: M.version });
