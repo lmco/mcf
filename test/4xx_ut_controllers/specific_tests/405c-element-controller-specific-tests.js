@@ -39,7 +39,6 @@ let elements = [];
 let artifacts = null;
 let artifactID = null;
 
-
 /* --------------------( Main )-------------------- */
 /**
  * The "describe" function is provided by Mocha and provides a way of wrapping

@@ -89,7 +89,6 @@ describe(M.getModuleName(module.filename), () => {
 });
 
 /* --------------------( Tests )-------------------- */
-
 /**
  * @description Verifies that a gzip file can be uploaded, unzipped, and
  * the contents can be used to create users.

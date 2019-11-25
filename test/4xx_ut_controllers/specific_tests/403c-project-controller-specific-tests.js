@@ -34,7 +34,6 @@ let adminUser = null;
 let org = null;
 let projects = null;
 
-
 /* --------------------( Main )-------------------- */
 /**
  * The "describe" function is provided by Mocha and provides a way of wrapping

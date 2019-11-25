@@ -180,7 +180,6 @@ async function fnameInvalid() {
   }
 }
 
-
 /**
  * @description Attempts to create a user with an invalid last name.
  */
@@ -208,7 +207,6 @@ async function lnameInvalid() {
     should.not.exist(error);
   }
 }
-
 
 /**
  * @description Attempts to create a user with an invalid preferred name.
@@ -238,7 +236,6 @@ async function preferredNameInvalid() {
     should.not.exist(error);
   }
 }
-
 
 /**
  * @description Attempts to create a user with an admin that's not a boolean.
