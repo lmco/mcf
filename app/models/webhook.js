@@ -18,22 +18,22 @@
  * that fall under the category of automating responses to specific events. Webhook documents store
  * triggers and a response for asynchronous events and api calls within the server. For example, an
  * outgoing webhook may be triggered by a project creation event, and notify the admins of that
- * organization through an http request stored in the webhook's response field. Conversely,
+ * organization through an HTTP request stored in the webhook's response field. Conversely,
  * an incoming webhook may be triggered by a request to the api endpoint
- * /api/webhooks/trigger/:base64id. The triggered webhook will then emit the events stored in its
+ * /api/webhooks/trigger/:encodedid. The triggered webhook will then emit the events stored in its
  * triggers field with the data contained in the request body.</p>
  *
  * <h4>Type</h4>
  * <p>The type of the webhook specifies outgoing or incoming.  An outgoing webhook will only react
  * to events that originate from within the server, while an incoming webhook will only react to
- * external requests to a specific api endpoint tied to the base 64 encoding of its UUID.</p>
+ * external requests to a specific api endpoint tied to the base 64 encoding of its _id.</p>
  *
  * <h4>Triggers</h4>
  * <p>The triggers field is an array of strings that refer to specific events that can trigger an
  * outgoing webhook or the events an incoming webhook will emit.</p>
  *
  * <h4>Response</h4>
- * <p>The response field is an object that contain fields required to send a request: url, method,
+ * <p>The response field is an object that contains fields required to send a request: url, method,
  * headers, token, ca, and data. Only outgoing webhooks have a response field. The url is the
  * only required field, while the method defaults to POST and the headers to
  * {'Content-Type': 'application/json'}. The token field allows for extra security with token
@@ -42,7 +42,7 @@
  * with every request.</p>
  *
  * <h4>Token</h4>
- * <p>The token is a string used to verify permissions for external http requests to trigger a
+ * <p>The token is a string used to verify permissions for external HTTP requests to trigger a
  * webhook. External requests must contain a matching token in order to trigger the webhook.</p>
  *
  * <h4>TokenLocation</h4>
@@ -85,13 +85,13 @@ const extensions = M.require('models.plugin.extensions');
  * @property {string} name - The webhook's name.
  * @property {string} type - The webhook's type, either incoming or outgoing.
  * @property {string} description - An optional field to provide a description for the webhook.
- * @property {Array} triggers - The events that trigger the webhook or that the webhook emits.
- * @property {object} response - An object containing options for an http request.
+ * @property {string[]} triggers - The events that trigger the webhook or that the webhook emits.
+ * @property {object} response - An object containing options for an HTTP request.
  * @property {string} response.url - The url to send a request to.
  * @property {string} response.method - The method of the request. Defaults to POST.
  * @property {string} response.headers - The headers of the request. Defaults to
  * {'Content-Type': 'application/json'}.
- * @property {object} response.token - An optional field for additional verification.
+ * @property {string} response.token - An optional field for additional verification.
  * @property {object} response.data - An optional field for data to send with the request.
  * @property {string} token - The token to validate incoming requests against.
  * @property {string} tokenLocation - The location of the token in the external request.
@@ -219,7 +219,7 @@ const WebhookSchema = new db.Schema({
       validator: function() {
         return this.type === 'Incoming';
       },
-      message: () => 'Only an Incoming webhook can have a token.'
+      message: () => 'Only an incoming webhook can have a token.'
     },
     {
       validator: function(v) {
@@ -234,7 +234,7 @@ const WebhookSchema = new db.Schema({
       validator: function(v) {
         return this.type === 'Incoming';
       },
-      message: () => 'Only an Incoming webhook can have a tokenLocation.'
+      message: () => 'Only an incoming webhook can have a tokenLocation.'
     },
     {
       validator: function(v) {

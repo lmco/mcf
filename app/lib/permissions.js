@@ -694,9 +694,9 @@ function deleteBlob(user, org, project) {
  * @description Verifies that the user has permission to create webhooks.
  *
  * @param {User} user - The user object to check permissions for.
- * @param {Organization} org - The org object to check permissions on.
- * @param {Project} project - The project object to check permissions on.
- * @param {Branch} branch - Parameter currently unused.
+ * @param {Organization} [org=null] - The org object to check permissions on.
+ * @param {Project} [project=null] - The project object to check permissions on.
+ * @param {Branch} [branch=null] - Parameter currently unused.
  *
  * @throws {PermissionError}
  */
@@ -727,9 +727,9 @@ function createWebhook(user, org = null, project = null, branch = null) {
  * @description Verifies that the user has permission to read webhooks.
  *
  * @param {User} user - The user object to check permissions for.
- * @param {Organization} org - The org object to check permissions on.
- * @param {Project} project - The project object to check permissions on.
- * @param {Branch} branch - Parameter currently unused.
+ * @param {Organization} [org=null] - The org object to check permissions on.
+ * @param {Project} [project=null] - The project object to check permissions on.
+ * @param {Branch} [branch=null] - Parameter currently unused.
  *
  * @throws {PermissionError}
  */
@@ -760,9 +760,9 @@ function readWebhook(user, org = null, project = null, branch = null) {
  * @description Verifies that the user has permission to update webhooks.
  *
  * @param {User} user - The user object to check permissions for.
- * @param {Organization} org - The org object to check permissions on.
- * @param {Project} project - The project object to check permissions on.
- * @param {Branch} branch - Parameter currently unused.
+ * @param {Organization} [org=null] - The org object to check permissions on.
+ * @param {Project} [project=null] - The project object to check permissions on.
+ * @param {Branch} [branch=null] - Parameter currently unused.
  *
  * @throws {PermissionError}
  */
@@ -793,9 +793,9 @@ function updateWebhook(user, org = null, project = null, branch = null) {
  * @description Verifies that the user has permission to delete webhooks.
  *
  * @param {User} user - The user object to check permissions for.
- * @param {Organization} org - The org object to check permissions on.
- * @param {Project} project - The project object to check permissions on.
- * @param {Branch} branch - Parameter currently unused.
+ * @param {Organization} [org=null] - The org object to check permissions on.
+ * @param {Project} [project=null] - The project object to check permissions on.
+ * @param {Branch} [branch=null] - Parameter currently unused.
  *
  * @throws {PermissionError}
  */
