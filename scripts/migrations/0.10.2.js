@@ -95,7 +95,6 @@ async function elementHelper() {
       fs.mkdirSync(path.join(M.root, 'data'));
     }
 
-    const promises = [];
     const batchLimit = 5000;
     let batchSkip = 0;
 
@@ -103,37 +102,32 @@ async function elementHelper() {
     for (let i = 0; i < numElements / batchLimit; i++) {
       batchSkip = i * 5000;
 
-      // Add find operation to array of promises
-      promises.push(
-        Element.find({}, null, { skip: batchSkip, limit: batchLimit })
-        .then((elements) => {
-          // Save all elements to a JSON file in the data directory
-          fs.writeFileSync(path.join(M.root, 'data', `elements-0102-${i}.json`), JSON.stringify(elements));
+      // eslint-disable-next-line no-await-in-loop
+      const elements = await Element.find({}, null, { skip: batchSkip, limit: batchLimit });
 
-          const bulkWrite = [];
-          // Add 'artifact' field to elements
-          elements.forEach((element) => {
-            element.artifact = null;
+      // Save all elements to a JSON file in the data directory
+      fs.writeFileSync(path.join(M.root, 'data', `elements-0102-${i}.json`), JSON.stringify(elements));
 
-            bulkWrite.push({
-              updateOne: {
-                filter: { _id: element._id },
-                update: element
-              }
-            });
-          });
+      const bulkWrite = [];
+      // Add 'artifact' field to elements
+      elements.forEach((element) => {
+        element.artifact = null;
 
-          // Update all elements
-          return Element.bulkWrite(bulkWrite);
-        })
-        .then(() => {
-          // If the backup file exists, remove it
-          if (fs.existsSync(path.join(M.root, 'data', `elements-0102-${i}.json`))) {
-            fs.unlinkSync(path.join(M.root, 'data', `elements-0102-${i}.json`));
+        bulkWrite.push({
+          updateOne: {
+            filter: { _id: element._id },
+            update: element
           }
-        })
-      );
+        });
+      });
+
+      // Update all elements
+      await Element.bulkWrite(bulkWrite); // eslint-disable-line no-await-in-loop
+
+      // If the backup file exists, remove it
+      if (fs.existsSync(path.join(M.root, 'data', `elements-0102-${i}.json`))) {
+        fs.unlinkSync(path.join(M.root, 'data', `elements-0102-${i}.json`));
+      }
     }
-    await Promise.all(promises);
   }
 }
