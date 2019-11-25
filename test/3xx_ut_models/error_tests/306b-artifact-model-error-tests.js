@@ -5,11 +5,11 @@
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
- * @license LMPI - Lockheed Martin Proprietary Information
+ * @license MIT
  *
- * @owner Phillip Lee <phillip.lee@lmco.com>
+ * @owner Phillip Lee
  *
- * @author Phillip Lee <phillip.lee@lmco.com>
+ * @author Phillip Lee
  *
  * @description Tests for expected errors within the artifact model.
  */
@@ -25,7 +25,7 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const Artifact = M.require('models.artifact');
-const db = M.require('lib.db');
+const db = M.require('db');
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
 
