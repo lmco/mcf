@@ -136,29 +136,33 @@ function post(reference) {
 
     let levelData;
     let ref;
-    if (reference === 'org') {
-      levelData = orgWebhooks;
-      ref = {
-        org: org._id
-      };
-      webhookData.reference = ref;
-    }
-    if (reference === 'project') {
-      levelData = projWebhooks;
-      ref = {
-        org: org._id,
-        project: projID
-      };
-      webhookData.reference = ref;
-    }
-    if (reference === 'branch') {
-      levelData = branchWebhooks;
-      ref = {
-        org: org._id,
-        project: projID,
-        branch: branchID
-      };
-      webhookData.reference = ref;
+    switch (reference) {
+      case 'org':
+        levelData = orgWebhooks;
+        ref = {
+          org: org._id
+        };
+        webhookData.reference = ref;
+        break;
+      case 'project':
+        levelData = projWebhooks;
+        ref = {
+          org: org._id,
+          project: projID
+        };
+        webhookData.reference = ref;
+        break;
+      case 'branch':
+        levelData = branchWebhooks;
+        ref = {
+          org: org._id,
+          project: projID,
+          branch: branchID
+        };
+        webhookData.reference = ref;
+        break;
+      default:
+        throw new Error('Invalid input to post() test function');
     }
 
     // Create request object
@@ -226,35 +230,39 @@ function postMany(reference) {
 
     let levelData;
     let ref;
-    if (reference === 'org') {
-      levelData = orgWebhooks;
-      ref = {
-        org: org._id
-      };
-      webhookData.forEach((webhook) => {
-        webhook.reference = ref;
-      });
-    }
-    if (reference === 'project') {
-      levelData = projWebhooks;
-      ref = {
-        org: org._id,
-        project: projID
-      };
-      webhookData.forEach((webhook) => {
-        webhook.reference = ref;
-      });
-    }
-    if (reference === 'branch') {
-      levelData = branchWebhooks;
-      ref = {
-        org: org._id,
-        project: projID,
-        branch: branchID
-      };
-      webhookData.forEach((webhook) => {
-        webhook.reference = ref;
-      });
+    switch (reference) {
+      case 'org':
+        levelData = orgWebhooks;
+        ref = {
+          org: org._id
+        };
+        webhookData.forEach((webhook) => {
+          webhook.reference = ref;
+        });
+        break;
+      case 'project':
+        levelData = projWebhooks;
+        ref = {
+          org: org._id,
+          project: projID
+        };
+        webhookData.forEach((webhook) => {
+          webhook.reference = ref;
+        });
+        break;
+      case 'branch':
+        levelData = branchWebhooks;
+        ref = {
+          org: org._id,
+          project: projID,
+          branch: branchID
+        };
+        webhookData.forEach((webhook) => {
+          webhook.reference = ref;
+        });
+        break;
+      default:
+        throw new Error('Invalid input to postMany() test function');
     }
 
     // Create request object
@@ -336,26 +344,30 @@ function get(reference) {
 
     let levelData;
     let ref;
-    if (reference === 'org') {
-      levelData = orgWebhooks;
-      ref = {
-        org: org._id
-      };
-    }
-    if (reference === 'project') {
-      levelData = projWebhooks;
-      ref = {
-        org: org._id,
-        project: projID
-      };
-    }
-    if (reference === 'branch') {
-      levelData = branchWebhooks;
-      ref = {
-        org: org._id,
-        project: projID,
-        branch: branchID
-      };
+    switch (reference) {
+      case 'org':
+        levelData = orgWebhooks;
+        ref = {
+          org: org._id
+        };
+        break;
+      case 'project':
+        levelData = projWebhooks;
+        ref = {
+          org: org._id,
+          project: projID
+        };
+        break;
+      case 'branch':
+        levelData = branchWebhooks;
+        ref = {
+          org: org._id,
+          project: projID,
+          branch: branchID
+        };
+        break;
+      default:
+        throw new Error('Invalid input to get() test function');
     }
 
     // Create request object
@@ -418,29 +430,33 @@ function getMany(reference) {
     let webhookData;
 
     let ref;
-    if (reference === 'org') {
-      webhookData = orgWebhooks;
-      ref = {
-        org: org._id
-      };
-    }
-    if (reference === 'project') {
-      webhookData = projWebhooks;
-      ref = {
-        org: org._id,
-        project: projID
-      };
-    }
-    if (reference === 'branch') {
-      webhookData = branchWebhooks;
-      ref = {
-        org: org._id,
-        project: projID,
-        branch: branchID
-      };
-    }
-    if (reference === 'all') {
-      webhookData = [orgWebhooks[0], projWebhooks[0], branchWebhooks[0]];
+    switch (reference) {
+      case 'org':
+        webhookData = orgWebhooks;
+        ref = {
+          org: org._id
+        };
+        break;
+      case 'project':
+        webhookData = projWebhooks;
+        ref = {
+          org: org._id,
+          project: projID
+        };
+        break;
+      case 'branch':
+        webhookData = branchWebhooks;
+        ref = {
+          org: org._id,
+          project: projID,
+          branch: branchID
+        };
+        break;
+      case 'all':
+        webhookData = [orgWebhooks[0], projWebhooks[0], branchWebhooks[0]];
+        break;
+      default:
+        throw new Error('Invalid input to getMany() function');
     }
 
     // Create request object
@@ -520,29 +536,33 @@ function getAll(reference) {
     let webhookData;
 
     let ref;
-    if (reference === 'org') {
-      webhookData = orgWebhooks;
-      ref = {
-        org: org._id
-      };
-    }
-    if (reference === 'project') {
-      webhookData = projWebhooks;
-      ref = {
-        org: org._id,
-        project: projID
-      };
-    }
-    if (reference === 'branch') {
-      webhookData = branchWebhooks;
-      ref = {
-        org: org._id,
-        project: projID,
-        branch: branchID
-      };
-    }
-    if (reference === 'all') {
-      webhookData = [...orgWebhooks, ...projWebhooks, ...branchWebhooks];
+    switch (reference) {
+      case 'org':
+        webhookData = orgWebhooks;
+        ref = {
+          org: org._id
+        };
+        break;
+      case 'project':
+        webhookData = projWebhooks;
+        ref = {
+          org: org._id,
+          project: projID
+        };
+        break;
+      case 'branch':
+        webhookData = branchWebhooks;
+        ref = {
+          org: org._id,
+          project: projID,
+          branch: branchID
+        };
+        break;
+      case 'all':
+        webhookData = [...orgWebhooks, ...projWebhooks, ...branchWebhooks];
+        break;
+      default:
+        throw new Error('Invalid input to getAll() function');
     }
 
     // Create request object
@@ -620,26 +640,30 @@ function patch(reference) {
   return function(done) {
     let webhookData;
     let ref;
-    if (reference === 'org') {
-      webhookData = orgWebhooks[0];
-      ref = {
-        org: org._id
-      };
-    }
-    if (reference === 'project') {
-      webhookData = projWebhooks[0];
-      ref = {
-        org: org._id,
-        project: projID
-      };
-    }
-    if (reference === 'branch') {
-      webhookData = branchWebhooks[0];
-      ref = {
-        org: org._id,
-        project: projID,
-        branch: branchID
-      };
+    switch (reference) {
+      case 'org':
+        webhookData = orgWebhooks[0];
+        ref = {
+          org: org._id
+        };
+        break;
+      case 'project':
+        webhookData = projWebhooks[0];
+        ref = {
+          org: org._id,
+          project: projID
+        };
+        break;
+      case 'branch':
+        webhookData = branchWebhooks[0];
+        ref = {
+          org: org._id,
+          project: projID,
+          branch: branchID
+        };
+        break;
+      default:
+        throw new Error('Invalid input to patch() test function');
     }
 
     const webhookUpdate = {
@@ -704,26 +728,30 @@ function patchMany(reference) {
   return function(done) {
     let webhookData;
     let ref;
-    if (reference === 'org') {
-      webhookData = orgWebhooks.slice(1, 3);
-      ref = {
-        org: org._id
-      };
-    }
-    if (reference === 'project') {
-      webhookData = projWebhooks.slice(1, 3);
-      ref = {
-        org: org._id,
-        project: projID
-      };
-    }
-    if (reference === 'branch') {
-      webhookData = branchWebhooks.slice(1, 3);
-      ref = {
-        org: org._id,
-        project: projID,
-        branch: branchID
-      };
+    switch (reference) {
+      case 'org':
+        webhookData = orgWebhooks.slice(1, 3);
+        ref = {
+          org: org._id
+        };
+        break;
+      case 'project':
+        webhookData = projWebhooks.slice(1, 3);
+        ref = {
+          org: org._id,
+          project: projID
+        };
+        break;
+      case 'branch':
+        webhookData = branchWebhooks.slice(1, 3);
+        ref = {
+          org: org._id,
+          project: projID,
+          branch: branchID
+        };
+        break;
+      default:
+        throw new Error('Invalid input to patchMany() function');
     }
 
     const webhookUpdate = [{

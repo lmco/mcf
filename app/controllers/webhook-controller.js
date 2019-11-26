@@ -421,11 +421,6 @@ async function update(requestingUser, webhooks, options) {
       if (webhook.id === undefined) {
         throw new M.DataFormatError('One or more webhook updates does not have an id.');
       }
-      // Ensure that the user is not trying to modify a webhook's type
-      if (webhook.type !== undefined) {
-        throw new M.DataFormatError(`Problem with update for webhook ${webhook.id}: `
-        + 'A webhook\'s type cannot be changed.', 'warn');
-      }
       // Check that the update array does not contain duplicate ids
       if (duplicateCheck.includes(webhook.id)) {
         throw new M.DataFormatError(`Duplicate ids found in update array: ${webhook.id}`);
@@ -485,14 +480,14 @@ async function update(requestingUser, webhooks, options) {
           if (typeof validators.webhook[key] === 'string') {
             // If validation fails, throw error
             if (!RegExp(validators.webhook[key]).test(webhookUpdate[key])) {
-              throw new M.DataFormatError(`Problem with update for webhook ${webhook._id}: `
+              throw new M.DataFormatError(`Webhook ${webhook._id} validation failed: `
                 + `Invalid ${key}: [${webhookUpdate[key]}]`, 'warn');
             }
           }
           // If the validator is a function
           else if (typeof validators.webhook[key] === 'function') {
             if (!validators.webhook[key](webhookUpdate[key])) {
-              throw new M.DataFormatError(`Problem with update for webhook ${webhook._id}: `
+              throw new M.DataFormatError(`Webhook ${webhook._id} validation failed: `
                 + `Invalid ${key}: [${webhookUpdate[key]}]`, 'warn');
             }
           }
@@ -501,7 +496,7 @@ async function update(requestingUser, webhooks, options) {
             const subkeys = Object.keys(validators.webhook[key]);
             subkeys.forEach((subkey) => {
               if (!validators.webhook[key][subkey](webhookUpdate[key])) {
-                throw new M.DataFormatError(`Problem with update for webhook ${webhook._id}: `
+                throw new M.DataFormatError(`Webhook ${webhook._id} validation failed: `
                   + `Invalid ${key}: [${webhookUpdate[key]}]`, 'warn');
               }
             });
@@ -534,7 +529,7 @@ async function update(requestingUser, webhooks, options) {
       // --- Incoming Webhook specific checks ---
       if (webhook.type === 'Incoming') {
         if (webhookUpdate.response !== undefined) {
-          throw new M.DataFormatError(`Problem with update for webhook ${webhook._id}: `
+          throw new M.DataFormatError(`Webhook ${webhook._id} validation failed: `
             + 'An incoming webhook cannot have a response field.', 'warn');
         }
       }
@@ -542,11 +537,11 @@ async function update(requestingUser, webhooks, options) {
       // --- Outgoing Webhook specific checks ---
       else if (webhook.type === 'Outgoing') {
         if (webhookUpdate.token !== undefined) {
-          throw new M.DataFormatError(`Problem with update for webhook ${webhook._id}: `
+          throw new M.DataFormatError(`Webhook ${webhook._id} validation failed: `
             + 'An outgoing webhook cannot have a token.', 'warn');
         }
         if (webhookUpdate.tokenLocation !== undefined) {
-          throw new M.DataFormatError(`Problem with update for webhook ${webhook._id}: `
+          throw new M.DataFormatError(`Webhook ${webhook._id} validation failed: `
             + 'An outgoing webhook cannot have a tokenLocation.', 'warn');
         }
       }

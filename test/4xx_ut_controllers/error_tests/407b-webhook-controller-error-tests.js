@@ -196,63 +196,74 @@ function unauthorizedTest(level, operation) {
     webhookData.reference = {};
     let id;
     let op = operation;
+
     // Set up org, project, and branch id variables
-    if (level === 'org') {
-      // Set id to org id
-      id = org._id;
-      webhookData.id = orgWebhooks[0]._id;
-      // Set the reference namespace
-      if (typeof webhookData === 'object') {
-        webhookData.reference = {
-          org: org._id
-        };
-      }
-    }
-    if (level === 'project') {
-      // Set id to project id
-      id = projID;
-      webhookData.id = projWebhooks[0]._id;
-      // Set the reference namespace
-      if (typeof webhookData === 'object') {
-        webhookData.reference = {
-          org: org._id,
-          project: projID
-        };
-      }
-    }
-    if (level === 'branch') {
-      // The error message for branch will be also refer to the project
-      // Set id to project id
-      id = projID;
-      webhookData.id = branchWebhooks[0]._id;
-      // Set the reference namespace
-      if (typeof webhookData === 'object') {
-        webhookData.reference = {
-          org: org._id,
-          project: projID,
-          branch: branchID
-        };
-      }
-      // eslint-disable-next-line no-param-reassign
-      level = 'project';
+    switch (level) {
+      case 'org':
+        // Set id to org id
+        id = org._id;
+        webhookData.id = orgWebhooks[0]._id;
+        // Set the reference namespace
+        if (typeof webhookData === 'object') {
+          webhookData.reference = {
+            org: org._id
+          };
+        }
+        break;
+      case 'project':
+        // Set id to project id
+        id = projID;
+        webhookData.id = projWebhooks[0]._id;
+        // Set the reference namespace
+        if (typeof webhookData === 'object') {
+          webhookData.reference = {
+            org: org._id,
+            project: projID
+          };
+        }
+        break;
+      case 'branch':
+        // The error message for branch will be also refer to the project
+        // Set id to project id
+        id = projID;
+        webhookData.id = branchWebhooks[0]._id;
+        // Set the reference namespace
+        if (typeof webhookData === 'object') {
+          webhookData.reference = {
+            org: org._id,
+            project: projID,
+            branch: branchID
+          };
+        }
+        // eslint-disable-next-line no-param-reassign
+        level = 'project';
+        break;
+      case 'server':
+        break;
+      default:
+        throw new Error('Invalid input to unauthorizedTest function');
     }
 
-    if (operation === 'find') {
-      webhookData = webhookData.id;
-      op = 'read';  // Changing this because permissions errors say "read" instead of "find"
-    }
-    else if (operation === 'create') {
-      delete webhookData.id;
-    }
-    else if (operation === 'update') {
-      webhookData = {
-        id: webhookData.id,
-        description: 'update'
-      };
-    }
-    else if (operation === 'remove') {
-      webhookData = webhookData.id;
-      op = 'delete'; // Changing this because permissions errors say "delete" instead of "remove"
+    switch (operation) {
+      case 'find':
+        webhookData = webhookData.id;
+        op = 'read';  // Changing this because permissions errors say "read" instead of "find"
+        break;
+      case 'create':
+        delete webhookData.id;
+        break;
+      case 'update':
+        webhookData = {
+          id: webhookData.id,
+          description: 'update'
+        };
+        break;
+      case 'remove':
+        webhookData = webhookData.id;
+        op = 'delete'; // Changing this because permissions errors say "delete" instead of "remove"
+        break;
+      default:
+        throw new Error('Invalid input to unauthorizedTest function');
     }
 
     try {
@@ -335,20 +346,24 @@ function archivedTest(model, operation) {
         throw new Error('Invalid input to archivedTest function');
     }
 
-    if (operation === 'find') {
-      webhookData = webhookData.id;
-    }
-    else if (operation === 'create') {
-      delete webhookData.id;
-    }
-    else if (operation === 'update') {
-      webhookData = {
-        id: webhookData.id,
-        description: 'update'
-      };
-    }
-    else if (operation === 'remove') {
-      webhookData = webhookData.id;
+    switch (operation) {
+      case 'find':
+        webhookData = webhookData.id;
+        break;
+      case 'create':
+        delete webhookData.id;
+        break;
+      case 'update':
+        webhookData = {
+          id: webhookData.id,
+          description: 'update'
+        };
+        break;
+      case 'remove':
+        webhookData = webhookData.id;
+        break;
+      default:
+        throw new Error('Invalid input to archivedTest function');
     }
 
     // Archive the object of interest
@@ -459,8 +474,7 @@ async function updateType() {
     };
 
     await WebhookController.update(adminUser, webhookData)
-    .should.eventually.be.rejectedWith(`Problem with update for webhook ${webhookID}: `
-      + 'A webhook\'s type cannot be changed.');
+    .should.eventually.be.rejectedWith('Webhook property [type] cannot be changed.');
   }
   catch (error) {
     M.log.error(error);
@@ -548,7 +562,7 @@ async function updateAddResponse() {
     };
 
     await WebhookController.update(adminUser, webhookData)
-    .should.eventually.be.rejectedWith(`Problem with update for webhook ${incomingWebhookID}: `
+    .should.eventually.be.rejectedWith(`Webhook ${incomingWebhookID} validation failed: `
         + 'An incoming webhook cannot have a response field.');
   }
   catch (error) {
@@ -571,7 +585,7 @@ async function updateInvalidToken() {
     };
 
     await WebhookController.update(adminUser, webhookData)
-    .should.eventually.be.rejectedWith(`Problem with update for webhook ${incomingWebhookID}: `
+    .should.eventually.be.rejectedWith(`Webhook ${incomingWebhookID} validation failed: `
         + 'Invalid token: [null]');
   }
   catch (error) {
@@ -593,7 +607,7 @@ async function updateInvalidTokenLocation() {
     };
 
     await WebhookController.update(adminUser, webhookData)
-    .should.eventually.be.rejectedWith(`Problem with update for webhook ${incomingWebhookID}: `
+    .should.eventually.be.rejectedWith(`Webhook ${incomingWebhookID} validation failed: `
       + 'Invalid tokenLocation: [null]');
   }
   catch (error) {
@@ -615,7 +629,7 @@ async function updateAddToken() {
     };
 
     await WebhookController.update(adminUser, webhookData)
-    .should.eventually.be.rejectedWith(`Problem with update for webhook ${webhookID}: `
+    .should.eventually.be.rejectedWith(`Webhook ${webhookID} validation failed: `
       + 'An outgoing webhook cannot have a token.');
   }
   catch (error) {
@@ -637,7 +651,7 @@ async function updateAddTokenLocation() {
     };
 
     await WebhookController.update(adminUser, webhookData)
-    .should.eventually.be.rejectedWith(`Problem with update for webhook ${webhookID}: `
+    .should.eventually.be.rejectedWith(`Webhook ${webhookID} validation failed: `
       + 'An outgoing webhook cannot have a tokenLocation.');
   }
   catch (error) {
@@ -659,7 +673,7 @@ async function updateInvalidResponse() {
     };
 
     await WebhookController.update(adminUser, webhookData)
-    .should.eventually.be.rejectedWith(`Problem with update for webhook ${webhookID}: `
+    .should.eventually.be.rejectedWith(`Webhook ${webhookID} validation failed: `
       + 'Invalid response: []');
 
     // Create invalid update for an outgoing webhook
@@ -669,7 +683,7 @@ async function updateInvalidResponse() {
     };
 
     await WebhookController.update(adminUser, webhookData)
-    .should.eventually.be.rejectedWith(`Problem with update for webhook ${webhookID}: `
+    .should.eventually.be.rejectedWith(`Webhook ${webhookID} validation failed: `
       + 'Invalid response: [[object Object]]');
   }
   catch (error) {

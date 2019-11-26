@@ -295,7 +295,7 @@ async function optionFieldsFind() {
     // Create the list of fields that should be returned
     const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
 
-    // Create a list of visible artifact fields. Object.keys(art) returns hidden fields as well
+    // Create a list of visible artifact fields
     const visibleFields = Object.keys(art);
 
     // Check that the only keys in the artifact are the expected ones
@@ -308,7 +308,7 @@ async function optionFieldsFind() {
     chai.expect(notFindArtifacts.length).to.equal(1);
     const art2 = foundArtifacts[0];
 
-    // Create a list of visible artifact fields. Object.keys(art) returns hidden fields as well
+    // Create a list of visible artifact fields
     const visibleFields2 = Object.keys(art2);
 
     // Check that the keys in the notFindOptions are not in art
@@ -468,7 +468,7 @@ async function optionFieldsCreate() {
     // Create the list of fields that should be returned
     const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
 
-    // Create a list of visible artifact fields. Object.keys(art) returns hidden fields as well
+    // Create a list of visible artifact fields
     const visibleFields = Object.keys(art);
 
     // Check that the only keys in the artifact are the expected ones
@@ -481,7 +481,7 @@ async function optionFieldsCreate() {
     chai.expect(notFindArtifacts.length).to.equal(1);
     const art2 = notFindArtifacts[0];
 
-    // Create a list of visible artifact fields. Object.keys(art) returns hidden fields as well
+    // Create a list of visible artifact fields
     const visibleFields2 = Object.keys(art2);
 
     // Check that the keys in the notFindOptions are not in art
@@ -576,7 +576,7 @@ async function optionFieldsUpdate() {
     // Create the list of fields that should be returned
     const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
 
-    // Create a list of visible artifact fields. Object.keys(art) returns hidden fields as well
+    // Create a list of visible artifact fields
     const visibleFields = Object.keys(art);
 
     // Check that the only keys in the artifact are the expected ones
@@ -589,7 +589,7 @@ async function optionFieldsUpdate() {
     chai.expect(notFindArtifacts.length).to.equal(1);
     const art2 = notFindArtifacts[0];
 
-    // Create a list of visible artifact fields. Object.keys(art) returns hidden fields as well
+    // Create a list of visible artifact fields
     const visibleFields2 = Object.keys(art2);
 
     // Check that the keys in the notFindOptions are not in art

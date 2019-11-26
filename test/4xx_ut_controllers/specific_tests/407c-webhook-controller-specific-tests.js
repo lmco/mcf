@@ -11,8 +11,9 @@
  *
  * @author Connor Doyle
  *
- * @description Tests the webhook controller functionality: create,
- * find, update, and delete webhooks.
+ * @description These tests test for specific use cases within the webhook
+ * controller. The tests verify that operations can be done that are more
+ * specific than the core tests.
  */
 
 // NPM modules
@@ -291,16 +292,16 @@ async function optionPopulateCreate() {
 }
 
 /**
- * @description Validates that the Webhook Controller can return populated fields after
+ * @description Validates that the Webhook Controller can return specific fields after
  * creating a webhook.
  */
 async function optionFieldsCreate() {
   try {
     // Set object to create and populate option
     const webhookData = testData.webhooks[0];
-    // Create the options object with the list of fields specifically to find
+    // Create the options object with the list of fields specifically to return
     const findOptions = { fields: ['name', 'createdBy'] };
-    // Create the options object with the list of fields to specifically NOT to find
+    // Create the options object with the list of fields to specifically NOT to return
     const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
     // Create the list of fields which are always provided no matter what
     const fieldsAlwaysProvided = ['_id'];
@@ -315,7 +316,7 @@ async function optionFieldsCreate() {
     // Create the list of fields that should be returned
     const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
 
-    // Create a list of visible webhook fields. Object.keys(webhook) returns hidden fields as well
+    // Create a list of visible webhook fields
     const visibleFields = Object.keys(webhook);
 
     // Check that the only keys in the webhook are the expected ones
@@ -332,7 +333,7 @@ async function optionFieldsCreate() {
     chai.expect(notFieldsWebhooks.length).to.equal(1);
     const webhook2 = notFieldsWebhooks[0];
 
-    // Create a list of visible webhook fields. Object.keys(webhook) returns hidden fields as well
+    // Create a list of visible webhook fields
     const visibleFields2 = Object.keys(webhook2);
 
     // Check that the keys in the notFindOptions are not in webhook
@@ -622,9 +623,9 @@ async function optionFieldsFind() {
   try {
     // Set object to create and populate option
     const webhookData = webhookIDs[0];
-    // Create the options object with the list of fields specifically to find
+    // Create the options object with the list of fields specifically to return
     const findOptions = { fields: ['name', 'createdBy'] };
-    // Create the options object with the list of fields to specifically NOT to find
+    // Create the options object with the list of fields to specifically NOT to return
     const notFindOptions = { fields: ['-createdOn', '-updatedOn'] };
     // Create the list of fields which are always provided no matter what
     const fieldsAlwaysProvided = ['_id'];
@@ -639,7 +640,7 @@ async function optionFieldsFind() {
     // Create the list of fields that should be returned
     const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
 
-    // Create a list of visible webhook fields. Object.keys(webhook) returns hidden fields as well
+    // Create a list of visible webhook fields
     const visibleFields = Object.keys(webhook);
 
     // Check that the only keys in the webhook are the expected ones
@@ -656,7 +657,7 @@ async function optionFieldsFind() {
     chai.expect(notFieldsWebhooks.length).to.equal(1);
     const webhook2 = notFieldsWebhooks[0];
 
-    // Create a list of visible webhook fields. Object.keys(webhook) returns hidden fields as well
+    // Create a list of visible webhook fields
     const visibleFields2 = Object.keys(webhook2);
 
     // Check that the keys in the notFindOptions are not in webhook
@@ -704,7 +705,7 @@ async function optionSkipFind() {
     // Create the second options object with a limit and skip
     const secondOptions = { limit: 2, skip: 2 };
 
-    // Find all webhooks
+    // Find first 2 webhooks
     const foundWebhooks = await WebhookController.find(adminUser, firstOptions);
     // Verify that no more than 2 webhooks were found
     chai.expect(foundWebhooks).to.have.lengthOf.at.most(2);
@@ -781,9 +782,6 @@ async function optionSortFind() {
     chai.expect(reverseWebhooks[0].name).to.equal('c');
     chai.expect(reverseWebhooks[1].name).to.equal('b');
     chai.expect(reverseWebhooks[2].name).to.equal('a');
-
-    // await WebhookController.remove(adminUser, null, null, null,
-    //   createdWebhooks.map((w) => w._id));
   }
   catch (error) {
     M.log.error(error.message);
@@ -900,7 +898,7 @@ async function optionFieldsUpdate() {
     // Create the list of fields that should be returned
     const expectedFields = findOptions.fields.concat(fieldsAlwaysProvided);
 
-    // Create a list of visible webhook fields. Object.keys(webhook) returns hidden fields as well
+    // Create a list of visible webhook fields
     const visibleFields = Object.keys(webhook);
 
     // Check that the only keys in the webhook are the expected ones
@@ -912,7 +910,7 @@ async function optionFieldsUpdate() {
     chai.expect(notFindWebhooks.length).to.equal(1);
     const webhook2 = notFindWebhooks[0];
 
-    // Create a list of visible webhook fields. Object.keys(webhook) returns hidden fields as well
+    // Create a list of visible webhook fields
     const visibleFields2 = Object.keys(webhook2);
 
     // Check that the keys in the notFindOptions are not in the webhook

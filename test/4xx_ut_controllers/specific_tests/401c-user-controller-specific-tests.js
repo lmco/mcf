@@ -233,7 +233,7 @@ async function optionFieldsCreate() {
     const notFindUsers = await UserController.create(adminUser, userObjNotFind, notFindOptions);
     const notFindUser = notFindUsers[0];
 
-    // Create a list of visible user fields. Object.keys(createdUser) returns hidden fields as well
+    // Create a list of visible user fields
     const visibleFields2 = Object.keys(notFindUser);
 
     // Check that the keys in the notFindOptions are not in createdUser
