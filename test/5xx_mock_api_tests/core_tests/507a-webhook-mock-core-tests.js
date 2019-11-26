@@ -471,7 +471,7 @@ function patchWebhook(done) {
 }
 
 /**
- * @description Verifies mock PATCH request to update a webhook.
+ * @description Verifies mock PATCH request to update multiple webhooks.
  *
  * @param {Function} done - The mocha callback.
  */
@@ -584,7 +584,7 @@ function deleteWebhook(done) {
 }
 
 /**
- * @description Verifies mock DELETE request to remove a webhook.
+ * @description Verifies mock DELETE request to remove multiple webhooks.
  *
  * @param {Function} done - The mocha callback.
  */
