@@ -77,7 +77,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject creating a webhook with an invalid triggers field', invalidTriggers);
   it('should reject creating an outgoing webhook with no response field', noResponseOutgoing);
   it('should reject creating an incoming webhook with a response field', responseIncoming);
-  it('should reject creating a webhook with a response missing a url', noUrlInResponse);
+  it('should reject creating a webhook with no url in the response', noUrlInResponse);
   it('should reject creating a webhook with an invalid method in a response', invalidMethodInResponse);
   it('should reject creating a webhook with an invalid token in a response', invalidTokenInResponse);
   it('should reject creating a webhook with an invalid field in a response', invalidFieldInResponse);
@@ -248,7 +248,7 @@ async function noResponseOutgoing() {
 }
 
 /**
- * @description Validates that an webhook cannot be created with a response field.
+ * @description Validates that an incoming webhook cannot be created with a response field.
  */
 async function responseIncoming() {
   try {

@@ -510,8 +510,8 @@ async function updateDuplicate() {
 }
 
 /**
- * @description Validates that the webhook controller will reject an array of updates containing
- * duplicate ids.
+ * @description Validates that the webhook controller will reject an update to a webhook that was
+ * not found.
  */
 async function updateNotFound() {
   try {
