@@ -143,7 +143,7 @@ function postWebhook(done) {
 }
 
 /**
- * @description Verifies POST /api/webhooks creates a single webhook.
+ * @description Verifies POST /api/webhooks creates multiple webhooks.
  *
  * @param {Function} done - The mocha callback.
  */
