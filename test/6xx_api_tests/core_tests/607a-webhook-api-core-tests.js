@@ -75,7 +75,6 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute tests */
   // ------------- POST -------------
-  it('should POST a webhook', postWebhook);
   it('should POST multiple webhook', postWebhooks);
   // ------------- GET -------------
   it('should GET a webhook', getWebhook);
@@ -92,56 +91,6 @@ describe(M.getModuleName(module.filename), () => {
 });
 
 /* --------------------( Tests )-------------------- */
-/**
- * @description Verifies POST /api/webhooks creates a single webhook.
- *
- * @param {Function} done - The mocha callback.
- */
-function postWebhook(done) {
-  const webhookData = testData.webhooks[0];
-
-  request({
-    url: `${test.url}/api/webhooks`,
-    headers: testUtils.getHeaders(),
-    ca: testUtils.readCaFile(),
-    method: 'POST',
-    body: JSON.stringify(webhookData)
-  },
-  (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
-
-    // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
-
-    // Verify response body
-    const createdWebhooks = JSON.parse(body);
-    const createdWebhook = createdWebhooks[0];
-    chai.expect(createdWebhook.name).to.equal(webhookData.name);
-    chai.expect(createdWebhook.triggers).to.deep.equal(webhookData.triggers);
-    chai.expect(createdWebhook.response.url).to.equal(webhookData.response.url);
-    chai.expect(createdWebhook.response.method).to.equal(webhookData.response.method || 'POST');
-    chai.expect(createdWebhook.reference).to.equal('');
-    chai.expect(createdWebhook.custom).to.deep.equal(webhookData.custom || {});
-
-    // Verify additional properties
-    chai.expect(createdWebhook.createdBy).to.equal(adminUser._id);
-    chai.expect(createdWebhook.lastModifiedBy).to.equal(adminUser._id);
-    chai.expect(createdWebhook.createdOn).to.not.equal(null);
-    chai.expect(createdWebhook.updatedOn).to.not.equal(null);
-    chai.expect(createdWebhook.archived).to.equal(false);
-
-    // Verify specific fields not returned
-    chai.expect(createdWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
-      '__v', '_id');
-
-    // Save webhook id for later use
-    webhookData.id = createdWebhook.id;
-
-    done();
-  });
-}
-
 /**
  * @description Verifies POST /api/webhooks creates a single webhook.
  *

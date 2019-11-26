@@ -630,7 +630,7 @@ function getAll(reference) {
 
 /**
  * @description A constructor for a dynamic mocha-compatible function that verifies
- * mock POST requests to update a webhook on an org, project, or branch.
+ * mock PATCH requests to update a webhook on an org, project, or branch.
  *
  * @param {string} reference - A string specifying org, project, or branch.
  *
