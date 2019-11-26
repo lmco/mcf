@@ -554,7 +554,7 @@ async function updateAddResponse() {
 
 /**
  * @description Validates that the webhook controller will reject an update to an incoming
- * webhook attempting to remove the token.
+ * webhook attempting to set the token to null.
  */
 async function updateInvalidToken() {
   try {
