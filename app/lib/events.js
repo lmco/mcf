@@ -35,12 +35,10 @@ class CustomEmitter extends EventEmitter {
   async emit(event, ...args) {
     try {
       // Find all webhooks that include the triggered event
-      const webhooks = await Webhook.find({ triggers: event });
+      const webhooks = await Webhook.find({ type: 'Outgoing', triggers: event });
       webhooks.forEach((webhook) => {
-        if (webhook.type === 'Outgoing') {
-          // Send the request with the provided arguments.
-          Webhook.sendRequest(webhook, args);
-        }
+        // Send the request with the provided arguments.
+        Webhook.sendRequest(webhook, args);
       });
     }
     catch (error) {
