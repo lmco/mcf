@@ -176,6 +176,7 @@ async function createOnProject() {
     chai.expect(createdWebhook.type).to.equal(testData.webhooks[0].type);
     chai.expect(createdWebhook.description).to.equal(testData.webhooks[0].description);
     chai.expect(createdWebhook.triggers).to.deep.equal(testData.webhooks[0].triggers);
+    chai.expect(createdWebhook.reference).to.equal(utils.createID(org._id, projID));
     chai.expect(createdWebhook.custom).to.deep.equal(testData.webhooks[0].custom || {});
 
     // Verify additional properties
@@ -220,6 +221,7 @@ async function createOnBranch() {
     chai.expect(createdWebhook.type).to.equal(testData.webhooks[0].type);
     chai.expect(createdWebhook.description).to.equal(testData.webhooks[0].description);
     chai.expect(createdWebhook.triggers).to.deep.equal(testData.webhooks[0].triggers);
+    chai.expect(createdWebhook.reference).to.equal(utils.createID(org._id, projID, branchID));
     chai.expect(createdWebhook.custom).to.deep.equal(testData.webhooks[0].custom || {});
 
     // Verify additional properties

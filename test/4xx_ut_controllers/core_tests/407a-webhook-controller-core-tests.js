@@ -340,9 +340,6 @@ async function updateWebhook() {
     chai.expect(updatedWebhook.createdOn).to.not.equal(null);
     chai.expect(updatedWebhook.updatedOn).to.not.equal(null);
     chai.expect(updatedWebhook.archivedOn).to.equal(null);
-
-    // Save the generated UUID to be used later in find() tests
-    webhookData._id = updatedWebhook._id;
   }
   catch (error) {
     M.log.error(error);

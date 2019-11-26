@@ -290,44 +290,48 @@ function archivedTest(model, operation) {
     let id;
     let name;
 
-    if (model === Organization) {
-      // Set id to org id
-      id = org._id;
-      webhookData.id = orgWebhooks[0]._id;
-      // Set the reference namespace
-      webhookData.reference = {
-        org: org._id
-      };
-      name = 'Organization';
-    }
-    if (model === Project) {
-      // Set id to project id
-      id = utils.createID(org._id, projID);
-      webhookData.id = projWebhooks[0]._id;
-      // Set the reference namespace
-      webhookData.reference = {
-        org: org._id,
-        project: projID
-      };
-      name = 'Project';
-    }
-    if (model === Branch) {
-      // Set id to branch id
-      id = utils.createID(org._id, projID, branchID);
-      webhookData.id = branchWebhooks[0]._id;
-      // Set the reference namespace
-      webhookData.reference = {
-        org: org._id,
-        project: projID,
-        branch: branchID
-      };
-      name = 'Branch';
-    }
-    if (model === Webhook) {
-      // Set id to webhook id
-      id = webhookID;
-      webhookData.id = webhookID;
-      name = 'Webhook';
+    switch (model) {
+      case Organization:
+        // Set id to org id
+        id = org._id;
+        webhookData.id = orgWebhooks[0]._id;
+        // Set the reference namespace
+        webhookData.reference = {
+          org: org._id
+        };
+        name = 'Organization';
+        break;
+      case Project:
+        // Set id to project id
+        id = utils.createID(org._id, projID);
+        webhookData.id = projWebhooks[0]._id;
+        // Set the reference namespace
+        webhookData.reference = {
+          org: org._id,
+          project: projID
+        };
+        name = 'Project';
+        break;
+      case Branch:
+        // Set id to branch id
+        id = utils.createID(org._id, projID, branchID);
+        webhookData.id = branchWebhooks[0]._id;
+        // Set the reference namespace
+        webhookData.reference = {
+          org: org._id,
+          project: projID,
+          branch: branchID
+        };
+        name = 'Branch';
+        break;
+      case Webhook:
+        // Set id to webhook id
+        id = webhookID;
+        webhookData.id = webhookID;
+        name = 'Webhook';
+        break;
+      default:
+        throw new Error('Invalid input to archivedTest function');
     }
 
     if (operation === 'find') {
@@ -554,7 +558,7 @@ async function updateAddResponse() {
 
 /**
  * @description Validates that the webhook controller will reject an update to an incoming
- * webhook attempting to remove the token.
+ * webhook attempting to set the token to null.
  */
 async function updateInvalidToken() {
   try {
