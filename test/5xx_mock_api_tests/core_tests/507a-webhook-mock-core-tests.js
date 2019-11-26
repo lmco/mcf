@@ -607,7 +607,7 @@ function deleteWebhooks(done) {
     // Verify response body
     const deletedWebhooks = JSON.parse(_data);
     chai.expect(deletedWebhooks.length).to.equal(2);
-    chai.expect(deleteIDs).to.have.members(deletedWebhooks.map((w) => w._id));
+    chai.expect(deleteIDs).to.have.members(deletedWebhooks);
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);

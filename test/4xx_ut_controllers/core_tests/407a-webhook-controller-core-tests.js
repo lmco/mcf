@@ -349,7 +349,7 @@ async function updateWebhook() {
 }
 
 /**
- * @description Validates that the Webhook Controller can create a webhook.
+ * @description Validates that the Webhook Controller can update multiple webhooks.
  */
 async function updateWebhooks() {
   try {
@@ -428,7 +428,7 @@ async function deleteWebhook() {
 }
 
 /**
- * @description Validates that the Webhook Controller can delete a webhook.
+ * @description Validates that the Webhook Controller can delete multiple webhooks.
  */
 async function deleteWebhooks() {
   try {
@@ -440,8 +440,7 @@ async function deleteWebhooks() {
 
     // Expect deletedWebhooks array to contain 2 webhooks
     chai.expect(deletedWebhooks.length).to.equal(2);
-    chai.expect(deletedWebhooks.includes(webhookIDs[0])).to.equal(true);
-    chai.expect(deletedWebhooks.includes(webhookIDs[1])).to.equal(true);
+    chai.expect(deletedWebhooks).to.have.members(webhookIDs);
 
     // Try to find the webhooks
     const foundWebhooks = await WebhookController.find(adminUser, webhookIDs);
