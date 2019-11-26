@@ -98,11 +98,11 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a PATCH webhook request with conflicting ids in the body and url', conflictingIDs('patchWebhook'));
   // ------------- 404 Not Found -------------
   it('should return 404 for a GET webhooks request that returned no results', notFound('getWebhooks'));
-  it('should return 404 for a GET webhook request for a nonexistent user', notFound('getWebhook'));
-  it('should return 404 for a PATCH webhooks request for a nonexistent user', notFound('patchWebhooks'));
-  it('should return 404 for a PATCH webhook request for a nonexistent user', notFound('patchWebhook'));
-  it('should return 404 for a DELETE webhooks request for a nonexistent user', notFound('deleteWebhooks'));
-  it('should return 404 for a DELETE webhook request for a nonexistent user', notFound('deleteWebhook'));
+  it('should return 404 for a GET webhook request for a nonexistent webhook', notFound('getWebhook'));
+  it('should return 404 for a PATCH webhooks request for a nonexistent webhook', notFound('patchWebhooks'));
+  it('should return 404 for a PATCH webhook request for a nonexistent webhook', notFound('patchWebhook'));
+  it('should return 404 for a DELETE webhooks request for a nonexistent webhook', notFound('deleteWebhooks'));
+  it('should return 404 for a DELETE webhook request for a nonexistent webhook', notFound('deleteWebhook'));
   // ------------- No arrays in singular endpoints -------------
   it('should reject a PATCH singular webhook request containing an array in the body', noArrays('patchWebhook'));
   //  ------------- Trigger -------------

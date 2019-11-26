@@ -103,6 +103,7 @@ describe(M.getModuleName(module.filename), () => {
       webhooks = await WebhookController.create(adminUser, webhookData[1]);
       branchWebhooks.push(webhooks[0]);
 
+      // Enumerate all the webhook ids into a single array
       webhookIDs.push(...orgWebhooks.map((w) => w._id),
         ...projWebhooks.map((w) => w._id), ...branchWebhooks.map((w) => w._id));
     }
