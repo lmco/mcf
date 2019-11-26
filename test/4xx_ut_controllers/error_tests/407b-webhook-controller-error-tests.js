@@ -187,6 +187,7 @@ describe(M.getModuleName(module.filename), () => {
  * @param {string} level - The level at which to test the authorization of the user: server, org,
  * project, or branch.
  * @param {string} operation - The type of operation for the test: create, update, etc.
+ *
  * @returns {Function} Returns a function to be used as a test.
  */
 function unauthorizedTest(level, operation) {
