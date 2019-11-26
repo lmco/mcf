@@ -471,7 +471,7 @@ function patchWebhook(done) {
 }
 
 /**
- * @description Verifies mock PATCH request to update a webhook.
+ * @description Verifies mock PATCH request to update multiple webhooks.
  *
  * @param {Function} done - The mocha callback.
  */
