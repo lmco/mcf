@@ -307,7 +307,7 @@ async function findAllWebhooks() {
 }
 
 /**
- * @description Validates that the Webhook Controller can create a webhook.
+ * @description Validates that the Webhook Controller can update a webhook.
  */
 async function updateWebhook() {
   try {

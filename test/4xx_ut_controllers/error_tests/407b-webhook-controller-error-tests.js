@@ -282,6 +282,7 @@ function unauthorizedTest(level, operation) {
  *
  * @param {object} model - The model to use for the test.
  * @param {string} operation - The type of operation for the test: create, update, etc.
+ *
  * @returns {Function} Returns a function to be used as a test.
  */
 function archivedTest(model, operation) {
@@ -581,7 +582,7 @@ async function updateInvalidToken() {
 
 /**
  * @description Validates that the webhook controller will reject an update to an incoming
- * webhook attempting to remove the tokenLocation.
+ * webhook attempting to set the tokenLocation to null.
  */
 async function updateInvalidTokenLocation() {
   try {
