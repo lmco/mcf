@@ -53,7 +53,7 @@ describe(M.getModuleName(module.filename), () => {
     catch (error) {
       M.log.error(error);
       // Expect no error
-      chai.expect(error).to.equal(null);
+      should.not.exist(error);
     }
   });
 
@@ -69,7 +69,7 @@ describe(M.getModuleName(module.filename), () => {
     catch (error) {
       M.log.error(error);
       // Expect no error
-      chai.expect(error).to.equal(null);
+      should.not.exist(error);
     }
   });
 
@@ -80,6 +80,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should update a webhook', updateWebhook);
   it('should delete a webhook', deleteWebhook);
   it('should verify a token', verifyToken);
+  it('should get the valid update fields', validUpdateFields);
+  it('should get the valid populate fields', validPopulateFields);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -107,7 +109,7 @@ async function createOutgoingWebhook() {
  */
 async function createIncomingWebhook() {
   try {
-    const webhookData = testData.webhooks[0];
+    const webhookData = testData.webhooks[1];
     // Create a new uuid
     webhookData._id = uuidv4();
 
@@ -209,6 +211,53 @@ async function verifyToken() {
 
     // Run the webhook test for tokens; it will throw an error if they don't match
     Webhook.verifyAuthority(webhooks[0], token);
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
+}
+
+/**
+ *
+ * @description Verifies that the webhook model function getValidUpdateFields returns the
+ * correct fields.
+ */
+async function validUpdateFields() {
+  try {
+    // Set the array of correct update fields;
+    const updateFields = ['name', 'description', 'triggers', 'response', 'token',
+      'tokenLocation', 'archived'];
+
+    // Get the update fields from the webhook model
+    const modelUpdateFields = Webhook.getValidUpdateFields();
+
+    // Expect the array returned from the model function to have the values listed above
+    (modelUpdateFields).should.have.members(updateFields);
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
+}
+
+/**
+ *
+ * @description Verifies that the webhook model function getValidPopulaetFields returns the
+ * correct fields.
+ */
+async function validPopulateFields() {
+  try {
+    // Set the array of correct update fields;
+    const populateFields = ['archivedBy', 'lastModifiedBy', 'createdBy'];
+
+    // Get the update fields from the webhook model
+    const modelPopulateFields = Webhook.getValidPopulateFields();
+
+    // Expect the array returned from the model function to have the values listed above
+    chai.expect(modelPopulateFields).to.have.members(populateFields);
   }
   catch (error) {
     M.log.error(error);

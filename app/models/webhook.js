@@ -205,7 +205,7 @@ WebhookSchema.plugin(extensions);
  * @description Send the requests stored in the webhook.
  * @memberOf WebhookSchema
  */
-WebhookSchema.static('sendRequests', function(webhook, data) {
+WebhookSchema.static('sendRequest', function(webhook, data) {
   const options = {
     url: webhook.response.url,
     headers: webhook.response.headers || { 'Content-Type': 'application/json' },

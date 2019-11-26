@@ -244,7 +244,7 @@ const webhook = {
       if (data.headers === undefined) {
         data.headers = { 'Content-Type': 'application/json' };
       }
-      return typeof data.headers === 'object' && data.headers !== null;
+      return typeof data.headers === 'object' && !Array.isArray(data) && data.headers !== null;
     },
     token: function(data) {
       // If the response field has a token, it must be a string
