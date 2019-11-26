@@ -325,7 +325,7 @@ async function updateWebhook() {
     const updatedWebhook = updatedWebhooks[0];
 
     // Verify webhook
-    chai.expect(updatedWebhook.name).to.equal('test update');
+    chai.expect(updatedWebhook.name).to.equal(webhookUpdate.name);
     chai.expect(updatedWebhook.type).to.equal(webhookData.type);
     chai.expect(updatedWebhook.description).to.equal(webhookData.description);
     chai.expect(updatedWebhook.triggers).to.deep.equal(webhookData.triggers);
