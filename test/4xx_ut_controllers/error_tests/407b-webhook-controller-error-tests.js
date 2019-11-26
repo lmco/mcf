@@ -73,6 +73,7 @@ describe(M.getModuleName(module.filename), () => {
 
       const webhookData = testData.webhooks;
 
+// Server webhooks
       const outgoingWebhooks = await WebhookController.create(adminUser, webhookData[0]);
       webhookID = outgoingWebhooks[0]._id;
       const incomingWebhooks = await WebhookController.create(adminUser, webhookData[1]);
