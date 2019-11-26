@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.407c-webhook-controller-error-tests
+ * @module test.407c-webhook-controller-specific-tests
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
