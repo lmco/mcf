@@ -282,6 +282,7 @@ function unauthorizedTest(level, operation) {
  *
  * @param {object} model - The model to use for the test.
  * @param {string} operation - The type of operation for the test: create, update, etc.
+ *
  * @returns {Function} Returns a function to be used as a test.
  */
 function archivedTest(model, operation) {
