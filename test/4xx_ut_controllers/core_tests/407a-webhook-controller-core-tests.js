@@ -349,7 +349,7 @@ async function updateWebhook() {
 }
 
 /**
- * @description Validates that the Webhook Controller can create a webhook.
+ * @description Validates that the Webhook Controller can update multiple webhooks.
  */
 async function updateWebhooks() {
   try {
