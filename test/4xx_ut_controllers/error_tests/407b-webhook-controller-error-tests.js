@@ -577,7 +577,7 @@ async function updateInvalidToken() {
 
 /**
  * @description Validates that the webhook controller will reject an update to an incoming
- * webhook attempting to remove the tokenLocation.
+ * webhook attempting to set the tokenLocation to null.
  */
 async function updateInvalidTokenLocation() {
   try {
