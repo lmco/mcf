@@ -428,7 +428,7 @@ async function deleteWebhook() {
 }
 
 /**
- * @description Validates that the Webhook Controller can delete a webhook.
+ * @description Validates that the Webhook Controller can delete multiple webhooks.
  */
 async function deleteWebhooks() {
   try {
