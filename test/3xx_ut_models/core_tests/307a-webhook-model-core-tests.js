@@ -20,27 +20,14 @@
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const uuidv4 = require('uuid/v4');
-const express = require('express');
-const expressLayouts = require('express-ejs-layouts');
-const session = require('express-session');
-const bodyParser = require('body-parser');
-const flash = require('express-flash');
-const compression = require('compression');
 
 // Use async chai
 chai.use(chaiAsPromised);
 const should = chai.should(); // eslint-disable-line no-unused-vars
 
-// Node modules
-const path = require('path');
-const http = require('http');
-
 // MBEE modules
 const Webhook = M.require('models.webhook');
 const db = M.require('db');
-const middleware = M.require('lib.middleware');
-const utils = M.require('lib.utils');
-const EventEmitter = M.require('lib.events');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');

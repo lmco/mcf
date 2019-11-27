@@ -624,16 +624,12 @@ function deleteWebhooks(done) {
  * @description A function that registers a listener for an incoming webhook and then proceeds
  * to make a mock API request to trigger that webhook. Verifies that the webhook emits the event
  * when its endpoint is called.
- *
- * @param {Function} done - The mocha callback.
  **/
 async function triggerWebhook() {
   // Get data for an incoming webhook
   const webhookData = testData.webhooks[1];
   delete webhookData.id;
   const promises = [];
-
-
 
   // Create the incoming webhook
   const incomingWebhooks = await WebhookController.create(adminUser, webhookData);
