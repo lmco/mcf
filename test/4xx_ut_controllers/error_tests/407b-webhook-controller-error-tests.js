@@ -149,7 +149,11 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject an attempt to create a webhook by an unauthorized user at the project level', unauthorizedTest('project', 'create'));
   it('should reject an attempt to create a webhook by an unauthorized user at the branch level', unauthorizedTest('branch', 'create'));
   it('should reject an attempt to create a webhook with an invalid key', createInvalidKey);
-  it('should reject an attempt to create a webhook with improperly formatted webhook data', createInvalidWebhook);
+  it('should reject an attempt to create a webhook with a null value', createNull);
+  it('should reject an attempt to create a webhook with a boolena value', createBoolean);
+  it('should reject an attempt to create a webhook with a string value', createString);
+  it('should reject an attempt to create a webhook with an array that does not contain objects', createInvalidArray);
+  it('should reject an attempt to create a webhook with an undefined value', createUndefined);
   // ------------- Update -------------
   it('should reject an update to a webhook on an archived org', archivedTest(Organization, 'update'));
   it('should reject an update to a webhook on an archived project', archivedTest(Project, 'update'));
@@ -169,7 +173,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject an attempt to remove the tokenLocation from the incoming field', updateInvalidTokenLocation);
   it('should reject an attempt to add a token to an outgoing webhook', updateAddToken);
   it('should reject an attempt to add a tokenLocation to an outgoing webhook', updateAddTokenLocation);
-  it('should reject an attempt to add an invalid response field', updateInvalidResponse);
+  it('should reject an attempt to add a non-object response field', updateInvalidResponse);
+  it('should reject an attempt to add a response field that does not contain a url', updateNoUrlInResponse);
   // ------------- Remove -------------
   it('should reject an attempt to delete a webhook that doesn\'t exist', deleteNotFound);
   it('should reject an attempt to delete a webhook on an archived org', archivedTest(Organization, 'remove'));
@@ -407,34 +412,82 @@ async function createInvalidKey() {
  * @description Validates that the Webhook Controller will deny a request to create a webhook with
  * invalid webhook data.
  */
-async function createInvalidWebhook() {
+async function createNull() {
   try {
     // Create invalid webhook data
-    let webhookData = null;
+    const webhookData = null;
 
     await WebhookController.create(nonAdminUser, webhookData)
     .should.eventually.be.rejectedWith('Webhooks parameter cannot be null.');
+  }
+  catch (error) {
+    M.log.error(error);
+    should.not.exist(error);
+  }
+}
 
+/**
+ * @description Validates that the Webhook Controller will deny a request to create a webhook with
+ * invalid webhook data.
+ */
+async function createBoolean() {
+  try {
     // Create invalid webhook data
-    webhookData = true;
+    const webhookData = true;
 
     await WebhookController.create(nonAdminUser, webhookData)
     .should.eventually.be.rejectedWith('Webhooks parameter cannot be of type boolean.');
+  }
+  catch (error) {
+    M.log.error(error);
+    should.not.exist(error);
+  }
+}
 
+/**
+ * @description Validates that the Webhook Controller will deny a request to create a webhook with
+ * invalid webhook data.
+ */
+async function createString() {
+  try {
     // Create invalid webhook data
-    webhookData = 'webhook';
+    const webhookData = 'webhook';
 
     await WebhookController.create(nonAdminUser, webhookData)
     .should.eventually.be.rejectedWith('Webhooks parameter cannot be of type string.');
+  }
+  catch (error) {
+    M.log.error(error);
+    should.not.exist(error);
+  }
+}
 
+/**
+ * @description Validates that the Webhook Controller will deny a request to create a webhook with
+ * invalid webhook data.
+ */
+async function createInvalidArray() {
+  try {
     // Create invalid webhook data
-    webhookData = [true, true];
+    const webhookData = [true, true];
 
     await WebhookController.create(nonAdminUser, webhookData)
     .should.eventually.be.rejectedWith('Not every item in Webhooks is an object.');
+  }
+  catch (error) {
+    M.log.error(error);
+    should.not.exist(error);
+  }
+}
 
+/**
+ * @description Validates that the Webhook Controller will deny a request to create a webhook with
+ * invalid webhook data.
+ */
+async function createUndefined() {
+  try {
     // Create invalid webhook data
-    webhookData = undefined;
+    const webhookData = undefined;
 
     await WebhookController.create(nonAdminUser, webhookData)
     .should.eventually.be.rejectedWith('Webhooks parameter cannot be of type undefined.');
@@ -670,7 +723,7 @@ async function updateAddTokenLocation() {
 async function updateInvalidResponse() {
   try {
     // Create invalid update for an outgoing webhook
-    let webhookData = {
+    const webhookData = {
       id: webhookID,
       response: []
     };
@@ -678,9 +731,21 @@ async function updateInvalidResponse() {
     await WebhookController.update(adminUser, webhookData)
     .should.eventually.be.rejectedWith(`Webhook ${webhookID} validation failed: `
       + 'Invalid response: []');
+  }
+  catch (error) {
+    M.log.error(error);
+    should.not.exist(error);
+  }
+}
 
+/**
+ * @description Validates that the webhook controller will reject an update to an outgoing
+ * webhook removing the url from the response field.
+ */
+async function updateNoUrlInResponse() {
+  try {
     // Create invalid update for an outgoing webhook
-    webhookData = {
+    const webhookData = {
       id: webhookID,
       response: { method: 'test' } // This is wrong because a response must have a url
     };
