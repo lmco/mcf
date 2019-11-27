@@ -50,7 +50,6 @@ describe(M.getModuleName(module.filename), () => {
   before(async () => {
     try {
       await db.connect();
-
       adminUser = await testUtils.createTestAdmin();
       org = await testUtils.createTestOrg(adminUser);
       project = await testUtils.createTestProject(adminUser, org._id);
@@ -354,33 +353,15 @@ async function optionFieldsCreate() {
  */
 async function findOnOrg() {
   try {
-    // Get the org webhook id
-    const webhookData = webhookIDs[0];
     // Set org reference
     const options = { org: org._id };
 
     // Find webhook via controller
-    const foundWebhooks = await WebhookController.find(adminUser, webhookData, options);
-
-    // Expect createdWebhooks array to contain 1 webhook
-    chai.expect(foundWebhooks.length).to.equal(1);
+    const foundWebhooks = await WebhookController.find(adminUser, options);
     const foundWebhook = foundWebhooks[0];
 
-    // Verify webhook created properly
-    chai.expect(foundWebhook.name).to.equal(testData.webhooks[0].name);
-    chai.expect(foundWebhook.type).to.equal(testData.webhooks[0].type);
-    chai.expect(foundWebhook.description).to.equal(testData.webhooks[0].description);
-    chai.expect(foundWebhook.triggers).to.deep.equal(testData.webhooks[0].triggers);
+    // Verify webhook found on org
     chai.expect(foundWebhook.reference).to.equal(org._id);
-    chai.expect(foundWebhook.custom).to.deep.equal(testData.webhooks[0].custom || {});
-
-    // Verify additional properties
-    chai.expect(foundWebhook.createdBy).to.equal(adminUser._id);
-    chai.expect(foundWebhook.lastModifiedBy).to.equal(adminUser._id);
-    chai.expect(foundWebhook.archivedBy).to.equal(null);
-    chai.expect(foundWebhook.createdOn).to.not.equal(null);
-    chai.expect(foundWebhook.updatedOn).to.not.equal(null);
-    chai.expect(foundWebhook.archivedOn).to.equal(null);
   }
   catch (error) {
     M.log.error(error);
@@ -394,33 +375,15 @@ async function findOnOrg() {
  */
 async function findOnProject() {
   try {
-    // Get the project webhook id
-    const webhookData = webhookIDs[1];
     // Set project reference
     const options = { org: org._id, project: projID };
 
     // Find webhook via controller
-    const foundWebhooks = await WebhookController.find(adminUser, webhookData, options);
-
-    // Expect createdWebhooks array to contain 1 webhook
-    chai.expect(foundWebhooks.length).to.equal(1);
+    const foundWebhooks = await WebhookController.find(adminUser, options);
     const foundWebhook = foundWebhooks[0];
 
-    // Verify webhook created properly
-    chai.expect(foundWebhook.name).to.equal(testData.webhooks[0].name);
-    chai.expect(foundWebhook.type).to.equal(testData.webhooks[0].type);
-    chai.expect(foundWebhook.description).to.equal(testData.webhooks[0].description);
-    chai.expect(foundWebhook.triggers).to.deep.equal(testData.webhooks[0].triggers);
+    // Verify webhook found on project
     chai.expect(foundWebhook.reference).to.equal(utils.createID(org._id, projID));
-    chai.expect(foundWebhook.custom).to.deep.equal(testData.webhooks[0].custom || {});
-
-    // Verify additional properties
-    chai.expect(foundWebhook.createdBy).to.equal(adminUser._id);
-    chai.expect(foundWebhook.lastModifiedBy).to.equal(adminUser._id);
-    chai.expect(foundWebhook.archivedBy).to.equal(null);
-    chai.expect(foundWebhook.createdOn).to.not.equal(null);
-    chai.expect(foundWebhook.updatedOn).to.not.equal(null);
-    chai.expect(foundWebhook.archivedOn).to.equal(null);
   }
   catch (error) {
     M.log.error(error);
@@ -434,33 +397,15 @@ async function findOnProject() {
  */
 async function findOnBranch() {
   try {
-    // Get the branch webhook id
-    const webhookData = webhookIDs[2];
     // Set branch reference
     const options = { org: org._id, project: projID, branch: branchID };
 
     // Find webhook via controller
-    const foundWebhooks = await WebhookController.find(adminUser, webhookData, options);
-
-    // Expect createdWebhooks array to contain 1 webhook
-    chai.expect(foundWebhooks.length).to.equal(1);
+    const foundWebhooks = await WebhookController.find(adminUser, options);
     const foundWebhook = foundWebhooks[0];
 
-    // Verify webhook created properly
-    chai.expect(foundWebhook.name).to.equal(testData.webhooks[0].name);
-    chai.expect(foundWebhook.type).to.equal(testData.webhooks[0].type);
-    chai.expect(foundWebhook.description).to.equal(testData.webhooks[0].description);
-    chai.expect(foundWebhook.triggers).to.deep.equal(testData.webhooks[0].triggers);
+    // Verify webhook found on branch
     chai.expect(foundWebhook.reference).to.equal(utils.createID(org._id, projID, branchID));
-    chai.expect(foundWebhook.custom).to.deep.equal(testData.webhooks[0].custom || {});
-
-    // Verify additional properties
-    chai.expect(foundWebhook.createdBy).to.equal(adminUser._id);
-    chai.expect(foundWebhook.lastModifiedBy).to.equal(adminUser._id);
-    chai.expect(foundWebhook.archivedBy).to.equal(null);
-    chai.expect(foundWebhook.createdOn).to.not.equal(null);
-    chai.expect(foundWebhook.updatedOn).to.not.equal(null);
-    chai.expect(foundWebhook.archivedOn).to.equal(null);
   }
   catch (error) {
     M.log.error(error);
