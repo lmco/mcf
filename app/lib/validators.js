@@ -139,10 +139,6 @@ const project = {
       // If the ID is invalid, reject
       return RegExp(project.id).test(data);
     },
-    optionalMatch: function(data) {
-      // Allow either null or a matching id
-      return data === null || RegExp(project.id).test(data);
-    },
     maxLength: function(data) {
       // If the ID is longer than max length, reject
       return data.length <= project.idLength;
@@ -185,10 +181,6 @@ const branch = {
       // If the ID is invalid, reject
       return RegExp(branch.id).test(data);
     },
-    optionalMatch: function(data) {
-      // Allow either null or a matching id
-      return data === null || RegExp(branch.id).test(data);
-    },
     maxLength: function(data) {
       // If the ID is longer than max length, reject
       return data.length <= branch.idLength;
@@ -199,10 +191,12 @@ const branch = {
     }
   },
   project: project._id.match,
+  source: function(data) {
+    // Allow either null or a matching id
+    return data === null || RegExp(branch.id).test(data);
+  },
   custom: customDataValidator
 };
-// Define source after so that it can user branch._id.optionalMatch
-branch.source = branch._id.optionalMatch;
 
 /**
  * @description Regular Expressions to validate artifact data and corresponding validator
