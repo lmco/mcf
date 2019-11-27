@@ -627,41 +627,47 @@ function deleteWebhooks(done) {
  *
  * @param {Function} done - The mocha callback.
  **/
-function triggerWebhook(done) {
+async function triggerWebhook() {
   // Get data for an incoming webhook
   const webhookData = testData.webhooks[1];
   delete webhookData.id;
+  const promises = [];
 
-  // Register a listener for the incoming webhook event
-  events.on(webhookData.triggers[0], function() {
-    done();
-  });
+
 
   // Create the incoming webhook
-  WebhookController.create(adminUser, webhookData)
-  .then((incomingWebhooks) => {
-    // Get the base64 of the webhook id
-    const triggerID = incomingWebhooks[0]._id;
-    const encodedID = Buffer.from(triggerID).toString('base64');
+  const incomingWebhooks = await WebhookController.create(adminUser, webhookData);
+  // Get the base64 of the webhook id
+  const triggerID = incomingWebhooks[0]._id;
+  const encodedID = Buffer.from(triggerID).toString('base64');
 
-    // Save the id to be deleted later
-    webhookIDs.push(triggerID);
+  // Save the id to be deleted later
+  webhookIDs.push(triggerID);
 
-    // Create request object
-    const body = {
-      test: { token: 'test token' },
-      data: 'test data'
-    };
-    const params = { encodedid: encodedID };
-    const method = 'POST';
-    const req = testUtils.createRequest(adminUser, params, body, method);
+  // Create request object
+  const body = {
+    test: { token: 'test token' },
+    data: 'test data'
+  };
+  const params = { encodedid: encodedID };
+  const method = 'POST';
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
-    // Set response as empty object
-    const res = {};
+  // Set response as empty object
+  const res = {};
 
-    // Verifies status code and headers
-    testUtils.createResponse(res);
+  // Verifies status code and headers
+  testUtils.createResponse(res);
 
+  promises.push(new Promise((resolve, reject) => {
+    // Register a listener for the incoming webhook event
+    events.on(webhookData.triggers[0], function(data) {
+      if (data[0] === body.data) resolve();
+      else reject(new Error('Data not found in emitted webhook event'));
+    });
+  }));
+
+  promises.push(new Promise((resolve) => {
     // Verifies the response data
     res.send = function send(_data) {
       // Verify response body
@@ -669,13 +675,13 @@ function triggerWebhook(done) {
 
       // Expect the statusCode to be 200
       chai.expect(res.statusCode).to.equal(200);
-
-      // TODO: replace done with a custom function for testResponseLogging
       // Ensure the response was logged correctly
-      // setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, resolve), 50);
     };
 
     // GETs the webhook trigger endpoint
     APIController.triggerWebhook(req, res);
-  });
+  }));
+
+  await Promise.all(promises);
 }

@@ -6117,7 +6117,8 @@ async function triggerWebhook(req, res) {
     Webhook.verifyAuthority(webhook, token);
 
     webhook.triggers.forEach((trigger) => {
-      EventEmitter.emit(trigger, data);
+      if (Array.isArray(data)) EventEmitter.emit(trigger, ...data);
+      else EventEmitter.emit(trigger, data);
     });
 
     // Return 200: OK and the message 'success'
