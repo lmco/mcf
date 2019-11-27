@@ -95,20 +95,27 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   // -------------- Find --------------
+  // TODO: it('should reject an unauthorized attempt to find an org', unauthorizedTest('find'));
   // ------------- Create -------------
+  // TODO: it('should reject an unauthorized attempt to create an org', unauthorizedTest('create'));
+  // TODO: it('should reject an attempt to create an org that already exists', createExisting);
   // ------------- Update -------------
-  // it('should reject an update to an archived org')
+  // TODO: it('should reject an unauthorized attempt to update an org', unauthorizedTest('update'));
+  // TODO: it('should reject an attempt to update an archived org', updateArchived);
   // ------------- Replace ------------
-  it('should reject put org with invalid id', putInvalidId);
-  it('should reject put org without id', putWithoutId);
+  // TODO: it('should reject an unauthorized attempt to replace an org',
+  //  unauthorizedTest('createOrReplace'));
+  it('should reject an attempt to replace an org with an invalid id', replaceInvalidId);
+  it('should reject an attempt to replace an org without an id', replaceWithoutId);
   // ------------- Remove -------------
+  // TODO: it('should reject an unauthorized attempt to delete an org', unauthorizedTest('delete'));
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies invalid Id PUT call does not delete existing orgs.
+ * @description Verifies createOrReplace() call with an invalid id does not delete existing orgs.
  */
-async function putInvalidId() {
+async function replaceInvalidId() {
   // Create the test org objects
   const testOrgObj0 = testData.orgs[0];
   const testOrgObj1 = testData.orgs[1];
@@ -134,10 +141,10 @@ async function putInvalidId() {
 }
 
 /**
- * @description Verifies PUT call without Id does not delete existing orgs.
+ * @description Verifies createOrReplace() call without an id does not delete existing orgs.
  * Note: This test should fail prior to deletion of existing orgs.
  */
-async function putWithoutId() {
+async function replaceWithoutId() {
   // Create the test org objects
   const testOrgObj0 = testData.orgs[0];
   const testOrgObj1 = testData.orgs[1];

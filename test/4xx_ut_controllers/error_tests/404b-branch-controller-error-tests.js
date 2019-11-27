@@ -102,17 +102,32 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   // -------------- Find --------------
+  // TODO: it('should reject an unauthorized attempt to find a branch', unauthorizedTest('find'));
   // ------------- Create -------------
-  // it('should reject creating a branch on an archived org')
-  // it('should reject creating a branch on an archived project')
+  // TODO: it('should reject an unauthorized attempt to create a branch',
+  //  unauthorizedTest('create'));
+  // TODO: it('should reject an attempt to create a branch on an archived org',
+  //  archivedTest(Organization, 'create'));
+  // TODO: it('should reject an attempt to create a branch on an archived project',
+  //  archivedTest(Project, 'update'));
+  // TODO: it('should reject an attempt to create a branch that already exists', createExisting);
   // ------------- Update -------------
-  // it('should reject an update to a branch on an archived org')
-  // it('should reject an update to a branch on an archived project')
-  // it('should reject an update to an archived branch')
-  // ------------- Replace ------------
+  // TODO: it('should reject an unauthorized attempt to update a branch',
+  //  unauthorizedTest('update'));
+  // TODO: it('should reject an attempt to update a branch on an archived org',
+  //  archivedTest(Organization, 'update'));
+  // TODO: it('should reject an attempt to update a branch on an archived project',
+  //  archivedTest(Project, 'update'));
+  // TODO: it('should reject an attempt to update an archived branch',
+  //  archivedTest(Branch, 'update'));
   // ------------- Remove -------------
-  it('should reject deletion of master branch'
-    + ' saying branch cannot be deleted', deleteMasterBranch);
+  // TODO: it('should reject an unauthorized attempt to delete a branch',
+  //  unauthorizedTest('remove'));
+  // TODO: it('should reject an attempt to delete a branch on an archived org',
+  //  archivedTest(Organization, 'remove'));
+  // TODO: it('should reject an attempt to delete a branch on an archived project',
+  //  archivedTest(Project, 'remove'));
+  it('should reject deletion of master branch', deleteMasterBranch);
 });
 
 /* --------------------( Tests )-------------------- */

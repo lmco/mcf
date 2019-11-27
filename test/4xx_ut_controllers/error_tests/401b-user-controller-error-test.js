@@ -81,12 +81,21 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute the tests */
   // -------------- Find --------------
   // ------------- Create -------------
+  // TODO: it('should reject an unauthorized attempt to create a user', unauthorizedTest('create'));
   // ------------- Update -------------
+  // TODO: it('should reject an unauthorized attempt to update a user', unauthorizedTest('update'));
+  // TODO: it('should reject an attempt to update an archived user', updateArchived);
   // ------------- Replace ------------
+  // TODO: it('should reject an unauthorized attempt to replace a user',
+  //  unauthorizedTest('createOrReplace'));
   it('should reject put user with invalid username', putInvalidUsername);
   it('should reject put user without username', putWithoutUsername);
   // ------------- Remove -------------
+  // TODO: it('should reject an unauthorized attempt to delete a user', unauthorizedTest('remove'));
+  // TODO: it('should reject an attempt to delete a user that doesn\'t exist', deleteNotFound);
   // --------- Update Password --------
+  // TODO: it('should reject an unauthorized attempt to update a password',
+  //  unauthorizedTest('updatePassword'));
   // ------------- Search -------------
 });
 

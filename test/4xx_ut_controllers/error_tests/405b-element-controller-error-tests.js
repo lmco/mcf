@@ -123,20 +123,29 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   // -------------- Find --------------
-  // it('should reject a request to find an element by an unauthorized user')
+  // TODO: it('should reject an unauthorized attempt to find an element', unauthorizedTest('find'));
   // ------------- Create -------------
-  it('should reject creating elements to a tag '
-    + 'saying elements cannot be created.', createInTag);
-  // it('should reject creating an element on an archived org')
-  // it('should reject creating an element on an archived project')
-  // it('should reject creating an element on an archived branch')
-  // it('should reject a request to create an element by an unauthorized user')
+  // TODO: it('should reject an unauthorized attempt to create an element',
+  //  unauthorizedTest('create'));
+  it('should reject creating elements on a tag.', createOnTag);
+  // TODO: it('should reject an attempt to create an element on an archived org',
+  //  archivedTest(Organization, 'create'));
+  // TODO: it('should reject an attempt to create an element on an archived project',
+  //  archivedTest(Project, 'create'));
+  // TODO: it('should reject an attempt to create an element on an archived branch',
+  //  archivedTest(Branch, 'create'));
+  // TODO: it('should reject an attempt to create an element that already exists', createExisting);
   // ------------- Update -------------
-  // it('should reject an update to an element on an archived org')
-  // it('should reject an update to an element on an archived project')
-  // it('should reject an update to an element on an archived branch')
-  // it('should reject an update to an archived element')
-  // it('should reject an update to an element by an unauthorized user')
+  // TODO: it('should reject an unauthorized attempt to update an element',
+  //  unauthorizedTest('update'));
+  // TODO: it('should reject an attempt to update an element on an archived org',
+  //  archivedTest(Organization, 'update'));
+  // TODO: it('should reject an attempt to update an element on an archived project',
+  //  archivedTest(Project, 'update'));
+  // TODO: it('should reject an attempt to update an element on an archived branch',
+  //  archivedTest(Branch, 'update'));
+  // TODO: it('should reject an attempt to update an archived element',
+  //  archivedTest(Element, 'update'));
   it('should reject an update saying a source cannot be set to self', updateSourceToSelf);
   it('should reject an update saying a target cannot be set to self', updateTargetToSelf);
   it('should reject an update saying a source cannot be found', updateNonExistentSource);
@@ -148,24 +157,35 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject updating elements to a tag '
     + 'saying elements cannot be update.', updateInTag);
   // ------------- Replace ------------
-  // it('should reject replacing an element on an archived org')
-  // it('should reject replacing an element on an archived project')
-  // it('should reject replacing an element on an archived branch')
-  // it('should reject a request to replace an element by an unauthorized user')
-  it('should reject put elements with invalid id', putInvalidId);
-  it('should reject put elements without id', putWithoutId);
+  // TODO: it('should reject an unauthorized attempt to replace an element',
+  //  unauthorizedTest('createOrReplace'));
+  // TODO: it('should reject an attempt to replace an element on an archived org',
+  //  archivedTest(Organization, 'createOrReplace'));
+  // TODO: it('should reject an attempt to replace an element on an archived project',
+  //  archivedTest(Project, 'createOrReplace'));
+  // TODO: it('should reject an attempt to replace an element on an archived branch',
+  //  archivedTest(Branch, 'createOrReplace'));
+  it('should reject an attempt to replace an element with an invalid id', putInvalidId);
+  it('should reject an attempt to replace an element without an id', putWithoutId);
   // ------------- Remove -------------
-  // it('should reject deleting an element on an archived org')
-  // it('should reject deleting an element on an archived project')
-  // it('should reject deleting an element on an archived branch')
-  // it('should reject a request to delete an element by an unauthorized user')
-  it('should reject deleting elements in a tag '
-    + 'saying elements cannot be deleted.', deleteInTag);
+  // TODO: it('should reject an unauthorized attempt to delete an element',
+  //  unauthorizedTest('remove'));
+  // TODO: it('should reject an attempt to delete an element on an archived org',
+  //  archivedTest(Organization, 'remove'));
+  // TODO: it('should reject an attempt to delete an element on an archived project',
+  //  archivedTest(Project, 'remove'));
+  // TODO: it('should reject an attempt to delete an element on an archived branch',
+  //  archivedTest(Branch, 'remove'));
+  it('should reject deleting elements on a tag', deleteOnTag);
   // ------------- Search -------------
-  // it('should reject searching an element on an archived org')
-  // it('should reject searching an element on an archived project')
-  // it('should reject searching an element on an archived branch')
-  // it('should reject a request to delete an element by an unauthorized user')
+  // TODO: it('should reject an unauthorized attempt to search an element',
+  //  unauthorizedTest('search'));
+  // TODO: it('should reject an attempt to search an element on an archived org',
+  //  archivedTest(Organization, 'search'));
+  // TODO: it('should reject an attempt to search an element on an archived project',
+  //  archivedTest(Project, 'search'));
+  // TODO: it('should reject an attempt to search an element on an archived branch',
+  //  archivedTest(Branch, 'search'));
 });
 
 /* --------------------( Tests )-------------------- */
@@ -286,7 +306,7 @@ async function updateTargetWithNoSource() {
 /**
  * @description Verifies that the tag can not create elements.
  */
-async function createInTag() {
+async function createOnTag() {
   const elementObj = testData.elements[0];
 
   // Attempt to create an element; should be rejected with specific error message
@@ -315,7 +335,7 @@ async function updateInTag() {
 /**
  * @description Verifies that the tag can not delete elements.
  */
-async function deleteInTag() {
+async function deleteOnTag() {
   // Attempt deleting an element via controller; should be rejected with specific error message
   await ElementController.remove(adminUser, org._id, projID, tagID, testData.elements[1].id)
   .should.eventually.be.rejectedWith(`[${tagID}] is a tag and`

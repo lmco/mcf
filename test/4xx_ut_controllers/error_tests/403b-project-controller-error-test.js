@@ -98,22 +98,39 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   // -------------- Find --------------
+  // TODO: it('should reject an unauthorized attempt to find a project', unauthorizedTest('find'));
   // ------------- Create -------------
-  // it('should reject creating a project on an archived org')
+  // TODO: it('should reject an unauthorized attempt to create a project',
+  //  unauthorizedTest('create'));
+  // TODO: it('should reject an attempt to create a project on an archived org',
+  //  archivedTest(Organization, 'create'));
+  // TODO: it('should reject an attempt to create a project that already exists', createExisting);
   // ------------- Update -------------
-  // it('should reject an update to a project on an archived org')
-  // it('should reject an update to an archived project')
+  // TODO: it('should reject an unauthorized attempt to update a project',
+  //  unauthorizedTest('update'));
+  // TODO: it('should reject an attempt to update a project on an archived org',
+  //  archivedTest(Organization, 'update'));
+  // TODO: it('should reject an attempt to update an archived project',
+  //  archivedTest(Project, 'update'));
   // ------------- Replace ------------
-  it('should reject put proj with invalid id', putInvalidId);
-  it('should reject put proj without id', putWithoutId);
+  // TODO: it('should reject an unauthorized attempt to replace a project',
+  //  unauthorizedTest('createOrReplace'));
+  it('should reject an attempt to replace a project with an invalid id', replaceInvalidId);
+  it('should reject an attempt to replace a project without an id', replaceWithoutId);
   // ------------- Remove -------------
+  // TODO: it('should reject an unauthorized attempt to delete a project',
+  //  unauthorizedTest('remove'));
+  // TODO: it('should reject an attempt to delete a project on an archived org',
+  //  archivedTest(Organization, 'remove'));
+  // TODO: it('should reject an attempt to delete a project that doesn\'t exist', deleteNotFound);
 });
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies invalid Id PUT call does not delete existing projects.
+ * @description Verifies createOrReplace() call with an invalid id does not delete existing
+ * projects.
  */
-async function putInvalidId() {
+async function replaceInvalidId() {
   // Create the test project objects
   const testProjObj0 = testData.projects[0];
   const testProjObj1 = testData.projects[1];
@@ -141,10 +158,10 @@ async function putInvalidId() {
 }
 
 /**
- * @description Verifies PUT call without Id does not delete existing projects.
+ * @description Verifies createOrReplace() call without an id does not delete existing projects.
  * Note: This test should fail prior to deletion of existing projects.
  */
-async function putWithoutId() {
+async function replaceWithoutId() {
   // Create the test projects
   const testProjObj0 = testData.projects[0];
   const testProjObj1 = testData.projects[1];

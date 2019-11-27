@@ -117,26 +117,44 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   // -------------- Find --------------
+  // TODO: it('should reject an unauthorized attempt to find an artifact',
+  //  unauthorizedTest('find'));
   it('should reject a find request for a blob that does not exist.', findNonexistingBlob);
   // ------------- Create -------------
-  // it('should reject creating an artifact on an archived org')
-  // it('should reject creating an artifact on an archived project')
-  // it('should reject creating an artifact on an archived branch')
-  it('should reject creating artifacts on a tag '
-    + 'saying artifacts cannot be created.', createInTag);
+  // TODO: it('should reject an unauthorized attempt to create an artifact',
+  //  unauthorizedTest('create'));
+  // TODO: it('should reject an attempt to create an artifact on an archived org',
+  //  archivedTest(Organization, 'create'));
+  // TODO: it('should reject an attempt to create an artifact on an archived project',
+  //  archivedTest(Project, 'create'));
+  // TODO: it('should reject an attempt to create an artifact on an archived branch',
+  //  archivedTest(Branch, 'create'));
+  it('should reject creating artifacts on a tag', createInTag);
   it('should reject creating a blob that already exists.', createExistingBlob);
   it('should reject creating an artifact that already exists.', createExistingArtifact);
   // ------------- Update -------------
-  // it('should reject an update to an artifact on an archived org')
-  // it('should reject an update to an artifact on an archived project')
-  // it('should reject an update to an artifact on an archived branch')
-  // it('should reject an update to an archived artifact')
-  it('should reject updating artifact that does NOT exist.', updateNonexistingArtifact);
-  it('should reject updating artifacts on a tag '
-    + 'saying artifacts cannot be updated.', updateInTag);
+  // TODO: it('should reject an unauthorized attempt to update an artifact',
+  //  unauthorizedTest('update'));
+  // TODO: it('should reject an attempt to update an artifact on an archived org',
+  //  archivedTest(Organization, 'update'));
+  // TODO: it('should reject an attempt to update an artifact on an archived project',
+  //  archivedTest(Project, 'update'));
+  // TODO: it('should reject an attempt to update an artifact on an archived branch',
+  //  archivedTest(Branch, 'update'));
+  // TODO: it('should reject an attempt to update an archived artifact',
+  //  archivedTest(Artifact, 'update'));
+  it('should reject updating an artifact that does NOT exist.', updateNonexistingArtifact);
+  it('should reject updating artifacts on a tag', updateInTag);
   // ------------- Remove -------------
-  it('should reject deleting artifacts on a tag '
-    + 'saying artifacts cannot be deleted.', deleteInTag);
+  // TODO: it('should reject an unauthorized attempt to delete an artifact',
+  //  unauthorizedTest('remove'));
+  // TODO: it('should reject an attempt to delete an artifact on an archived org',
+  //  archivedTest(Organization, 'remove'));
+  // TODO: it('should reject an attempt to delete an artifact on an archived project',
+  //  archivedTest(Project, 'remove'));
+  // TODO: it('should reject an attempt to delete an artifact on an archived branch',
+  //  archivedTest(Branch, 'remove'));
+  it('should reject deleting artifacts on a tag', deleteInTag);
   it('should reject deleting a nonexistent blob.', deleteNonexistingBlob);
 });
 
