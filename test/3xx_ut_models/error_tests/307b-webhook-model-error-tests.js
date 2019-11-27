@@ -101,13 +101,12 @@ async function noID() {
       + 'Path `_id` is required.');
   }
   catch (error) {
+    // Remove the webhook in case the test failed
+    Webhook.deleteMany(webhookID);
+
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
-  }
-  finally {
-    // Remove the webhook in case the test failed
-    Webhook.deleteMany(webhookID);
   }
 }
 
@@ -126,13 +125,12 @@ async function noType() {
       + 'Path `type` is required.');
   }
   catch (error) {
+    // Remove the webhook in case the test failed
+    Webhook.deleteMany(webhookID);
+
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
-  }
-  finally {
-    // Remove the webhook in case the test failed
-    Webhook.deleteMany(webhookID);
   }
 }
 
@@ -151,13 +149,12 @@ async function invalidType() {
       + 'Path `type` is required.');
   }
   catch (error) {
+    // Remove the webhook in case the test failed
+    Webhook.deleteMany(webhookID);
+
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
-  }
-  finally {
-    // Remove the webhook in case the test failed
-    Webhook.deleteMany(webhookID);
   }
 }
 
@@ -211,13 +208,12 @@ async function noTriggers() {
       + 'failed: triggers: Path `triggers` is required.');
   }
   catch (error) {
+    // Remove the webhook in case the test failed
+    Webhook.deleteMany(webhookID);
+
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
-  }
-  finally {
-    // Remove the webhook in case the test failed
-    Webhook.deleteMany(webhookID);
   }
 }
 
@@ -236,13 +232,12 @@ async function invalidTriggers() {
       + 'failed: triggers: The triggers field must be an array of strings.');
   }
   catch (error) {
+    // Remove the webhook in case the test failed
+    Webhook.deleteMany(webhookID);
+
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
-  }
-  finally {
-    // Remove the webhook in case the test failed
-    Webhook.deleteMany(webhookID);
   }
 }
 
@@ -262,13 +257,12 @@ async function noResponseOutgoing() {
       + ' tokenLocation.');
   }
   catch (error) {
+    // Remove the webhook in case the test failed
+    Webhook.deleteMany(webhookID);
+
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
-  }
-  finally {
-    // Remove the webhook in case the test failed
-    Webhook.deleteMany(webhookID);
   }
 }
 
@@ -290,13 +284,12 @@ async function responseIncoming() {
       + ' a response field.');
   }
   catch (error) {
+    // Remove the webhook in case the test failed
+    Webhook.deleteMany(webhookID);
+
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
-  }
-  finally {
-    // Remove the webhook in case the test failed
-    Webhook.deleteMany(webhookID);
   }
 }
 
@@ -315,13 +308,12 @@ async function noUrlInResponse() {
       + 'failed: response: The response field must have a url.');
   }
   catch (error) {
+    // Remove the webhook in case the test failed
+    Webhook.deleteMany(webhookID);
+
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
-  }
-  finally {
-    // Remove the webhook in case the test failed
-    Webhook.deleteMany(webhookID);
   }
 }
 
@@ -344,13 +336,12 @@ async function invalidMethodInResponse() {
       + 'failed: response: Invalid method in response field.');
   }
   catch (error) {
+    // Remove the webhook in case the test failed
+    Webhook.deleteMany(webhookID);
+
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
-  }
-  finally {
-    // Remove the webhook in case the test failed
-    Webhook.deleteMany(webhookID);
   }
 }
 
@@ -373,13 +364,12 @@ async function invalidTokenInResponse() {
       + 'failed: response: Invalid token in response field.');
   }
   catch (error) {
+    // Remove the webhook in case the test failed
+    Webhook.deleteMany(webhookID);
+
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
-  }
-  finally {
-    // Remove the webhook in case the test failed
-    Webhook.deleteMany(webhookID);
   }
 }
 
@@ -402,13 +392,12 @@ async function invalidFieldInResponse() {
       + 'failed: response: Invalid field [wrong] in response field.');
   }
   catch (error) {
+    // Remove the webhook in case the test failed
+    Webhook.deleteMany(webhookID);
+
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
-  }
-  finally {
-    // Remove the webhook in case the test failed
-    Webhook.deleteMany(webhookID);
   }
 }
 
@@ -429,13 +418,12 @@ async function noTokenIncoming() {
       + ' a response field.');
   }
   catch (error) {
+    // Remove the webhook in case the test failed
+    Webhook.deleteMany(webhookID);
+
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
-  }
-  finally {
-    // Remove the webhook in case the test failed
-    Webhook.deleteMany(webhookID);
   }
 }
 
@@ -456,13 +444,12 @@ async function noTokenLocationIncoming() {
       + ' a response field.');
   }
   catch (error) {
+    // Remove the webhook in case the test failed
+    Webhook.deleteMany(webhookID);
+
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
-  }
-  finally {
-    // Remove the webhook in case the test failed
-    Webhook.deleteMany(webhookID);
   }
 }
 
@@ -483,13 +470,12 @@ async function tokenOutgoing() {
       + ' tokenLocation.');
   }
   catch (error) {
+    // Remove the webhook in case the test failed
+    Webhook.deleteMany(webhookID);
+
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
-  }
-  finally {
-    // Remove the webhook in case the test failed
-    Webhook.deleteMany(webhookID);
   }
 }
 
@@ -510,13 +496,12 @@ async function tokenLocationOutgoing() {
       + ' tokenLocation.');
   }
   catch (error) {
+    // Remove the webhook in case the test failed
+    Webhook.deleteMany(webhookID);
+
     M.log.error(error);
     // There should be no error
     should.not.exist(error);
-  }
-  finally {
-    // Remove the webhook in case the test failed
-    Webhook.deleteMany(webhookID);
   }
 }
 
