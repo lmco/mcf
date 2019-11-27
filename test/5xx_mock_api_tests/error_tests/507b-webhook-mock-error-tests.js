@@ -373,8 +373,8 @@ function tokenInvalid(done) {
     // Expect an error message
     _data.should.equal('Token received from request does not match stored token.');
 
-    // Expect the statusCode to be 403
-    res.statusCode.should.equal(403);
+    // Expect the statusCode to be 401
+    res.statusCode.should.equal(401);
 
     // Ensure the response was logged correctly
     setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);

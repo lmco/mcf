@@ -225,7 +225,7 @@ WebhookSchema.static('sendRequest', function(webhook, data) {
  */
 WebhookSchema.static('verifyAuthority', function(webhook, value) {
   if (!(webhook.type === 'Incoming' && webhook.token === value)) {
-    throw new M.PermissionError('Token received from request does not match stored token.', 'warn');
+    throw new M.AuthorizationError('Token received from request does not match stored token.', 'warn');
   }
 });
 

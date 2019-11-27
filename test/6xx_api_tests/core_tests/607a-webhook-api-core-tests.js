@@ -97,7 +97,7 @@ describe(M.getModuleName(module.filename), () => {
  * @param {Function} done - The mocha callback.
  */
 function postWebhooks(done) {
-  const webhookData = testData.webhooks.slice(1, 3);
+  const webhookData = testData.webhooks;
 
   request({
     url: `${test.url}/api/webhooks`,

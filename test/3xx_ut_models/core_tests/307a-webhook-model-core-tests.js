@@ -286,118 +286,16 @@ async function validPopulateFields() {
  */
 async function sendRequest() {
   try {
-    // Initialize an express app to set up a server to listen for the webhook request
-
-    // Initialize express app and export the object
-    const app = express();
-
-    // Compress responses
-    app.use(compression());
-
-    // Configure the static/public directory
-    const staticDir = path.join(__dirname, '..', 'build', 'public');
-    app.use(express.static(staticDir));
-    app.use('/favicon.ico', express.static('build/public/img/favicon.ico'));
-
-    // for parsing application/json
-    app.use(bodyParser.json({ limit: M.config.server.requestSize || '50mb' }));
-    app.use(bodyParser.text());
-
-    // for parsing application/xwww-form-urlencoded
-    app.use(bodyParser.urlencoded({ limit: M.config.server.requestSize || '50mb',
-      extended: true }));
-
-    // Trust proxy for IP logging
-    app.enable('trust proxy');
-
-    // Remove powered-by from headers
-    app.disable('x-powered-by');
-
-    // Configures ejs views/templates
-    app.set('view engine', 'ejs');
-    app.set('views', path.join(__dirname, 'views'));
-    app.use(expressLayouts);
-
-    // Configure sessions
-    const units = utils.timeConversions[M.config.auth.session.units];
-    app.use(session({
-      name: 'SESSION_ID',
-      secret: M.config.server.secret,
-      resave: false,
-      saveUninitialized: false,
-      cookie: { maxAge: M.config.auth.session.expires * units }
-    }));
-
-    // Enable flash messages
-    app.use(flash());
-
-    // Log IP address of all incoming requests
-    app.use(middleware.logIP);
-
-    // Load the API Routes
-    if (M.config.server.api.enabled) {
-      app.use('/api', M.require('api-routes'));
-    }
-
-    // Set up the server
-    const httpServer = http.createServer(app);
-
-    // If a timeout is defined in the config, set it
-    if (M.config.server.requestTimeout) {
-      httpServer.setTimeout(M.config.server.requestTimeout);
-    }
-
-    // Start listening for requests on the server
-    httpServer.listen(M.config.server.http.port);
-
-    // Get authorization headers
-    const auth = `${M.config.server.defaultAdminUsername}:${M.config.server.defaultAdminPassword}`;
-    const auth64 = Buffer.from(auth).toString('base64');
-    const authHeader = { authorization: `Basic ${auth64}` };
-
-    // Create an incoming webhook to trigger
-    const webhookData = {
-      _id: uuidv4(),
-      type: 'Incoming',
-      triggers: ['webhook-test-event'],
-      token: '307a test token',
-      tokenLocation: 'body.token'
-    };
-
-    // Add webhook id to list for later deletion
-    webhookIDs.push(webhookData._id);
-
-    // Get base64 encoding of webhook id
-    const encodedID = Buffer.from(webhookData._id).toString('base64');
-
-    // Create the webhook
-    Webhook.insertMany(webhookData);
-
     // Create a mock outgoing webhook object
     const webhook = {
       type: 'Outgoing',
       response: {
-        url: `${M.config.test.url}/api/webhooks/trigger/${encodedID}`,
-        headers: authHeader,
-        ca: testUtils.readCaFile(),
-        data: {
-          token: '307a test token',
-          data: 'test data'
-        }
+        url: `${M.config.test.url}/api/test`
       }
     };
 
-    // Wrap the event listener in a promise so that this test function completes synchronously
-    await new Promise((resolve, reject) => {
-      // Register a listener for this webhook's event
-      EventEmitter.on('webhook-test-event', function(data) {
-        if (data[0] === 'test data') resolve();
-        else reject(new M.ServerError('Webhook event not triggered by test'));
-      });
-
-      // Test the sendRequest function
-      Webhook.sendRequest(webhook, 'test data');
-    });
+    // Test the sendRequest function
+    Webhook.sendRequest(webhook, 'test data');
   }
   catch (error) {
     M.log.error(error);

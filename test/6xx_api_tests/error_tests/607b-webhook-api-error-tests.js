@@ -416,8 +416,8 @@ function tokenInvalid(done) {
     // Expect no error
     chai.expect(err).to.equal(null);
 
-    // Expect response status: 403 Permission Error
-    chai.expect(response.statusCode).to.equal(403);
+    // Expect response status: 401 Authorization Error
+    chai.expect(response.statusCode).to.equal(401);
 
     // Expect an error message
     chai.expect(response.body).to.equal('Token received from request does not match stored token.');
