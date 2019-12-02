@@ -1551,7 +1551,7 @@ class Model {
 
       // Get an array of the base words to search;
       const baseWords = (exactMatch)
-        ? searchString.replace(/"/g, '') // if "" included, its an exact match
+        ? searchString.replace(/"/g, '') // if "" included, it's an exact match
         : searchString.split(' ');  // Split string by space, these are all the words to search
       const regexString = (exactMatch)
         ? RegExp(`(${baseWords})`)
