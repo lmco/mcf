@@ -560,7 +560,7 @@ async function update(requestingUser, orgs, options) {
           }
           // If the validator is a function
           else if (typeof validators.org[key] === 'function') {
-            if (!validators.org[key](updateOrg[key])) {
+            if (!validators.org[key](updateOrg[key]) && key !== 'permissions') {
               throw new M.DataFormatError(
                 `Invalid ${key}: [${updateOrg[key]}]`, 'warn'
               );

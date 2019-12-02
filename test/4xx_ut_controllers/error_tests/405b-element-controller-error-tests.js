@@ -195,13 +195,13 @@ async function updateNonExistentSource() {
   // Set source to self
   const update = {
     id: elemDataObject.id,
-    source: 'NonExistentElement'
+    source: 'nonexistentelement'
   };
 
   // Attempt to update the element; should be rejected with specific error message
   await ElementController.update(adminUser, org._id, projID, branchID, update)
   .should.eventually.be.rejectedWith('The source element '
-    + `[NonExistentElement] was not found in the project [${projID}].`);
+    + `[nonexistentelement] was not found in the project [${projID}].`);
 }
 
 /**
@@ -214,13 +214,13 @@ async function updateNonExistentTarget() {
   // Set source to self
   const update = {
     id: elemDataObject.id,
-    target: 'NonExistentElement'
+    target: 'nonexistentelement'
   };
 
   // Attempt to update the element; should be rejected with specific error message
   await ElementController.update(adminUser, org._id, projID, branchID, update)
   .should.eventually.be.rejectedWith('The target element '
-    + `[NonExistentElement] was not found in the project [${projID}].`);
+    + `[nonexistentelement] was not found in the project [${projID}].`);
 }
 
 /**

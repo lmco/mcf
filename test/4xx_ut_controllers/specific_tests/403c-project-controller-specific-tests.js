@@ -129,8 +129,10 @@ async function findInternalProject() {
     const user = await testUtils.createNonAdminUser();
     const updateObj = { id: org._id, permissions: {} };
     updateObj.permissions[user._id] = 'read';
+
     // Add user to organization
     await OrgController.update(adminUser, updateObj);
+
     // Update project visibility to internal
     const projUpdate = { id: utils.parseID(projects[1]._id).pop(), visibility: 'internal' };
     await ProjectController.update(adminUser, org._id, projUpdate);
