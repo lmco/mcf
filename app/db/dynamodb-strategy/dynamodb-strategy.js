@@ -205,7 +205,7 @@ class Schema {
           AttributeName: key,
           AttributeType: obj[key].type
         };
-        // Add the the schema AttributeDefinitions
+        // Add the schema AttributeDefinitions
         this.schema.AttributeDefinitions.push(attributeObj);
 
         // Create index object
