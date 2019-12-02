@@ -57,7 +57,7 @@ describe(M.getModuleName(module.filename), () => {
   after(async () => {
     try {
       await testUtils.removeTestAdmin();
-      db.disconnect();
+      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);
