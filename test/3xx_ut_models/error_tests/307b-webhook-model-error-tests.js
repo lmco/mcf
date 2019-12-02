@@ -59,7 +59,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   after(async () => {
     try {
-      db.disconnect();
+      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);
