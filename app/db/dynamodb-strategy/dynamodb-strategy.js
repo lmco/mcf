@@ -1313,7 +1313,7 @@ class Model {
    * parameter.
    * @param {object} [options] - An object containing options.
    * @param {string} [options.populate] - A space separated list of fields to
-   * populate of return of a document. Only fields that reference other
+   * populate on return of a document. Only fields that reference other
    * documents can be populated. Populating a field returns the entire
    * referenced document instead of that document's ID. If no document exists,
    * null is returned.
