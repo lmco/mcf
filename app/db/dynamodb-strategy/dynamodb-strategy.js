@@ -948,7 +948,7 @@ class Model {
    * @async
    *
    * @param {object[]} ops - An array of objects detailing what operations to
-   * perform the data required for those operations.
+   * perform and the data required for those operations.
    * @param {object} [ops.insertOne] - Specified an insertOne operation.
    * @param {object} [ops.insertOne.document] - The document to create, for
    * insertOne.
