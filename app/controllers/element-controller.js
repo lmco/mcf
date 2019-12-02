@@ -643,7 +643,7 @@ async function create(requestingUser, organizationID, projectID, branchID, eleme
     M.log.debug('create(): After insertMany()');
 
     promises = [];
-    const createdIDs = await createdElements.map(e => e._id);
+    const createdIDs = createdElements.map(e => e._id);
     // Find elements in batches
     for (let i = 0; i < createdIDs.length / 50000; i++) {
       // Split elementIDs list into batches of 50000

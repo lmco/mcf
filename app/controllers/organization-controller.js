@@ -41,6 +41,7 @@ const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
+const Webhook = M.require('models.webhook');
 const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
@@ -934,8 +935,12 @@ async function remove(requestingUser, orgs, options) {
     // Delete any branches in the found projects
     await Branch.deleteMany({ project: { $in: projectIDs } });
 
-    // Delete any projects in the org
+    // Delete any projects in the orgs
     await Project.deleteMany({ org: { $in: searchedIDs } });
+
+    // Delete any webhooks on the orgs
+    await Webhook.deleteMany({ reference: { $in: searchedIDs } });
+
     // Delete the orgs
     const retQuery = await Organization.deleteMany(searchQuery);
     // Emit the event orgs-deleted

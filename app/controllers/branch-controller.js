@@ -34,6 +34,7 @@ const Element = M.require('models.element');
 const Branch = M.require('models.branch');
 const Project = M.require('models.project');
 const Org = M.require('models.organization');
+const Webhook = M.require('models.webhook');
 const EventEmitter = M.require('lib.events');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
@@ -830,11 +831,14 @@ async function remove(requestingUser, organizationID, projectID, branches, optio
       }
     });
 
-    // Delete any elements in the branch
+    // Delete any elements in the branches
     await Element.deleteMany(ownedQuery);
 
-    // Delete any artifacts in the branch
+    // Delete any artifacts in the branches
     await Artifact.deleteMany(ownedQuery);
+
+    // Delete any webhooks on the branches
+    await Webhook.deleteMany({ reference: ownedQuery.branch });
 
     // Delete all the branches
     const retQuery = await Branch.deleteMany(searchQuery);
