@@ -745,7 +745,7 @@ class Model {
   constructor(name, schema, collection) {
     this.schema = schema.schema;
     this.definition = schema.definition;
-    this.TableName = collection;
+    this.TableName = collection ? collection : name;
     this.modelName = name;
     // Create a new query object
     this.query = new Query(this);
