@@ -1013,7 +1013,7 @@ class Model {
   }
 
   /**
-   * @description Counts the number of documents that matches a filter.
+   * @description Counts the number of documents that match a filter.
    * @async
    *
    * @param {object} filter - An object containing parameters to filter the
