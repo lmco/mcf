@@ -46,13 +46,9 @@ module.exports.migrate = async function(args) {
     await prompt(args);
 
     // Initialize models
-    await Artifact.init();
-    await Branch.init();
-    await Element.init();
-    await Organization.init();
-    await Project.init();
-    await ServerData.init();
-    await User.init();
+    const promises = [Artifact.init(), Branch.init(), Element.init(),
+      Organization.init(), Project.init(), ServerData.init(), User.init()];
+    await Promise.all(promises);
 
     // Get the server data documents
     const serverData = await ServerData.find({}, null);
@@ -74,7 +70,7 @@ module.exports.migrate = async function(args) {
     // A list of MCF versions
     const knownVersions = ['0.6.0', '0.6.0.1', '0.7.0', '0.7.1', '0.7.2', '0.7.3',
       '0.7.3.1', '0.8.0', '0.8.1', '0.8.2', '0.8.3', '0.9.0', '0.9.1', '0.9.2',
-      '0.9.3', '0.9.4', '0.9.5', '0.10.0', '0.10.1'];
+      '0.9.3', '0.9.4', '0.9.5', '0.10.0', '0.10.1', '0.10.2'];
 
     // Run the migrations
     await runMigrations(knownVersions.slice(knownVersions.indexOf(fromVersion) + 1));
@@ -154,15 +150,8 @@ async function runMigrations(versions) {
       }
 
       // Upgrade schema version number
-      const bulkWriteArray = [
-        {
-          replaceOne: {
-            filter: { _id: 'server_data' },
-            replacement: { _id: 'server_data', version: versions[i] }
-          }
-        }
-      ];
-      await ServerData.bulkWrite(bulkWriteArray); // eslint-disable-line no-await-in-loop
+      await ServerData.deleteMany({}); // eslint-disable-line no-await-in-loop
+      await ServerData.insertMany([{ _id: 'server_data', version: versions[i] }]); // eslint-disable-line
       M.log.info(`Upgraded to version ${versions[i]}.`);
     }
   }
@@ -209,14 +198,10 @@ module.exports.getVersion = async function() {
         // Clear the database to ensure any old indexes are removed
         await db.clear();
 
-        // Reinit models
-        await Artifact.init();
-        await Branch.init();
-        await Element.init();
-        await Organization.init();
-        await Project.init();
-        await ServerData.init();
-        await User.init();
+        // Re-initialize models
+        const promises = [Artifact.init(), Branch.init(), Element.init(),
+          Organization.init(), Project.init(), ServerData.init(), User.init()];
+        await Promise.all(promises);
 
         // Insert server data document, with current schema version
         await ServerData.insertMany({ _id: 'server_data', version: M.version });

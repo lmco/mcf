@@ -137,7 +137,7 @@ module.exports.validate = function(config) {
   const dirs = fs.readdirSync(path.join(M.root, 'app', 'db'))
   .filter((file) => file.includes(config.db.strategy));
   if (dirs.length === 0) {
-    throw new Error(`Configuration file: DB strategy direcotry ${config.db.strategy} not found in app/db directory.`);
+    throw new Error(`Configuration file: DB strategy directory ${config.db.strategy} not found in app/db directory.`);
   }
 
   // Ensure that the db strategy exists

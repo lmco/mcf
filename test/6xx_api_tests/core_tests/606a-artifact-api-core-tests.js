@@ -110,7 +110,9 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies POST request to create an artifact.
+ * @description Verifies POST request
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
+ * to create an artifact.
  *
  * @param {Function} done - The mocha callback.
  */
@@ -158,7 +160,9 @@ function postArtifact(done) {
 }
 
 /**
- * @description Verifies POST request to create multiple artifacts.
+ * @description Verifies POST request
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts
+ * to create multiple artifacts.
  *
  * @param {Function} done - The mocha callback.
  */
@@ -223,7 +227,9 @@ function postArtifacts(done) {
 }
 
 /**
- * @description Verifies GET request to get an artifact.
+ * @description Verifies GET request
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
+ * to get an artifact.
  *
  * @param {Function} done - The mocha callback.
  */
@@ -271,7 +277,9 @@ function getArtifact(done) {
 }
 
 /**
- * @description Verifies GET request to get multiple artifacts.
+ * @description Verifies GET request
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts
+ * to get multiple artifacts.
  *
  * @param {Function} done - The mocha callback.
  */
@@ -342,7 +350,9 @@ function getArtifacts(done) {
 }
 
 /**
- * @description Verifies POST request to post an artifact blob.
+ * @description Verifies POST request
+ * /api/orgs/:orgid/projects/:projectid/artifacts/blob
+ * to post an artifact blob.
  *
  * @param {Function} done - The mocha callback.
  */
@@ -386,7 +396,9 @@ function postBlob(done) {
 }
 
 /**
- * @description Verifies GET request to get an artifact blob.
+ * @description Verifies GET request
+ * /api/orgs/:orgid/projects/:projectid/artifacts/blob
+ * to get an artifact blob.
  *
  * @param {Function} done - The mocha callback.
  */
@@ -461,7 +473,9 @@ function getBlobById(done) {
 }
 
 /**
- * @description Verifies DELETE request to delete an artifact blob.
+ * @description Verifies DELETE request
+ * /api/orgs/:orgid/projects/:projectid/artifacts/blob
+ * to delete an artifact blob.
  *
  * @param {Function} done - The mocha callback.
  */
@@ -497,7 +511,9 @@ function deleteBlob(done) {
 }
 
 /**
- * @description Verifies PATCH request to update an artifact.
+ * @description Verifies PATCH request
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
+ * to update an artifact.
  *
  * @param {Function} done - The mocha callback.
  */
@@ -552,7 +568,9 @@ function patchArtifact(done) {
 }
 
 /**
- * @description Verifies PATCH request to update multiple artifacts.
+ * @description Verifies PATCH request
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts
+ * to update multiple artifacts.
  *
  * @param {Function} done - The mocha callback.
  */
@@ -622,7 +640,9 @@ function patchArtifacts(done) {
 }
 
 /**
- * @description Verifies DELETE request to delete an artifact.
+ * @description Verifies DELETE request
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifactid
+ * to delete an artifact.
  *
  * @param {Function} done - The mocha callback.
  */
@@ -651,7 +671,9 @@ function deleteArtifact(done) {
 }
 
 /**
- * @description Verifies DELETE request to delete multiple artifacts.
+ * @description Verifies DELETE request
+ * /api/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts
+ * to delete multiple artifacts.
  *
  * @param {Function} done - The mocha callback.
  */

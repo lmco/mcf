@@ -35,7 +35,6 @@ const testData = testUtils.importTestData('test_data.json');
 let adminUser = null;
 let org = null;
 
-
 /* --------------------( Main )-------------------- */
 /**
  * The "describe" function is provided by Mocha and provides a way of wrapping

@@ -319,11 +319,7 @@ async function getOrgs(req, res) {
   }
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -405,11 +401,7 @@ async function postOrgs(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -489,11 +481,7 @@ async function putOrgs(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -572,11 +560,7 @@ async function patchOrgs(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -655,11 +639,7 @@ async function deleteOrgs(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -722,11 +702,7 @@ async function getOrg(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -797,11 +773,7 @@ async function postOrg(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
@@ -882,11 +854,7 @@ async function putOrg(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
@@ -966,11 +934,7 @@ async function patchOrg(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
@@ -1050,11 +1014,7 @@ async function deleteOrg(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -1135,11 +1095,7 @@ async function getAllProjects(req, res) {
   }
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -1228,11 +1184,7 @@ async function getProjects(req, res) {
   }
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -1315,11 +1267,7 @@ async function postProjects(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -1399,11 +1347,7 @@ async function putProjects(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -1482,11 +1426,7 @@ async function patchProjects(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -1565,11 +1505,7 @@ async function deleteProjects(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -1635,11 +1571,7 @@ async function getProject(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -1710,11 +1642,7 @@ async function postProject(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
@@ -1794,11 +1722,7 @@ async function putProject(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
@@ -1878,11 +1802,7 @@ async function patchProject(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
@@ -1961,11 +1881,7 @@ async function deleteProject(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -2041,11 +1957,7 @@ async function getUsers(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -2134,11 +2046,7 @@ async function postUsers(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -2217,11 +2125,7 @@ async function putUsers(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -2300,11 +2204,7 @@ async function patchUsers(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -2382,11 +2282,7 @@ async function deleteUsers(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -2445,11 +2341,7 @@ async function getUser(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -2522,11 +2414,7 @@ async function postUser(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
@@ -2606,11 +2494,7 @@ async function putUser(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
@@ -2690,11 +2574,7 @@ async function patchUser(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
@@ -2772,11 +2652,7 @@ async function deleteUser(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
@@ -2840,11 +2716,7 @@ async function whoami(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -2903,11 +2775,7 @@ async function searchUsers(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -2981,11 +2849,7 @@ async function patchPassword(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Ensure old password was provided
   if (!req.body.oldPassword) {
@@ -3101,11 +2965,7 @@ async function getElements(req, res) {
   }
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -3231,11 +3091,7 @@ async function postElements(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -3315,11 +3171,7 @@ async function putElements(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -3398,11 +3250,7 @@ async function patchElements(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -3479,11 +3327,7 @@ async function deleteElements(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -3570,11 +3414,7 @@ async function searchElements(req, res) {
   }
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -3651,11 +3491,7 @@ async function getElement(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -3730,11 +3566,7 @@ async function postElement(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
@@ -3815,11 +3647,7 @@ async function putElement(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
@@ -3899,11 +3727,7 @@ async function patchElement(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
@@ -3981,11 +3805,7 @@ async function deleteElement(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -4070,11 +3890,7 @@ async function getBranches(req, res) {
   }
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -4156,11 +3972,7 @@ async function postBranches(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -4239,11 +4051,7 @@ async function patchBranches(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -4321,11 +4129,7 @@ async function deleteBranches(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -4391,11 +4195,7 @@ async function getBranch(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -4465,11 +4265,7 @@ async function postBranch(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
@@ -4549,11 +4345,7 @@ async function patchBranch(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
@@ -4632,11 +4424,7 @@ async function deleteBranch(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -4711,11 +4499,7 @@ async function getArtifacts(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -4838,11 +4622,7 @@ async function postArtifacts(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -4919,11 +4699,7 @@ async function patchArtifacts(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -5001,11 +4777,7 @@ async function deleteArtifacts(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -5065,11 +4837,7 @@ async function getArtifact(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -5140,11 +4908,7 @@ async function postArtifact(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -5221,11 +4985,7 @@ async function patchArtifact(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -5305,11 +5065,7 @@ async function deleteArtifact(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -5357,11 +5113,7 @@ async function deleteArtifact(req, res) {
  */
 async function getBlob(req, res) {
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   try {
     const artifactBlob = await ArtifactController.getBlob(req.user, req.params.orgid,
@@ -5394,11 +5146,7 @@ async function getBlob(req, res) {
 async function postBlob(req, res) {
   await upload(req, res, async function(err) {
     // Sanity Check: there should always be a user in the request
-    if (!req.user) {
-      M.log.critical('No requesting user available.');
-      const error = new M.ServerError('Request Failed');
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
-    }
+    if (!req.user) return noUserError(req, res);
 
     if (err instanceof multer.MulterError) {
       // A Multer error occurred when uploading.
@@ -5443,11 +5191,7 @@ async function postBlob(req, res) {
  */
 async function deleteBlob(req, res) {
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   try {
     const artifact = await ArtifactController.deleteBlob(req.user, req.params.orgid,
@@ -5490,11 +5234,7 @@ async function getBlobById(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) {
-    M.log.critical('No requesting user available.');
-    const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
-  }
+  if (!req.user) return noUserError(req, res);
 
   // Attempt to parse query options
   try {
@@ -6144,4 +5884,18 @@ async function triggerWebhook(req, res) {
 function invalidRoute(req, res) {
   const json = 'Invalid Route or Method.';
   return returnResponse(req, res, json, 404);
+}
+
+/**
+ * @description A helper function that logs a critical error and returns a new Server Error for
+ * cases where an incoming request has no requesting user.
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ * @returns {object} Response error message
+ */
+function noUserError(req, res) {
+  M.log.critical('No requesting user available.');
+  const error = new M.ServerError('Request Failed');
+  return returnResponse(req, res, error.message, errors.getStatusCode(error));
 }
