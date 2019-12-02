@@ -248,7 +248,7 @@ class Schema {
    */
   plugin(cb, options) {
     this.cb = cb;
-    // Call the plugin with, passing in "this" as the only parameter
+    // Call the plugin, passing in "this" as the only parameter
     this.cb(this);
     // Remove the plugin from this
     delete this.cb;
