@@ -128,7 +128,7 @@ function loadPlugins() {
     // Run the plugin tests if specified
     if (plugins[f].testOnStartup) {
       M.log.info(`Running tests for plugin ${namespace}`);
-      const opts = ['--plugin', namespace];
+      const opts = ['--no-header', '--plugin', namespace];
       // eslint-disable-next-line global-require
       const task = require(path.join(M.root, 'scripts', 'test'));
       await task(opts);

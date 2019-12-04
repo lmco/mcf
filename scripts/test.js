@@ -45,8 +45,9 @@ if (module.parent == null) {
  * process.exit().
  */
 function test(_args) {
-  // Don't print the header if this is running for plugins
-  if (!_args.includes('--plugin')) printHeader();
+  // Don't print the header if specified; this is usually only used for server startup
+  if (!_args.includes('--no-header')) printHeader();
+
   M.log.verbose(`Running tests with DB strategy: ${M.config.db.strategy}`);
 
   // Default timeout changed to 5000
@@ -103,6 +104,12 @@ function test(_args) {
     _args.splice(removeInd, 1);
   }
 
+  // Remove --no-header
+  if (_args.includes('--no-header')) {
+    const removeInd = _args.indexOf('--no-header');
+    _args.splice(removeInd, 1);
+  }
+
   // Handle the plugin option
   let plugin;
   let pluginName;
@@ -114,8 +121,9 @@ function test(_args) {
     catch (error) {
       throw new M.DataFormatError('No plugin name provided');
     }
-    if (RegExp(/^(--)/).test(pluginName)) {
-      throw new M.DataFormatError(`Invalid argument [${pluginName}] for plugin name`);
+    const pluginNames = Object.keys(M.config.server.plugins.plugins);
+    if (!pluginNames.includes(pluginName)) {
+      throw new M.DataFormatError(`Plugin [${pluginName}] is not specified in the config`);
     }
     plugin = true;
     // Remove the plugin arguments
