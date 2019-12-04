@@ -76,7 +76,7 @@ function test(_args) {
         + 'This operation could ERASE PRODUCTION DATA PERMANENTLY.\n'
         + 'If you would still like to perform this action, use the\n'
         + 'optional parameter --force\n\n'
-        + 'The following command is highly preferred:'
+        + 'The following command is recommended:'
         + 'node mbee test --grep "[^[1-8]]"\n');
       process.exit(-1);
     }
