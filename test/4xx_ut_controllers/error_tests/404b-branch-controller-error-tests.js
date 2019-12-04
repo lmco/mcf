@@ -250,7 +250,7 @@ async function createExisting() {
     // Create the branch first
     await BranchController.create(adminUser, org._id, projID, branchData);
 
-    // Attempt to create an element; this element was already created in the before() function
+    // Attempt to create a branch; this branch was already created in the before() function
     await BranchController.create(adminUser, org._id, projID, branchData)
     .should.eventually.be.rejectedWith('Branches with the following IDs already exist '
       + `[${branchData.id}].`);
