@@ -160,6 +160,22 @@ function getArtifactPublicData(artifact, options) {
 
   };
 
+  // Handle the virtual referencedBy field
+  if (artifact.referencedBy) {
+    // If all contents are objects (they should be)
+    if (artifact.referencedBy.every(a => typeof a === 'object')) {
+      // If the includeArchived option is supplied
+      if (options.hasOwnProperty('includeArchived') && options.includeArchived === true) {
+        data.referencedBy = artifact.referencedBy.map(a => getElementPublicData(a, {}));
+      }
+      else {
+        // Remove all archived elements
+        const nonArchivedElements = artifact.referencedBy.filter(a => a.archived !== true);
+        data.referencedBy = nonArchivedElements.map(a => getElementPublicData(a, {}));
+      }
+    }
+  }
+
   // If the fields options is defined
   if (options.hasOwnProperty('fields')) {
     // If fields should be excluded

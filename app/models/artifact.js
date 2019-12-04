@@ -117,6 +117,14 @@ const ArtifactSchema = new db.Schema({
   }
 });
 
+// Virtual which stores elements that reference this artifact
+ArtifactSchema.virtual('referencedBy', {
+  ref: 'Element',
+  localField: '_id',
+  foreignField: 'artifact',
+  justOne: false
+});
+
 /* ---------------------------( Model Plugin )---------------------------- */
 // Use extensions model plugin;
 ArtifactSchema.plugin(extensions);
@@ -135,7 +143,8 @@ ArtifactSchema.static('getValidUpdateFields', function() {
  * @memberOf ArtifactSchema
  */
 ArtifactSchema.static('getValidPopulateFields', function() {
-  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'project', 'branch'];
+  return ['archivedBy', 'lastModifiedBy', 'createdBy', 'project', 'branch',
+    'referencedBy'];
 });
 
 /* ----------------------( Artifact Schema Export )---------------------- */
