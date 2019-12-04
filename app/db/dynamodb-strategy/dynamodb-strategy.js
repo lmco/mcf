@@ -949,7 +949,7 @@ class Model {
    *
    * @param {object[]} ops - An array of objects detailing what operations to
    * perform and the data required for those operations.
-   * @param {object} [ops.insertOne] - Specified an insertOne operation.
+   * @param {object} [ops.insertOne] - Specifies an insertOne operation.
    * @param {object} [ops.insertOne.document] - The document to create, for
    * insertOne.
    * @param {object} [ops.updateOne] - Specifies an updateOne operation.
