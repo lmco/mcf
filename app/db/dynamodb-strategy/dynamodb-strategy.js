@@ -1115,7 +1115,7 @@ class Model {
         // Get the formatted scan query
         const scanObj = this.query.scan(filter, options);
 
-        // If there is no filter. block from finding all documents to delete
+        // If there is no filter, block from finding all documents to delete
         if (!scanObj.hasOwnProperty('FilterExpression')) {
           more = false;
         }
