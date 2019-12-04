@@ -291,15 +291,14 @@ function archivedTest(model, operation) {
       await ElementController[operation](adminUser, org._id, projID, branchID, elemData)
       .should.eventually.be.rejectedWith(`The ${name} [${utils.parseID(id).pop()}] is archived. `
         + 'It must first be unarchived before performing this operation.');
-
-      // Unarchive the object of interest
-      await model.updateOne({ _id: id }, { archived: false });
     }
     catch (error) {
-      // Unarchive the model in case the operation failed
-      await model.updateOne({ _id: id }, { archived: false });
       M.log.error(error);
       should.not.exist(error);
+    }
+    finally {
+      // Unarchive the model
+      await model.updateOne({ _id: id }, { archived: false });
     }
   };
 }
