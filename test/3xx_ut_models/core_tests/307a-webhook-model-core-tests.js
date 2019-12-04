@@ -20,6 +20,7 @@
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const uuidv4 = require('uuid/v4');
+const request = require('request');
 
 // Use async chai
 chai.use(chaiAsPromised);
@@ -272,17 +273,33 @@ async function validPopulateFields() {
  * an HTTP request.
  */
 async function sendRequest() {
+  // First check that the api is up
+  const options = {
+    url: `${M.config.test.url}/api/test`,
+    method: 'GET'
+  };
+  const apiUp = await new Promise((resolve) => {
+    request(options, (err, response) => {
+      if (err) resolve(false);
+      if (response && response.statusCode === 200) resolve(true);
+      else resolve(false);
+    });
+  });
+  // Skip the test if the api isn't up
+  if (!apiUp) this.skip();
+
   try {
     // Create a mock outgoing webhook object
     const webhook = {
       type: 'Outgoing',
       response: {
-        url: `${M.config.test.url}/api/test`
+        url: `${M.config.test.url}/api/test`,
+        method: 'GET'
       }
     };
 
-    // Test the sendRequest function
-    Webhook.sendRequest(webhook, 'test data');
+    // Test the sendRequest function with no data
+    Webhook.sendRequest(webhook, null);
   }
   catch (error) {
     M.log.error(error);

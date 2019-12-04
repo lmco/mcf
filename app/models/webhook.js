@@ -210,9 +210,9 @@ WebhookSchema.static('sendRequest', function(webhook, data) {
     url: webhook.response.url,
     headers: webhook.response.headers || { 'Content-Type': 'application/json' },
     method: webhook.response.method || 'POST',
-    body: webhook.response.data || data || undefined,
-    json: true
+    body: webhook.response.data || data || undefined
   };
+  if (options.body) options.json = true;
   if (webhook.response.ca) options.ca = webhook.response.ca;
   if (webhook.response.token) options.token = webhook.response.token;
   // Send an HTTP request to given URL
