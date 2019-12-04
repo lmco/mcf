@@ -1546,7 +1546,7 @@ class Model {
       delete options.skip;
       delete options.limit;
 
-      // If double quotes are found, its an exact match
+      // If double quotes are found, it's an exact match
       const exactMatch = searchString.includes('"');
 
       // Get an array of the base words to search;
