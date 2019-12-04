@@ -337,7 +337,7 @@ async function createExisting() {
 function notFoundTest(operation, reference) {
   return async function() {
     const elemData = {
-      id: operation === 'create' ? testData.elements[0].id : testData.elements[1].id,
+      id: (operation === 'create') ? testData.elements[0].id : testData.elements[1].id,
       source: testData.elements[5].source,
       target: testData.elements[5].target
     };
