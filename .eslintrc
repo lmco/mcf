@@ -893,6 +893,7 @@
         "ServerError",
         "DatabaseError",
         "NotImplementedError",
+        "Model",
         "User",
         "Organization",
         "Project",

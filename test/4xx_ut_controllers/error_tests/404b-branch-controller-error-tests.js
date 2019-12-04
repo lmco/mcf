@@ -172,7 +172,7 @@ function unauthorizedTest(operation) {
 /**
  * @description A function that dynamically generates a test function for different archived cases.
  *
- * @param {object} model - The model to use for the test.
+ * @param {Model} model - The model to use for the test.
  * @param {string} operation - The type of operation for the test: create, update, etc.
  *
  * @returns {Function} Returns a function to be used as a test.
@@ -204,9 +204,6 @@ function archivedTest(model, operation) {
     }
 
     switch (operation) {
-      case 'find':
-        branchData = branchData.id;
-        break;
       case 'create':
         break;
       case 'update':
@@ -215,6 +212,7 @@ function archivedTest(model, operation) {
           name: 'update'
         };
         break;
+      case 'find':
       case 'remove':
         branchData = branchData.id;
         break;
@@ -229,15 +227,14 @@ function archivedTest(model, operation) {
       await BranchController[operation](adminUser, org._id, projID, branchData)
       .should.eventually.be.rejectedWith(`The ${name} [${utils.parseID(id).pop()}] is archived. `
         + 'It must first be unarchived before performing this operation.');
-
-      // Unarchive the object of interest
-      await model.updateOne({ _id: id }, { archived: false });
     }
     catch (error) {
-      // Unarchive the model in case the operation failed
-      await model.updateOne({ _id: id }, { archived: false });
       M.log.error(error);
       should.not.exist(error);
+    }
+    finally {
+      // Unarchive the model
+      await model.updateOne({ _id: id }, { archived: false });
     }
   };
 }
