@@ -678,7 +678,7 @@ class Query {
    * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#update-property DocumentClient.update()}.
    *
    * @param {object} filter - The filter to parse, used to find the document to
-   * updated.
+   * update.
    * @param {object} doc - An object containing the updates to be made to the
    * found document.
    *
