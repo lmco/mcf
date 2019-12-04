@@ -179,7 +179,7 @@ function unauthorizedTest(operation) {
  */
 function archivedTest(model, operation) {
   return async function() {
-    let branchData = operation === 'update' ? testData.branches[0] : testData.branches[1];
+    let branchData = (operation === 'update') ? testData.branches[0] : testData.branches[1];
     let id;
     let name;
 
