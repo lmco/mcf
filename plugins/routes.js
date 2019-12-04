@@ -64,16 +64,16 @@ function loadPlugins() {
   const files = fs.readdirSync(__dirname);
 
   // Get a list of plugin names in the config
-  const pluginName = Object.keys(plugins);
+  const pluginNames = Object.keys(plugins);
 
-  files.forEach((f) => {
+  files.forEach(async (f) => {
     // Skip routes.js
     if (protectedFileNames.includes(f)) {
       return;
     }
 
     // Removes old plugins
-    if (!pluginName.includes(f)) {
+    if (!pluginNames.includes(f)) {
       M.log.info(`Removing plugin '${f}' ...`);
       const c = `${rmd} ${path.join(__dirname, f)}`;
       const stdout = execSync(c);
@@ -124,6 +124,17 @@ function loadPlugins() {
       M.log.error(err);
       return;
     }
+
+    // Run the plugin tests if specified
+    if (plugins[f].testOnStartup) {
+      M.log.info(`Running tests for plugin ${namespace}`);
+      const opts = ['--plugin', namespace];
+      // eslint-disable-next-line global-require
+      const task = require(path.join(M.root, 'scripts', 'test'));
+      await task(opts);
+      M.log.info(`Tests completed for plugin ${namespace}`);
+    }
+
     M.log.info(`Plugin ${namespace} installed.`);
 
     // Add plugin name/title to array of loaded plugins
