@@ -4147,7 +4147,7 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      project, branch]
+ *                      project, branch, referencedBy]
  *         in: query
  *         type: string
  *         required: false
@@ -4301,7 +4301,8 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *                 type: number
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      project, branch, referencedBy]
  *         in: query
  *         type: string
  *         required: false
@@ -4400,7 +4401,8 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *                 type: boolean
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      project, branch, referencedBy]
  *         in: query
  *         type: string
  *         required: false
@@ -4559,7 +4561,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      project, branch]
+ *                      project, branch, referencedBy]
  *         in: query
  *         type: string
  *         required: false
@@ -4658,7 +4660,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
  *               type: number
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      project, branch, referencedBy]
  *         in: query
  *         type: string
  *         required: false
@@ -4755,7 +4758,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
  *               type: boolean
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      project, branch, referencedBy]
  *         in: query
  *         type: string
  *         required: false
