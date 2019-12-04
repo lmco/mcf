@@ -264,9 +264,6 @@ function archivedTest(model, operation) {
     }
 
     switch (operation) {
-      case 'find':
-        elemData = elemData.id;
-        break;
       case 'create':
         break;
       case 'update':
@@ -277,6 +274,7 @@ function archivedTest(model, operation) {
         break;
       case 'createOrReplace':
         break;
+      case 'find':
       case 'remove':
         elemData = elemData.id;
         break;
