@@ -651,8 +651,8 @@ async function update(requestingUser, organizationID, projectID, branches, optio
       // Error Check: if branch is currently archived, it must first be unarchived
       if (branch.archived && (updateBranch.archived === undefined
         || JSON.parse(updateBranch.archived) !== false)) {
-        throw new M.OperationError(`Branch [${utils.parseID(branch._id).pop()}]`
-          + ' is archived. Archived objects cannot be modified.', 'warn');
+        throw new M.OperationError(`The Branch [${utils.parseID(branch._id).pop()}]`
+          + ' is archived. It must first be unarchived before performing this operation.', 'warn');
       }
 
       // For each key in the updated object
