@@ -264,19 +264,20 @@ function archivedTest(model, operation) {
     }
 
     switch (operation) {
-      case 'create':
-        break;
       case 'update':
         elemData = {
           id: elemData.id,
           documentation: 'update'
         };
         break;
-      case 'createOrReplace':
-        break;
       case 'find':
       case 'remove':
         elemData = elemData.id;
+        break;
+      // No alteration needed for these endpoints
+      case 'create':
+        break;
+      case 'createOrReplace':
         break;
       case 'search':
         break;
