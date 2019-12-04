@@ -240,7 +240,7 @@ function archivedTest(model, operation) {
 }
 
 /**
- * @description Verifies that an element cannot be created if an element already exists with the
+ * @description Verifies that a branch cannot be created if a branch already exists with the
  * same id.
  */
 async function createExisting() {
