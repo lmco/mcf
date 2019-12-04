@@ -227,7 +227,7 @@ function unauthorizedTest(operation) {
 /**
  * @description A function that dynamically generates a test function for different archived cases.
  *
- * @param {object} model - The model to use for the test.
+ * @param {Model} model - The model to use for the test.
  * @param {string} operation - The type of operation for the test: create, update, etc.
  *
  * @returns {Function} Returns a function to be used as a test.
