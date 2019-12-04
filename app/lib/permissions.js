@@ -305,17 +305,25 @@ function readElement(user, org, project, branch) {
     if (!user.admin) {
       if (project.visibility === 'internal') {
         // User only needs read permissions on the org to read the project.
-        assert.ok(org.permissions.hasOwnProperty(user._id), '');
+        assert.ok(org.permissions.hasOwnProperty(user._id),
+          'User does not have permission to find'
+          + ` items in the org [${org._id}].`);
       }
       else if (project.visibility === 'private') {
+        assert.ok(org.permissions.hasOwnProperty(user._id),
+          `User does not have permission to find items in the org [${org._id}].`);
+        assert.ok(project.permissions.hasOwnProperty(user._id),
+          'User does not have permission to find items in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
         // User must have read permissions on project.
-        assert.ok(project.permissions.hasOwnProperty(user._id), '');
+        assert.ok(project.permissions[user._id].includes('write'),
+          'User does not have permission to find items in the project '
+          + `[${utils.parseID(project._id).pop()}].`);
       }
     }
   }
   catch (error) {
-    throw new M.PermissionError('User does not have permission to find'
-      + ` items in the project [${utils.parseID(project._id).pop()}].`, 'warn');
+    throw new M.PermissionError(error.message, 'warn');
   }
 }
 
