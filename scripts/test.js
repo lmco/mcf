@@ -161,7 +161,7 @@ function test(_args) {
       }
       else if (plugin) {
         resolve();
-      } // if (failures) {}
+      }
       else {
         // mocha passed all tests, exit with error code 0
         process.exit(0);
