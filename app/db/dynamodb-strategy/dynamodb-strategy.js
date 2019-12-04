@@ -258,7 +258,7 @@ class Schema {
    * @description Defines an index for the schema. Can support adding compound
    * or text indexes.
    *
-   * @param {object} fields - A object containing the key/values pairs where the
+   * @param {object} fields - An object containing the key/value pairs where the
    * keys are the fields to add indexes to, and the values define the index type
    * where 1 defines an ascending index, -1 a descending index, and 'text'
    * defines a text index.
