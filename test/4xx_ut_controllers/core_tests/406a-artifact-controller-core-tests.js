@@ -186,7 +186,6 @@ async function createArtifacts() {
       chai.expect(createdArt.custom || {}).to.deep.equal(artObj.custom);
       chai.expect(createdArt.project).to.equal(utils.createID(orgID, projectID));
       chai.expect(createdArt.branch).to.equal(utils.createID(orgID, projectID, branchID));
-
       chai.expect(createdArt.filename).to.equal(artObj.filename);
       chai.expect(createdArt.location).to.equal(artObj.location);
       chai.expect(createdArt.strategy).to.equal(M.config.artifact.strategy);

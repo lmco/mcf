@@ -269,6 +269,16 @@ router.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements#:elem
 );
 
 /**
+ * @description This renders a project's artifacts page for a user.
+ **/
+router.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  UIController.project
+);
+
+/**
  * @description This renders a project's search page for a user.
  **/
 router.route('/orgs/:orgid/projects/:projectid/branches/:branchid/search')

@@ -51,7 +51,6 @@ describe(M.getModuleName(module.filename), () => {
       await db.connect();
       // Create test admin
       adminUser = await testUtils.createTestAdmin();
-      await testUtils.createNonAdminUser();
     }
     catch (error) {
       M.log.error(error);
@@ -65,9 +64,8 @@ describe(M.getModuleName(module.filename), () => {
    */
   after(async () => {
     try {
-      // Delete test admin and test user
+      // Delete test admin
       await testUtils.removeTestAdmin();
-      await testUtils.removeNonAdminUser();
       await db.disconnect();
     }
     catch (error) {
@@ -265,7 +263,7 @@ function notFound(endpoint) {
   const name = testData.users[4].username;
   // Parse the method
   const method = testUtils.parseMethod(endpoint);
-  // Body must be an array of ids for delete; key-value pair for anything else
+  // Body must be an array of ids for get and delete; key-value pair for anything else
   const body = (endpoint === 'deleteUsers' || endpoint === 'getUsers')
     ? [name] : { username: name };
   // Add in a params field for singular user endpoints
@@ -298,7 +296,7 @@ function notFound(endpoint) {
 
 /**
  * @description A constructor for a dynamic mocha-compatible function that tests singular user api
- * endpoints given an array of usernames in the body.
+ * endpoints given an array in the body.
  *
  * @param {string} endpoint - The particular api endpoint to test.
  * @returns {Function} A function for mocha to use to test a specific api endpoint.

@@ -213,6 +213,7 @@ class ProjectElements extends Component {
             <BranchBar project={this.props.project}
                        branchid={this.state.branch}
                        archived={this.state.archived}
+                       endpoint='/elements'
                        permissions={this.props.permissions}
                        displayIds={this.state.displayIds}
                        expand={this.state.expand}

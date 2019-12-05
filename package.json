@@ -1,6 +1,6 @@
 {
   "name": "mbee",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "build": "NO_BUILD_NUMBER",
   "description": "Model-Based Engineering Environment",
   "main": "mbee.js",
@@ -27,6 +27,7 @@
     "request": "^2.86.0",
     "swagger-jsdoc": "^3.4.0",
     "swagger-ui-express": "2.0.15",
+    "uuid": "^3.3.3",
     "winston": "^3.2.1",
     "yarn": "^1.13.0"
   },

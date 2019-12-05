@@ -297,13 +297,15 @@ module.exports.validateOptions = function(options, validOptions, model) {
       validatedOptions.populateString = 'contains sourceOf targetOf ';
       break;
     case 'Artifact':
-      validSearchOptions = ['name', 'createdBy', 'archived',
-        'lastModifiedBy', 'archivedBy'];
-
+      validSearchOptions = ['name', 'createdBy', 'archived', 'lastModifiedBy', 'archivedBy'];
       break;
     case 'User':
       validSearchOptions = ['fname', 'preferredName', 'lname', 'email', 'createdBy',
         'lastModifiedBy', 'archived', 'archivedBy'];
+      break;
+    case 'Webhook':
+      validSearchOptions = ['type', 'name', 'createdBy', 'lastModifiedBy', 'archived',
+        'archivedBy', 'org', 'project', 'branch'];
       break;
     default:
       throw new M.DataFormatError('No model provided', 'warn');

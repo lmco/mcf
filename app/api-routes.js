@@ -76,6 +76,7 @@ api.get('/doc/swagger.json',
   Middleware.logRoute,
   APIController.swaggerJSON);
 
+
 /**
  * @swagger
  * /api/login:
@@ -104,6 +105,7 @@ api.route('/login')
   AuthController.doLogin,
   APIController.login
 );
+
 
 /**
  * @swagger
@@ -1818,6 +1820,7 @@ api.route('/orgs/:orgid/projects/:projectid')
   APIController.deleteProject
 );
 
+
 /**
  * @swagger
  * /api/orgs/{orgid}/projects/{projectid}/branches:
@@ -2208,6 +2211,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches')
   APIController.deleteBranches
 );
 
+
 /**
  * @swagger
  * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}:
@@ -2532,6 +2536,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
   Middleware.logRoute,
   APIController.deleteBranch
 );
+
 
 /**
  * @swagger
@@ -3910,6 +3915,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
   APIController.deleteElement
 );
 
+
 /**
  * @swagger
  * /api/orgs/{orgid}/projects/{projectid}/artifacts/blob:
@@ -4141,7 +4147,7 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      project, branch]
+ *                      project, branch, referencedBy]
  *         in: query
  *         type: string
  *         required: false
@@ -4295,7 +4301,8 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *                 type: number
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      project, branch, referencedBy]
  *         in: query
  *         type: string
  *         required: false
@@ -4394,7 +4401,8 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *                 type: boolean
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      project, branch, referencedBy]
  *         in: query
  *         type: string
  *         required: false
@@ -4516,6 +4524,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
   APIController.deleteArtifacts
 );
 
+
 /**
  * @swagger
  * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/artifacts/{artifactid}:
@@ -4552,7 +4561,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
  *                      of the object. [archivedBy, lastModifiedBy, createdBy,
- *                      project, branch]
+ *                      project, branch, referencedBy]
  *         in: query
  *         type: string
  *         required: false
@@ -4651,7 +4660,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
  *               type: number
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      project, branch, referencedBy]
  *         in: query
  *         type: string
  *         required: false
@@ -4748,7 +4758,8 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
  *               type: boolean
  *       - name: populate
  *         description: Comma separated list of values to be populated on return
- *                      of the object.
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy,
+ *                      project, branch, referencedBy]
  *         in: query
  *         type: string
  *         required: false
@@ -4866,6 +4877,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
   APIController.deleteArtifact
 );
 
+
 /**
  * @swagger
  * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/artifacts/{artifactid}/blob:
@@ -4927,6 +4939,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
   Middleware.logRoute,
   APIController.getBlobById
 );
+
 
 /**
  * @swagger
@@ -5940,6 +5953,680 @@ api.route('/users/:username/password')
   Middleware.logRoute,
   Middleware.disableUserPatchPassword,
   APIController.patchPassword
+);
+
+
+/**
+ * @swagger
+ * /api/webhooks:
+ *   get:
+ *     tags:
+ *       - webhooks
+ *     description: Finds and returns webhooks from an array of ids. If no array is
+ *                  provided, returns every webhook the requesting user has access
+ *                  to.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *         description: An array of webhook IDs to search for. If both query
+ *                      parameter and body are not provided, all webhooks the
+ *                      user has access to are found.
+ *       - name: ids
+ *         description: Comma separated list of IDs to search for. If both query
+ *                      parameter and body are not provided, all webhooks the
+ *                      user has access to are found.
+ *         in: query
+ *         type: string
+ *       - name: org
+ *         description: The ID of an org to query on. If provided, only returns
+ *                      webhooks registered to the org, unless project and/or
+ *                      branch are also provided.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: project
+ *         description: The ID of a project to query on. If provided, only returns
+ *                      webhooks registered to the project, unless a branch is
+ *                      also provided. An org must be provided with this option.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: branch
+ *         description: The ID of a branch to query on. If provided, only returns
+ *                      webhooks registered to the branch. Both an org and a project
+ *                      must be provided with this option.
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: includeArchived
+ *         description: If true, archived objects will be also be searched
+ *                      through. Overridden by the archived search option
+ *         in: query
+ *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, updatedOn, custom, description, lastModifiedBy,
+ *                      name, reference, type, triggers, response, token,
+ *                      tokenLocation]
+ *         in: query
+ *         type: string
+ *       - name: limit
+ *         description: The maximum number of objects to return. A limit of 0 is
+ *                      equivalent to setting no limit.
+ *         in: query
+ *         type: number
+ *       - name: skip
+ *         description: The number of objects to skip returning. For example,
+ *                      if 10 objects are found and skip is 5, the first five
+ *                      objects will NOT be returned. NOTE, skip cannot be a
+ *                      negative number.
+ *         in: query
+ *         type: number
+ *       - name: sort
+ *         description: Provide a particular field to sort the results by.
+ *                      Adding a '-' in front of the field indicates sorting in
+ *                      reverse order.
+ *         in: query
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *       - name: type
+ *         description: Search for webhooks with a specific type.
+ *         in: query
+ *         type: string
+ *       - name: name
+ *         description: Search for webhooks with a specific name.
+ *         in: query
+ *         type: string
+ *       - name: createdBy
+ *         description: Search for webhooks created by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: lastModifiedBy
+ *         description: Search for webhooks last modified by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: archived
+ *         description: Search only for archived webhooks. If false, only returns
+ *                      unarchived webhooks. Overrides the includeArchived option.
+ *         in: query
+ *         type: boolean
+ *       - name: archivedBy
+ *         description: Search for webhooks archived by a specific user.
+ *         in: query
+ *         type: string
+ *       - name: custom
+ *         description: Search for a specific key/value pair in the custom data.
+ *                      To find a specific key, separate the keys using dot
+ *                      notation. For example, custom.hello
+ *         in: query
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET webhooks, returns webhook public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to GET webhooks due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET webhooks due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET webhooks due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to GET webhooks due to webhooks not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET webhooks due to
+ *                      server side issue.
+ *   post:
+ *     tags:
+ *       - webhooks
+ *     description: Creates new webhooks from given data in the request body.
+ *                  The user must have admin permissions at the specified level.
+ *                  System-wide admin for system level webhooks, org admin for
+ *                  org level webhooks, and project admin for project and branch
+ *                  level webhooks.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: body
+ *         in: body
+ *         description: An array of objects containing new webhook data.
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *             type:
+ *               type: string
+ *               description: Must be either 'Outgoing' or 'Incoming'.
+ *             description:
+ *               type: string
+ *             triggers:
+ *               type: Array
+ *               description: An array of strings that refer to the events that
+ *                            trigger the webhook. All Outgoing webhooks must
+ *                            have at least one trigger.
+ *             response:
+ *               type: Object
+ *               description: An object that contain information for http requests.
+ *               properties:
+ *                 url:
+ *                   type: string
+ *                 method:
+ *                   type: string
+ *                   default: 'POST'
+ *                 headers:
+ *                   type: object
+ *                   default: { 'Content-Type': 'application/json' }
+ *                 token:
+ *                   type: string
+ *                 ca:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   description: An optional field to store data to send with the
+ *                                http requests upon webhook triggering.
+ *             token:
+ *               type: string
+ *               description: A secret token used to verify external requests to
+ *                            trigger the incoming webhook.
+ *             tokenLocation:
+ *               type: string
+ *               description: A dot-delimited string specifying where to find the
+ *                            token in the external request.
+ *             reference:
+ *               type: object
+ *               description: An object defining the namespace of the webhook.
+ *               properties:
+ *                 org:
+ *                   type: string
+ *                   description: An org ID.
+ *                 project:
+ *                   type: string
+ *                   description: A project ID.
+ *                 branch:
+ *                   type: string
+ *                   description: A branch ID.
+ *             custom:
+ *               type: object
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, updatedOn, custom, description, lastModifiedBy,
+ *                      name, reference, type, triggers, response, token,
+ *                      tokenLocation]
+ *         in: query
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to POST webhooks, return webhooks' public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to POST webhooks due to invalid
+ *                      webhook data.
+ *       401:
+ *         description: Unauthorized, Failed to POST webhooks due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to POST webhooks due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to POST webhook due to org, project,
+ *                      or branch not existing.
+ *       500:
+ *         description: Internal Server Error, Failed to POST webhook due to a
+ *                      server side issue.
+ *   patch:
+ *     tags:
+ *       - webhooks
+ *     description: Updates multiple webhooks from the data provided in the request
+ *                  body. Webhooks that are currently archived must first
+ *                  be unarchived before making any other updates. The following
+ *                  fields can be updated [name, description, archived,
+ *                  triggers, requests, token, tokenLocation].
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: update
+ *         description: An array of objects containing updates to webhooks.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *             description:
+ *               type: string
+ *             triggers:
+ *               type: Array
+ *               description: An array of strings that refer to the events that
+ *                            trigger the webhook. All Outgoing webhooks must
+ *                            have at least one trigger.
+ *             response:
+ *               type: Object
+ *               description: An object that contain information for http requests.
+ *               properties:
+ *                 url:
+ *                   type: string
+ *                 method:
+ *                   type: string
+ *                   default: 'POST'
+ *                 headers:
+ *                   type: object
+ *                   default: { 'Content-Type': 'application/json' }
+ *                 token:
+ *                   type: string
+ *                 ca:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   description: An optional field to store data to send with the
+ *                                http requests upon webhook triggering.
+ *             token:
+ *                 type: string
+ *                 description: A secret token used to verify external requests to
+ *                              trigger the incoming webhook.
+ *             tokenLocation:
+ *                 type: string
+ *                 description: A dot-delimited string specifying where to find the
+ *                              token in the external request.
+ *             custom:
+ *               type: object
+ *             archived:
+ *               type: boolean
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, updatedOn, custom, description, lastModifiedBy,
+ *                      name, reference, type, triggers, response, token,
+ *                      tokenLocation]
+ *         in: query
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PATCH webhooks, returns webhooks' public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to PATCH webhooks due to invalid
+ *                      data.
+ *       401:
+ *         description: Unauthorized, Failed to PATCH webhooks due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PATCH webhooks due to not having
+ *                      permissions.
+ *       500:
+ *         description: Internal Server Error, Failed to PATCH webhooks due to
+ *                      server side issue.
+ *   delete:
+ *     tags:
+ *       - webhooks
+ *     description: Deletes multiple webhooks and returns the deleted ids.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: webhookIDs
+ *         description: An array of webhook IDs to delete. Can optionally be an
+ *                      array of objects containing id key/value pairs.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to DELETE webhooks, return deleted
+ *                      webhooks' ids.
+ *       400:
+ *         description: Bad Request, Failed to DELETE webhooks due to invalid
+ *                      data.
+ *       401:
+ *         description: Unauthorized, Failed to DELETE webhooks due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to DELETE webhooks due to not having
+ *                      permissions.
+ *       500:
+ *         description: Internal Server Error, Failed to DELETE webhooks due to
+ *                      server side issue.
+ */
+api.route('/webhooks')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.getWebhooks
+)
+.post(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.postWebhooks
+)
+.patch(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.patchWebhooks
+)
+.delete(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.deleteWebhooks
+);
+
+
+/**
+ * @swagger
+ * /api/webhooks/trigger/:encodedid:
+ *   post:
+ *     tags:
+ *       - webhooks
+ *     description: Triggers a webhook configured to listen for external api requests.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: body
+ *         in: body
+ *         description: A token used to validate the webhook trigger request
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded trigger webhook
+ *       400:
+ *         description: Bad Request, failed to trigger webhook due to invalid data
+ *       401:
+ *         description: Unauthorized, failed to trigger webhook due to invalid token
+ *       403:
+ *         description: Forbidden, Failed to trigger webhook due to not having
+ *                      permissions.
+ *       500:
+ *         description: Internal Server Error, trigger webhook due to server
+ *                      side issue.
+ */
+api.route('/webhooks/trigger/:encodedid')
+.post(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.triggerWebhook
+);
+
+
+/**
+ * @swagger
+ * /api/webhooks/{webhookid}:
+ *   get:
+ *     tags:
+ *       - webhooks
+ *     description: Finds a single webhook. Requesting user must have permission to
+ *                  view the webhook.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: webhookid
+ *         description: The ID of the webhook to find.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: includeArchived
+ *         description: If true, archived objects will be also be searched
+ *                      through. Overridden by the archived search option
+ *         in: query
+ *         type: boolean
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, updatedOn, custom, description, lastModifiedBy,
+ *                      name, reference, type, triggers, response, token,
+ *                      tokenLocation]
+ *         in: query
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET webhook, returns webhook public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to GET webhook due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET webhook due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET webhook due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to GET webhook due to webhook not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET webhook due to
+ *                      server side issue.
+ *   patch:
+ *     tags:
+ *       - webhooks
+ *     description: Updates a webhook from the data provided in the request
+ *                  body. Webhooks that are currently archived must first
+ *                  be unarchived before making any other updates. The following
+ *                  fields can be updated [name, description, archived,
+ *                  triggers, requests, token, tokenLocation].
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: webhookid
+ *         description: The ID of the webhook to update.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: update
+ *         description: An object containing an update to a webhook.
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *             description:
+ *               type: string
+ *             triggers:
+ *               type: Array
+ *               description: An array of strings that refer to the events that
+ *                            trigger the webhook. All Outgoing webhooks must
+ *                            have at least one trigger.
+ *             response:
+ *               type: Object
+ *               description: An object that contain information for http requests.
+ *               properties:
+ *                 url:
+ *                   type: string
+ *                 method:
+ *                   type: string
+ *                   default: 'POST'
+ *                 headers:
+ *                   type: object
+ *                   default: { 'Content-Type': 'application/json' }
+ *                 token:
+ *                   type: string
+ *                 ca:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   description: An optional field to store data to send with the
+ *                                http requests upon webhook triggering.
+ *             token:
+ *                 type: string
+ *                 description: A secret token used to verify external requests to
+ *                              trigger the incoming webhook.
+ *             tokenLocation:
+ *                 type: string
+ *                 description: A dot-delimited string specifying where to find the
+ *                              token in the external request.
+ *             custom:
+ *               type: object
+ *             archived:
+ *               type: boolean
+ *       - name: populate
+ *         description: Comma separated list of values to be populated on return
+ *                      of the object. [archivedBy, lastModifiedBy, createdBy]
+ *         in: query
+ *         type: string
+ *         required: false
+ *       - name: fields
+ *         description: Comma separated list of specific fields to return. By
+ *                      default the id field is returned. To specifically NOT
+ *                      include a field, include a '-' in front of the field
+ *                      (-name). [archived, archivedBy, archivedOn, createdBy,
+ *                      createdOn, updatedOn, custom, description, lastModifiedBy,
+ *                      name, reference, type, triggers, response, token,
+ *                      tokenLocation]
+ *         in: query
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to PATCH webhook, returns webhook's public
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to PATCH webhook due to invalid
+ *                      data.
+ *       401:
+ *         description: Unauthorized, Failed to PATCH webhook due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to PATCH webhook due to not having
+ *                      permissions.
+ *       500:
+ *         description: Internal Server Error, Failed to PATCH webhook due to
+ *                      server side issue.
+ *   delete:
+ *     tags:
+ *       - webhooks
+ *     description: Deletes the specified webhook and returns the id of the
+ *                  webhook.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: webhookid
+ *         description: The id of the webhook to delete.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to DELETE webhook, return deleted
+ *                      webhook's id.
+ *       400:
+ *         description: Bad Request, Failed to DELETE webhook due to invalid
+ *                      data.
+ *       401:
+ *         description: Unauthorized, Failed to DELETE webhook due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to DELETE webhook due to not having
+ *                      permissions.
+ *       500:
+ *         description: Internal Server Error, Failed to DELETE webhook due to
+ *                      server side issue.
+ */
+api.route('/webhooks/:webhookid')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.getWebhook
+)
+.patch(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.patchWebhook
+)
+.delete(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  APIController.deleteWebhook
 );
 
 
