@@ -30,6 +30,7 @@ const events = M.require('lib.events');
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const next = testUtils.next;
 let adminUser = null;
 const webhookIDs = [];
 
@@ -146,7 +147,7 @@ function postWebhook(done) {
   };
 
   // POSTs a webhook
-  APIController.postWebhooks(req, res);
+  APIController.postWebhooks(req, res, next(req, res));
 }
 
 /**
@@ -219,7 +220,7 @@ function postWebhooks(done) {
   };
 
   // POSTs multiple webhooks
-  APIController.postWebhooks(req, res);
+  APIController.postWebhooks(req, res, next(req, res));
 }
 
 /**
@@ -271,7 +272,7 @@ function getWebhook(done) {
   };
 
   // GETs a webhook
-  APIController.getWebhook(req, res);
+  APIController.getWebhook(req, res, next(req, res));
 }
 
 /**
@@ -341,7 +342,7 @@ function getWebhooks(done) {
   };
 
   // GETs webhooks
-  APIController.getWebhooks(req, res);
+  APIController.getWebhooks(req, res, next(req, res));
 }
 
 /**
@@ -411,7 +412,7 @@ function getAllWebhooks(done) {
   };
 
   // GETs all webhooks
-  APIController.getWebhooks(req, res);
+  APIController.getWebhooks(req, res, next(req, res));
 }
 
 /**
@@ -467,7 +468,7 @@ function patchWebhook(done) {
   };
 
   // PATCHes a webhook
-  APIController.patchWebhook(req, res);
+  APIController.patchWebhook(req, res, next(req, res));
 }
 
 /**
@@ -543,7 +544,7 @@ function patchWebhooks(done) {
   };
 
   // PATCHes multiple webhooks
-  APIController.patchWebhooks(req, res);
+  APIController.patchWebhooks(req, res, next(req, res));
 }
 
 /**
@@ -580,7 +581,7 @@ function deleteWebhook(done) {
   };
 
   // DELETEs a webhook
-  APIController.deleteWebhook(req, res);
+  APIController.deleteWebhook(req, res, next(req, res));
 }
 
 /**
@@ -617,7 +618,7 @@ function deleteWebhooks(done) {
   };
 
   // DELETEs multiple webhooks
-  APIController.deleteWebhooks(req, res);
+  APIController.deleteWebhooks(req, res, next(req, res));
 }
 
 /**
@@ -676,7 +677,7 @@ async function triggerWebhook() {
     };
 
     // GETs the webhook trigger endpoint
-    APIController.triggerWebhook(req, res);
+    APIController.triggerWebhook(req, res, next(req, res));
   }));
 
   await Promise.all(promises);

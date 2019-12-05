@@ -11,10 +11,17 @@
  *
  * @author Jake Ursetta
  * @author Austin Bieber
+ * @author Connor Doyle
  *
  * @description This file defines middleware functions which can be used by
  * express to perform actions during requests.
  */
+
+// Node modules
+const path = require('path');
+
+// MBEE modules
+const logger = M.require('lib.logger');
 
 /**
  * @description Log the route and method requested by a user.
@@ -94,4 +101,51 @@ module.exports.disableUserPatchPassword = function disableUserPatchPassword(req,
     return res.status(403).send(error.message);
   }
   next();
+};
+
+module.exports.pluginPre = function pluginPre(endpoint) {
+  // eslint-disable-next-line global-require
+  const { pluginFunctions } = require(path.join(M.root, 'plugins', 'routes.js'));
+
+  return function(req, res, next) {
+    pluginFunctions[endpoint].pre.forEach((fun) => {
+      fun(req, res);
+    });
+    next();
+  };
+};
+
+module.exports.pluginPost = function pluginPost(endpoint) {
+  // eslint-disable-next-line global-require
+  const { pluginFunctions } = require(path.join(M.root, 'plugins', 'routes.js'));
+
+  return function(req, res, next) {
+    pluginFunctions[endpoint].post.forEach((fun) => {
+      fun(req, res);
+    });
+    next();
+  };
+};
+
+module.exports.respond = function respond(req, res) {
+  const message = res.locals.message;
+  const statusCode = res.locals.statusCode;
+
+  const contentType = 'application/json';
+
+  if (statusCode === 200) {
+    // We send these headers for a success response
+    res.header('Content-Type', contentType);
+  }
+  else {
+    // We send these headers for an error response
+    res.header('Content-Type', 'text/plain');
+  }
+
+  // Send the message
+  res.status(statusCode).send(message);
+  // Log the response
+  logger.logResponse(message.length, req, res);
+  // Return res
+  return res;
 };

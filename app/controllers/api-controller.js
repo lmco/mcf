@@ -278,13 +278,14 @@ function version(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with orgs' public data
  *
  * NOTE: All users are members of the 'default' org, should always have
  * access to at least this organization.
  */
-async function getOrgs(req, res) {
+async function getOrgs(req, res, next) {
   // Define options and ids
   // Note: Undefined if not set
   let ids;
@@ -368,8 +369,12 @@ async function getOrgs(req, res) {
     // Format JSON
     const json = formatJSON(orgsPublicData, minified);
 
-    // Return 200: OK and public org data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the found orgs' public data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -384,10 +389,11 @@ async function getOrgs(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with orgs' public data
  */
-async function postOrgs(req, res) {
+async function postOrgs(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -447,8 +453,12 @@ async function postOrgs(req, res) {
     // Format JSON
     const json = formatJSON(orgsPublicData, minified);
 
-    // Return 200: OK and created orgs
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the created orgs and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -464,10 +474,11 @@ async function postOrgs(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with orgs' public data
  */
-async function putOrgs(req, res) {
+async function putOrgs(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -527,8 +538,12 @@ async function putOrgs(req, res) {
     // Format JSON
     const json = formatJSON(orgsPublicData, minified);
 
-    // Return 200: OK and created/replaced orgs
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the replaced orgs and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -543,10 +558,11 @@ async function putOrgs(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with orgs' public data
  */
-async function patchOrgs(req, res) {
+async function patchOrgs(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -606,8 +622,12 @@ async function patchOrgs(req, res) {
     // Format JSON
     const json = formatJSON(orgsPublicData, minified);
 
-    // Return 200: OK and the updated orgs
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the updated orgs and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -624,10 +644,11 @@ async function patchOrgs(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with array of deleted org IDs.
  */
-async function deleteOrgs(req, res) {
+async function deleteOrgs(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -665,11 +686,15 @@ async function deleteOrgs(req, res) {
   try {
     // Remove the specified orgs
     const orgIDs = await OrgController.remove(req.user, req.body, options);
-    // Return 200: OK and the deleted org IDs
     // Format JSON
     const json = formatJSON(orgIDs, minified);
 
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the deleted org ids and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -684,10 +709,11 @@ async function deleteOrgs(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with org's public data
  */
-async function getOrg(req, res) {
+async function getOrg(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -739,8 +765,12 @@ async function getOrg(req, res) {
     // Format JSON
     const json = formatJSON(orgsPublicData[0], minified);
 
-    // Return a 200: OK and the org's public data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the org's public data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -756,10 +786,11 @@ async function getOrg(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with org's public data
  */
-async function postOrg(req, res) {
+async function postOrg(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -820,8 +851,12 @@ async function postOrg(req, res) {
     // Format JSON
     const json = formatJSON(orgsPublicData[0], minified);
 
-    // Return 200: OK and created org
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the created org and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -837,10 +872,11 @@ async function postOrg(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with org's public data
  */
-async function putOrg(req, res) {
+async function putOrg(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -901,8 +937,12 @@ async function putOrg(req, res) {
     // Format JSON
     const json = formatJSON(orgsPublicData[0], minified);
 
-    // Return 200: OK and created org
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the replaced org and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -917,10 +957,11 @@ async function putOrg(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with updated org
  */
-async function patchOrg(req, res) {
+async function patchOrg(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -981,8 +1022,12 @@ async function patchOrg(req, res) {
     // Format JSON
     const json = formatJSON(orgsPublicData[0], minified);
 
-    // Return 200: OK and the updated org
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the updated org and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -998,7 +1043,7 @@ async function patchOrg(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
- * @param {Function} next - Callback function.
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with deleted org ID.
  */
@@ -1041,8 +1086,12 @@ async function deleteOrg(req, res, next) {
     // Format JSON
     const json = formatJSON(orgID, minified);
 
-    // Return 200: OK and the deleted org IDs
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the deleted org id and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -1058,10 +1107,11 @@ async function deleteOrg(req, res, next) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with projects' public data
  */
-async function getAllProjects(req, res) {
+async function getAllProjects(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1128,8 +1178,12 @@ async function getAllProjects(req, res) {
     // Format JSON
     const json = formatJSON(publicProjectData, minified);
 
-    // Return 200: OK and public project data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public project data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -1145,10 +1199,11 @@ async function getAllProjects(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with projects' public data
  */
-async function getProjects(req, res) {
+async function getProjects(req, res, next) {
   // Define options and ids
   // Note: Undefined if not set
   let ids;
@@ -1234,8 +1289,12 @@ async function getProjects(req, res) {
     // Format JSON
     const json = formatJSON(publicProjectData, minified);
 
-    // Return 200: OK and public project data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public project data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -1250,10 +1309,11 @@ async function getProjects(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with created projects.
  */
-async function postProjects(req, res) {
+async function postProjects(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1313,8 +1373,12 @@ async function postProjects(req, res) {
     // Format JSON
     const json = formatJSON(publicProjectData, minified);
 
-    // Return 200: OK and created project data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the created projects and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -1330,10 +1394,11 @@ async function postProjects(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with created/replaced projects.
  */
-async function putProjects(req, res) {
+async function putProjects(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1393,8 +1458,12 @@ async function putProjects(req, res) {
     // Format JSON
     const json = formatJSON(publicProjectData, minified);
 
-    // Return 200: OK and created/replaced project data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the replaced projects and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -1409,10 +1478,11 @@ async function putProjects(req, res) {
  *
  * @param {object} req - request express object
  * @param {object} res - response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with updated projects.
  */
-async function patchProjects(req, res) {
+async function patchProjects(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1472,8 +1542,12 @@ async function patchProjects(req, res) {
     // Format JSON
     const json = formatJSON(publicProjectData, minified);
 
-    // Return 200: OK and updated project data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the updated projects and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -1490,10 +1564,11 @@ async function patchProjects(req, res) {
  *
  * @param {object} req - request express object
  * @param {object} res - response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with deleted project IDs.
  */
-async function deleteProjects(req, res) {
+async function deleteProjects(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1537,8 +1612,12 @@ async function deleteProjects(req, res) {
     // Format JSON
     const json = formatJSON(parsedIDs, minified);
 
-    // Return 200: OK and the deleted project IDs
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the deleted project ids and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -1553,10 +1632,11 @@ async function deleteProjects(req, res) {
  *
  * @param {object} req - request express object
  * @param {object} res - response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with project's public data
  */
-async function getProject(req, res) {
+async function getProject(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1608,8 +1688,12 @@ async function getProject(req, res) {
     // Format JSON
     const json = formatJSON(publicProjectData[0], minified);
 
-    // Return 200: OK and public project data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public project data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -1625,10 +1709,11 @@ async function getProject(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with created project.
  */
-async function postProject(req, res) {
+async function postProject(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1688,8 +1773,12 @@ async function postProject(req, res) {
     // Format JSON
     const json = formatJSON(publicProjectData[0], minified);
 
-    // Return 200: OK and created project data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the created project and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -1705,10 +1794,11 @@ async function postProject(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with created project.
  */
-async function putProject(req, res) {
+async function putProject(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1769,8 +1859,12 @@ async function putProject(req, res) {
     // Format JSON
     const json = formatJSON(publicProjectData[0], minified);
 
-    // Return 200: OK and created/replaced project data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the replaced project and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -1785,10 +1879,11 @@ async function putProject(req, res) {
  *
  * @param {object} req - request express object
  * @param {object} res - response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with updated project.
  */
-async function patchProject(req, res) {
+async function patchProject(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1849,8 +1944,12 @@ async function patchProject(req, res) {
     // Format JSON
     const json = formatJSON(publicProjectData[0], minified);
 
-    // Return 200: OK and updated project data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the updated project and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -1866,10 +1965,11 @@ async function patchProject(req, res) {
  *
  * @param {object} req - request express object
  * @param {object} res - response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with deleted project ID.
  */
-async function deleteProject(req, res) {
+async function deleteProject(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -1909,8 +2009,12 @@ async function deleteProject(req, res) {
     // Format JSON
     const json = formatJSON(parsedIDs, minified);
 
-    // Return 200: OK and the deleted project ID
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the deleted project id and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -1926,10 +2030,11 @@ async function deleteProject(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with users' public data
  */
-async function getUsers(req, res) {
+async function getUsers(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2012,8 +2117,12 @@ async function getUsers(req, res) {
     // Format JSON
     const json = formatJSON(publicUserData, minified);
 
-    // Return 200: OK and public user data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public user data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -2029,10 +2138,11 @@ async function getUsers(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with users' public data
  */
-async function postUsers(req, res) {
+async function postUsers(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2091,8 +2201,12 @@ async function postUsers(req, res) {
     // Format JSON
     const json = formatJSON(publicUserData, minified);
 
-    // Return 200: OK and public user data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public user data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -2108,10 +2222,11 @@ async function postUsers(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with users' public data
  */
-async function putUsers(req, res) {
+async function putUsers(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2170,8 +2285,12 @@ async function putUsers(req, res) {
     // Format JSON
     const json = formatJSON(publicUserData, minified);
 
-    // Return 200: OK and public user data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public user data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -2187,10 +2306,11 @@ async function putUsers(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with users' public data
  */
-async function patchUsers(req, res) {
+async function patchUsers(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2249,8 +2369,12 @@ async function patchUsers(req, res) {
     // Format JSON
     const json = formatJSON(publicUserData, minified);
 
-    // Return 200: OK and the updated users
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public user data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -2267,10 +2391,11 @@ async function patchUsers(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with usernames
  */
-async function deleteUsers(req, res) {
+async function deleteUsers(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2307,8 +2432,12 @@ async function deleteUsers(req, res) {
     // Format JSON
     const json = formatJSON(usernames, minified);
 
-    // Return 200: OK and deleted usernames
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the deleted usernames and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -2323,10 +2452,11 @@ async function deleteUsers(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with user's public data
  */
-async function getUser(req, res) {
+async function getUser(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2380,8 +2510,12 @@ async function getUser(req, res) {
     // Format JSON
     const json = formatJSON(publicUserData[0], minified);
 
-    // Return a 200: OK and the user's public data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public user data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -2397,10 +2531,11 @@ async function getUser(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with created user
  */
-async function postUser(req, res) {
+async function postUser(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2460,8 +2595,12 @@ async function postUser(req, res) {
     // Format JSON
     const json = formatJSON(publicUserData[0], minified);
 
-    // Return 200: OK and created user
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public user data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -2477,10 +2616,11 @@ async function postUser(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with created user
  */
-async function putUser(req, res) {
+async function putUser(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2540,8 +2680,12 @@ async function putUser(req, res) {
     // Format JSON
     const json = formatJSON(publicUserData[0], minified);
 
-    // Return 200: OK and created/replaced user
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public user data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -2557,10 +2701,11 @@ async function putUser(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with updated user
  */
-async function patchUser(req, res) {
+async function patchUser(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2620,8 +2765,12 @@ async function patchUser(req, res) {
     // Format JSON
     const json = formatJSON(publicUserData[0], minified);
 
-    // Return 200: OK and updated user
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public user data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -2637,10 +2786,11 @@ async function patchUser(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with deleted username
  */
-async function deleteUser(req, res) {
+async function deleteUser(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2685,8 +2835,12 @@ async function deleteUser(req, res) {
     // Format JSON
     const json = formatJSON(username, minified);
 
-    // Return 200: OK and the deleted username
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the deleted username and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -2701,10 +2855,11 @@ async function deleteUser(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with user's public data
  */
-async function whoami(req, res) {
+async function whoami(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -2741,8 +2896,12 @@ async function whoami(req, res) {
   // Format JSON
   const json = formatJSON(publicUserData, minified);
 
-  // Returns 200: OK and the users public data
-  return returnResponse(req, res, json, 200);
+  // Sets the message to the public user data and the status code to 200
+  res.locals = {
+    message: json,
+    statusCode: 200
+  };
+  next();
 }
 
 /**
@@ -2752,10 +2911,11 @@ async function whoami(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with found users
  */
-async function searchUsers(req, res) {
+async function searchUsers(req, res, next) {
   // Define options and query
   // Note: Undefined if not set
   let options;
@@ -2818,8 +2978,12 @@ async function searchUsers(req, res) {
     // Format JSON
     const json = formatJSON(usersPublicData, minified);
 
-    // Return a 200: OK and public user data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public user data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -2919,10 +3083,11 @@ async function patchPassword(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with elements' public data
  */
-async function getElements(req, res) {
+async function getElements(req, res, next) {
   // Define options and ids
   // Note: Undefined if not set
   let elemIDs;
@@ -3057,8 +3222,12 @@ async function getElements(req, res) {
     // Format JSON
     const json = formatJSON(retData, minified);
 
-    // Return a 200: OK and public element data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public element data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -3073,10 +3242,11 @@ async function getElements(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with created elements
  */
-async function postElements(req, res) {
+async function postElements(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3137,8 +3307,12 @@ async function postElements(req, res) {
     // Format JSON
     const json = formatJSON(elementsPublicData, minified);
 
-    // Return 200: OK and the new elements
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public element data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -3154,10 +3328,11 @@ async function postElements(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with created/replaced elements
  */
-async function putElements(req, res) {
+async function putElements(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3217,8 +3392,12 @@ async function putElements(req, res) {
     // Format JSON
     const json = formatJSON(elementsPublicData, minified);
 
-    // Return 200: OK and the new/replaced elements
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public element data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -3233,10 +3412,11 @@ async function putElements(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with updated elements
  */
-async function patchElements(req, res) {
+async function patchElements(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3296,8 +3476,12 @@ async function patchElements(req, res) {
     // Format JSON
     const json = formatJSON(elementsPublicData, minified);
 
-    // Return 200: OK and the updated elements
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public element data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -3313,9 +3497,11 @@ async function patchElements(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
+ *
  * @returns {object} Response object with element ids.
  */
-async function deleteElements(req, res) {
+async function deleteElements(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3355,8 +3541,12 @@ async function deleteElements(req, res) {
     // Format JSON
     const json = formatJSON(parsedIDs, minified);
 
-    // Return 200: OK and the deleted element ids
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the deleted element ids and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -3371,10 +3561,11 @@ async function deleteElements(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with elements
  */
-async function searchElements(req, res) {
+async function searchElements(req, res, next) {
   // Define options and query
   // Note: Undefined if not set
   let options;
@@ -3455,8 +3646,12 @@ async function searchElements(req, res) {
     // Format JSON
     const json = formatJSON(elementsPublicData, minified);
 
-    // Return a 200: OK and public element data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public element data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -3471,10 +3666,11 @@ async function searchElements(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with element's public data
  */
-async function getElement(req, res) {
+async function getElement(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3533,8 +3729,12 @@ async function getElement(req, res) {
     // Format JSON
     const json = formatJSON(elementsPublicData, minified);
 
-    // Return 200: OK and the elements
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public element data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -3549,10 +3749,11 @@ async function getElement(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with created element
  */
-async function postElement(req, res) {
+async function postElement(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3613,8 +3814,12 @@ async function postElement(req, res) {
     // Format JSON
     const json = formatJSON(elementsPublicData[0], minified);
 
-    // Return 200: OK and the created element
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public element data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -3630,10 +3835,11 @@ async function postElement(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with created/replaced element
  */
-async function putElement(req, res) {
+async function putElement(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3694,8 +3900,12 @@ async function putElement(req, res) {
     // Format JSON
     const json = formatJSON(elementsPublicData[0], minified);
 
-    // Return 200: OK and the created/replaced element
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public element data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -3710,10 +3920,11 @@ async function putElement(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with updated element
  */
-async function patchElement(req, res) {
+async function patchElement(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3774,8 +3985,12 @@ async function patchElement(req, res) {
     // Format JSON
     const json = formatJSON(elementsPublicData[0], minified);
 
-    // Return 200: OK and the updated element
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public element data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -3790,10 +4005,11 @@ async function patchElement(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with deleted element id.
  */
-async function deleteElement(req, res) {
+async function deleteElement(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3833,8 +4049,12 @@ async function deleteElement(req, res) {
     // Format JSON
     const json = formatJSON(parsedID, minified);
 
-    // Return 200: OK and deleted element ID
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the deleted element id and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -3850,10 +4070,11 @@ async function deleteElement(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with branches' public data
  */
-async function getBranches(req, res) {
+async function getBranches(req, res, next) {
   // Define options and ids
   // Note: Undefined if not set
   let branchIDs;
@@ -3939,8 +4160,12 @@ async function getBranches(req, res) {
     // Format JSON
     const json = formatJSON(branchesPublicData, minified);
 
-    // Return a 200: OK and public branch data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public branch data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -3955,10 +4180,11 @@ async function getBranches(req, res) {
  *
  * @param {object} req - request express object
  * @param {object} res - response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with created branches.
  */
-async function postBranches(req, res) {
+async function postBranches(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4018,8 +4244,12 @@ async function postBranches(req, res) {
     // Format JSON
     const json = formatJSON(publicBranchData, minified);
 
-    // Return 200: OK and created branch data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public branch data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -4034,10 +4264,11 @@ async function postBranches(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with updated branches
  */
-async function patchBranches(req, res) {
+async function patchBranches(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4097,8 +4328,12 @@ async function patchBranches(req, res) {
     // Format JSON
     const json = formatJSON(branchesPublicData, minified);
 
-    // Return 200: OK and the updated branches
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public branch data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -4114,10 +4349,11 @@ async function patchBranches(req, res) {
  *
  * @param {object} req - request express object
  * @param {object} res - response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with deleted branch IDs.
  */
-async function deleteBranches(req, res) {
+async function deleteBranches(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4161,8 +4397,12 @@ async function deleteBranches(req, res) {
     // Format JSON
     const json = formatJSON(parsedIDs, minified);
 
-    // Return 200: OK and the deleted branch IDs
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the deleted branch ids and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -4177,10 +4417,11 @@ async function deleteBranches(req, res) {
  *
  * @param {object} req - request express object
  * @param {object} res - response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with branch's public data
  */
-async function getBranch(req, res) {
+async function getBranch(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4232,8 +4473,12 @@ async function getBranch(req, res) {
     // Format JSON
     const json = formatJSON(publicBranchData[0], minified);
 
-    // Return 200: OK and public branch data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public branch data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -4248,10 +4493,11 @@ async function getBranch(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with created branch
  */
-async function postBranch(req, res) {
+async function postBranch(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4312,8 +4558,12 @@ async function postBranch(req, res) {
     // Format JSON
     const json = formatJSON(branchesPublicData[0], minified);
 
-    // Return 200: OK and the created branch
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public branch data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -4328,10 +4578,11 @@ async function postBranch(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with updated branch
  */
-async function patchBranch(req, res) {
+async function patchBranch(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4392,8 +4643,12 @@ async function patchBranch(req, res) {
     // Format JSON
     const json = formatJSON(branchPublicData[0], minified);
 
-    // Return 200: OK and the updated branch
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public branch data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -4409,10 +4664,11 @@ async function patchBranch(req, res) {
  *
  * @param {object} req - request express object
  * @param {object} res - response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with deleted branch ID.
  */
-async function deleteBranch(req, res) {
+async function deleteBranch(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4452,8 +4708,12 @@ async function deleteBranch(req, res) {
     // Format JSON
     const json = formatJSON(parsedIDs, minified);
 
-    // Return 200: OK and the deleted branch ID
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the deleted branch id and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -4469,10 +4729,11 @@ async function deleteBranch(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with public data of found artifacts
  */
-async function getArtifacts(req, res) {
+async function getArtifacts(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let artIDs;
@@ -4588,8 +4849,12 @@ async function getArtifacts(req, res) {
     // Format JSON
     const json = formatJSON(retData, minified);
 
-    // Return 200: OK and public artifact data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public artifact data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -4604,10 +4869,11 @@ async function getArtifacts(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with created artifacts
  */
-async function postArtifacts(req, res) {
+async function postArtifacts(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4668,7 +4934,13 @@ async function postArtifacts(req, res) {
 
     // Format JSON
     const json = formatJSON(artifactsPublicData, minified);
-    return returnResponse(req, res, json, 200);
+
+    // Sets the message to the public artifact data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
@@ -4682,10 +4954,11 @@ async function postArtifacts(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with updated artifacts
  */
-async function patchArtifacts(req, res) {
+async function patchArtifacts(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4746,7 +5019,13 @@ async function patchArtifacts(req, res) {
 
     // Format JSON
     const json = formatJSON(artifactsPublicData, minified);
-    return returnResponse(req, res, json, 200);
+
+    // Sets the message to the public artifact data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -4762,10 +5041,11 @@ async function patchArtifacts(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with artifact ids.
  */
-async function deleteArtifacts(req, res) {
+async function deleteArtifacts(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4804,7 +5084,12 @@ async function deleteArtifacts(req, res) {
     // Format JSON
     const json = formatJSON(parsedIDs, minified);
 
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the deleted artifact ids and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -4819,10 +5104,11 @@ async function deleteArtifacts(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with found artifact
  */
-async function getArtifact(req, res) {
+async function getArtifact(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4875,8 +5161,12 @@ async function getArtifact(req, res) {
     // Format JSON
     const json = formatJSON(publicArtifactData[0], minified);
 
-    // Return 200: OK and public artifact data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public artifact data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -4891,10 +5181,11 @@ async function getArtifact(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with created artifact
  */
-async function postArtifact(req, res) {
+async function postArtifact(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -4954,7 +5245,13 @@ async function postArtifact(req, res) {
     );
     // Format JSON
     const json = formatJSON(artifactsPublicData[0], minified);
-    return returnResponse(req, res, json, 200);
+
+    // Sets the message to the public artifact data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
@@ -4968,10 +5265,11 @@ async function postArtifact(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with updated artifact
  */
-async function patchArtifact(req, res) {
+async function patchArtifact(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -5035,7 +5333,13 @@ async function patchArtifact(req, res) {
 
     // Format JSON
     const json = formatJSON(artifactsPublicData[0], minified);
-    return returnResponse(req, res, json, 200);
+
+    // Sets the message to the public artifact data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -5050,10 +5354,11 @@ async function patchArtifact(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with artifact id.
  */
-async function deleteArtifact(req, res) {
+async function deleteArtifact(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -5092,7 +5397,12 @@ async function deleteArtifact(req, res) {
     // Format JSON
     const json = formatJSON(parsedIDs[0], minified);
 
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the deleted artifact id and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -5103,15 +5413,15 @@ async function deleteArtifact(req, res) {
 /**
  * GET /api/orgs/:orgid/projects/:projectid/artifacts/blob
  *
- * @description Gets an artifact blob by org.id, project.id,
- * location, filename.
+ * @description Gets an artifact blob by org.id, project.id, location, filename.
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {Buffer} Artifact blob.
  */
-async function getBlob(req, res) {
+async function getBlob(req, res, next) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) return noUserError(req, res);
 
@@ -5122,9 +5432,14 @@ async function getBlob(req, res) {
     // Set filename
     res.header('Content-Disposition', `attachment; filename=${req.query.filename}`);
 
-    // Return 200: OK and public artifact data
-    return returnResponse(req, res, artifactBlob, 200,
-      utils.getContentType(req.query.filename));
+    // Sets the message to the public artifact data and the status code to 200
+    // Also sends the Content-Type of the blob
+    res.locals = {
+      message: artifactBlob,
+      statusCode: 200,
+      contentType: utils.getContentType(req.query.filename)
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -5140,10 +5455,11 @@ async function getBlob(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Posted Artifact object.
  */
-async function postBlob(req, res) {
+async function postBlob(req, res, next) {
   await upload(req, res, async function(err) {
     // Sanity Check: there should always be a user in the request
     if (!req.user) return noUserError(req, res);
@@ -5170,7 +5486,13 @@ async function postBlob(req, res) {
 
       // Format JSON
       const json = formatJSON(artifact, minified);
-      return returnResponse(req, res, json, 200);
+
+      // Sets the message to the blob data and the status code to 200
+      res.locals = {
+        message: json,
+        statusCode: 200
+      };
+      next();
     }
     catch (error) {
       return returnResponse(req, res, error.message, errors.getStatusCode(error));
@@ -5186,10 +5508,11 @@ async function postBlob(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Deleted Artifact object.
  */
-async function deleteBlob(req, res) {
+async function deleteBlob(req, res, next) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) return noUserError(req, res);
 
@@ -5203,8 +5526,12 @@ async function deleteBlob(req, res) {
     // Format JSON
     const json = formatJSON(artifact, minified);
 
-    // Return 200: OK and public artifact data
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the deleted blob data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -5220,10 +5547,11 @@ async function deleteBlob(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {Buffer} Artifact blob.
  */
-async function getBlobById(req, res) {
+async function getBlobById(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -5267,9 +5595,14 @@ async function getBlobById(req, res) {
     // Set filename
     res.header('Content-Disposition', `attachment; filename=${artMetadata[0].filename}`);
 
-    // Return 200: OK and public artifact data
-    return returnResponse(req, res, artifactBlob, 200,
-      utils.getContentType(artMetadata[0].filename));
+    // Sets the message to the public artifact data and the status code to 200
+    // Also sends the Content-Type of the blob
+    res.locals = {
+      message: artifactBlob,
+      statusCode: 200,
+      contentType: utils.getContentType(req.query.filename)
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -5286,10 +5619,11 @@ async function getBlobById(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with webhooks' public data.
  */
-async function getWebhooks(req, res) {
+async function getWebhooks(req, res, next) {
   // Define options
   let webhookIDs;
   let options;
@@ -5382,8 +5716,12 @@ async function getWebhooks(req, res) {
     // Format JSON
     const json = formatJSON(webhooksPublicData, minified);
 
-    // Return 200: OK and the found webhooks
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public webhook data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -5398,10 +5736,11 @@ async function getWebhooks(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with the created webhook.
  */
-async function postWebhooks(req, res) {
+async function postWebhooks(req, res, next) {
   // Define options
   let options;
   let minified = false;
@@ -5448,8 +5787,12 @@ async function postWebhooks(req, res) {
     // Format JSON
     const json = formatJSON(webhookPublicData, minified);
 
-    // Return 200: OK and the created webhook
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public webhook data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -5464,10 +5807,11 @@ async function postWebhooks(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with the updated webhooks.
  */
-async function patchWebhooks(req, res) {
+async function patchWebhooks(req, res, next) {
   // Define options
   let options;
   let minified = false;
@@ -5514,8 +5858,12 @@ async function patchWebhooks(req, res) {
     // Format JSON
     const json = formatJSON(webhookPublicData, minified);
 
-    // Return 200: OK and the updated webhook
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public webhook data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -5530,10 +5878,11 @@ async function patchWebhooks(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with the deleted webhook ids.
  */
-async function deleteWebhooks(req, res) {
+async function deleteWebhooks(req, res, next) {
   // Define options
   let options = {};
   let minified = false;
@@ -5573,8 +5922,12 @@ async function deleteWebhooks(req, res) {
     // Format JSON
     const json = formatJSON(webhooks, minified);
 
-    // Return 200: OK and the deleted webhook ids
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the deleted webhook ids and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -5589,10 +5942,11 @@ async function deleteWebhooks(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with the webhook's public data.
  */
-async function getWebhook(req, res) {
+async function getWebhook(req, res, next) {
   // Define options
   let options;
   let minified = false;
@@ -5648,8 +6002,12 @@ async function getWebhook(req, res) {
     // Format JSON
     const json = formatJSON(webhookPublicData, minified);
 
-    // Return 200: OK and the found webhook
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public webhook data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -5664,10 +6022,11 @@ async function getWebhook(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with the updated webhook.
  */
-async function patchWebhook(req, res) {
+async function patchWebhook(req, res, next) {
   // Define options
   let options;
   let minified = false;
@@ -5731,8 +6090,12 @@ async function patchWebhook(req, res) {
     // Format JSON
     const json = formatJSON(webhookPublicData, minified);
 
-    // Return 200: OK and the updated webhook
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the public webhook data and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -5747,10 +6110,11 @@ async function patchWebhook(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Respones object with the deleted webhook id.
  */
-async function deleteWebhook(req, res) {
+async function deleteWebhook(req, res, next) {
   // Define options
   let options;
   let minified = false;
@@ -5790,8 +6154,12 @@ async function deleteWebhook(req, res) {
     // Format JSON
     const json = formatJSON(webhooks, minified);
 
-    // Return 200: OK and the deleted webhook
-    return returnResponse(req, res, json, 200);
+    // Sets the message to the deleted webhook id and the status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -5806,10 +6174,11 @@ async function deleteWebhook(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Notification that the trigger succeeded or failed.
  */
-async function triggerWebhook(req, res) {
+async function triggerWebhook(req, res, next) {
   // Parse the webhook id from the base64 encoded url
   const webhookID = Buffer.from(req.params.encodedid, 'base64').toString('ascii');
 
@@ -5861,8 +6230,12 @@ async function triggerWebhook(req, res) {
       else EventEmitter.emit(trigger, data);
     });
 
-    // Return 200: OK and the message 'success'
-    return returnResponse(req, res, 'success', 200);
+    // Sets the message to "success" and the status code to 200
+    res.locals = {
+      message: 'success',
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
@@ -5892,6 +6265,7 @@ function invalidRoute(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ *
  * @returns {object} Response error message
  */
 function noUserError(req, res) {

@@ -66,6 +66,18 @@ function loadPlugins() {
   // Get a list of plugin names in the config
   const pluginNames = Object.keys(plugins);
 
+  // Initialize object to store plugin middleware functions
+  const pluginFunctions = {};
+  const apiFunctions = M.require('controllers.api-controller');
+  Object.keys(apiFunctions).forEach((apiFun) => {
+    pluginFunctions[apiFun] = { pre: [], post: [] };
+  });
+  // Remove reserved functions
+  const reservedFunctions = ['swaggerJSON', 'login', 'test', 'version', 'patchPassword'];
+  reservedFunctions.forEach((reserved) => {
+    delete pluginFunctions[reserved];
+  });
+
   files.forEach(async (f) => {
     // Skip routes.js
     if (protectedFileNames.includes(f)) {
@@ -125,6 +137,32 @@ function loadPlugins() {
       return;
     }
 
+    // Load the plugin middleware functions
+    if (fs.existsSync(path.join(pluginPath, 'middleware.js'))) {
+      // eslint-disable-next-line global-require
+      const middleware = require(path.join(pluginPath, 'middleware'));
+      M.log.info('Loading plugin middleware...');
+      // Iterate through each middleware object corresponding to an APIController function
+      Object.keys(middleware).forEach((m) => {
+        // Check that each middleware object only has the keys "pre" and/or "post"
+        const keys = Object.keys(middleware[m]);
+        const allowedKeys = ['pre', 'post'];
+        if (keys.every((k) => allowedKeys.includes(k))) {
+          if (Object.keys(pluginFunctions).includes(m)) {
+            if (middleware[m].pre) pluginFunctions[m].pre.push(middleware[m].pre);
+            if (middleware[m].post) pluginFunctions[m].post.push(middleware[m].post);
+          }
+          else {
+            M.log.warn(`Plugin middleware for api endpoint [${m}] not supported`);
+          }
+        }
+        else {
+          M.log.warn(`Skipping plugin middleware for api endpoint [${m}] due to invalid format`);
+        }
+      });
+    }
+
+
     // Run the plugin tests if specified
     if (plugins[f].testOnStartup) {
       M.log.info(`Running tests for plugin ${namespace}`);
@@ -146,6 +184,7 @@ function loadPlugins() {
 
   // Export list of loaded plugins
   module.exports.loadedPlugins = loadedPlugins;
+  module.exports.pluginFunctions = pluginFunctions;
 }
 
 /**

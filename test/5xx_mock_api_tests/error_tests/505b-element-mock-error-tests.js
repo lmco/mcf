@@ -32,6 +32,7 @@ const db = M.require('db');
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const next = testUtils.next;
 let adminUser = null;
 let org;
 let project;
@@ -165,7 +166,7 @@ function noReqUser(endpoint) {
     };
 
     // Sends the mock request
-    APIController[endpoint](req, res);
+    APIController[endpoint](req, res, next(req, res));
   };
 }
 
@@ -205,7 +206,7 @@ function invalidOptions(endpoint) {
     };
 
     // Sends the mock request
-    APIController[endpoint](req, res);
+    APIController[endpoint](req, res, next(req, res));
   };
 }
 
@@ -245,7 +246,7 @@ function conflictingIDs(endpoint) {
     };
 
     // Sends the mock request
-    APIController[endpoint](req, res);
+    APIController[endpoint](req, res, next(req, res));
   };
 }
 
@@ -288,7 +289,7 @@ function notFound(endpoint) {
     };
 
     // Sends the mock request
-    APIController[endpoint](req, res);
+    APIController[endpoint](req, res, next(req, res));
   };
 }
 
@@ -326,6 +327,6 @@ function noArrays(endpoint) {
     };
 
     // Sends the mock request
-    APIController[endpoint](req, res);
+    APIController[endpoint](req, res, next(req, res));
   };
 }

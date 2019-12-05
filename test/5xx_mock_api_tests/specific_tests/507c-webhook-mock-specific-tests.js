@@ -29,6 +29,7 @@ const utils = M.require('lib.utils');
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const next = testUtils.next;
 let adminUser;
 let org;
 let project;
@@ -205,7 +206,7 @@ function post(reference) {
     };
 
     // POSTs a webhook
-    APIController.postWebhooks(req, res);
+    APIController.postWebhooks(req, res, next(req, res));
   };
 }
 
@@ -319,7 +320,7 @@ function postMany(reference) {
     };
 
     // POSTs a webhook
-    APIController.postWebhooks(req, res);
+    APIController.postWebhooks(req, res, next(req, res));
   };
 }
 
@@ -425,7 +426,7 @@ function getAll(reference) {
     };
 
     // GETs all webhooks at a reference level
-    APIController.getWebhooks(req, res);
+    APIController.getWebhooks(req, res, next(req, res));
   };
 }
 
@@ -513,7 +514,7 @@ function patch(reference) {
     };
 
     // PATCHes a webhook
-    APIController.patchWebhook(req, res);
+    APIController.patchWebhook(req, res, next(req, res));
   };
 }
 
@@ -619,7 +620,7 @@ function patchMany(reference) {
     };
 
     // PATCHes multiple webhooks
-    APIController.patchWebhooks(req, res);
+    APIController.patchWebhooks(req, res, next(req, res));
   };
 }
 
@@ -671,7 +672,7 @@ function remove(reference) {
     };
 
     // DELETEs a webhook
-    APIController.deleteWebhook(req, res);
+    APIController.deleteWebhook(req, res, next(req, res));
   };
 }
 
@@ -723,6 +724,6 @@ function removeMany(reference) {
     };
 
     // DELETEs a webhook
-    APIController.deleteWebhooks(req, res);
+    APIController.deleteWebhooks(req, res, next(req, res));
   };
 }

@@ -38,6 +38,7 @@ const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
+const Middleware = M.require('lib.middleware');
 const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
@@ -749,4 +750,18 @@ function generateCustomTestData() {
   testData = customTestData;
 
   return customTestData;
+}
+
+/**
+ * @description A mock next() callback function to use in the mock api tests.
+ *
+ * @param {object} req - A mock Express.js request object.
+ * @param {object} res - A mock Express.js response object.
+ *
+ * @returns {Function} The Middleware respond function.
+ */
+module.exports.next = function next(req, res) {
+  return function n() {
+    return Middleware.respond(req, res);
+  }
 }
