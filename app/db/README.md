@@ -211,7 +211,7 @@ java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
 
 #### Local Configuration Options
 
-When running DynamoDB locoally there are a few configuration options which can
+When running DynamoDB locally there are a few configuration options which can
 be supplied.
 
 * -port <port-number>

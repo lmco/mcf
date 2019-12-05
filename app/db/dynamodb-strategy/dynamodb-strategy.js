@@ -205,7 +205,7 @@ class Schema {
           AttributeName: key,
           AttributeType: obj[key].type
         };
-        // Add the the schema AttributeDefinitions
+        // Add the schema AttributeDefinitions
         this.schema.AttributeDefinitions.push(attributeObj);
 
         // Create index object
@@ -248,7 +248,7 @@ class Schema {
    */
   plugin(cb, options) {
     this.cb = cb;
-    // Call the plugin with, passing in "this" as the only parameter
+    // Call the plugin, passing in "this" as the only parameter
     this.cb(this);
     // Remove the plugin from this
     delete this.cb;
@@ -258,7 +258,7 @@ class Schema {
    * @description Defines an index for the schema. Can support adding compound
    * or text indexes.
    *
-   * @param {object} fields - A object containing the key/values pairs where the
+   * @param {object} fields - An object containing the key/value pairs where the
    * keys are the fields to add indexes to, and the values define the index type
    * where 1 defines an ascending index, -1 a descending index, and 'text'
    * defines a text index.
@@ -678,7 +678,7 @@ class Query {
    * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#update-property DocumentClient.update()}.
    *
    * @param {object} filter - The filter to parse, used to find the document to
-   * updated.
+   * update.
    * @param {object} doc - An object containing the updates to be made to the
    * found document.
    *
@@ -745,7 +745,7 @@ class Model {
   constructor(name, schema, collection) {
     this.schema = schema.schema;
     this.definition = schema.definition;
-    this.TableName = collection;
+    this.TableName = collection ? collection : name;
     this.modelName = name;
     // Create a new query object
     this.query = new Query(this);
@@ -948,8 +948,8 @@ class Model {
    * @async
    *
    * @param {object[]} ops - An array of objects detailing what operations to
-   * perform the data required for those operations.
-   * @param {object} [ops.insertOne] - Specified an insertOne operation.
+   * perform and the data required for those operations.
+   * @param {object} [ops.insertOne] - Specifies an insertOne operation.
    * @param {object} [ops.insertOne.document] - The document to create, for
    * insertOne.
    * @param {object} [ops.updateOne] - Specifies an updateOne operation.
@@ -1013,7 +1013,7 @@ class Model {
   }
 
   /**
-   * @description Counts the number of documents that matches a filter.
+   * @description Counts the number of documents that match a filter.
    * @async
    *
    * @param {object} filter - An object containing parameters to filter the
@@ -1115,7 +1115,7 @@ class Model {
         // Get the formatted scan query
         const scanObj = this.query.scan(filter, options);
 
-        // If there is no filter. block from finding all documents to delete
+        // If there is no filter, block from finding all documents to delete
         if (!scanObj.hasOwnProperty('FilterExpression')) {
           more = false;
         }
@@ -1313,7 +1313,7 @@ class Model {
    * parameter.
    * @param {object} [options] - An object containing options.
    * @param {string} [options.populate] - A space separated list of fields to
-   * populate of return of a document. Only fields that reference other
+   * populate on return of a document. Only fields that reference other
    * documents can be populated. Populating a field returns the entire
    * referenced document instead of that document's ID. If no document exists,
    * null is returned.
@@ -1546,12 +1546,12 @@ class Model {
       delete options.skip;
       delete options.limit;
 
-      // If double quotes are found, its an exact match
+      // If double quotes are found, it's an exact match
       const exactMatch = searchString.includes('"');
 
       // Get an array of the base words to search;
       const baseWords = (exactMatch)
-        ? searchString.replace(/"/g, '') // if "" included, its an exact match
+        ? searchString.replace(/"/g, '') // if "" included, it's an exact match
         : searchString.split(' ');  // Split string by space, these are all the words to search
       const regexString = (exactMatch)
         ? RegExp(`(${baseWords})`)
