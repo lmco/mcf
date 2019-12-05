@@ -27,6 +27,7 @@ const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const ServerData = M.require('models.server-data');
 const User = M.require('models.user');
+const Webhook = M.require('models.webhook');
 const db = M.require('db');
 
 /**
@@ -46,9 +47,9 @@ module.exports.migrate = async function(args) {
     await prompt(args);
 
     // Initialize models
-    const promises = [Artifact.init(), Branch.init(), Element.init(),
-      Organization.init(), Project.init(), ServerData.init(), User.init()];
-    await Promise.all(promises);
+    await Promise.all([Artifact.init(), Branch.init(), Element.init(),
+      Organization.init(), Project.init(), ServerData.init(), User.init(),
+      Webhook.init()]);
 
     // Get the server data documents
     const serverData = await ServerData.find({}, null);
@@ -199,9 +200,9 @@ module.exports.getVersion = async function() {
         await db.clear();
 
         // Re-initialize models
-        const promises = [Artifact.init(), Branch.init(), Element.init(),
-          Organization.init(), Project.init(), ServerData.init(), User.init()];
-        await Promise.all(promises);
+        await Promise.all([Artifact.init(), Branch.init(), Element.init(),
+          Organization.init(), Project.init(), ServerData.init(), User.init(),
+          Webhook.init()]);
 
         // Insert server data document, with current schema version
         await ServerData.insertMany({ _id: 'server_data', version: M.version });
