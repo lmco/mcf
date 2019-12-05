@@ -179,14 +179,12 @@ function unauthorizedTest(operation) {
   return async function() {
     let elemData = testData.elements[0];
     let op = operation;
-    let id = org._id;
-    let level = 'org';
+    const id = org._id;
+    const level = 'org';
 
     switch (operation) {
       case 'find':
         elemData = elemData.id;
-        level = 'project';
-        id = projID;
         break;
       case 'create':
         break;
@@ -205,8 +203,6 @@ function unauthorizedTest(operation) {
         break;
       case 'search':
         op = 'find';
-        level = 'project';
-        id = projID;
         break;
       default:
         throw new Error('Invalid input to unauthorizedTest function');

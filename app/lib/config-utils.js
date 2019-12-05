@@ -249,6 +249,9 @@ module.exports.validate = function(config) {
       test(config, `server.plugins.plugins.${pluginName}`, 'object');
       test(config, `server.plugins.plugins.${pluginName}.title`, 'string');
       test(config, `server.plugins.plugins.${pluginName}.source`, 'string');
+      if (config.server.plugins.plugins[pluginName].testOnStartup) {
+        test(config, `server.plugins.plugins.${pluginName}.testOnStartup`, 'boolean');
+      }
     });
   }
   test(config, 'server.ui', 'object');
