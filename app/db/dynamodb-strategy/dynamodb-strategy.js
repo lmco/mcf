@@ -745,7 +745,7 @@ class Model {
   constructor(name, schema, collection) {
     this.schema = schema.schema;
     this.definition = schema.definition;
-    this.TableName = collection ? collection : name;
+    this.TableName = collection || name;
     this.modelName = name;
     // Create a new query object
     this.query = new Query(this);
@@ -894,6 +894,11 @@ class Model {
     // Wait for any recursive portions to complete
     await Promise.all(promises);
 
+    if (!recurse) {
+      // Populate any fields specified in the options object
+      await this.populate(document, options);
+    }
+
     // If the top level, and not a recursive call of this function
     if (!recurse && !projection) {
       // Loop through all keys in definition
@@ -906,9 +911,6 @@ class Model {
           }
         }
       });
-
-      // Populate any fields specified in the options object
-      await this.populate(document, options);
     }
     // If a projection is specified
     else if (!recurse && projection) {
