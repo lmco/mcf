@@ -1118,7 +1118,7 @@ class Model {
         const scanObj = this.query.scan(filter, options);
 
         // If there is no filter, block from finding all documents to delete
-        if (!scanObj.hasOwnProperty('FilterExpression')) {
+        if (!scanObj.hasOwnProperty('FilterExpression') && Object.keys(filter).length !== 0) {
           more = false;
         }
         else {
@@ -1438,7 +1438,7 @@ class Model {
       // If documents with matching _ids exist, throw an error
       if (conflictingDocs.length > 0) {
         throw new M.PermissionError('Documents with the following _ids already'
-          + `exist: ${conflictingDocs.map(d => utils.parseID(d._id).pop())}.`, 'warn');
+          + ` exist: ${conflictingDocs.map(d => utils.parseID(d._id).pop())}.`, 'warn');
       }
       else {
         const promises = [];
