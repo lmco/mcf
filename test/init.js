@@ -23,6 +23,7 @@ const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const ServerData = M.require('models.server-data');
 const User = M.require('models.user');
+const Webhook = M.require('models.webhook');
 const db = M.require('db');
 
 // Before function, is run before any tests are run
@@ -32,13 +33,9 @@ before(async () => {
     await db.connect();
 
     // Initialize all models
-    await Artifact.init();
-    await Branch.init();
-    await Element.init();
-    await Organization.init();
-    await Project.init();
-    await ServerData.init();
-    await User.init();
+    await Promise.all([Artifact.init(), Branch.init(), Element.init(),
+      Organization.init(), Project.init(), ServerData.init(), User.init(),
+      Webhook.init()]);
 
     // Disconnect from the database
     await db.disconnect();

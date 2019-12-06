@@ -9,7 +9,7 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle
+ * @owner Phillip Lee
  *
  * @author Josh Kaplan
  * @author Jake Ursetta
@@ -79,37 +79,20 @@ const UserSchema = new db.Schema({
     type: 'String',
     required: [true, 'Username is required.'],
     validate: [{
-      validator: function(v) {
-        // If the ID is a reserved keyword, reject
-        return !validators.reserved.includes(v);
-      },
+      validator: validators.user._id.reserved,
       message: 'Username cannot include the following words: '
       + `[${validators.reserved}].`
     }, {
-      validator: function(v) {
-        // If the username is longer than max length, reject
-        return v.length <= validators.user.usernameLength;
-      },
+      validator: validators.user._id.match,
+      message: props => `Invalid username [${props.value}].`
+    }, {
+      validator: validators.user._id.maxLength,
       message: props => `Username length [${props.value.length}] must not be`
         + ` more than ${validators.user.usernameLength} characters.`
     }, {
-      validator: function(v) {
-        // If the username is shorter than min length, reject
-        return v.length > 2;
-      },
+      validator: validators.user._id.minLength,
       message: props => `Username length [${props.value.length}] must not be`
         + ' less than 3 characters.'
-    }, {
-      validator: function(v) {
-        if (typeof validators.user.username === 'string') {
-          // If the username is invalid, reject
-          return RegExp(validators.user.username).test(v);
-        }
-        else {
-          return validators.user.username(v);
-        }
-      },
-      message: props => `Invalid username [${props.value}].`
     }]
   },
   password: {
@@ -136,15 +119,7 @@ const UserSchema = new db.Schema({
     type: 'String',
     default: '',
     validate: [{
-      validator: function(v) {
-        if (typeof validators.user.fname === 'string') {
-          // If the fname is invalid and provided, reject
-          return !(!RegExp(validators.user.fname).test(v) && v);
-        }
-        else {
-          return !(!validators.user.fname(v) && v);
-        }
-      },
+      validator: validators.user.fname,
       message: props => `Invalid first name [${props.value}].`
     }]
   },
@@ -152,15 +127,7 @@ const UserSchema = new db.Schema({
     type: 'String',
     default: '',
     validate: [{
-      validator: function(v) {
-        if (typeof validators.user.fname === 'string') {
-          // If the preferredName is invalid and provided, reject
-          return !(!RegExp(validators.user.fname).test(v) && v);
-        }
-        else {
-          return !(!validators.user.fname(v) && v);
-        }
-      },
+      validator: validators.user.preferredName,
       message: props => `Invalid preferred name [${props.value}].`
     }]
   },
@@ -168,15 +135,7 @@ const UserSchema = new db.Schema({
     type: 'String',
     default: '',
     validate: [{
-      validator: function(v) {
-        if (typeof validators.user.lname === 'string') {
-          // If the lname is invalid and provided, reject
-          return !(!RegExp(validators.user.lname).test(v) && v);
-        }
-        else {
-          return !(!validators.user.lname(v) && v);
-        }
-      },
+      validator: validators.user.lname,
       message: props => `Invalid last name [${props.value}].`
     }]
   },
@@ -187,9 +146,7 @@ const UserSchema = new db.Schema({
   provider: {
     type: 'String',
     validate: [{
-      validator: function(v) {
-        return validators.user.provider(v);
-      },
+      validator: validators.user.provider,
       message: props => `Invalid provider [${props.value}].`
     }],
     default: 'local'

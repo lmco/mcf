@@ -9,7 +9,7 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber
+ * @owner Phillip Lee
  *
  * @author Josh Kaplan
  * @author Leah De Laurell
@@ -70,41 +70,23 @@ const BranchSchema = new db.Schema({
     type: 'String',
     required: true,
     validate: [{
-      validator: function(v) {
-        const branchID = utils.parseID(v).pop();
-        // If the ID is a reserved keyword, reject
-        return !validators.reserved.includes(branchID);
-      },
+      validator: validators.branch._id.reserved,
       message: 'Branch ID cannot include the following words: '
         + `[${validators.reserved}].`
     }, {
-      validator: function(v) {
-        // If the ID is longer than max length, reject
-        return v.length <= validators.branch.idLength;
-      },
+      validator: validators.branch._id.match,
+      message: props => `Invalid branch ID [${utils.parseID(props.value).pop()}].`
+    }, {
+      validator: validators.branch._id.maxLength,
       // Return a message, with calculated length of branch ID (branch.max - project.max - :)
       message: props => `Branch ID length [${props.value.length - validators.project.idLength - 1}]`
         + ` must not be more than ${validators.branch.idLength - validators.project.idLength - 1}`
         + ' characters.'
     }, {
-      validator: function(v) {
-        // If the ID is shorter than min length, reject
-        return v.length > 7;
-      },
+      validator: validators.branch._id.minLength,
       // Return a message, with calculated length of branch ID (branch.min - project.min - :)
       message: props => `Branch ID length [${props.value.length - 6}] must not`
         + ' be less than 2 characters.'
-    }, {
-      validator: function(v) {
-        if (typeof validators.branch.id === 'string') {
-          // If the ID is invalid, reject
-          return RegExp(validators.branch.id).test(v);
-        }
-        else {
-          return validators.branch.id(v);
-        }
-      },
-      message: props => `Invalid branch ID [${utils.parseID(props.value).pop()}].`
     }]
   },
   project: {
@@ -113,15 +95,7 @@ const BranchSchema = new db.Schema({
     required: true,
     index: true,
     validate: [{
-      validator: function(v) {
-        if (typeof validators.project.id === 'string') {
-          // If the ID is invalid, reject
-          return RegExp(validators.project.id).test(v);
-        }
-        else {
-          return validators.project.id(v);
-        }
-      },
+      validator: validators.branch.project,
       message: props => `${props.value} is not a valid project ID.`
     }]
   },
@@ -134,15 +108,7 @@ const BranchSchema = new db.Schema({
     ref: 'Branch',
     default: null,
     validate: [{
-      validator: function(v) {
-        if (typeof validators.branch.id === 'string') {
-          // If the ID is invalid, reject
-          return RegExp(validators.branch.id).test(v) || (v === null);
-        }
-        else {
-          return validators.branch.id(v) || (v === null);
-        }
-      },
+      validator: validators.branch.source,
       message: props => `${props.value} is not a valid source ID.`
     }]
   },
