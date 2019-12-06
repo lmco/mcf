@@ -9,7 +9,7 @@
  *
  * @license MIT
  *
- * @owner Connor Doyle
+ * @owner Phillip Lee
  *
  * @author Josh Kaplan
  * @author Jake Ursetta

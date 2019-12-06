@@ -7,9 +7,10 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber
+ * @owner Connor Doyle
  *
  * @author Austin Bieber
+ * @author Connor Doyle
  *
  * @description Defines the global event emitter.
  */
