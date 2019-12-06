@@ -1423,6 +1423,9 @@ class Model {
    */
   async insertMany(docs, options) {
     try {
+      // Use JSON parse/stringify to copy data to avoid modifying by reference
+      docs = JSON.parse(JSON.stringify(docs)); // eslint-disable-line no-param-reassign
+
       // If only a single document, add to array
       if (!Array.isArray(docs)) {
         docs = [docs]; // eslint-disable-line no-param-reassign
