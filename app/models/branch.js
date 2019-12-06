@@ -71,7 +71,7 @@ const BranchSchema = new db.Schema({
     required: true,
     validate: [{
       validator: validators.branch._id.reserved,
-      message: 'Branch ID cannot include the following words: '
+      message: props => 'Branch ID cannot include the following words: '
         + `[${validators.reserved}].`
     }, {
       validator: validators.branch._id.match,
