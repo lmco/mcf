@@ -113,13 +113,13 @@ const WebhookSchema = new db.Schema({
     immutable: true,
     validate: [{
       validator: validators.webhook.type.outgoing,
-      message: 'An outgoing webhook must have a response field and cannot have a token or'
-        + ' tokenLocation.'
+      message: props => 'An outgoing webhook must have a response field and '
+        + 'cannot have a token or tokenLocation.'
     },
     {
       validator: validators.webhook.type.incoming,
-      message: 'An incoming webhook must have a token and a tokenLocation and cannot have a response'
-        + ' field.'
+      message: props => 'An incoming webhook must have a token and a '
+        + 'tokenLocation and cannot have a response field.'
     }]
   },
   description: {
@@ -130,32 +130,32 @@ const WebhookSchema = new db.Schema({
     required: true,
     validate: [{
       validator: validators.webhook.triggers,
-      message: () => 'The triggers field must be an array of strings.'
+      message: props => 'The triggers field must be an array of strings.'
     }]
   },
   response: {
     type: 'Object',
     validate: [{
       validator: validators.webhook.response.object,
-      message: 'Response field cannot be an array or null.'
+      message: props => 'Response field cannot be an array or null.'
     }, {
       validator: validators.webhook.response.url,
-      message: 'The response field must have a url.'
+      message: props => 'The response field must have a url.'
     }, {
       validator: validators.webhook.response.method,
-      message: 'Invalid method in response field.'
+      message: props => 'Invalid method in response field.'
     }, {
       validator: validators.webhook.response.headers,
-      message: 'Invalid headers in response field.'
+      message: props => 'Invalid headers in response field.'
     }, {
       validator: validators.webhook.response.token,
-      message: 'Invalid token in response field.'
+      message: props => 'Invalid token in response field.'
     }, {
       validator: validators.webhook.response.ca,
-      message: 'Invalid ca in response field.'
+      message: props => 'Invalid ca in response field.'
     }, {
       validator: validators.webhook.response.data,
-      message: 'Invalid data field in response field.'
+      message: props => 'Invalid data field in response field.'
     }, {
       validator: validators.webhook.response.validFields,
       message: props => {
@@ -171,14 +171,14 @@ const WebhookSchema = new db.Schema({
     type: 'String',
     validate: [{
       validator: validators.webhook.token,
-      message: () => 'A token must be a string.'
+      message: props => 'A token must be a string.'
     }]
   },
   tokenLocation: {
     type: 'String',
     validate: [{
       validator: validators.webhook.tokenLocation,
-      message: () => 'A tokenLocation must be a string.'
+      message: props => 'A tokenLocation must be a string.'
     }]
   },
   reference: {
@@ -186,8 +186,8 @@ const WebhookSchema = new db.Schema({
     immutabe: true,
     validate: [{
       validator: validators.webhook.reference,
-      message: (v) => `Invalid reference id ${v}: reference must either be an empty string or `
-        + 'match an org, project, or branch id.'
+      message: props => `Invalid reference id ${props.value}: reference must `
+        + 'either be an empty string or match an org, project, or branch id.'
     }]
   }
 });
