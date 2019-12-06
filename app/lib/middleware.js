@@ -133,11 +133,11 @@ module.exports.respond = function respond(req, res) {
 
   const contentType = 'application/json';
 
-  if (statusCode === 200) {
+  if (!res.header && statusCode === 200) {
     // We send these headers for a success response
     res.header('Content-Type', contentType);
   }
-  else {
+  else if (!res.header) {
     // We send these headers for an error response
     res.header('Content-Type', 'text/plain');
   }

@@ -5600,7 +5600,7 @@ async function getBlobById(req, res, next) {
     res.locals = {
       message: artifactBlob,
       statusCode: 200,
-      contentType: utils.getContentType(req.query.filename)
+      contentType: utils.getContentType(artMetadata[0].filename)
     };
     next();
   }

@@ -753,7 +753,10 @@ function generateCustomTestData() {
 }
 
 /**
- * @description A mock next() callback function to use in the mock api tests.
+ * @description A factory function that returns a mock next() function to use in the
+ * mock API tests. Instead of routing through the plugin middleware, this function calls
+ * the final function in the api chain, since we're not testing plugin functionality in
+ * the core tests.
  *
  * @param {object} req - A mock Express.js request object.
  * @param {object} res - A mock Express.js response object.
@@ -762,6 +765,6 @@ function generateCustomTestData() {
  */
 module.exports.next = function next(req, res) {
   return function n() {
-    return Middleware.respond(req, res);
-  }
-}
+    Middleware.respond(req, res);
+  };
+};
