@@ -7,10 +7,11 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber
+ * @owner Connor Doyle
  *
  * @author Jake Ursetta
  * @author Josh Kaplan
+ * @author Connor Doyle
  *
  * @description This implements an authentication strategy for local
  * authentication. This should be the default authentication strategy for MBEE.
