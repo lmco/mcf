@@ -230,13 +230,28 @@ UserSchema.static('hashPassword', function(obj) {
  * @memberOf UserSchema
  */
 UserSchema.static('checkOldPasswords', function(user, pass) {
-  if (!user.hasOwnProperty('provider') || user.provider === 'local') {
+  if (M.config.auth.hasOwnProperty('oldPasswords')
+    && (!user.hasOwnProperty('provider') || user.provider === 'local')) {
+    // Get the hash of the new password
     const newPassword = crypto.pbkdf2Sync(pass, user._id.toString(), 1000, 32, 'sha256');
+
+    // Add the current password to the list of old passwords
+    user.oldPasswords.push(user.password);
+
+    // Check that the user hasn't reused a recent password
     if (user.oldPasswords.includes(newPassword.toString('hex'))) {
-      return false;
+      throw new M.OperationError('Password has been used too recently.', 'warn');
     }
+
+    // Trim the list of old passwords if necessary
+    if (user.oldPasswords.length > M.config.auth.oldPasswords) {
+      user.oldPasswords.shift();
+    }
+
+    // Return the new list of old passwords to be used in an update
+    return user.oldPasswords;
   }
-  return true;
+  return [];
 });
 
 /* ------------------------------( User Index )------------------------------ */

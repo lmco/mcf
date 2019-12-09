@@ -1004,24 +1004,8 @@ async function updatePassword(requestingUser, oldPassword, newPassword, confirmP
       throw new M.AuthorizationError('Old password is incorrect.', 'warn');
     }
 
-    // If the system admin has defined a limit to reusing passwords
-    if (M.config.auth.hasOwnProperty('oldPasswords')) {
-      // Add the current password to the list of old passwords
-      foundUser.oldPasswords.push(foundUser.password);
-
-      // Verify that the new password has not been used in the previous stored passwords
-      const noRepeat = await User.checkOldPasswords(foundUser, newPassword);
-
-      // Ensure old password was verified
-      if (!noRepeat) {
-        throw new M.OperationError('Password has been used too recently.', 'warn');
-      }
-
-      // Trim the list of old passwords if necessary
-      if (foundUser.oldPasswords.length > M.config.auth.oldPasswords) {
-        foundUser.oldPasswords.shift();
-      }
-    }
+    // Verify that the new password has not been used in the previous stored passwords
+    const oldPasswords = await User.checkOldPasswords(foundUser, newPassword);
 
     // Update password on requesting user
     foundUser.password = newPassword;
@@ -1030,7 +1014,7 @@ async function updatePassword(requestingUser, oldPassword, newPassword, confirmP
 
     // Save the user with the updated password
     await User.updateOne(userQuery, { password: foundUser.password,
-      oldPasswords: foundUser.oldPasswords });
+      oldPasswords: oldPasswords });
 
     // Find and return the updated user
     return await User.findOne(userQuery);
