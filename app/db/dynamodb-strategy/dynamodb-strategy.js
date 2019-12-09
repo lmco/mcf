@@ -153,9 +153,10 @@ class Schema {
       GlobalSecondaryIndexes: []
     };
 
-    // Define the definition and populate object
+    // Define the definition, populate object and immutables array
     this.definition = definition;
     this.definition.populate = {};
+    this.definition.immutables = [];
     this.add(definition);
 
     // Define statics and text indexes
@@ -236,6 +237,12 @@ class Schema {
           foreignField: '_id',
           justOne: true
         };
+      }
+
+      // If the property is immutable
+      if (obj[key].hasOwnProperty('immutable') && obj[key].immutable === true) {
+        // Add the the immutables array
+        this.definition.immutables.push(key);
       }
     });
   }
@@ -1688,6 +1695,11 @@ class Model {
    */
   async updateOne(filter, doc, options) {
     try {
+      // Remove all immutable fields
+      Object.keys(doc).forEach((k) => {
+        if (this.definition.immutables.includes(k)) delete doc[k];
+      });
+
       // Get the properly formatted updateItem query
       const updateObj = this.query.update(filter, doc);
 

@@ -649,7 +649,7 @@ async function remove(requestingUser, webhooks, options) {
 
 /**
  * @description A helper function that parses the reference id of a webhook and then
- * checks that the requsting user has permission to access the webhook.
+ * checks that the requesting user has permission to access the webhook.
  *
  * @param {User} reqUser - The model representing the requesting user.
  * @param {Webhook[]} webhooks - An array of webhooks to check permissions for.
