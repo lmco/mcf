@@ -127,6 +127,7 @@ module.exports.validate = function(config) {
   test(config, 'auth.session', 'object');
   test(config, 'auth.session.expires', 'number');
   test(config, 'auth.session.units', 'string');
+  if (config.auth.oldPasswords) test(config, 'auth.oldPasswords', 'number');
 
 
   // ----------------------------- Verify db ----------------------------- //
