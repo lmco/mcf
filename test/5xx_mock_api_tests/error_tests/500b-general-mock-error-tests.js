@@ -37,6 +37,7 @@ const db = M.require('db');
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
 let adminUser = null;
+let nonAdminUser = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -54,8 +55,9 @@ describe(M.getModuleName(module.filename), () => {
       // Connect to the database
       await db.connect();
 
-      // Create test admin
+      // Create test admin and non-admin users
       adminUser = await testUtils.createTestAdmin();
+      nonAdminUser = await testUtils.createNonAdminUser();
     }
     catch (error) {
       M.log.error(error);
@@ -69,8 +71,11 @@ describe(M.getModuleName(module.filename), () => {
    */
   after(async () => {
     try {
-      // Delete test admin
+      // Delete test admin and non-admin users
       await testUtils.removeTestAdmin();
+      await testUtils.removeNonAdminUser();
+
+      // Disconnect from the database
       await db.disconnect();
     }
     catch (error) {
@@ -83,6 +88,7 @@ describe(M.getModuleName(module.filename), () => {
   /* Execute tests */
   it('should reject a GET logs request with no requesting user', noReqUser('getLogs'));
   it('should reject a GET logs request with invalid options', invalidOptions('getLogs'));
+  it('should reject a GET logs request when a non-admin user makes the request', getLogsNonAdmin);
   it('should reject a GET logs request with a limit of 0', limit0);
   it('should reject a GET logs request when the log file does not exist', logFileDoesNotExist);
 });
@@ -167,6 +173,36 @@ function invalidOptions(endpoint) {
     // Sends the mock request
     APIController[endpoint](req, res);
   };
+}
+
+/**
+ * @description Verifies that a GET logs request made by a non admin user
+ * returns the correct error response.
+ *
+ * @param {Function} done - The mocha callback.
+ */
+function getLogsNonAdmin(done) {
+  // Create request object
+  const params = {};
+  const method = 'GET';
+  const req = testUtils.createRequest(nonAdminUser, params, {}, method);
+
+  // Create response object
+  const res = {};
+  testUtils.createResponse(res);
+
+  // Verifies the response data
+  res.send = function send(_data) {
+    // Expect a 403 status and specific error message
+    res.statusCode.should.equal(403);
+    _data.should.equal('User does not have permission to view system logs.');
+
+    // Ensure the response was logged correctly
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+  };
+
+  // GETs the system logs
+  APIController.getLogs(req, res);
 }
 
 /**
