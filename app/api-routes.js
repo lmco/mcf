@@ -150,6 +150,7 @@ api.route('/version')
  *                      will be treated as 0.
  *         in: query
  *         type: number
+ *         default: 0
  *       - name: limit
  *         description: Limits the number of lines returned. The default is 1000
  *                      lines. A limit of less than 0 will return ALL log
@@ -163,10 +164,9 @@ api.route('/version')
  *         in: query
  *         type: boolean
  *         default: false
-
  *     responses:
  *       200:
- *         description: OK, Succeeded to GET the logs
+ *         description: OK, Succeeded to GET the logs.
  *       400:
  *         description: Bad Request, Failed to GET logs due to improperly
  *                      formatted query options.

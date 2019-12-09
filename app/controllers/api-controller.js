@@ -336,8 +336,13 @@ function getLogs(req, res) {
   const numLines = logContent.split('\n').length;
 
   // If limit is -1, all log content should be returned
-  if (options.limit === -1) {
+  if (options.limit < 0) {
     returnedLines = logContent.split('\n');
+  }
+  // Return error if limit of 0 is supplied
+  else if (options.limit === 0) {
+    const error = new M.DataFormatError('A limit of 0 is not allowed.', 'warn');
+    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
   else {
     // Ensure skip option is in correct range
