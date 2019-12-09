@@ -153,11 +153,11 @@ function loadPlugins() {
             if (middleware[m].post) pluginFunctions[m].post.push(middleware[m].post);
           }
           else {
-            M.log.warn(`Plugin middleware for api endpoint [${m}] not supported`);
+            M.log.warn(`Plugin middleware for api function [${m}] not supported`);
           }
         }
         else {
-          M.log.warn(`Skipping plugin middleware for api endpoint [${m}] due to invalid format`);
+          M.log.warn(`Skipping plugin middleware for api function [${m}] due to invalid format`);
         }
       });
     }
