@@ -51,6 +51,9 @@ if (!AuthModule.hasOwnProperty('doLogin')) {
 async function authenticate(req, res, next) {
   // Extract authorization metadata
   const authorization = req.headers.authorization;
+  // Delete the authorization field from the request object to protect security-sensitive data
+  // from subsequent middleware
+  delete req.headers.authorization;
   let username = null;
   let password = null;
   let error = {};
