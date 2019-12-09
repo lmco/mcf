@@ -155,7 +155,7 @@ const ElementSchema = new db.Schema({
       message: props => `${props.value} is not a valid source ID.`
     }, {
       validator: validators.element.source.target,
-      message: 'Target is required if source is provided.'
+      message: props => 'Target is required if source is provided.'
     }]
   },
   target: {
