@@ -164,7 +164,7 @@ function noReqUser(endpoint) {
       res.statusCode.should.equal(500);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // Sends the mock request
@@ -204,7 +204,7 @@ function invalidOptions(endpoint) {
       res.statusCode.should.equal(400);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // Sends the mock request
@@ -243,7 +243,7 @@ function conflictingIDs(endpoint) {
       res.statusCode.should.equal(400);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // Sends the mock request
@@ -286,7 +286,7 @@ function notFound(endpoint) {
       res.statusCode.should.equal(404);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // Sends the mock request
@@ -324,7 +324,7 @@ function noArrays(endpoint) {
       res.statusCode.should.equal(400);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // Sends the mock request
@@ -388,7 +388,7 @@ function badPasswordInput(type) {
       res.statusCode.should.equal(code);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // Sends the mock request

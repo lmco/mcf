@@ -90,7 +90,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should reject a GET logs request with invalid options', invalidOptions('getLogs'));
   it('should reject a GET logs request when a non-admin user makes the request', getLogsNonAdmin);
   it('should reject a GET logs request with a limit of 0', limit0);
-  it('should reject a GET logs request when the log file does not exist', logFileDoesNotExist);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -126,7 +125,7 @@ function noReqUser(endpoint) {
       res.statusCode.should.equal(500);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // Sends the mock request
@@ -167,7 +166,7 @@ function invalidOptions(endpoint) {
       res.statusCode.should.equal(400);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // Sends the mock request
@@ -198,7 +197,7 @@ function getLogsNonAdmin(done) {
     _data.should.equal('User does not have permission to view system logs.');
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // GETs the system logs
@@ -229,61 +228,9 @@ function limit0(done) {
     _data.should.equal('A limit of 0 is not allowed.');
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // GETs the system logs
   APIController.getLogs(req, res);
-}
-
-/**
- * @description Verifies that a GET logs request returns the correct error
- * response when the server log file does not exist.
- *
- * @param {Function} done - The mocha callback.
- */
-function logFileDoesNotExist(done) {
-  const tempLogFilePath = path.join(M.root, 'logs', '500b-temp-log-file.log');
-  const logFilePath = path.join(M.root, 'logs', M.config.log.file);
-
-  // If the temp file already exists, skip the test
-  if (fs.existsSync(tempLogFilePath)) {
-    M.log.verbose('Skipping test due to pre-existing temporary log file.');
-    this.skip();
-  }
-  else {
-    // Copy the server log file to a backup
-    fs.copyFileSync(logFilePath, tempLogFilePath);
-
-    // Delete the server log
-    fs.unlinkSync(logFilePath);
-
-    // Create request object
-    const params = {};
-    const method = 'GET';
-    const req = testUtils.createRequest(adminUser, params, {}, method);
-
-    // Create response object
-    const res = {};
-    testUtils.createResponse(res);
-
-    // Verifies the response data
-    res.send = function send(_data) {
-      // Recreate the server log and delete the temp file
-      // Copy the server log file to a backup
-      fs.copyFileSync(tempLogFilePath, logFilePath);
-      fs.unlinkSync(tempLogFilePath);
-
-      // Expect a 500 status and specific error message
-      res.statusCode.should.equal(500);
-      _data.should.equal('Server log file does not exist.');
-
-      // Intentionally does not test the server response because the log file
-      //  does not exist at the time the response is logged
-      done();
-    };
-
-    // GETs the system logs
-    APIController.getLogs(req, res);
-  }
 }

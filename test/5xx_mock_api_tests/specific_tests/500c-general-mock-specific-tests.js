@@ -31,11 +31,13 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 // MBEE modules
 const APIController = M.require('controllers.api-controller');
 const db = M.require('db');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
 let adminUser = null;
+const logFilePath = path.join(M.root, 'logs', M.config.log.file);
 
 /* --------------------( Main )-------------------- */
 /**
@@ -96,6 +98,12 @@ describe(M.getModuleName(module.filename), () => {
  * @param {Function} done - The mocha callback.
  */
 function getLogsPositiveLimit(done) {
+  // Ensure there is enough memory to run this test
+  if (!utils.readFileCheck(logFilePath)) {
+    M.log.verbose('Skipping this test due to a lack of sufficient memory.');
+    this.skip();
+  }
+
   // Create request object
   const params = {};
   const method = 'GET';
@@ -115,7 +123,7 @@ function getLogsPositiveLimit(done) {
     chai.expect(_data.split('\n').length).to.equal(req.query.limit);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // GETs the system logs
@@ -129,6 +137,12 @@ function getLogsPositiveLimit(done) {
  * @param {Function} done - The mocha callback.
  */
 function getLogsNegativeLimit(done) {
+  // Ensure there is enough memory to run this test
+  if (!utils.readFileCheck(logFilePath)) {
+    M.log.verbose('Skipping this test due to a lack of sufficient memory.');
+    this.skip();
+  }
+
   // Create request object
   const params = {};
   const method = 'GET';
@@ -145,13 +159,12 @@ function getLogsNegativeLimit(done) {
     res.statusCode.should.equal(200);
 
     // Read the log file
-    const logPath = path.join(M.root, 'logs', M.config.log.file);
-    const logContent = fs.readFileSync(logPath).toString();
+    const logContent = fs.readFileSync(logFilePath).toString();
 
     chai.expect(logContent).to.equal(_data);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // GETs the system logs
@@ -165,6 +178,12 @@ function getLogsNegativeLimit(done) {
  * @param {Function} done - The mocha callback.
  */
 function getLogsSkip(done) {
+  // Ensure there is enough memory to run this test
+  if (!utils.readFileCheck(logFilePath)) {
+    M.log.verbose('Skipping this test due to a lack of sufficient memory.');
+    this.skip();
+  }
+
   // Create request object
   const params = {};
   const method = 'GET';
@@ -181,8 +200,7 @@ function getLogsSkip(done) {
     res.statusCode.should.equal(200);
 
     // Read the log file
-    const logPath = path.join(M.root, 'logs', M.config.log.file);
-    const logContent = fs.readFileSync(logPath).toString().split('\n');
+    const logContent = fs.readFileSync(logFilePath).toString().split('\n');
 
     // Expect the number of lines skipped NOT to be in _data
     chai.expect(_data).to.not.include(logContent.slice(0, req.query.skip).join('\n'));
@@ -190,7 +208,7 @@ function getLogsSkip(done) {
     chai.expect(_data).to.include(logContent[req.query.skip]);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // GETs the system logs
@@ -204,6 +222,12 @@ function getLogsSkip(done) {
  * @param {Function} done - The mocha callback.
  */
 function getLogsColorRemoved(done) {
+  // Ensure there is enough memory to run this test
+  if (!utils.readFileCheck(logFilePath)) {
+    M.log.verbose('Skipping this test due to a lack of sufficient memory.');
+    this.skip();
+  }
+
   // Create request object
   const params = {};
   const method = 'GET';
@@ -227,7 +251,7 @@ function getLogsColorRemoved(done) {
     chai.expect(_data).to.satisfy(s => colorChars.every(c => !s.includes(c)));
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // GETs the system logs

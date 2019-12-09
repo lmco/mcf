@@ -316,15 +316,30 @@ function getLogs(req, res) {
     // Set limit and skip options if not already set
     if (!options.hasOwnProperty('limit')) options.limit = 1000;
     if (!options.skip) options.skip = 0;
+
+    // Return error if limit of 0 is supplied
+    if (options.limit === 0) {
+      throw new M.DataFormatError('A limit of 0 is not allowed.', 'warn');
+    }
   }
   catch (error) {
     // Error occurred with options, report it
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-  // Read the log file
+
   const logPath = path.join(M.root, 'logs', M.config.log.file);
+
+  // Read the log file
   if (fs.existsSync(logPath)) {
+    // Ensure that there is enough memory to read the log file
+    if (!utils.readFileCheck(logPath)) {
+      const error = new M.ServerError('There is not enough memory to read the log'
+        + ' file. Please consider restarting the process with the flag '
+        + '--max-old-space-size.', 'error');
+      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    }
+
     logContent = fs.readFileSync(logPath).toString();
   }
   else {
@@ -338,11 +353,6 @@ function getLogs(req, res) {
   // If limit is -1, all log content should be returned
   if (options.limit < 0) {
     returnedLines = logContent.split('\n');
-  }
-  // Return error if limit of 0 is supplied
-  else if (options.limit === 0) {
-    const error = new M.DataFormatError('A limit of 0 is not allowed.', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
   else {
     // Ensure skip option is in correct range

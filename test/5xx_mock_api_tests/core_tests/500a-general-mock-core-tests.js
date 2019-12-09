@@ -25,11 +25,13 @@ const chai = require('chai');
 // MBEE modules
 const APIController = M.require('controllers.api-controller');
 const db = M.require('db');
+const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
 let adminUser = null;
+const logFilePath = path.join(M.root, 'logs', M.config.log.file);
 
 /* --------------------( Main )-------------------- */
 /**
@@ -84,6 +86,12 @@ describe(M.getModuleName(module.filename), () => {
  * @param {Function} done - The mocha callback.
  */
 function getLogs(done) {
+  // Ensure there is enough memory to run this test
+  if (!utils.readFileCheck(logFilePath)) {
+    M.log.verbose('Skipping this test due to a lack of sufficient memory.');
+    this.skip();
+  }
+
   // Create request object
   const params = {};
   const method = 'GET';
@@ -96,16 +104,15 @@ function getLogs(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Read log file content
-    const logPath = path.join(M.root, 'logs', M.config.log.file);
-    if (fs.existsSync(logPath)) {
-      const logContent = fs.readFileSync(logPath);
+    if (fs.existsSync(logFilePath)) {
+      const logContent = fs.readFileSync(logFilePath);
 
       // Ensure that the content returned is part of the main server log
       chai.expect(logContent.toString()).to.include(_data);
     }
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // GETs the system logs

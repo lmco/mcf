@@ -201,7 +201,7 @@ function post(reference) {
       webhookIDs.push(createdWebhook.id);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // POSTs a webhook
@@ -315,7 +315,7 @@ function postMany(reference) {
       chai.expect(res.statusCode).to.equal(200);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // POSTs a webhook
@@ -421,7 +421,7 @@ function getAll(reference) {
       chai.expect(res.statusCode).to.equal(200);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // GETs all webhooks at a reference level
@@ -509,7 +509,7 @@ function patch(reference) {
       chai.expect(res.statusCode).to.equal(200);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // PATCHes a webhook
@@ -615,7 +615,7 @@ function patchMany(reference) {
       chai.expect(res.statusCode).to.equal(200);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // PATCHes multiple webhooks
@@ -667,7 +667,7 @@ function remove(reference) {
       chai.expect(res.statusCode).to.equal(200);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // DELETEs a webhook
@@ -719,7 +719,7 @@ function removeMany(reference) {
       chai.expect(res.statusCode).to.equal(200);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // DELETEs a webhook
