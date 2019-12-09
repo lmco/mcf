@@ -188,7 +188,8 @@ const WebhookSchema = new db.Schema({
       validator: validators.webhook.reference,
       message: props => `Invalid reference id ${props.value}: reference must `
         + 'either be an empty string or match an org, project, or branch id.'
-    }]
+    }],
+    default: ''
   }
 });
 

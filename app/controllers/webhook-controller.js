@@ -635,7 +635,7 @@ async function remove(requestingUser, webhooks, options) {
     await checkPermissions(reqUser, foundWebhooks, 'deleteWebhook');
 
     // Delete the webhooks
-    await Webhook.deleteMany({ _id: webhooksToDelete });
+    await Webhook.deleteMany({ _id: { $in: webhooksToDelete } });
 
     // Emit event for webhook deletion
     EventEmitter.emit('webhooks-deleted', foundWebhooks);
