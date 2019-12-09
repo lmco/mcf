@@ -1,6 +1,45 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.10.3] - 2019-12-06
+### Major Features and Improvements
+* Added page in UI for managing Artifacts. Allows the user to create,
+  edit and delete artifacts on different branches
+* Added support for webhooks. Webhooks can be created at the organization,
+  project, branch and server levels. Webhooks can be triggered internally
+  through the Node.js event system or externally through a URL
+* Added the ability to run Mocha tests written in plugins. Any tests defined
+  in a `tests` directory at the root of the plugin can be run by running the
+  command `node mbee test --plugin {pluginName}` where `pluginName` is the
+  name of the plugin defined in the config
+
+### Bug Fixes and Other Changes
+* Added the virtual field `referencedBy` to artifacts. If populated, returns
+  all elements which reference the artifact
+* Increased error testing coverage of branch and element controllers
+
+### Configuration Changes
+* Added the optional field `testOnStartup` to plugins. If this boolean value
+  is true, the tests in the plugin will be run when it is built at server
+  startup. This option can be defined for each plugin that is installed
+```json
+{
+  "plugins": {
+    "enabled": true,
+    "plugins": {
+      "sample-plugin": {
+        "source": "path/to/sample/plugin",
+        "testOnStartup": true
+      },
+      "test-plugin": {
+        "source": "path/to/test/plugin",
+        "testOnStartup": false
+      }
+    }
+  }
+}
+```
+
 ## [0.10.2] - 2019-11-22
 ### Major Features and Improvements
 * Abstracted out database migrations to support the database abstraction layer.
