@@ -153,38 +153,6 @@ function formatJSON(obj, minified = false) {
 }
 
 /**
- * @description This is a utility function that formats an object as JSON.
- * This function is used for formatting all API responses.
- *
- * @param {object} req - The request object.
- * @param {object} res - The response object.
- * @param {string} message - The response message or error message.
- * @param {number} statusCode - The status code for the response.
- * @param {string} [contentType="application/json"] - The content type for
- * the response.
- *
- * @returns {object} The response object.
- */
-function returnResponse(req, res, message, statusCode,
-  contentType = 'application/json') {
-  if (statusCode === 200) {
-    // We send these headers for a success response
-    res.header('Content-Type', contentType);
-  }
-  else {
-    // We send these headers for an error response
-    res.header('Content-Type', 'text/plain');
-  }
-
-  // Send the message
-  res.status(statusCode).send(message);
-  // Log the response
-  logger.logResponse(message.length, req, res);
-  // Return res
-  return res;
-}
-
-/**
  * @description Generates the Swagger specification based on the Swagger JSDoc
  * in the API routes file.
  *
@@ -218,7 +186,7 @@ function swaggerSpec() {
 function swaggerJSON(req, res) {
   // Return swagger specification
   const json = formatJSON(swaggerSpec());
-  return returnResponse(req, res, json, 200);
+  return utils.returnResponse(req, res, json, 200);
 }
 
 /**
@@ -233,7 +201,7 @@ function swaggerJSON(req, res) {
  */
 function login(req, res) {
   const json = formatJSON({ token: req.session.token });
-  return returnResponse(req, res, json, 200);
+  return utils.returnResponse(req, res, json, 200);
 }
 
 /**
@@ -267,7 +235,7 @@ function version(req, res) {
   });
 
   // Return version object
-  return returnResponse(req, res, json, 200);
+  return utils.returnResponse(req, res, json, 200);
 }
 
 /* ----------------------( Organization API Endpoints )---------------------- */
@@ -329,7 +297,7 @@ async function getOrgs(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check query for ids
@@ -378,7 +346,7 @@ async function getOrgs(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -416,7 +384,7 @@ async function postOrgs(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -434,7 +402,7 @@ async function postOrgs(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   }
   else {
@@ -462,7 +430,7 @@ async function postOrgs(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -501,7 +469,7 @@ async function putOrgs(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -519,7 +487,7 @@ async function putOrgs(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   }
   else {
@@ -547,7 +515,7 @@ async function putOrgs(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -585,7 +553,7 @@ async function patchOrgs(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -603,7 +571,7 @@ async function patchOrgs(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   }
   else {
@@ -631,7 +599,7 @@ async function patchOrgs(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -669,7 +637,7 @@ async function deleteOrgs(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If req.body contains objects, grab the org IDs from the objects
@@ -698,7 +666,7 @@ async function deleteOrgs(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -737,7 +705,7 @@ async function getOrg(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -774,7 +742,7 @@ async function getOrg(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -809,7 +777,7 @@ async function postOrg(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -817,7 +785,7 @@ async function postOrg(req, res, next) {
     const error = new M.DataFormatError(
       'Organization ID in the body does not match ID in the params.', 'warn'
     );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -827,7 +795,7 @@ async function postOrg(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Set the org ID in the body equal req.params.orgid
@@ -860,7 +828,7 @@ async function postOrg(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -895,7 +863,7 @@ async function putOrg(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -903,7 +871,7 @@ async function putOrg(req, res, next) {
     const error = new M.DataFormatError(
       'Organization ID in the body does not match ID in the params.', 'warn'
     );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -913,7 +881,7 @@ async function putOrg(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Set the org ID in the body equal req.params.orgid
@@ -946,7 +914,7 @@ async function putOrg(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -980,7 +948,7 @@ async function patchOrg(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -988,7 +956,7 @@ async function patchOrg(req, res, next) {
     const error = new M.DataFormatError(
       'Organization ID in the body does not match ID in the params.', 'warn'
     );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -998,7 +966,7 @@ async function patchOrg(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Set body org id
@@ -1031,7 +999,7 @@ async function patchOrg(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1068,7 +1036,7 @@ async function deleteOrg(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -1095,7 +1063,7 @@ async function deleteOrg(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1154,7 +1122,7 @@ async function getAllProjects(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -1187,7 +1155,7 @@ async function getAllProjects(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1248,7 +1216,7 @@ async function getProjects(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check if ids was provided in the request query
@@ -1298,7 +1266,7 @@ async function getProjects(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1336,7 +1304,7 @@ async function postProjects(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -1354,7 +1322,7 @@ async function postProjects(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   }
   else {
@@ -1382,7 +1350,7 @@ async function postProjects(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1421,7 +1389,7 @@ async function putProjects(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -1439,7 +1407,7 @@ async function putProjects(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   }
   else {
@@ -1467,7 +1435,7 @@ async function putProjects(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1505,7 +1473,7 @@ async function patchProjects(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -1523,7 +1491,7 @@ async function patchProjects(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   }
   else {
@@ -1551,7 +1519,7 @@ async function patchProjects(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1589,7 +1557,7 @@ async function deleteProjects(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If req.body contains objects, grab the project IDs from the objects
@@ -1621,7 +1589,7 @@ async function deleteProjects(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1660,7 +1628,7 @@ async function getProject(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -1697,7 +1665,7 @@ async function getProject(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1732,7 +1700,7 @@ async function postProject(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
@@ -1740,7 +1708,7 @@ async function postProject(req, res, next) {
     const error = new M.DataFormatError(
       'Project ID in the body does not match ID in the params.', 'warn'
     );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -1750,7 +1718,7 @@ async function postProject(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Set the projectid in req.body in case it wasn't provided
@@ -1782,7 +1750,7 @@ async function postProject(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1817,7 +1785,7 @@ async function putProject(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
@@ -1825,7 +1793,7 @@ async function putProject(req, res, next) {
     const error = new M.DataFormatError(
       'Project ID in the body does not match ID in the params.', 'warn'
     );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -1835,7 +1803,7 @@ async function putProject(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Set the orgid in req.body in case it wasn't provided
@@ -1868,7 +1836,7 @@ async function putProject(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1902,7 +1870,7 @@ async function patchProject(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
@@ -1910,7 +1878,7 @@ async function patchProject(req, res, next) {
     const error = new M.DataFormatError(
       'Project ID in the body does not match ID in the params.', 'warn'
     );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -1920,7 +1888,7 @@ async function patchProject(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Set the orgid in req.body in case it wasn't provided
@@ -1953,7 +1921,7 @@ async function patchProject(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -1990,7 +1958,7 @@ async function deleteProject(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -2018,7 +1986,7 @@ async function deleteProject(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2071,7 +2039,7 @@ async function getUsers(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Set usernames to undefined
@@ -2126,7 +2094,7 @@ async function getUsers(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2165,7 +2133,7 @@ async function postUsers(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -2183,7 +2151,7 @@ async function postUsers(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   }
   else {
@@ -2210,7 +2178,7 @@ async function postUsers(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2249,7 +2217,7 @@ async function putUsers(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -2267,7 +2235,7 @@ async function putUsers(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   }
   else {
@@ -2294,7 +2262,7 @@ async function putUsers(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2333,7 +2301,7 @@ async function patchUsers(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -2351,7 +2319,7 @@ async function patchUsers(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   }
   else {
@@ -2378,7 +2346,7 @@ async function patchUsers(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2416,7 +2384,7 @@ async function deleteUsers(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -2441,7 +2409,7 @@ async function deleteUsers(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2480,7 +2448,7 @@ async function getUser(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -2519,7 +2487,7 @@ async function getUser(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2554,7 +2522,7 @@ async function postUser(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If username was provided in the body, ensure it matches username in params
@@ -2562,7 +2530,7 @@ async function postUser(req, res, next) {
     const error = new M.DataFormatError(
       'Username in body does not match username in params.', 'warn'
     );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Set the username in req.body in case it wasn't provided
@@ -2575,7 +2543,7 @@ async function postUser(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -2604,7 +2572,7 @@ async function postUser(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2639,7 +2607,7 @@ async function putUser(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If username was provided in the body, ensure it matches username in params
@@ -2647,7 +2615,7 @@ async function putUser(req, res, next) {
     const error = new M.DataFormatError(
       'Username in body does not match username in params.', 'warn'
     );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Set the username in req.body in case it wasn't provided
@@ -2660,7 +2628,7 @@ async function putUser(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -2689,7 +2657,7 @@ async function putUser(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2724,7 +2692,7 @@ async function patchUser(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If username was provided in the body, ensure it matches username in params
@@ -2732,7 +2700,7 @@ async function patchUser(req, res, next) {
     const error = new M.DataFormatError(
       'Username in body does not match username in params.', 'warn'
     );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -2742,7 +2710,7 @@ async function patchUser(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Set body username
@@ -2774,7 +2742,7 @@ async function patchUser(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2807,7 +2775,7 @@ async function deleteUser(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -2817,7 +2785,7 @@ async function deleteUser(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -2844,7 +2812,7 @@ async function deleteUser(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -2880,7 +2848,7 @@ async function whoami(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -2944,7 +2912,7 @@ async function searchUsers(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for q (query)
@@ -2987,7 +2955,7 @@ async function searchUsers(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3018,25 +2986,25 @@ async function patchPassword(req, res) {
   // Ensure old password was provided
   if (!req.body.oldPassword) {
     const error = new M.DataFormatError('Old password not in request body.', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Ensure new password was provided
   if (!req.body.password) {
     const error = new M.DataFormatError('New password not in request body.', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Ensure confirmed password was provided
   if (!req.body.confirmPassword) {
     const error = new M.DataFormatError('Confirmed password not in request body.', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Ensure user is not trying to change another user's password
   if (req.user._id !== req.params.username) {
     const error = new M.OperationError('Cannot change another user\'s password.', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -3046,7 +3014,7 @@ async function patchPassword(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -3067,11 +3035,11 @@ async function patchPassword(req, res) {
     const json = formatJSON(publicUserData, minified);
 
     // Returns 200: OK and the updated user's public data
-    return returnResponse(req, res, json, 200);
+    return utils.returnResponse(req, res, json, 200);
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3139,7 +3107,7 @@ async function getElements(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check query for element IDs
@@ -3163,7 +3131,7 @@ async function getElements(req, res, next) {
     if (!validFormats.includes(options.format)) {
       const error = new M.DataFormatError(`The format ${options.format} is not a `
         + 'valid format.', 'warn');
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
     format = options.format;
     delete options.format;
@@ -3212,7 +3180,7 @@ async function getElements(req, res, next) {
         const json = formatJSON(jmiData, minified);
 
         // Return a 200: OK and public JMI type 3 element data
-        return returnResponse(req, res, json, 200);
+        return utils.returnResponse(req, res, json, 200);
       }
       catch (err) {
         throw err;
@@ -3231,7 +3199,7 @@ async function getElements(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3270,7 +3238,7 @@ async function postElements(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -3288,7 +3256,7 @@ async function postElements(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   }
   else {
@@ -3316,7 +3284,7 @@ async function postElements(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3355,7 +3323,7 @@ async function putElements(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -3373,7 +3341,7 @@ async function putElements(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   }
   else {
@@ -3401,7 +3369,7 @@ async function putElements(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3439,7 +3407,7 @@ async function patchElements(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -3457,7 +3425,7 @@ async function patchElements(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   }
   else {
@@ -3485,7 +3453,7 @@ async function patchElements(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3522,7 +3490,7 @@ async function deleteElements(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -3550,7 +3518,7 @@ async function deleteElements(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3614,7 +3582,7 @@ async function searchElements(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for q (query)
@@ -3655,7 +3623,7 @@ async function searchElements(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3696,7 +3664,7 @@ async function getElement(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -3738,7 +3706,7 @@ async function getElement(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3772,7 +3740,7 @@ async function postElement(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -3780,7 +3748,7 @@ async function postElement(req, res, next) {
     const error = new M.DataFormatError(
       'Element ID in the body does not match ID in the params.', 'warn'
     );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -3790,7 +3758,7 @@ async function postElement(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Set the element ID in the body equal req.params.elementid
@@ -3823,7 +3791,7 @@ async function postElement(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3858,7 +3826,7 @@ async function putElement(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -3866,7 +3834,7 @@ async function putElement(req, res, next) {
     const error = new M.DataFormatError(
       'Element ID in the body does not match ID in the params.', 'warn'
     );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -3876,7 +3844,7 @@ async function putElement(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Set the element ID in the body equal req.params.elementid
@@ -3909,7 +3877,7 @@ async function putElement(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -3943,7 +3911,7 @@ async function patchElement(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -3951,7 +3919,7 @@ async function patchElement(req, res, next) {
     const error = new M.DataFormatError(
       'Element ID in the body does not match ID in the params.', 'warn'
     );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -3961,7 +3929,7 @@ async function patchElement(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Set the element ID in the body equal req.params.elementid
@@ -3994,7 +3962,7 @@ async function patchElement(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4030,7 +3998,7 @@ async function deleteElement(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -4058,7 +4026,7 @@ async function deleteElement(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4120,7 +4088,7 @@ async function getBranches(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check query for branch IDs
@@ -4169,7 +4137,7 @@ async function getBranches(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4207,7 +4175,7 @@ async function postBranches(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -4225,7 +4193,7 @@ async function postBranches(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   }
   else {
@@ -4253,7 +4221,7 @@ async function postBranches(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4291,7 +4259,7 @@ async function patchBranches(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -4309,7 +4277,7 @@ async function patchBranches(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   }
   else {
@@ -4337,7 +4305,7 @@ async function patchBranches(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4374,7 +4342,7 @@ async function deleteBranches(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If req.body contains objects, grab the branch IDs from the objects
@@ -4406,7 +4374,7 @@ async function deleteBranches(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4445,7 +4413,7 @@ async function getBranch(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -4482,7 +4450,7 @@ async function getBranch(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4516,7 +4484,7 @@ async function postBranch(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -4524,7 +4492,7 @@ async function postBranch(req, res, next) {
     const error = new M.DataFormatError(
       'Branch ID in the body does not match ID in the params.', 'warn'
     );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -4534,7 +4502,7 @@ async function postBranch(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Set the branch ID in the body equal req.params.branchid
@@ -4567,7 +4535,7 @@ async function postBranch(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4601,7 +4569,7 @@ async function patchBranch(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -4609,7 +4577,7 @@ async function patchBranch(req, res, next) {
     const error = new M.DataFormatError(
       'Branch ID in the body does not match ID in the params.', 'warn'
     );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -4619,7 +4587,7 @@ async function patchBranch(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Set the branch ID in the body equal req.params.branchid
@@ -4652,7 +4620,7 @@ async function patchBranch(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4689,7 +4657,7 @@ async function deleteBranch(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -4717,7 +4685,7 @@ async function deleteBranch(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4769,7 +4737,7 @@ async function getArtifacts(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check query for artifact IDs
@@ -4793,7 +4761,7 @@ async function getArtifacts(req, res, next) {
     if (!validFormats.includes(options.format)) {
       const error = new M.DataFormatError(`The format ${options.format} is not a `
         + 'valid format.', 'warn');
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
     format = options.format;
     delete options.format;
@@ -4839,7 +4807,7 @@ async function getArtifacts(req, res, next) {
         const json = formatJSON(jmiData, minified);
 
         // Return a 200: OK and public JMI artifact data
-        return returnResponse(req, res, json, 200);
+        return utils.returnResponse(req, res, json, 200);
       }
       catch (err) {
         throw err;
@@ -4858,7 +4826,7 @@ async function getArtifacts(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4897,7 +4865,7 @@ async function postArtifacts(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -4915,7 +4883,7 @@ async function postArtifacts(req, res, next) {
     }
     catch (error) {
       // Error occurred, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   }
   else {
@@ -4943,7 +4911,7 @@ async function postArtifacts(req, res, next) {
     next();
   }
   catch (error) {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -4981,7 +4949,7 @@ async function patchArtifacts(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -4999,7 +4967,7 @@ async function patchArtifacts(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   }
   else {
@@ -5029,7 +4997,7 @@ async function patchArtifacts(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -5066,7 +5034,7 @@ async function deleteArtifacts(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -5093,7 +5061,7 @@ async function deleteArtifacts(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -5132,7 +5100,7 @@ async function getArtifact(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -5170,7 +5138,7 @@ async function getArtifact(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -5208,7 +5176,7 @@ async function postArtifact(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -5220,7 +5188,7 @@ async function postArtifact(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If artifact ID was provided in the body, ensure it matches artifact ID in params
@@ -5228,7 +5196,7 @@ async function postArtifact(req, res, next) {
     const error = new M.DataFormatError(
       'Artifact ID in the body does not match ID in the params.', 'warn'
     );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Set the artifact ID in the body equal req.params.artifactid
@@ -5254,7 +5222,7 @@ async function postArtifact(req, res, next) {
     next();
   }
   catch (error) {
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -5292,7 +5260,7 @@ async function patchArtifact(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -5304,7 +5272,7 @@ async function patchArtifact(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Sanitize body
@@ -5315,7 +5283,7 @@ async function patchArtifact(req, res, next) {
     const error = new M.DataFormatError(
       'Artifact ID in the body does not match ID in the params.', 'warn'
     );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Set the artifact ID in the body equal req.params.artifactid
@@ -5343,7 +5311,7 @@ async function patchArtifact(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -5379,7 +5347,7 @@ async function deleteArtifact(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -5406,7 +5374,7 @@ async function deleteArtifact(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -5443,7 +5411,7 @@ async function getBlob(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -5468,13 +5436,13 @@ async function postBlob(req, res, next) {
       // A Multer error occurred when uploading.
       M.log.error(err);
       const error = new M.ServerError('Artifact upload failed.', 'warn');
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
 
     // Sanity Check: file is required
     if (!req.file) {
       const error = new M.DataFormatError('Artifact Blob file must be defined.', 'warn');
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
 
     try {
@@ -5495,7 +5463,7 @@ async function postBlob(req, res, next) {
       next();
     }
     catch (error) {
-      return returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
     }
   });
 }
@@ -5535,7 +5503,7 @@ async function deleteBlob(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -5571,7 +5539,7 @@ async function getBlobById(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   try {
@@ -5606,7 +5574,7 @@ async function getBlobById(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -5666,7 +5634,7 @@ async function getWebhooks(req, res, next) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -5676,7 +5644,7 @@ async function getWebhooks(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check query for webhook IDs
@@ -5725,7 +5693,7 @@ async function getWebhooks(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -5756,7 +5724,7 @@ async function postWebhooks(req, res, next) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -5766,7 +5734,7 @@ async function postWebhooks(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -5796,7 +5764,7 @@ async function postWebhooks(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -5827,7 +5795,7 @@ async function patchWebhooks(req, res, next) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -5837,7 +5805,7 @@ async function patchWebhooks(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -5867,7 +5835,7 @@ async function patchWebhooks(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -5896,7 +5864,7 @@ async function deleteWebhooks(req, res, next) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -5906,7 +5874,7 @@ async function deleteWebhooks(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -5931,7 +5899,7 @@ async function deleteWebhooks(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -5963,7 +5931,7 @@ async function getWebhook(req, res, next) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -5973,7 +5941,7 @@ async function getWebhook(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -6011,7 +5979,7 @@ async function getWebhook(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -6042,13 +6010,13 @@ async function patchWebhook(req, res, next) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // If there's a webhookid in the body, check that it matches the params
@@ -6056,7 +6024,7 @@ async function patchWebhook(req, res, next) {
     const error = new M.DataFormatError(
       'Webhook ID in body does not match webhook ID in params.', 'warn'
     );
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
   // Set body id to params id
   req.body.id = req.params.webhookid;
@@ -6068,7 +6036,7 @@ async function patchWebhook(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -6099,7 +6067,7 @@ async function patchWebhook(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -6128,7 +6096,7 @@ async function deleteWebhook(req, res, next) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     const error = new M.ServerError('Request Failed');
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Attempt to parse query options
@@ -6138,7 +6106,7 @@ async function deleteWebhook(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
   // Check options for minified
@@ -6163,7 +6131,7 @@ async function deleteWebhook(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -6239,7 +6207,7 @@ async function triggerWebhook(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
@@ -6256,7 +6224,7 @@ async function triggerWebhook(req, res, next) {
  */
 function invalidRoute(req, res) {
   const json = 'Invalid Route or Method.';
-  return returnResponse(req, res, json, 404);
+  return utils.returnResponse(req, res, json, 404);
 }
 
 /**
@@ -6271,5 +6239,5 @@ function invalidRoute(req, res) {
 function noUserError(req, res) {
   M.log.critical('No requesting user available.');
   const error = new M.ServerError('Request Failed');
-  return returnResponse(req, res, error.message, errors.getStatusCode(error));
+  return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
 }
