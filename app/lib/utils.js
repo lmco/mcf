@@ -222,10 +222,10 @@ module.exports.parseOptions = function(options, validOptions) {
     // Check option of boolean type
     if (validOptions[option] === 'boolean') {
       // Check and convert string to boolean
-      if (options[option] === 'true') {
+      if (options[option] === 'true' || options[option] === true) {
         parsedOptions[option] = true;
       }
-      else if (options[option] === 'false') {
+      else if (options[option] === 'false' || options[option] === false) {
         parsedOptions[option] = false;
       }
       else if (!(typeof options[option] === 'boolean')) {
