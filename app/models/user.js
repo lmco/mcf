@@ -154,6 +154,10 @@ const UserSchema = new db.Schema({
   failedlogins: {
     type: 'Object',
     default: []
+  },
+  oldPasswords: {
+    type: 'Object',
+    default: []
   }
 });
 
@@ -170,17 +174,11 @@ UserSchema.plugin(extensions);
  * @memberOf UserSchema
  */
 UserSchema.static('verifyPassword', function(user, pass) {
-  return new Promise((resolve, reject) => {
-    // Hash the input plaintext password
-    crypto.pbkdf2(pass, user._id.toString(), 1000, 32, 'sha256', (err, derivedKey) => {
-      // If err, reject it
-      if (err) reject(err);
-
-      // Compare the hashed input password with the stored hashed password
-      // and return it.
-      return resolve(derivedKey.toString('hex') === user.password);
-    });
-  });
+  // Hash the input plaintext password
+  const derivedKey = crypto.pbkdf2Sync(pass, user._id.toString(), 1000, 32, 'sha256');
+  // Compare the hashed input password with the stored hashed password
+  // and return it.
+  return derivedKey.toString('hex') === user.password;
 });
 
 /**
@@ -207,7 +205,7 @@ UserSchema.static('hashPassword', function(obj) {
   // Require auth module
   const AuthController = M.require('lib.auth');
 
-  // If the provider is not defined, set it the the default, its needed for this fxn
+  // If the provider is not defined, set it the the default, it's needed for this fxn
   if (!obj.hasOwnProperty('provider')) {
     obj.provider = 'local';
   }
@@ -222,6 +220,23 @@ UserSchema.static('hashPassword', function(obj) {
     const derivedKey = crypto.pbkdf2Sync(obj.password, obj._id.toString(), 1000, 32, 'sha256');
     obj.password = derivedKey.toString('hex');
   }
+});
+
+/**
+ * @description Checks that the new password does not match any of the previous 10 passwords
+ *
+ * @param {object} user - The user object being validated.
+ * @param {string} pass - The new password to be compared with the old passwords.
+ * @memberOf UserSchema
+ */
+UserSchema.static('checkOldPasswords', function(user, pass) {
+  if (!user.hasOwnProperty('provider') || user.provider === 'local') {
+    const newPassword = crypto.pbkdf2Sync(pass, user._id.toString(), 1000, 32, 'sha256');
+    if (user.oldPasswords.includes(newPassword.toString('hex'))) {
+      return false;
+    }
+  }
+  return true;
 });
 
 /* ------------------------------( User Index )------------------------------ */
