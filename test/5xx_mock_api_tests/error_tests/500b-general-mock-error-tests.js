@@ -15,10 +15,6 @@
  * endpoints.
  */
 
-// Node Modules
-const fs = require('fs');
-const path = require('path');
-
 // NPM modules
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
