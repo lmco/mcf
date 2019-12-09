@@ -1012,8 +1012,7 @@ async function updatePassword(requestingUser, oldPassword, newPassword, confirmP
 
     // Ensure old password was verified
     if (!noRepeat) {
-      throw new M.OperationError('New password cannot match any of the previous 12 passwords.',
-        'warn');
+      throw new M.OperationError('Password has been used too recently.', 'warn');
     }
 
     // Trim the list of old passwords if necessary

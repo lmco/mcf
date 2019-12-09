@@ -68,10 +68,10 @@ const extensions = M.require('models.plugin.extensions');
  * @property {string} preferredName - The users preferred first name.
  * @property {string} lname - The users last name.
  * @property {boolean} admin - Indicates if the user is a global admin.
- * @property {string} provider - Defines the authentication provider for the
- * user.
- * @property {object} failedLogins - Stores the history of failed login
- * attempts.
+ * @property {string} provider - Defines the authentication provider for the user.
+ * @property {object} failedLogins - Stores the history of failed login attempts.
+ * @property {object} oldPasswords - Stores previous passwords; used to prevent users
+ * from re-using recent passwords.
  *
  */
 const UserSchema = new db.Schema({
@@ -223,7 +223,7 @@ UserSchema.static('hashPassword', function(obj) {
 });
 
 /**
- * @description Checks that the new password does not match any of the previous 10 passwords
+ * @description Checks that the new password does not match any of the stored previous passwords
  *
  * @param {object} user - The user object being validated.
  * @param {string} pass - The new password to be compared with the old passwords.
