@@ -1004,6 +1004,9 @@ async function updatePassword(requestingUser, oldPassword, newPassword, confirmP
       throw new M.AuthorizationError('Old password is incorrect.', 'warn');
     }
 
+    // Add the current password to the list of old passwords
+    foundUser.oldPasswords.push(foundUser.password);
+
     // Verify that the new password has not been used in the previous 12 passwords
     const noRepeat = await User.checkOldPasswords(foundUser, newPassword);
 
@@ -1012,9 +1015,6 @@ async function updatePassword(requestingUser, oldPassword, newPassword, confirmP
       throw new M.OperationError('New password cannot match any of the previous 12 passwords.',
         'warn');
     }
-
-    // Add the current password to the list of old passwords
-    foundUser.oldPasswords.push(foundUser.password);
 
     // Trim the list of old passwords if necessary
     if (foundUser.oldPasswords.length > 12) foundUser.oldPasswords.shift();
