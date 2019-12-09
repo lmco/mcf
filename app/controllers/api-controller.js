@@ -314,7 +314,7 @@ function getLogs(req, res) {
     options = utils.parseOptions(req.query, validOptions);
 
     // Set limit and skip options if not already set
-    if (!options.limit) options.limit = 1000;
+    if (!options.hasOwnProperty('limit')) options.limit = 1000;
     if (!options.skip) options.skip = 0;
   }
   catch (error) {
