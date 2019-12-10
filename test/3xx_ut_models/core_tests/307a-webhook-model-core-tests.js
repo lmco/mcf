@@ -180,7 +180,7 @@ async function updateWebhook() {
 async function deleteWebhook() {
   try {
     // Remove the webhook
-    await Webhook.deleteMany({ _id: { $in: webhookID } });
+    await Webhook.deleteMany({ _id: { $in: [webhookID] } });
 
     // Attempt to find the webhook
     const foundWebhook = await Webhook.findOne({ _id: webhookID });
