@@ -83,7 +83,8 @@ const ArtifactSchema = new db.Schema({
     validate: [{
       validator: validators.artifact.project,
       message: props => `${props.value} is not a valid project ID.`
-    }]
+    }],
+    immutable: true
   },
   branch: {
     type: 'String',
@@ -93,7 +94,8 @@ const ArtifactSchema = new db.Schema({
     validate: [{
       validator: validators.artifact.branch,
       message: props => `${props.value} is not a valid branch ID.`
-    }]
+    }],
+    immutable: true
   },
   filename: {
     type: 'String',
@@ -113,7 +115,8 @@ const ArtifactSchema = new db.Schema({
   },
   strategy: {
     type: 'String',
-    required: true
+    required: true,
+    immutable: true
   }
 });
 
