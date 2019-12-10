@@ -71,12 +71,12 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /* Execute the tests */
-  // it('should create a user', createUser);
-  // it('should verify a valid password', verifyValidPassword);
-  // it('should get a user from the database', getUser);
-  // it('should get a users public data', getUserPublicData);
-  // it('should update a user', updateUser);
-  // it('should delete a user', deleteUser);
+  it('should create a user', createUser);
+  it('should verify a valid password', verifyValidPassword);
+  it('should get a user from the database', getUser);
+  it('should get a users public data', getUserPublicData);
+  it('should update a user', updateUser);
+  it('should delete a user', deleteUser);
   it('should store old passwords', saveOldPassword);
 });
 
