@@ -43,7 +43,9 @@ async function connect() {
     endpoint: `${M.config.db.url}:${M.config.db.port}`,
     accessKeyId: M.config.db.accessKeyId,
     secretAccessKey: M.config.db.secretAccessKey,
-    region: M.config.db.region
+    region: M.config.db.region,
+    sslEnabled: M.config.db.ssl,
+    httpOptions: (M.config.db.proxy) ? { proxy: M.config.db.proxy } : undefined
   });
 }
 
@@ -1836,10 +1838,12 @@ class Store extends DynamoDBStore {
   constructor(options) {
     const obj = {
       dynamoConfig: {
+        endpoint: `${M.config.db.url}:${M.config.db.port}`,
         accessKeyId: M.config.db.accessKeyId,
         secretAccessKey: M.config.db.secretAccessKey,
         region: M.config.db.region,
-        endpoint: `${M.config.db.url}:${M.config.db.port}`
+        sslEnabled: M.config.db.ssl,
+        httpOptions: (M.config.db.proxy) ? { proxy: M.config.db.proxy } : undefined
       },
       ttl: utils.timeConversions[M.config.auth.session.units] * M.config.auth.session.expires
     };

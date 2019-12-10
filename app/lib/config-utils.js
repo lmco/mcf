@@ -176,6 +176,11 @@ module.exports.validate = function(config) {
     test(config, 'db.accessKeyId', 'string');
     test(config, 'db.secretAccessKey', 'string');
     test(config, 'db.region', 'string');
+    test(config, 'db.ssl', 'boolean');
+    // Test the optional proxy field
+    if (config.db.proxy) {
+      test(config, 'db.proxy', 'string');
+    }
   }
 
 

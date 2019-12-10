@@ -168,7 +168,9 @@ config should be configured as follows:
     "port": "8000",
     "accessKeyId": "your-aws-access-key",
     "secretAccessKey": "your-aws-secret-access-key",
-    "region": "your-db-region"
+    "region": "your-db-region",
+    "ssl": "true/false",
+    "proxy": "your-optional-proxy-url"
   }
 }
 ```
