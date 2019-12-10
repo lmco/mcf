@@ -716,7 +716,7 @@ class Query {
         const value = (k.includes('.')) ? k.split('.').join('_') : k;
 
         // If the value is not a blank string, update the field
-        if (value !== '') {
+        if (this.formatJSON(doc[k]) !== '') {
           // Perform operation based on the type of parameter being updated
           updateQuery.ExpressionAttributeValues[`:${value}`] = this.formatJSON(doc[k]);
 
@@ -736,8 +736,8 @@ class Query {
       if (removeKeys.length > 0) {
         // If UpdateExpression is not defined yet, define it, else append condition
         updateQuery.UpdateExpression = (!updateQuery.UpdateExpression)
-          ? `REMOVE ${removeKeys.join(' ')}`
-          : `${updateQuery.UpdateExpression}, REMOVE ${removeKeys.join(' ')}`;
+          ? `REMOVE ${removeKeys.join(', ')}`
+          : `${updateQuery.UpdateExpression} REMOVE ${removeKeys.join(', ')}`;
       }
     }
     // No updates are actually being preformed. This should rarely/never happen

@@ -111,12 +111,10 @@ async function elementHelper() {
       const bulkWrite = [];
       // Add 'artifact' field to elements
       elements.forEach((element) => {
-        element.artifact = null;
-
         bulkWrite.push({
           updateOne: {
             filter: { _id: element._id },
-            update: element
+            update: { artifact: null }
           }
         });
       });
