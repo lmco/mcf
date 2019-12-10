@@ -35,6 +35,7 @@ const localAuth = M.require('auth.local-strategy');
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const next = testUtils.next;
 let adminUser = null;
 
 /* --------------------( Main )-------------------- */
@@ -165,7 +166,7 @@ async function failedloginsField() {
     res.statusCode.should.equal(200);
   };
   // GETs the test user as an admin
-  await APIController.getUser(req, res);
+  await APIController.getUser(req, res, next(req, res));
 
   // *************** Verify failedlogins field not returned for non-admin *************** //
   // Create a mock req object for the api controller
@@ -180,7 +181,7 @@ async function failedloginsField() {
     res.statusCode.should.equal(200);
   };
   // GETs the user as a non-admin
-  await APIController.getUser(req, res);
+  await APIController.getUser(req, res, next(req, res));
 
   // Remove the test user
   await UserController.remove(adminUser, user._id);

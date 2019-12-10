@@ -33,6 +33,7 @@ const utils = M.require('lib.utils');
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const next = testUtils.next;
 const filepath = path.join(M.root, '/test/testzip.json');
 let adminUser = null;
 let org = null;
@@ -154,7 +155,7 @@ function postGzip(done) {
   };
 
   // POST elements
-  apiController.postElements(req, res);
+  apiController.postElements(req, res, next(req, res));
 }
 
 /**
@@ -212,7 +213,7 @@ function putGzip(done) {
   };
 
   // PUT elements
-  apiController.putElements(req, res);
+  apiController.putElements(req, res, next(req, res));
 }
 
 /**
@@ -273,6 +274,6 @@ function patchGzip(done) {
     };
 
     // PATCH elements
-    apiController.patchElements(req, res);
+    apiController.patchElements(req, res, next(req, res));
   });
 }

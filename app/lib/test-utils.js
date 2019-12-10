@@ -38,6 +38,7 @@ const Branch = M.require('models.branch');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const User = M.require('models.user');
+const Middleware = M.require('lib.middleware');
 const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
@@ -750,3 +751,20 @@ function generateCustomTestData() {
 
   return customTestData;
 }
+
+/**
+ * @description A factory function that returns a mock next() function to use in the
+ * mock API tests. Instead of routing through the plugin middleware, this function calls
+ * the final function in the api chain, since we're not testing plugin functionality in
+ * the core tests.
+ *
+ * @param {object} req - A mock Express.js request object.
+ * @param {object} res - A mock Express.js response object.
+ *
+ * @returns {Function} The Middleware respond function.
+ */
+module.exports.next = function next(req, res) {
+  return function n() {
+    Middleware.respond(req, res);
+  };
+};

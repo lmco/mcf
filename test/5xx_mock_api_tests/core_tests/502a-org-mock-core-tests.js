@@ -28,6 +28,7 @@ const jmi = M.require('lib.jmi-conversions');
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const next = testUtils.next;
 let adminUser = null;
 
 /* --------------------( Main )-------------------- */
@@ -136,7 +137,7 @@ function postOrg(done) {
   };
 
   // POSTs an org
-  apiController.postOrg(req, res);
+  apiController.postOrg(req, res, next(req, res));
 }
 
 /**
@@ -198,7 +199,7 @@ function postOrgs(done) {
   };
 
   // POSTs multiple orgs
-  apiController.postOrgs(req, res);
+  apiController.postOrgs(req, res, next(req, res));
 }
 
 /**
@@ -248,7 +249,7 @@ function putOrg(done) {
   };
 
   // PUTs an org
-  apiController.putOrg(req, res);
+  apiController.putOrg(req, res, next(req, res));
 }
 
 /**
@@ -312,7 +313,7 @@ function putOrgs(done) {
   };
 
   // PUTs multiple orgs
-  apiController.putOrgs(req, res);
+  apiController.putOrgs(req, res, next(req, res));
 }
 
 /**
@@ -361,7 +362,7 @@ function getOrg(done) {
   };
 
   // GETs an org
-  apiController.getOrg(req, res);
+  apiController.getOrg(req, res, next(req, res));
 }
 
 /**
@@ -425,7 +426,7 @@ function getOrgs(done) {
   };
 
   // GETs all orgs
-  apiController.getOrgs(req, res);
+  apiController.getOrgs(req, res, next(req, res));
 }
 
 /**
@@ -491,7 +492,7 @@ function getAllOrgs(done) {
   };
 
   // GETs all orgs
-  apiController.getOrgs(req, res);
+  apiController.getOrgs(req, res, next(req, res));
 }
 
 /**
@@ -539,7 +540,7 @@ function patchOrg(done) {
   };
 
   // PATCHs an org
-  apiController.patchOrg(req, res);
+  apiController.patchOrg(req, res, next(req, res));
 }
 
 /**
@@ -606,7 +607,7 @@ function patchOrgs(done) {
   };
 
   // PATCHs multiple orgs
-  apiController.patchOrgs(req, res);
+  apiController.patchOrgs(req, res, next(req, res));
 }
 
 /**
@@ -643,7 +644,7 @@ function deleteOrg(done) {
   };
 
   // DELETEs an org
-  apiController.deleteOrg(req, res);
+  apiController.deleteOrg(req, res, next(req, res));
 }
 
 /**
@@ -682,5 +683,5 @@ function deleteOrgs(done) {
   };
 
   // DELETEs multiple orgs
-  apiController.deleteOrgs(req, res);
+  apiController.deleteOrgs(req, res, next(req, res));
 }

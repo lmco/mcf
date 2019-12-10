@@ -28,6 +28,7 @@ const db = M.require('db');
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const next = testUtils.next;
 let adminUser = null;
 let webhookID;
 
@@ -142,7 +143,7 @@ function noReqUser(endpoint) {
     };
 
     // Sends the mock request
-    APIController[endpoint](req, res);
+    APIController[endpoint](req, res, next(req, res));
   };
 }
 
@@ -182,7 +183,7 @@ function invalidOptions(endpoint) {
     };
 
     // Sends the mock request
-    APIController[endpoint](req, res);
+    APIController[endpoint](req, res, next(req, res));
   };
 }
 
@@ -221,7 +222,7 @@ function conflictingIDs(endpoint) {
     };
 
     // Sends the mock request
-    APIController[endpoint](req, res);
+    APIController[endpoint](req, res, next(req, res));
   };
 }
 
@@ -264,7 +265,7 @@ function notFound(endpoint) {
     };
 
     // Sends the mock request
-    APIController[endpoint](req, res);
+    APIController[endpoint](req, res, next(req, res));
   };
 }
 
@@ -302,7 +303,7 @@ function noArrays(endpoint) {
     };
 
     // Sends the mock request
-    APIController[endpoint](req, res);
+    APIController[endpoint](req, res, next(req, res));
   };
 }
 
@@ -340,7 +341,7 @@ function tokenNotFound(done) {
   };
 
   // Sends the mock request
-  APIController.triggerWebhook(req, res);
+  APIController.triggerWebhook(req, res, next(req, res));
 }
 
 /**
@@ -377,5 +378,5 @@ function tokenInvalid(done) {
   };
 
   // Sends the mock request
-  APIController.triggerWebhook(req, res);
+  APIController.triggerWebhook(req, res, next(req, res));
 }

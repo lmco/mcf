@@ -11,10 +11,17 @@
  *
  * @author Jake Ursetta
  * @author Austin Bieber
+ * @author Connor Doyle
  *
  * @description This file defines middleware functions which can be used by
  * express to perform actions during requests.
  */
+
+// Node modules
+const path = require('path');
+
+// MBEE modules
+const utils = M.require('lib.utils');
 
 /**
  * @description Log the route and method requested by a user.
@@ -94,4 +101,78 @@ module.exports.disableUserPatchPassword = function disableUserPatchPassword(req,
     return res.status(403).send(error.message);
   }
   next();
+};
+
+/**
+ * @description Defines the plugin middleware function to be used before API controller
+ * functions. Synchronously iterates through every plugin function that was registered to
+ * this endpoint upon startup of the server.
+ *
+ * @param {string} endpoint - The name of the API Controller function.
+ * @returns {Function} The function used in API routing that runs every plugin function
+ * registered to the endpoint of interest.
+ */
+module.exports.pluginPre = function pluginPre(endpoint) {
+  if (M.config.server.plugins.enabled) {
+    // eslint-disable-next-line global-require
+    const { pluginFunctions } = require(path.join(M.root, 'plugins', 'routes.js'));
+
+    return async function(req, res, next) {
+      for (let i = 0; i < pluginFunctions[endpoint].pre.length; i++) {
+        // eslint-disable-next-line no-await-in-loop
+        await pluginFunctions[endpoint].pre[i](req, res);
+      }
+      next();
+    };
+  }
+  else {
+    return function(req, res, next) {
+      next();
+    };
+  }
+};
+
+/**
+ * @description Defines the plugin middleware function to be used after API controller
+ * functions. Synchronously iterates through every plugin function that was registered to
+ * this endpoint upon startup of the server.
+ *
+ * @param {string} endpoint - The name of the API Controller function.
+ * @returns {Function} The function used in API routing that runs every plugin function
+ * registered to the endpoint of interest.
+ */
+module.exports.pluginPost = function pluginPost(endpoint) {
+  if (M.config.server.plugins.enabled) {
+    // eslint-disable-next-line global-require
+    const { pluginFunctions } = require(path.join(M.root, 'plugins', 'routes.js'));
+
+    return async function(req, res, next) {
+      for (let i = 0; i < pluginFunctions[endpoint].post.length; i++) {
+        // eslint-disable-next-line no-await-in-loop
+        await pluginFunctions[endpoint].post[i](req, res);
+      }
+      next();
+    };
+  }
+  else {
+    return function(req, res, next) {
+      next();
+    };
+  }
+};
+
+/**
+ * @description Parses information from the locals field of the response object and then
+ * calls the returnResponse function to send the response. Necessary for information to
+ * be passed through multiple middleware functions.
+ *
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ */
+module.exports.respond = function respond(req, res) {
+  const message = res.locals.message;
+  const statusCode = res.locals.statusCode;
+  const contentType = res.locals.contentType ? res.locals.contentType : 'application/json';
+
+  utils.returnResponse(req, res, message, statusCode, contentType);
 };
