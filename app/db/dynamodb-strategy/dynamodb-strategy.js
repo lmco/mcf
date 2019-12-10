@@ -793,14 +793,17 @@ class Model {
 
   /**
    * @description Creates a table if it does not already exist in the database.
-   * If the table does already exist, it is updated with any new indexes.
+   * If the table does already exist, it is updated with any new indexes. Please
+   * see the
+   * {@link https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#createTable-property createTable}
+   * documentation for more information.
    * @async
    *
    * @returns {Promise} Resolves upon completion.
    */
   async init() {
     // Create connection to the database
-    this.connection = await connect();
+    const conn = await connect();
     // Grab all existing tables
     const tables = await this.listTables();
     // If the table does not currently exist
@@ -811,7 +814,7 @@ class Model {
 
       M.log.debug(`DB OPERATION: ${this.TableName} createTable`);
       // Create the actual table
-      await this.connection.createTable(this.schema).promise();
+      await conn.createTable(this.schema).promise();
     }
     else {
       // TODO: We should update the table in case fields/indexes have been added
@@ -834,8 +837,10 @@ class Model {
   async listTables() {
     try {
       M.log.debug('DB OPERATION: listTables');
+      // Connect to the database
+      const conn = await connect();
       // Find all tables
-      return this.connection.listTables().promise();
+      return conn.listTables().promise();
     }
     catch (error) {
       M.log.verbose(`Failed to ${this.modelName}.findTables().`);
