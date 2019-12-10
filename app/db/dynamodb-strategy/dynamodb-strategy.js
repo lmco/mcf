@@ -790,7 +790,7 @@ class Model {
     if (!tables.TableNames.includes(this.TableName)) {
       // Set the TableName and BillingMode
       this.schema.TableName = this.TableName;
-      this.schema.BillingMode = 'PAY_PER_REQUEST';
+      this.schema.BillingMode = M.config.db.billingMode;
 
       M.log.debug(`DB OPERATION: ${this.TableName} createTable`);
       // Create the actual table

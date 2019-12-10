@@ -170,13 +170,17 @@ config should be configured as follows:
     "secretAccessKey": "your-aws-secret-access-key",
     "region": "your-db-region",
     "ssl": "true/false",
-    "proxy": "your-optional-proxy-url"
+    "proxy": "your-optional-proxy-url",
+    "billingMode": "PAY_PER_REQUEST/PROVISIONED"
   }
 }
 ```
 
 The default port which DynamoDB runs on is 8000, but this can be configured on
 setup of DynamoDB as well as configured in the MBEE config.
+
+For more information about the different billing modes, please see the 
+[DynamoDB Pricing Guide](https://aws.amazon.com/dynamodb/pricing/).
 
 #### Running DynamoDB
 Currently, MBEE has only been tested with a local instance of DynamoDB. There
