@@ -172,7 +172,7 @@ function getLogsNegativeLimit(done) {
 }
 
 /**
- * @description Verifies a mock GET logs request with a skip value grater than
+ * @description Verifies a mock GET logs request with a skip value greater than
  * 0 returns the correct log lines.
  *
  * @param {Function} done - The mocha callback.
