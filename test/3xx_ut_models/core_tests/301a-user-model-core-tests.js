@@ -213,10 +213,10 @@ async function deleteUser() {
  * list of recently used passwords when presented with a new password.
  */
 async function saveOldPassword() {
-  try {
-    // Skip test if this feature is not enabled
-    if (!M.config.auth.hasOwnProperty('oldPasswords')) this.skip();
+  // Skip test if this feature is not enabled
+  if (!M.config.auth.hasOwnProperty('oldPasswords')) this.skip();
 
+  try {
     // Create user object with an old password to test
     const userObj = testData.users[0];
     userObj._id = userObj.username;
@@ -226,7 +226,7 @@ async function saveOldPassword() {
     // Create new password
     const newPassword = 'ABCabc2!';
 
-    // Test the checkOldPasswords function; expect an error
+    // Test the checkOldPasswords function
     const oldPasswords = User.checkOldPasswords(userObj, newPassword);
 
     oldPasswords.should.have.members([userObj.password]);

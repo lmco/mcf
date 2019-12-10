@@ -338,10 +338,10 @@ async function emailInvalid() {
  * presented with a new password stored in the user's oldPasswords field.
  */
 async function noPasswordReuse() {
-  try {
-    // Skip test if this feature is not enabled
-    if (!M.config.auth.hasOwnProperty('oldPasswords')) this.skip();
+  // Skip test if this feature is not enabled
+  if (!M.config.auth.hasOwnProperty('oldPasswords')) this.skip();
 
+  try {
     // Create user object with an old password to test
     const userObj = testData.users[0];
     userObj._id = userObj.username;
