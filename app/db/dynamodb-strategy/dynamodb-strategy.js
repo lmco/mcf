@@ -1434,6 +1434,7 @@ class Model {
       // Get the table information, which includes indexes
       M.log.debug(`DB OPERATION: ${this.TableName} describeTable`);
       const table = await conn.describeTable({ TableName: this.TableName }).promise();
+      // TODO find GlobalSecondaryIndexes
       // Return the index info
       return table.Table.KeySchema;
     }
