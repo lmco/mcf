@@ -28,6 +28,7 @@ const jmi = M.require('lib.jmi-conversions');
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const next = testUtils.next;
 let adminUser = null;
 let org = null;
 let proj = null;
@@ -187,7 +188,7 @@ function postElement(done) {
   };
 
   // POSTs an element
-  apiController.postElement(req, res);
+  apiController.postElement(req, res, next(req, res));
 }
 
 /**
@@ -270,7 +271,7 @@ function postElements(done) {
   };
 
   // POSTs multiple elements
-  apiController.postElements(req, res);
+  apiController.postElements(req, res, next(req, res));
 }
 
 /**
@@ -344,7 +345,7 @@ function putElement(done) {
   };
 
   // PUTs an element
-  apiController.putElement(req, res);
+  apiController.putElement(req, res, next(req, res));
 }
 
 /**
@@ -428,7 +429,7 @@ function putElements(done) {
   };
 
   // PUTs multiple elements
-  apiController.putElements(req, res);
+  apiController.putElements(req, res, next(req, res));
 }
 
 /**
@@ -502,7 +503,7 @@ function getElement(done) {
   };
 
   // GETs an element
-  apiController.getElement(req, res);
+  apiController.getElement(req, res, next(req, res));
 }
 
 /**
@@ -588,7 +589,7 @@ function getElements(done) {
   };
 
   // GETs multiple elements
-  apiController.getElements(req, res);
+  apiController.getElements(req, res, next(req, res));
 }
 
 /**
@@ -674,7 +675,7 @@ function getAllElements(done) {
   };
 
   // GETs multiple elements
-  apiController.getElements(req, res);
+  apiController.getElements(req, res, next(req, res));
 }
 
 /**
@@ -753,7 +754,7 @@ function searchElement(done) {
   };
 
   // GETs elements through text search
-  apiController.searchElements(req, res);
+  apiController.searchElements(req, res, next(req, res));
 }
 
 /**
@@ -831,7 +832,7 @@ function patchElement(done) {
   };
 
   // PATCHs an element
-  apiController.patchElement(req, res);
+  apiController.patchElement(req, res, next(req, res));
 }
 
 /**
@@ -923,7 +924,7 @@ function patchElements(done) {
   };
 
   // PATCHs multiple elements
-  apiController.patchElements(req, res);
+  apiController.patchElements(req, res, next(req, res));
 }
 
 /**
@@ -962,7 +963,7 @@ function deleteElement(done) {
   };
 
   // DELETEs an element
-  apiController.deleteElement(req, res);
+  apiController.deleteElement(req, res, next(req, res));
 }
 
 /**
@@ -1005,5 +1006,5 @@ function deleteElements(done) {
   };
 
   // DELETEs multiple elements
-  apiController.deleteElements(req, res);
+  apiController.deleteElements(req, res, next(req, res));
 }

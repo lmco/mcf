@@ -35,6 +35,7 @@ const jmi = M.require('lib.jmi-conversions');
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const next = testUtils.next;
 const filepath = path.join(M.root, '/test/testzip.json');
 let adminUser = null;
 let org = null;
@@ -166,7 +167,7 @@ function postGzip(done) {
   };
 
   // POSTs an artifact
-  apiController.postArtifacts(req, res);
+  apiController.postArtifacts(req, res, next(req, res));
 }
 
 /**
@@ -236,6 +237,6 @@ function patchGzip(done) {
     };
 
     // PATCH artifacts
-    apiController.patchArtifacts(req, res);
+    apiController.patchArtifacts(req, res, next(req, res));
   });
 }
