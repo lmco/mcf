@@ -835,7 +835,7 @@ class Model {
     try {
       M.log.debug('DB OPERATION: listTables');
       // Find all tables
-      return this.connection.listTables({}).promise();
+      return this.connection.listTables().promise();
     }
     catch (error) {
       M.log.verbose(`Failed to ${this.modelName}.findTables().`);
