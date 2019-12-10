@@ -156,8 +156,7 @@ const UserSchema = new db.Schema({
     default: []
   },
   oldPasswords: {
-    type: 'Object',
-    default: []
+    type: 'Object'
   }
 });
 
@@ -230,13 +229,16 @@ UserSchema.static('hashPassword', function(obj) {
  * @memberOf UserSchema
  */
 UserSchema.static('checkOldPasswords', function(user, pass) {
+  // Check that this feature is enabled in the config file
+  // This check should only be run on users stored locally
   if (M.config.auth.hasOwnProperty('oldPasswords')
     && (!user.hasOwnProperty('provider') || user.provider === 'local')) {
     // Get the hash of the new password
     const newPassword = crypto.pbkdf2Sync(pass, user._id.toString(), 1000, 32, 'sha256');
 
     // Add the current password to the list of old passwords
-    user.oldPasswords.push(user.password);
+    if (!user.hasOwnProperty('oldPasswords')) user.oldPasswords = [user.password];
+    else user.oldPasswords.push(user.password);
 
     // Check that the user hasn't reused a recent password
     if (user.oldPasswords.includes(newPassword.toString('hex'))) {
