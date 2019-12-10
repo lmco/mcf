@@ -97,7 +97,8 @@ const BranchSchema = new db.Schema({
     validate: [{
       validator: validators.branch.project,
       message: props => `${props.value} is not a valid project ID.`
-    }]
+    }],
+    immutable: true
   },
   name: {
     type: 'String',
@@ -110,11 +111,13 @@ const BranchSchema = new db.Schema({
     validate: [{
       validator: validators.branch.source,
       message: props => `${props.value} is not a valid source ID.`
-    }]
+    }],
+    immutable: true
   },
   tag: {
     type: 'Boolean',
-    default: false
+    default: false,
+    immutable: true
   }
 });
 
