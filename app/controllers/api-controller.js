@@ -327,7 +327,6 @@ function getLogs(req, res) {
     return returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 
-
   const logPath = path.join(M.root, 'logs', M.config.log.file);
 
   // Read the log file

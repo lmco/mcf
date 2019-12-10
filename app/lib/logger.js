@@ -118,7 +118,7 @@ const formatter = printf((msg) => {
   if (msg.level.includes('debug')) {
     // Get heap usage
     const heap = process.memoryUsage();
-    const heapTotal = (M.memoryLimit / 1024 / 1024).toFixed(2);
+    const heapTotal = M.memoryLimit;
     const heapUsed = (heap.heapUsed / 1024 / 1024).toFixed(2);
     extra = `[heap ${(heapUsed / heapTotal * 100).toFixed(2)}% ${heapUsed}/${heapTotal}]`;
   }
