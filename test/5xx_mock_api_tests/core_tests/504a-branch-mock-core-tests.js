@@ -27,6 +27,7 @@ const jmi = M.require('lib.jmi-conversions');
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const next = testUtils.next;
 let adminUser = null;
 let org = null;
 let proj = null;
@@ -162,7 +163,7 @@ function postBranch(done) {
   };
 
   // POSTs a branch
-  apiController.postBranch(req, res);
+  apiController.postBranch(req, res, next(req, res));
 }
 
 /**
@@ -233,7 +234,7 @@ function postBranches(done) {
   };
 
   // POSTs multiple branches
-  apiController.postBranches(req, res);
+  apiController.postBranches(req, res, next(req, res));
 }
 
 /**
@@ -290,7 +291,7 @@ function getBranch(done) {
   };
 
   // GETs an branch
-  apiController.getBranch(req, res);
+  apiController.getBranch(req, res, next(req, res));
 }
 
 /**
@@ -359,7 +360,7 @@ function getBranches(done) {
   };
 
   // GETs multiple branches
-  apiController.getBranches(req, res);
+  apiController.getBranches(req, res, next(req, res));
 }
 
 /**
@@ -432,7 +433,7 @@ function getAllBranches(done) {
   };
 
   // GETs multiple branches
-  apiController.getBranches(req, res);
+  apiController.getBranches(req, res, next(req, res));
 }
 
 /**
@@ -493,7 +494,7 @@ function patchBranch(done) {
   };
 
   // PATCHs an branch
-  apiController.patchBranch(req, res);
+  apiController.patchBranch(req, res, next(req, res));
 }
 
 /**
@@ -568,7 +569,7 @@ function patchBranches(done) {
   };
 
   // PATCHs multiple branches
-  apiController.patchBranches(req, res);
+  apiController.patchBranches(req, res, next(req, res));
 }
 
 /**
@@ -606,7 +607,7 @@ function deleteBranch(done) {
   };
 
   // DELETEs an branch
-  apiController.deleteBranch(req, res);
+  apiController.deleteBranch(req, res, next(req, res));
 }
 
 /**
@@ -648,5 +649,5 @@ function deleteBranches(done) {
   };
 
   // DELETEs multiple branches
-  apiController.deleteBranches(req, res);
+  apiController.deleteBranches(req, res, next(req, res));
 }

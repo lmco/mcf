@@ -36,6 +36,7 @@ const utils = M.require('lib.utils');
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
+const next = testUtils.next;
 let adminUser = null;
 const logFilePath = path.join(M.root, 'logs', M.config.log.file);
 
@@ -127,7 +128,7 @@ function getLogsPositiveLimit(done) {
   };
 
   // GETs the system logs
-  APIController.getLogs(req, res);
+  APIController.getLogs(req, res, next(req, res));
 }
 
 /**
@@ -178,7 +179,7 @@ function getLogsNegativeLimit(done) {
   };
 
   // GETs the system logs
-  APIController.getLogs(req, res);
+  APIController.getLogs(req, res, next(req, res));
 }
 
 /**
@@ -232,7 +233,7 @@ function getLogsSkip(done) {
   };
 
   // GETs the system logs
-  APIController.getLogs(req, res);
+  APIController.getLogs(req, res, next(req, res));
 }
 
 /**
@@ -275,5 +276,5 @@ function getLogsColorRemoved(done) {
   };
 
   // GETs the system logs
-  APIController.getLogs(req, res);
+  APIController.getLogs(req, res, next(req, res));
 }

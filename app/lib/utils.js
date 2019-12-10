@@ -27,6 +27,7 @@ const zlib = require('zlib');
 
 // MBEE modules
 const publicData = M.require('lib.get-public-data');
+const logger = M.require('lib.logger');
 
 // Define mine type to content type look up table
 const mineTypeTable = {
@@ -563,4 +564,36 @@ module.exports.readFileCheck = function(filePath) {
     // File does not exist, not safe to read
     return false;
   }
+};
+
+/**
+ * @description This is a utility function that formats an object as JSON.
+ * This function is used for formatting all API responses.
+ *
+ * @param {object} req - The request object.
+ * @param {object} res - The response object.
+ * @param {string} message - The response message or error message.
+ * @param {number} statusCode - The status code for the response.
+ * @param {string} [contentType="application/json"] - The content type for
+ * the response.
+ *
+ * @returns {object} The response object.
+ */
+module.exports.returnResponse = function returnResponse(req, res, message, statusCode,
+  contentType = 'application/json') {
+  if (statusCode === 200) {
+    // We send these headers for a success response
+    res.header('Content-Type', contentType);
+  }
+  else {
+    // We send these headers for an error response
+    res.header('Content-Type', 'text/plain');
+  }
+
+  // Send the message
+  res.status(statusCode).send(message);
+  // Log the response
+  logger.logResponse(message.length, req, res);
+  // Return res
+  return res;
 };

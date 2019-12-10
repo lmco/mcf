@@ -50,7 +50,7 @@ const ArtifactSchema = new db.Schema({
     required: true,
     validate: [{
       validator: validators.artifact._id.reserved,
-      message: 'Artifact ID cannot include the following words: '
+      message: props => 'Artifact ID cannot include the following words: '
         + `[${validators.reserved}].`
     }, {
       validator: validators.artifact._id.match,

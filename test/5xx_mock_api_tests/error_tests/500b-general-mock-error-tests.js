@@ -32,6 +32,7 @@ const db = M.require('db');
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
+const next = testUtils.next;
 let adminUser = null;
 let nonAdminUser = null;
 
@@ -125,7 +126,7 @@ function noReqUser(endpoint) {
     };
 
     // Sends the mock request
-    APIController[endpoint](req, res);
+    APIController[endpoint](req, res, next(req, res));
   };
 }
 
@@ -166,7 +167,7 @@ function invalidOptions(endpoint) {
     };
 
     // Sends the mock request
-    APIController[endpoint](req, res);
+    APIController[endpoint](req, res, next(req, res));
   };
 }
 
@@ -197,7 +198,7 @@ function getLogsNonAdmin(done) {
   };
 
   // GETs the system logs
-  APIController.getLogs(req, res);
+  APIController.getLogs(req, res, next(req, res));
 }
 
 /**
@@ -228,5 +229,5 @@ function limit0(done) {
   };
 
   // GETs the system logs
-  APIController.getLogs(req, res);
+  APIController.getLogs(req, res, next(req, res));
 }

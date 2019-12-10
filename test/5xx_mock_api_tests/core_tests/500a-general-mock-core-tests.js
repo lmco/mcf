@@ -27,9 +27,11 @@ const APIController = M.require('controllers.api-controller');
 const db = M.require('db');
 const utils = M.require('lib.utils');
 
+
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
+const next = testUtils.next;
 let adminUser = null;
 const logFilePath = path.join(M.root, 'logs', M.config.log.file);
 
@@ -126,5 +128,5 @@ function getLogs(done) {
   };
 
   // GETs the system logs
-  APIController.getLogs(req, res);
+  APIController.getLogs(req, res, next(req, res));
 }

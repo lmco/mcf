@@ -28,6 +28,7 @@ const jmi = M.require('lib.jmi-conversions');
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const next = testUtils.next;
 let adminUser = null;
 
 /* --------------------( Main )-------------------- */
@@ -41,37 +42,31 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * Before: Run before all tests. Creates the admin user.
    */
-  before((done) => {
-    // Connect to the database
-    db.connect()
-    // Create test admin
-    .then(() => testUtils.createTestAdmin())
-    .then((reqUser) => {
-      adminUser = reqUser;
-      done();
-    })
-    .catch((error) => {
+  before(async () => {
+    try {
+      await db.connect();
+      adminUser = await testUtils.createTestAdmin();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**
    * After: Delete admin user.
    */
-  after((done) => {
-    // Delete test admin
-    testUtils.removeTestAdmin()
-    .then(() => db.disconnect())
-    .then(() => done())
-    .catch((error) => {
+  after(async () => {
+    try {
+      await testUtils.removeTestAdmin();
+      await db.disconnect();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /* Execute tests */
@@ -125,7 +120,7 @@ function whoami(done) {
   };
 
   // GETs the requesting user
-  APIController.whoami(req, res);
+  APIController.whoami(req, res, next(req, res));
 }
 
 /**
@@ -175,7 +170,7 @@ function postUser(done) {
   };
 
   // POSTs a user
-  APIController.postUser(req, res);
+  APIController.postUser(req, res, next(req, res));
 }
 
 /**
@@ -237,7 +232,7 @@ function postUsers(done) {
   };
 
   // POSTs multiple users
-  APIController.postUsers(req, res);
+  APIController.postUsers(req, res, next(req, res));
 }
 
 /**
@@ -287,7 +282,7 @@ function putUser(done) {
   };
 
   // PUTs a user
-  APIController.putUser(req, res);
+  APIController.putUser(req, res, next(req, res));
 }
 
 /**
@@ -350,7 +345,7 @@ function putUsers(done) {
   };
 
   // PUTs multiple users
-  APIController.putUsers(req, res);
+  APIController.putUsers(req, res, next(req, res));
 }
 
 /**
@@ -400,7 +395,7 @@ function getUser(done) {
   };
 
   // GETs a user
-  APIController.getUser(req, res);
+  APIController.getUser(req, res, next(req, res));
 }
 
 /**
@@ -464,7 +459,7 @@ function getUsers(done) {
   };
 
   // GETs multiple users
-  APIController.getUsers(req, res);
+  APIController.getUsers(req, res, next(req, res));
 }
 
 /**
@@ -538,7 +533,7 @@ function getAllUsers(done) {
   };
 
   // GETs all users
-  APIController.getUsers(req, res);
+  APIController.getUsers(req, res, next(req, res));
 }
 
 /**
@@ -607,7 +602,7 @@ function searchUsers(done) {
   };
 
   // Searches for a user
-  APIController.searchUsers(req, res);
+  APIController.searchUsers(req, res, next(req, res));
 }
 
 /**
@@ -661,7 +656,7 @@ function patchUser(done) {
   };
 
   // PATCHs a user
-  APIController.patchUser(req, res);
+  APIController.patchUser(req, res, next(req, res));
 }
 
 /**
@@ -728,7 +723,7 @@ function patchUsers(done) {
   };
 
   // PATCHs multiple users
-  APIController.patchUsers(req, res);
+  APIController.patchUsers(req, res, next(req, res));
 }
 
 /**
@@ -784,7 +779,7 @@ function patchUserPassword(done) {
   };
 
   // PATCHs a users password
-  APIController.patchPassword(req, res);
+  APIController.patchPassword(req, res, next(req, res));
 }
 
 /**
@@ -819,7 +814,7 @@ function deleteUser(done) {
   };
 
   // DELETEs a user
-  APIController.deleteUser(req, res);
+  APIController.deleteUser(req, res, next(req, res));
 }
 
 /**
@@ -859,5 +854,5 @@ function deleteUsers(done) {
   };
 
   // DELETEs multiple users
-  APIController.deleteUsers(req, res);
+  APIController.deleteUsers(req, res, next(req, res));
 }

@@ -94,7 +94,7 @@ const ElementSchema = new db.Schema({
     required: true,
     validate: [{
       validator: validators.element._id.reserved,
-      message: 'Element ID cannot include the following words: '
+      message: props => 'Element ID cannot include the following words: '
         + `[${validators.reserved}].`
     }, {
       validator: validators.element._id.match,
@@ -155,7 +155,7 @@ const ElementSchema = new db.Schema({
       message: props => `${props.value} is not a valid source ID.`
     }, {
       validator: validators.element.source.target,
-      message: 'Target is required if source is provided.'
+      message: props => 'Target is required if source is provided.'
     }]
   },
   target: {
@@ -168,7 +168,7 @@ const ElementSchema = new db.Schema({
       message: props => `${props.value} is not a valid target ID.`
     }, {
       validator: validators.element.target.source,
-      message: 'Source is required if target is provided.'
+      message: props => 'Source is required if target is provided.'
     }]
   },
   documentation: {

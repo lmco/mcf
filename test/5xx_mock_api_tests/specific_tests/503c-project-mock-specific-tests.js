@@ -31,6 +31,7 @@ const db = M.require('db');
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const next = testUtils.next;
 const filepath = path.join(M.root, '/test/testzip.json');
 let adminUser = null;
 let org = null;
@@ -142,7 +143,7 @@ function postGzip(done) {
   };
 
   // POSTs a project
-  apiController.postProjects(req, res);
+  apiController.postProjects(req, res, next(req, res));
 }
 
 /**
@@ -197,7 +198,7 @@ function putGzip(done) {
   };
 
   // PUTs a project
-  apiController.putProjects(req, res);
+  apiController.putProjects(req, res, next(req, res));
 }
 
 /**
@@ -257,6 +258,6 @@ function patchGzip(done) {
     };
 
     // PATCHes a project
-    apiController.patchProjects(req, res);
+    apiController.patchProjects(req, res, next(req, res));
   });
 }

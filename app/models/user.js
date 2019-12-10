@@ -80,7 +80,7 @@ const UserSchema = new db.Schema({
     required: [true, 'Username is required.'],
     validate: [{
       validator: validators.user._id.reserved,
-      message: 'Username cannot include the following words: '
+      message: props => 'Username cannot include the following words: '
       + `[${validators.reserved}].`
     }, {
       validator: validators.user._id.match,

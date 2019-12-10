@@ -31,6 +31,7 @@ const jmi = M.require('lib.jmi-conversions');
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const next = testUtils.next;
 let adminUser = null;
 let org = null;
 let orgID = null;
@@ -180,7 +181,7 @@ function postArtifact(done) {
   };
 
   // POSTs an artifact
-  apiController.postArtifact(req, res);
+  apiController.postArtifact(req, res, next(req, res));
 }
 
 /**
@@ -258,7 +259,7 @@ function postArtifacts(done) {
   };
 
   // POST artifacts
-  apiController.postArtifacts(req, res);
+  apiController.postArtifacts(req, res, next(req, res));
 }
 
 /**
@@ -327,7 +328,7 @@ function getArtifact(done) {
   };
 
   // GETs an artifact
-  apiController.getArtifact(req, res);
+  apiController.getArtifact(req, res, next(req, res));
 }
 
 /**
@@ -412,7 +413,7 @@ function getArtifacts(done) {
   };
 
   // GET artifacts
-  apiController.getArtifacts(req, res);
+  apiController.getArtifacts(req, res, next(req, res));
 }
 
 /**
@@ -465,7 +466,7 @@ function postBlob(done) {
     setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
   // POSTs a blob
-  apiController.postBlob(req, res);
+  apiController.postBlob(req, res, next(req, res));
 }
 
 /**
@@ -517,7 +518,7 @@ function getBlob(done) {
     setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
   // GETs a blob
-  apiController.getBlob(req, res);
+  apiController.getBlob(req, res, next(req, res));
 }
 
 /**
@@ -567,7 +568,7 @@ function getBlobById(done) {
     setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
   // GETs a blob
-  apiController.getBlobById(req, res);
+  apiController.getBlobById(req, res, next(req, res));
 }
 
 /**
@@ -613,7 +614,7 @@ function deleteBlob(done) {
     setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
   // DELETEs a blob
-  apiController.deleteBlob(req, res);
+  apiController.deleteBlob(req, res, next(req, res));
 }
 
 /**
@@ -685,7 +686,7 @@ function patchArtifact(done) {
   };
 
   // PATCHes an artifact
-  apiController.patchArtifact(req, res);
+  apiController.patchArtifact(req, res, next(req, res));
 }
 
 /**
@@ -771,7 +772,7 @@ function patchArtifacts(done) {
   };
 
   // PATCH artifacts
-  apiController.patchArtifacts(req, res);
+  apiController.patchArtifacts(req, res, next(req, res));
 }
 
 /**
@@ -815,7 +816,7 @@ function deleteArtifact(done) {
   };
 
   // DELETEs an artifact
-  apiController.deleteArtifact(req, res);
+  apiController.deleteArtifact(req, res, next(req, res));
 }
 
 /**
@@ -856,5 +857,5 @@ function deleteArtifacts(done) {
   };
 
   // DELETE artifacts
-  apiController.deleteArtifacts(req, res);
+  apiController.deleteArtifacts(req, res, next(req, res));
 }

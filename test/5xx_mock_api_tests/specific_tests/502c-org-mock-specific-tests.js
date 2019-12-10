@@ -31,6 +31,7 @@ const db = M.require('db');
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const next = testUtils.next;
 const filepath = path.join(M.root, '/test/testzip.json');
 let adminUser = null;
 
@@ -137,7 +138,7 @@ function postGzip(done) {
   };
 
   // POSTs an org
-  apiController.postOrgs(req, res);
+  apiController.postOrgs(req, res, next(req, res));
 }
 
 /**
@@ -194,7 +195,7 @@ function putGzip(done) {
   };
 
   // PUTs a org
-  apiController.putOrgs(req, res);
+  apiController.putOrgs(req, res, next(req, res));
 }
 
 /**
@@ -254,6 +255,6 @@ function patchGzip(done) {
     };
 
     // PATCHes an org
-    apiController.patchOrgs(req, res);
+    apiController.patchOrgs(req, res, next(req, res));
   });
 }

@@ -29,6 +29,7 @@ const utils = M.require('lib.utils');
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const next = testUtils.next;
 let adminUser = null;
 let org = null;
 
@@ -153,7 +154,7 @@ function postProject(done) {
   };
 
   // POSTs a project
-  APIController.postProject(req, res);
+  APIController.postProject(req, res, next(req, res));
 }
 
 /**
@@ -220,7 +221,7 @@ function postProjects(done) {
   };
 
   // POSTs multiple projects
-  APIController.postProjects(req, res);
+  APIController.postProjects(req, res, next(req, res));
 }
 
 /**
@@ -276,7 +277,7 @@ function putProject(done) {
   };
 
   // PUTs a project
-  APIController.putProject(req, res);
+  APIController.putProject(req, res, next(req, res));
 }
 
 /**
@@ -344,7 +345,7 @@ function putProjects(done) {
   };
 
   // PUTs multiple projects
-  APIController.putProjects(req, res);
+  APIController.putProjects(req, res, next(req, res));
 }
 
 /**
@@ -400,7 +401,7 @@ function getProject(done) {
   };
 
   // GETs a project
-  APIController.getProject(req, res);
+  APIController.getProject(req, res, next(req, res));
 }
 
 /**
@@ -469,7 +470,7 @@ function getProjects(done) {
   };
 
   // GETs multiple projects
-  APIController.getProjects(req, res);
+  APIController.getProjects(req, res, next(req, res));
 }
 
 /**
@@ -539,7 +540,7 @@ function getAllProjectsOnOrg(done) {
   };
 
   // GETs multiple projects
-  APIController.getProjects(req, res);
+  APIController.getProjects(req, res, next(req, res));
 }
 
 /**
@@ -619,7 +620,7 @@ function getAllProjects(done) {
   };
 
   // GETs multiple projects
-  APIController.getAllProjects(req, res);
+  APIController.getAllProjects(req, res, next(req, res));
 }
 
 /**
@@ -679,7 +680,7 @@ function patchProject(done) {
   };
 
   // PATCHs a project
-  APIController.patchProject(req, res);
+  APIController.patchProject(req, res, next(req, res));
 }
 
 /**
@@ -752,7 +753,7 @@ function patchProjects(done) {
   };
 
   // PATCHs multiple projects
-  APIController.patchProjects(req, res);
+  APIController.patchProjects(req, res, next(req, res));
 }
 
 /**
@@ -792,7 +793,7 @@ function deleteProject(done) {
   };
 
   // DELETEs a project
-  APIController.deleteProject(req, res);
+  APIController.deleteProject(req, res, next(req, res));
 }
 
 /**
@@ -836,5 +837,5 @@ function deleteProjects(done) {
   };
 
   // DELETEs multiple project
-  APIController.deleteProjects(req, res);
+  APIController.deleteProjects(req, res, next(req, res));
 }
