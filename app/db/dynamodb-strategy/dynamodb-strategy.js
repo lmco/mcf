@@ -991,6 +991,11 @@ class Model {
    * @param {object} [ops.deleteMany] - Specifies a deleteMany operation.
    * @param {object} [ops.deleteMany.filter] - An object containing parameters
    * to filter the find query by, for deleteMany.
+   * @param {object} [ops.replaceOne] - Specifies a replace operation.
+   * @param {object} [ops.replaceOne.filter] - An object containing parameters
+   * to filter the find query by, for replaceOne.
+   * @param {object} [ops.replaceOne.replacement] - The document to replace the
+   * found document with.
    * @param {object} [options] - An object containing options.
    *
    * @returns {Promise<object>} An object specifying the number of documents
