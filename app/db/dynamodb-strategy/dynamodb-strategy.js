@@ -708,20 +708,37 @@ class Query {
 
     // If the update document is not empty
     if (Object.keys(doc).length !== 0) {
+      const removeKeys = [];
       // Handle the UpdateExpression
       Object.keys(doc).forEach((k) => {
         // Get the properly formatted key/value
         const key = this.parseExpressionAttributeNames(updateQuery, k);
         const value = (k.includes('.')) ? k.split('.').join('_') : k;
 
-        // Perform operation based on the type of parameter being updated
-        updateQuery.ExpressionAttributeValues[`:${value}`] = this.formatJSON(doc[k]);
+        // If the value is not a blank string, update the field
+        if (value !== '') {
+          // Perform operation based on the type of parameter being updated
+          updateQuery.ExpressionAttributeValues[`:${value}`] = this.formatJSON(doc[k]);
 
+          // If UpdateExpression is not defined yet, define it, else append condition
+          updateQuery.UpdateExpression = (!updateQuery.UpdateExpression)
+            ? `SET #${key} = :${value}`
+            : `${updateQuery.UpdateExpression}, #${key} = :${value}`;
+        }
+        // If blank string, remove the property from the document. Blank strings
+        // are not allowed in the DynamoDB
+        else {
+          removeKeys.push(`#${key}`);
+        }
+      });
+
+      // Add remove piece to UpdateExpression
+      if (removeKeys.length > 0) {
         // If UpdateExpression is not defined yet, define it, else append condition
         updateQuery.UpdateExpression = (!updateQuery.UpdateExpression)
-          ? `SET #${key} = :${value}`
-          : `${updateQuery.UpdateExpression}, #${key} = :${value}`;
-      });
+          ? `REMOVE ${removeKeys.join(' ')}`
+          : `${updateQuery.UpdateExpression}, REMOVE ${removeKeys.join(' ')}`;
+      }
     }
     // No updates are actually being preformed. This should rarely/never happen
     else {
