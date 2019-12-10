@@ -92,6 +92,10 @@ function getLogs(done) {
     this.skip();
   }
 
+  // Store this, used in res.send() if need to skip test due to possible heap
+  // overflow of additional file read
+  const testThis = this;
+
   // Create request object
   const params = {};
   const method = 'GET';
@@ -103,6 +107,12 @@ function getLogs(done) {
 
   // Verifies the response data
   res.send = function send(_data) {
+    // Ensure there is enough memory to test the response
+    if (!utils.readFileCheck(logFilePath)) {
+      M.log.verbose('Skipping this test due to a lack of sufficient memory.');
+      testThis.skip();
+    }
+
     // Read log file content
     if (fs.existsSync(logFilePath)) {
       const logContent = fs.readFileSync(logFilePath);

@@ -143,6 +143,10 @@ function getLogsNegativeLimit(done) {
     this.skip();
   }
 
+  // Store this, used in res.send() if need to skip test due to possible heap
+  // overflow of additional file read
+  const testThis = this;
+
   // Create request object
   const params = {};
   const method = 'GET';
@@ -157,6 +161,12 @@ function getLogsNegativeLimit(done) {
   res.send = function send(_data) {
     // Expect a 200 status
     res.statusCode.should.equal(200);
+
+    // Ensure there is enough memory to test the response
+    if (!utils.readFileCheck(logFilePath)) {
+      M.log.verbose('Skipping this test due to a lack of sufficient memory.');
+      testThis.skip();
+    }
 
     // Read the log file
     const logContent = fs.readFileSync(logFilePath).toString();
@@ -184,6 +194,10 @@ function getLogsSkip(done) {
     this.skip();
   }
 
+  // Store this, used in res.send() if need to skip test due to possible heap
+  // overflow of additional file read
+  const testThis = this;
+
   // Create request object
   const params = {};
   const method = 'GET';
@@ -198,6 +212,12 @@ function getLogsSkip(done) {
   res.send = function send(_data) {
     // Expect a 200 status
     res.statusCode.should.equal(200);
+
+    // Ensure there is enough memory to test the response
+    if (!utils.readFileCheck(logFilePath)) {
+      M.log.verbose('Skipping this test due to a lack of sufficient memory.');
+      testThis.skip();
+    }
 
     // Read the log file
     const logContent = fs.readFileSync(logFilePath).toString().split('\n');
