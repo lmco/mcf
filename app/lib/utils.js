@@ -574,15 +574,13 @@ module.exports.readFileCheck = function(filePath) {
  * @param {object} res - The response object.
  * @param {string} message - The response message or error message.
  * @param {number} statusCode - The status code for the response.
- * @param {boolean} security - Indicates whether or not to save the response to a separate
- * security log file for security-related endpoints.
  * @param {string} [contentType="application/json"] - The content type for
  * the response.
  *
  * @returns {object} The response object.
  */
 module.exports.returnResponse = function returnResponse(req, res, message, statusCode,
-  security = false, contentType = 'application/json') {
+  contentType = 'application/json') {
   if (statusCode === 200) {
     // We send these headers for a success response
     res.header('Content-Type', contentType);
@@ -595,28 +593,7 @@ module.exports.returnResponse = function returnResponse(req, res, message, statu
   // Send the message
   res.status(statusCode).send(message);
   // Log the response
-  logger.logResponse(message.length, req, res, security);
+  logger.logResponse(message.length, req, res);
   // Return res
   return res;
-};
-
-module.exports.checkForSecurityEndpoint = function checkForSecurityEndpoint(req) {
-  // Grab the url without the query
-  const url = req.url.match(/(.*?)(?=\?)/)[0];
-  const method = req.method;
-  const securityEndpoints = [/login/, /orgs/, /orgs\/(.*?)(?=\/)/, /orgs\/*\/projects/,
-    /users/, /users\/(.*?)(?=\/)/, /webhooks/, /webhooks\/(?!trigger)(.*?)/];
-  let securityMethods = ['POST', 'PUT', 'DELETE'];
-  if (securityEndpoints.some((val) => {
-    return url.match(val);
-  })) {
-    if ('projects'.match(url)) securityMethods = ['DELETE'];
-    if ('login'.match(url)) securityMethods = ['POST'];
-    if ('webhooks'.match(url)) securityMethods = ['GET', 'POST', 'PATCH', 'DELETE'];
-  }
-  else {
-    return false;
-  }
-
-  if (securityMethods.includes(method)) return true;
 };

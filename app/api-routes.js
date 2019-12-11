@@ -103,7 +103,8 @@ api.route('/login')
   AuthController.authenticate,
   Middleware.logRoute,
   AuthController.doLogin,
-  APIController.login
+  APIController.login,
+  Middleware.respond
 );
 
 

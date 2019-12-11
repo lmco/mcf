@@ -22,6 +22,7 @@ const path = require('path');
 
 // MBEE modules
 const utils = M.require('lib.utils');
+const logger = M.require('lib.logger');
 
 /**
  * @description Log the route and method requested by a user.
@@ -31,11 +32,13 @@ const utils = M.require('lib.utils');
  * @param {Function} next - Callback to express authentication flow.
  */
 module.exports.logRoute = function logRoute(req, res, next) {
-  utils.checkForSecurityEndpoint(req);
   // Set username to anonymous if req.user is not defined
   const username = (req.user) ? (req.user._id || req.user.username) : 'anonymous';
   // Log the method, url, and username for the request
-  M.log.info(`${req.method} "${req.originalUrl}" requested by ${username}`);
+  const message = `${req.method} "${req.originalUrl}" requested by ${username}`;
+  M.log.info(message);
+  // Check if this is a security-sensitive endpoint and perform additional logging
+  logger.logSecurityEndpoints(req, message);
   next();
 };
 
@@ -173,8 +176,7 @@ module.exports.pluginPost = function pluginPost(endpoint) {
 module.exports.respond = function respond(req, res) {
   const message = res.locals.message;
   const statusCode = res.locals.statusCode;
-  const security = res.locals.security ? res.locals.security : false;
   const contentType = res.locals.contentType ? res.locals.contentType : 'application/json';
 
-  utils.returnResponse(req, res, message, statusCode, security, contentType);
+  utils.returnResponse(req, res, message, statusCode, contentType);
 };

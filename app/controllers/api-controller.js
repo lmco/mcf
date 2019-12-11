@@ -199,12 +199,17 @@ function swaggerJSON(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with session token
  */
-function login(req, res) {
+function login(req, res, next) {
   const json = formatJSON({ token: req.session.token });
-  return utils.returnResponse(req, res, json, 200);
+  res.locals = {
+    message: json,
+    statusCode: 200
+  };
+  next();
 }
 
 /**

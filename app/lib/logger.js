@@ -218,10 +218,8 @@ winston.addColors(colors);
  * @param {number} responseLength - The length of the response in bytes.
  * @param {object} req - Request object from express.
  * @param {object} res - Response object from express.
- * @param {boolean} security - Indicates whether or not to save the response to a separate
- * security log file for security-related endpoints.
  */
-function logResponse(responseLength, req, res, security = false) {
+function logResponse(responseLength, req, res) {
   // Set username to anonymous if req.user is not defined
   const username = (req.user) ? (req.user._id || req.user.username) : 'anonymous';
   const date = JSON.stringify(new Date()).replace(/"/g, '');
@@ -240,13 +238,48 @@ function logResponse(responseLength, req, res, security = false) {
 
   // Log the info at 'info' level
   M.log.info(message);
+  // Check if this is a security-sensitive endpoint and perform additional logging
+  logSecurityEndpoints(req, message);
+}
 
-  if (security) {
-    fs.appendFileSync(path.join('logs', M.config.log.security_file), message);
+/**
+ * @description - A.
+ *
+ * @param {object} req - A.
+ * @param {string} message - A.
+ */
+function logSecurityEndpoints(req, message) {
+  // Grab the url without the query if the query exists
+  const url = req.url.match(/(.*?)(?=\?)/) ? req.url.match(/(.*?)(?=\?)/)[0] : req.url;
+  const method = req.method;
+  const securityEndpoints = [/login/, /orgs/, /orgs\/(.*?)(?=\/)/, /orgs\/*\/projects/,
+    /users/, /users\/(.*?)(?=\/)/, /webhooks/, /webhooks\/(?!trigger)(.*)/, /logs/];
+  let securityMethods = ['POST', 'PUT', 'DELETE'];
+
+  // Check if the url matches a security-sensitive url
+  if (securityEndpoints.some((val) => {
+    return url.match(val);
+  })) {
+    // Reformat securityMethods depending on the url
+    if (url.match(/projects/)) securityMethods = ['DELETE'];
+    else if (url.match(/login/)) securityMethods = ['GET', 'POST'];
+    else if (url.match(/webhooks/)) securityMethods = ['GET', 'POST', 'PATCH', 'DELETE'];
+    else if (url.match(/logs/)) securityMethods = ['GET'];
+  }
+  else {
+    // No match; exit function
+    return;
+  }
+
+  // Final check - was a security-sensitive method used on a security-sensitive url?
+  if (securityMethods.includes(method)) {
+    // Add it to the security log
+    fs.appendFileSync(path.join('logs', M.config.log.security_file), `${message}\n`);
   }
 }
 
 module.exports = {
   makeLogger,
-  logResponse
+  logResponse,
+  logSecurityEndpoints
 };

@@ -46,6 +46,7 @@ const swaggerJSDoc = require('swagger-jsdoc');
 // MBEE modules
 const utils = M.require('lib.utils');
 const validators = M.require('lib.validators');
+const logger = M.require('lib.logger');
 
 /**
  * @description Renders the home page.
@@ -283,6 +284,9 @@ function login(req, res) {
   else {
     next = '/';
   }
+
+  // Log the login
+  logger.logResponse(res.locals.message.length, req, res);
 
   // handle the redirect
   M.log.info(`Redirecting to ${next} ...`);
