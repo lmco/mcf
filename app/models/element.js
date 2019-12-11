@@ -86,7 +86,7 @@ const utils = M.require('lib.utils');
  * element is a relationship. NOTE: If target is provided, source is required.
  * @property {string} documentation - The element documentation.
  * @property {string} type - An optional type string.
- *
+ * @property {string} artifact - A reference to an artifact.
  */
 const ElementSchema = new db.Schema({
   _id: {
@@ -123,7 +123,8 @@ const ElementSchema = new db.Schema({
     validate: [{
       validator: validators.element.project,
       message: props => `${props.value} is not a valid project ID.`
-    }]
+    }],
+    immutable: true
   },
   branch: {
     type: 'String',
@@ -133,7 +134,8 @@ const ElementSchema = new db.Schema({
     validate: [{
       validator: validators.element.branch,
       message: props => `${props.value} is not a valid branch ID.`
-    }]
+    }],
+    immutable: true
   },
   parent: {
     type: 'String',

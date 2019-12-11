@@ -280,6 +280,20 @@ class Model {
    * @returns {Promise<object>} Result of the bulkWrite operation.
    */
   async bulkWrite(ops, options) {
+    // Loop over each operation
+    ops.forEach((o) => {
+      // If performing an update
+      if (Object.keys(o)[0] === 'updateOne') {
+        // Verify there are no immutable fields in the doc
+        Object.keys(o.updateOne.update).forEach((k) => {
+          if (this.schema.tree[k].immutable === true) {
+            throw new M.OperationError(`${this.modelName} validation failed: `
+              + `${k}: Path \`${k}\` is immutable and cannot be modified.`);
+          }
+        });
+      }
+    });
+
     return this.model.bulkWrite(ops, options);
   }
 
@@ -526,6 +540,14 @@ class Model {
    * @returns {Promise<object[]>} The updated objects.
    */
   async updateMany(filter, doc, options) {
+    // Verify there are no immutable fields in the doc
+    Object.keys(doc).forEach((k) => {
+      if (this.schema.tree[k].immutable === true) {
+        throw new M.OperationError(`${this.modelName} validation failed: `
+          + `${k}: Path \`${k}\` is immutable and cannot be modified.`);
+      }
+    });
+
     // Validate the query
     this.validateQuery(filter);
 
@@ -545,6 +567,14 @@ class Model {
    * @returns {Promise<object>} The updated document.
    */
   async updateOne(filter, doc, options) {
+    // Verify there are no immutable fields in the doc
+    Object.keys(doc).forEach((k) => {
+      if (this.schema.tree[k].immutable === true) {
+        throw new M.OperationError(`${this.modelName} validation failed: `
+          + `${k}: Path \`${k}\` is immutable and cannot be modified.`);
+      }
+    });
+
     // Validate the query
     this.validateQuery(filter);
 

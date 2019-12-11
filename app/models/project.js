@@ -112,7 +112,8 @@ const ProjectSchema = new db.Schema({
     validate: [{
       validator: validators.project.org,
       message: props => `${props.value} is not a valid org ID.`
-    }]
+    }],
+    immutable: true
   },
   name: {
     type: 'String',

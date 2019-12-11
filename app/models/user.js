@@ -149,7 +149,8 @@ const UserSchema = new db.Schema({
       validator: validators.user.provider,
       message: props => `Invalid provider [${props.value}].`
     }],
-    default: 'local'
+    default: 'local',
+    immutable: true
   },
   failedlogins: {
     type: 'Object',
