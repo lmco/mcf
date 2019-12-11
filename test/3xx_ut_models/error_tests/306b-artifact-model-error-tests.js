@@ -46,26 +46,26 @@ describe(M.getModuleName(module.filename), () => {
    * Before: runs before all tests. Open database connection and create test
    * artifact.
    */
-  before((done) => {
-    db.connect()
-    .then(() => done())
-    .catch((error) => {
+  before(async () => {
+    try {
+      await db.connect();
+    }
+    catch (error) {
       chai.expect(error.message).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**
    * After: runs after all tests. Close database connection and delete test
    * artifact.
    */
-  after((done) => {
-    db.disconnect()
-    .then(() => done())
-    .catch((error) => {
+  after(async () => {
+    try {
+      db.disconnect();
+    }
+    catch (error) {
       chai.expect(error.message).to.equal(null);
-      done();
-    });
+    }
   });
 
   /* Execute the tests */
