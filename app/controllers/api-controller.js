@@ -402,7 +402,7 @@ async function postOrgs(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error), true);
     }
   }
   else {
@@ -424,13 +424,14 @@ async function postOrgs(req, res, next) {
     // Sets the message to the created orgs and the status code to 200
     res.locals = {
       message: json,
-      statusCode: 200
+      statusCode: 200,
+      security: true
     };
     next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error), true);
   }
 }
 
@@ -469,7 +470,7 @@ async function putOrgs(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error), true);
   }
 
   // Check options for minified
@@ -487,7 +488,7 @@ async function putOrgs(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error), true);
     }
   }
   else {
@@ -509,13 +510,14 @@ async function putOrgs(req, res, next) {
     // Sets the message to the replaced orgs and the status code to 200
     res.locals = {
       message: json,
-      statusCode: 200
+      statusCode: 200,
+      security: true
     };
     next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error), true);
   }
 }
 
@@ -637,7 +639,7 @@ async function deleteOrgs(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error), true);
   }
 
   // If req.body contains objects, grab the org IDs from the objects
@@ -660,13 +662,14 @@ async function deleteOrgs(req, res, next) {
     // Sets the message to the deleted org ids and the status code to 200
     res.locals = {
       message: json,
-      statusCode: 200
+      statusCode: 200,
+      security: true
     };
     next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error), true);
   }
 }
 
@@ -777,7 +780,7 @@ async function postOrg(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error), true);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -785,7 +788,7 @@ async function postOrg(req, res, next) {
     const error = new M.DataFormatError(
       'Organization ID in the body does not match ID in the params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error), true);
   }
 
   // Attempt to parse query options
@@ -795,7 +798,7 @@ async function postOrg(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error), true);
   }
 
   // Set the org ID in the body equal req.params.orgid
@@ -822,13 +825,14 @@ async function postOrg(req, res, next) {
     // Sets the message to the created org and the status code to 200
     res.locals = {
       message: json,
-      statusCode: 200
+      statusCode: 200,
+      security: true
     };
     next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error), true);
   }
 }
 
@@ -863,7 +867,7 @@ async function putOrg(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error), true);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -871,7 +875,7 @@ async function putOrg(req, res, next) {
     const error = new M.DataFormatError(
       'Organization ID in the body does not match ID in the params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error), true);
   }
 
   // Attempt to parse query options
@@ -881,7 +885,7 @@ async function putOrg(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error), true);
   }
 
   // Set the org ID in the body equal req.params.orgid
@@ -908,13 +912,14 @@ async function putOrg(req, res, next) {
     // Sets the message to the replaced org and the status code to 200
     res.locals = {
       message: json,
-      statusCode: 200
+      statusCode: 200,
+      security: true
     };
     next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error), true);
   }
 }
 
@@ -1036,7 +1041,7 @@ async function deleteOrg(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error), true);
   }
 
   // Check options for minified
@@ -1057,13 +1062,14 @@ async function deleteOrg(req, res, next) {
     // Sets the message to the deleted org id and the status code to 200
     res.locals = {
       message: json,
-      statusCode: 200
+      statusCode: 200,
+      security: true
     };
     next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error), true);
   }
 }
 

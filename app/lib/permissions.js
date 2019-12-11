@@ -316,7 +316,7 @@ function readElement(user, org, project, branch) {
           'User does not have permission to find items in the project '
           + `[${utils.parseID(project._id).pop()}].`);
         // User must have read permissions on project.
-        assert.ok(project.permissions[user._id].includes('write'),
+        assert.ok(project.permissions[user._id].includes('read'),
           'User does not have permission to find items in the project '
           + `[${utils.parseID(project._id).pop()}].`);
       }

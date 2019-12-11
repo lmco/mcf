@@ -218,8 +218,10 @@ winston.addColors(colors);
  * @param {number} responseLength - The length of the response in bytes.
  * @param {object} req - Request object from express.
  * @param {object} res - Response object from express.
+ * @param {boolean} security - Indicates whether or not to save the response to a separate
+ * security log file for security-related endpoints.
  */
-function logResponse(responseLength, req, res) {
+function logResponse(responseLength, req, res, security = false) {
   // Set username to anonymous if req.user is not defined
   const username = (req.user) ? (req.user._id || req.user.username) : 'anonymous';
   const date = JSON.stringify(new Date()).replace(/"/g, '');
@@ -233,9 +235,15 @@ function logResponse(responseLength, req, res) {
     ip = ip.replace('::ffff:', '');
   }
 
+  const message = `RESPONSE: ${ip} ${username} [${date}] "${req.method} `
+    + `${req.originalUrl}" ${res.statusCode} ${responseLength.toString()}`;
+
   // Log the info at 'info' level
-  M.log.info(`RESPONSE: ${ip} ${username} [${date}] "${req.method} `
-    + `${req.originalUrl}" ${res.statusCode} ${responseLength.toString()}`);
+  M.log.info(message);
+
+  if (security) {
+    fs.appendFileSync(path.join('logs', M.config.log.security_file), message);
+  }
 }
 
 module.exports = {
