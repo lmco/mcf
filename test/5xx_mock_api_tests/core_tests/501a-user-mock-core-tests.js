@@ -116,7 +116,7 @@ function whoami(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // GETs the requesting user
@@ -166,7 +166,7 @@ function postUser(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // POSTs a user
@@ -228,7 +228,7 @@ function postUsers(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // POSTs multiple users
@@ -278,7 +278,7 @@ function putUser(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // PUTs a user
@@ -341,7 +341,7 @@ function putUsers(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // PUTs multiple users
@@ -391,7 +391,7 @@ function getUser(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // GETs a user
@@ -455,7 +455,7 @@ function getUsers(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // GETs multiple users
@@ -529,7 +529,7 @@ function getAllUsers(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // GETs all users
@@ -598,7 +598,7 @@ function searchUsers(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // Searches for a user
@@ -652,7 +652,7 @@ function patchUser(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // PATCHs a user
@@ -719,7 +719,7 @@ function patchUsers(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // PATCHs multiple users
@@ -775,7 +775,7 @@ function patchUserPassword(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // PATCHs a users password
@@ -810,7 +810,7 @@ function deleteUser(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // DELETEs a user
@@ -850,7 +850,7 @@ function deleteUsers(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // DELETEs multiple users

@@ -53,7 +53,8 @@ module.exports = {
   updateUser,
   updateBranch,
   updateArtifact,
-  updateWebhook
+  updateWebhook,
+  getLogs
 };
 
 /**
@@ -824,6 +825,22 @@ function deleteWebhook(user, org = null, project = null, branch = null) {
       assert.ok(user.admin,
         'User does not have permission to delete server level webhooks.');
     }
+  }
+  catch (error) {
+    throw new M.PermissionError(error.message, 'warn');
+  }
+}
+
+/**
+ * @description Verifies that the user has permission to view system logs.
+ *
+ * @param {User} user - The user object to check permissions for.
+ *
+ * @throws {PermissionError}
+ */
+function getLogs(user) {
+  try {
+    assert.ok(user.admin, 'User does not have permission to view system logs.');
   }
   catch (error) {
     throw new M.PermissionError(error.message, 'warn');

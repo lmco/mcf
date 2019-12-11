@@ -133,6 +133,62 @@ api.route('/version')
   APIController.version
 );
 
+/**
+ * @swagger
+ * /api/logs:
+ *   get:
+ *     tags:
+ *       - general
+ *     description: Returns the contents of the main server log file. This
+ *                  endpoint is reserved for system-wide admins only.
+ *     produces:
+ *       - text/plain
+ *     parameters:
+ *       - name: skip
+ *         description: Allows for pagination of log content by skipping a
+ *                      certain number of lines. A skip value of less than 0
+ *                      will be treated as 0.
+ *         in: query
+ *         type: number
+ *         default: 0
+ *       - name: limit
+ *         description: Limits the number of lines returned. The default is 1000
+ *                      lines. A limit of less than 0 will return ALL log
+ *                      content. A limit of 0 is not allowed.
+ *         in: query
+ *         type: number
+ *         default: 1000
+ *       - name: removeColor
+ *         description: Removes any characters used to colorize the logs, if
+ *                      they exist.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET the logs.
+ *       400:
+ *         description: Bad Request, Failed to GET logs due to improperly
+ *                      formatted query options.
+ *       401:
+ *         description: Unauthorized, Failed to GET the logs due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET logs due to lack of correct
+ *                      permissions.
+ *       500:
+ *         description: Internal Server Error, Failed to GET logs due to a
+ *                      server side issue, or the log file not existing.
+ */
+api.route('/logs')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  Middleware.pluginPre('getLogs'),
+  APIController.getLogs,
+  Middleware.pluginPost('getLogs'),
+  Middleware.respond
+);
 
 /**
  * @swagger
