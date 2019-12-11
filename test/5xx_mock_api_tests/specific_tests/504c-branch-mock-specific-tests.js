@@ -147,7 +147,7 @@ function postGzip(done) {
     fs.truncateSync(filepath);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // POSTs a branch
@@ -211,7 +211,7 @@ function patchGzip(done) {
       fs.truncateSync(filepath);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // PATCHes a branch

@@ -130,15 +130,12 @@ function unauthorizedTest(operation) {
   return async function() {
     let branchData = testData.branches[0];
     let op = operation;
-    let id = org._id;
-    let level = 'org';
+    const id = org._id;
+    const level = 'org';
 
     switch (operation) {
       case 'find':
         branchData = branchData.id;
-        op = 'get'; // Changing this because permissions errors say "get" instead of "find"
-        level = 'project';
-        id = projID;
         break;
       case 'create':
         branchData = testData.branches[1];

@@ -173,14 +173,10 @@ async function typeImmutable() {
       type: 'Incoming'
     };
 
-    // Update webhook; it won't actually throw an error
-    await Webhook.updateOne({ _id: webhookID }, update);
-
-    // Find the webhook
-    const webhook = await Webhook.findOne({ _id: webhookID });
-
-    // Expect the type to still be outgoing
-    webhook.type.should.equal('Outgoing');
+    // Update webhook; expect specific error message
+    await Webhook.updateOne({ _id: webhookID }, update)
+    .should.eventually.be.rejectedWith('Webhook validation failed: type: Path'
+      + ' `type` is immutable and cannot be modified.');
   }
   catch (error) {
     M.log.error(error);

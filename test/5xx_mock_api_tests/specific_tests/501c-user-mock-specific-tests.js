@@ -142,7 +142,7 @@ function postGzip(done) {
     UserController.remove(adminUser, userData.username)
     .then(() => {
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     });
   };
 
@@ -202,7 +202,7 @@ function putGzip(done) {
     UserController.remove(adminUser, userData.username)
     .then(() => {
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     });
   };
 
@@ -269,7 +269,7 @@ function patchGzip(done) {
       UserController.remove(adminUser, userData.username)
       .then(() => {
         // Ensure the response was logged correctly
-        setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+        setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
       });
     };
 

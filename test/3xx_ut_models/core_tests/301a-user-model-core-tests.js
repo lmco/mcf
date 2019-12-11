@@ -49,25 +49,25 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * Before: runs before all tests. Open the database connection.
    */
-  before((done) => {
-    db.connect()
-    .then(() => done())
-    .catch((error) => {
+  before(async () => {
+    try {
+      await db.connect();
+    }
+    catch (error) {
       chai.expect(error.message).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**
    * After: runs after all tests. Close database connection.
    */
-  after((done) => {
-    db.disconnect()
-    .then(() => done())
-    .catch((error) => {
+  after(async () => {
+    try {
+      db.disconnect();
+    }
+    catch (error) {
       chai.expect(error.message).to.equal(null);
-      done();
-    });
+    }
   });
 
   /* Execute the tests */
@@ -77,6 +77,7 @@ describe(M.getModuleName(module.filename), () => {
   it('should get a users public data', getUserPublicData);
   it('should update a user', updateUser);
   it('should delete a user', deleteUser);
+  it('should store old passwords', saveOldPassword);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -199,6 +200,36 @@ async function deleteUser() {
 
     // foundUser should be null
     should.not.exist(foundUser);
+  }
+  catch (error) {
+    M.log.error(error);
+    // There should be no error
+    should.not.exist(error);
+  }
+}
+
+/**
+ * @description Verifies that the User static function checkOldPasswords returns an updated
+ * list of recently used passwords when presented with a new password.
+ */
+async function saveOldPassword() {
+  // Skip test if this feature is not enabled
+  if (!M.config.auth.hasOwnProperty('oldPasswords')) this.skip();
+
+  try {
+    // Create user object with an old password to test
+    const userObj = testData.users[0];
+    userObj._id = userObj.username;
+    userObj.password = 'ABCabc1!';
+    User.hashPassword(userObj);
+
+    // Create new password
+    const newPassword = 'ABCabc2!';
+
+    // Test the checkOldPasswords function
+    const oldPasswords = User.checkOldPasswords(userObj, newPassword);
+
+    oldPasswords.should.have.members([userObj.password]);
   }
   catch (error) {
     M.log.error(error);

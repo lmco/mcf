@@ -21,6 +21,7 @@
 
 // Node modules
 const assert = require('assert');
+const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 
@@ -223,10 +224,10 @@ module.exports.parseOptions = function(options, validOptions) {
     // Check option of boolean type
     if (validOptions[option] === 'boolean') {
       // Check and convert string to boolean
-      if (options[option] === 'true') {
+      if (options[option] === 'true' || options[option] === true) {
         parsedOptions[option] = true;
       }
-      else if (options[option] === 'false') {
+      else if (options[option] === 'false' || options[option] === false) {
         parsedOptions[option] = false;
       }
       else if (!(typeof options[option] === 'boolean')) {
@@ -535,6 +536,34 @@ module.exports.getContentType = function(filename) {
     contentType = mineTypeTable[ext];
   }
   return contentType;
+};
+
+/**
+ * @description Checks that the available heap memory allows for a file to be
+ * read into memory.
+ *
+ * @param {string} filePath - The path of the file.
+ *
+ * @returns {boolean} If the file is safe to read or not.
+ */
+module.exports.readFileCheck = function(filePath) {
+  // Check that the file exists
+  if (fs.existsSync(filePath)) {
+    // Get the size of the file, in bytes
+    const fileSize = fs.statSync(filePath).size;
+    // Get the total heap usage, in bytes
+    const currentHeapUsage = process.memoryUsage().heapUsed;
+
+    // Get the theoretical remaining heap usage after reading the file
+    const totalHeapUsage = currentHeapUsage + fileSize;
+
+    // If within 95% of memory limit, file is NOT safe to read
+    return !(totalHeapUsage / 1024 / 1024 >= M.memoryLimit * 0.95);
+  }
+  else {
+    // File does not exist, not safe to read
+    return false;
+  }
 };
 
 /**

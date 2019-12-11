@@ -24,6 +24,7 @@
 
 
 // Node modules
+const fs = require('fs');
 const path = require('path');
 
 // NPM modules
@@ -44,6 +45,7 @@ const EventEmitter = M.require('lib.events');
 const errors = M.require('lib.errors');
 const jmi = M.require('lib.jmi-conversions');
 const logger = M.require('lib.logger');
+const permissions = M.require('lib.permissions');
 const publicData = M.require('lib.get-public-data');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
@@ -55,6 +57,7 @@ module.exports = {
   login,
   test,
   version,
+  getLogs,
   getOrgs,
   postOrgs,
   putOrgs,
@@ -236,6 +239,118 @@ function version(req, res) {
 
   // Return version object
   return utils.returnResponse(req, res, json, 200);
+}
+
+/**
+ * GET /api/logs
+ *
+ * @description Returns the contents of the main log. Reserved for system-wide
+ * admins only.
+ *
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @param {Function} next - Middleware callback to trigger the next function
+ *
+ * @returns {object} Response object with log info.
+ */
+function getLogs(req, res, next) {
+  let options;
+  let logContent;
+  let returnedLines;
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) return noUserError(req, res);
+
+  // Ensure that the user has permission to get the logs
+  try {
+    permissions.getLogs(req.user);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Define valid options and their types
+  const validOptions = {
+    skip: 'number',
+    limit: 'number',
+    removeColor: 'boolean'
+  };
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+
+    // Set limit and skip options if not already set
+    if (!options.hasOwnProperty('limit')) options.limit = 1000;
+    if (!options.skip) options.skip = 0;
+
+    // Return error if limit of 0 is supplied
+    if (options.limit === 0) {
+      throw new M.DataFormatError('A limit of 0 is not allowed.', 'warn');
+    }
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  const logPath = path.join(M.root, 'logs', M.config.log.file);
+
+  // Read the log file
+  if (fs.existsSync(logPath)) {
+    // Ensure that there is enough memory to read the log file
+    if (!utils.readFileCheck(logPath)) {
+      const error = new M.ServerError('There is not enough memory to read the log'
+        + ' file. Please consider restarting the process with the flag '
+        + '--max-old-space-size.', 'error');
+      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    }
+
+    logContent = fs.readFileSync(logPath).toString();
+  }
+  else {
+    const error = new M.ServerError('Server log file does not exist.', 'critical');
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+  }
+
+  // Get the number of lines in the log file
+  const numLines = logContent.split('\n').length;
+
+  // If limit is -1, all log content should be returned
+  if (options.limit < 0) {
+    returnedLines = logContent.split('\n');
+  }
+  else {
+    // Ensure skip option is in correct range
+    if (options.skip < 0) {
+      options.skip = 0;
+    }
+    else if (options.skip > numLines) {
+      options.skip = numLines;
+    }
+
+    // Skip the correct number of lines
+    returnedLines = logContent.split('\n').slice(options.skip);
+    // Limit the correct number of lines
+    returnedLines = returnedLines.slice(0, options.limit);
+  }
+
+  // Remove the color characters from log if removeColor is specified
+  if (options.removeColor) {
+    const colorizeRegex = /(\[30m|\[31m|\[32m|\[33m|\[34m|\[35m|\[36m|\[37m|\[38m|\[39m)/g;
+    returnedLines = returnedLines.map((l) => l.replace(colorizeRegex, ''));
+  }
+
+  // Sets the message to the log content, content type to text/plain
+  // and the status code to 200
+  res.locals = {
+    message: returnedLines.join('\n'),
+    statusCode: 200,
+    contentType: 'text/plain'
+  };
+  next();
 }
 
 /* ----------------------( Organization API Endpoints )---------------------- */
