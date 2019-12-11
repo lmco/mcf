@@ -570,7 +570,7 @@ class Model {
     // Verify there are no immutable fields in the doc
     Object.keys(doc).forEach((k) => {
       if (this.schema.tree[k].immutable === true) {
-        throw new M.PermissionError(`${this.modelName} validation failed: `
+        throw new M.OperationError(`${this.modelName} validation failed: `
           + `${k}: Path \`${k}\` is immutable and cannot be modified.`);
       }
     });
