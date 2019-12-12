@@ -719,8 +719,8 @@ async function update(requestingUser, organizationID, projects, options) {
             + 'be changed.', 'warn');
         }
 
-        // Get validator for field if one exists
-        if (validators.project.hasOwnProperty(key)) {
+        // Get validator for field if one exists; permissions is handled separately
+        if (validators.project.hasOwnProperty(key) && key !== 'permissions') {
           // If the validator is a regex string
           if (typeof validators.project[key] === 'string') {
             // If validation fails, throw error
