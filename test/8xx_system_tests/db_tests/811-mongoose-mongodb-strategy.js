@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.db_tests.811-mongoose-mongodb-strategy
+ * @module test.811-db-mongoose-mongodb-strategy
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
