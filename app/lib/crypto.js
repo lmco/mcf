@@ -17,6 +17,10 @@
 // Node modules
 const crypto = require('crypto');  // NOTE: Refers to standard node crypto library
 
+// Initialize an IV (Initialization Vector) for the createCipheriv and createDecipheriv functions
+let iv = Buffer.alloc(16);
+iv = Buffer.from(Array.prototype.map.call(iv, () => Math.floor(Math.random() * 256)));
+
 /**
  * @description Encrypts data with AES-256 using the app secret and returns the
  * encrypted data as a base64 encoded string.
@@ -26,8 +30,10 @@ const crypto = require('crypto');  // NOTE: Refers to standard node crypto libra
  * @returns {string} Encrypted data.
  */
 module.exports.encrypt = function encrypt(data) {
-  const secret = M.config.server.secret;
-  const cipher = crypto.createCipher('aes-256-cbc', secret);
+  // Generate a key from the secret in the config
+  let key = Buffer.alloc(32);
+  key = Buffer.concat([Buffer.from(M.config.server.secret)], key.length);
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
 
   // Encrypt input using aes-256 cipher
   let encrypted = cipher.update(data, 'utf8', 'hex');
@@ -53,8 +59,9 @@ module.exports.decrypt = function decrypt(data) {
   }
 
   try {
-    const secret = M.config.server.secret;
-    const decipher = crypto.createDecipher('aes-256-cbc', secret);
+    let key = Buffer.alloc(32);
+    key = Buffer.concat([Buffer.from(M.config.server.secret)], key.length);
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
 
     // Retrieve hex data from base64 encoded string
     const hexData = Buffer.from(data, 'base64').toString('hex');
