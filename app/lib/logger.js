@@ -243,9 +243,11 @@ function logResponse(responseLength, req, res) {
 }
 
 /**
- * @description - A.
+ * @description - Tests the url and method of the incoming request object against a list of
+ * security-sensitive api endpoints. If there's a match, the response message is also logged
+ * to a special security log file.
  *
- * @param {object} req - A.
+ * @param {object} req - Request express object.
  * @param {string} message - A.
  */
 function logSecurityEndpoints(req, message) {
@@ -257,9 +259,7 @@ function logSecurityEndpoints(req, message) {
   let securityMethods = ['POST', 'PUT', 'DELETE'];
 
   // Check if the url matches a security-sensitive url
-  if (securityEndpoints.some((val) => {
-    return url.match(val);
-  })) {
+  if (securityEndpoints.some((val) => url.match(val))) {
     // Reformat securityMethods depending on the url
     if (url.match(/projects/)) securityMethods = ['DELETE'];
     else if (url.match(/login/)) securityMethods = ['GET', 'POST'];

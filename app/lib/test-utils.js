@@ -499,6 +499,7 @@ module.exports.createRequest = function(user, params, body, method, query = {}) 
   }
 
   return {
+    url: 'test',
     headers: this.getHeaders(),
     method: method,
     originalUrl: 'ThisIsATest',
@@ -536,6 +537,7 @@ module.exports.createReadStreamRequest = function(user, params, body, method, qu
   }
 
   const req = fs.createReadStream(filepath);
+  req.url = 'test';
   req.user = user;
   req.params = params;
   req.body = body;
