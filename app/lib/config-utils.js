@@ -214,8 +214,8 @@ module.exports.validate = function(config) {
   test(config, 'log.file', 'string');
   test(config, 'log.error_file', 'string');
   test(config, 'log.debug_file', 'string');
+  test(config, 'log.security_file', 'string');
   test(config, 'log.colorize', 'boolean');
-
 
   // ----------------------------- Verify server ----------------------------- //
   test(config, 'server', 'object');
