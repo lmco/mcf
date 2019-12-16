@@ -387,9 +387,8 @@ async function create(requestingUser, organizationID, projectID, branches, optio
       // Grabbing all the element ids
       elementsCloning = elementsToClone.map((e) => e._id);
 
-      const promises = [];
       // Loop through all the branches
-      promises.push(newBranches.forEach((branch) => {
+      newBranches.forEach((branch) => {
         // Create the new element objects for each element in the cloned from branch
         elementsToCreate = elementsToCreate.concat(elementsToClone.map((e) => {
           // Grab the element ID and parent ID
@@ -467,15 +466,64 @@ async function create(requestingUser, organizationID, projectID, branches, optio
           // Return the element object
           return elemObj;
         }));
-      }));
+      });
 
-      await Promise.all(promises);
       // Create the new elements
       const newElements = await Element.insertMany(elementsToCreate);
 
       if (newElements.length !== (newBranches.length * elementsCloning.length)) {
         // Not all elements were created
         throw new M.DatabaseError('Not all elements were cloned from branch.', 'error');
+      }
+
+      // Find all the artifacts in the branch we are branching from
+      const artifactsToClone = await Artifact.find({ branch: sourceID }, null);
+
+      // Check if there are artifacts to be cloned
+      if (artifactsToClone.length > 0) {
+        // Grabbing all the artifact ids
+        const artifactIDs = artifactsToClone.map((a) => a._id);
+
+        let artifactsToCreate = [];
+
+        // Loop through each branch
+        newBranches.forEach((branch) => {
+          // Loop through each artifact
+          artifactsToCreate = artifactsToCreate.concat(artifactsToClone.map((a) => {
+            // Grab the artifact ID
+            const oldArtID = utils.parseID(a._id).pop();
+            const artID = utils.createID(branch._id, oldArtID);
+
+            const artObj = {
+              _id: artID,
+              project: a.project,
+              branch: branch._id,
+              filename: a.filename,
+              location: a.location,
+              custom: a.custom,
+              lastModifiedBy: reqUser._id,
+              createdBy: a.createdBy,
+              createdOn: a.createdOn,
+              updatedOn: Date.now(),
+              archived: a.archived,
+              description: a.description,
+              size: a.size,
+              strategy: a.strategy,
+              archivedOn: (a.archivedOn) ? a.archivedOn : null,
+              archivedBy: (a.archivedBy) ? a.archivedBy : null
+            };
+
+            return artObj;
+          }));
+        });
+
+        // Create the new artifacts
+        const newArtifacts = await Artifact.insertMany(artifactsToCreate);
+
+        if (newArtifacts.length !== (newBranches.length * artifactIDs.length)) {
+          // Not all artifacts were created
+          throw new M.DatabaseError('Not all artifacts were cloned from branch.', 'error');
+        }
       }
     }
     catch (error) {
@@ -486,6 +534,8 @@ async function create(requestingUser, organizationID, projectID, branches, optio
           await Element.deleteMany({ branch: { $in: arrIDs } });
           // Delete the branches
           await Branch.deleteMany({ _id: { $in: arrIDs } });
+          // Delete the artifacts
+          await Artifact.deleteMany({ branch: { $in: arrIDs } });
           // Send original error
           resolve(error);
         }
