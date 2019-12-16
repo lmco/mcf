@@ -20,6 +20,12 @@ const crypto = require('crypto');  // NOTE: Refers to standard node crypto libra
 // Create an Initialization Vector (IV) of 16 random bytes for the createCipheriv
 // and createDecipheriv functions
 const iv = crypto.randomBytes(16);
+// Set the length of the secret key in bytes
+const keyLength = 32;
+// Generate a cryptographic key in buffer form from the secret in the config.
+// Limit size of the buffer to the specified key length.
+const key = Buffer.concat([Buffer.from(M.config.server.secret)], keyLength);
+
 
 /**
  * @description Encrypts data with AES-256 using the app secret and returns the
@@ -30,9 +36,7 @@ const iv = crypto.randomBytes(16);
  * @returns {string} Encrypted data.
  */
 module.exports.encrypt = function encrypt(data) {
-  // Generate a cryptographic key in buffer form from the secret in the config.
-  // Limit size of the buffer to 32 bytes.
-  const key = Buffer.concat([Buffer.from(M.config.server.secret)], 32);
+  // Create aes-256-cbc cipher object using secret key and random initialization vector
   const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
 
   // Encrypt input using aes-256 cipher
@@ -59,8 +63,7 @@ module.exports.decrypt = function decrypt(data) {
   }
 
   try {
-    let key = Buffer.alloc(32);
-    key = Buffer.concat([Buffer.from(M.config.server.secret)], key.length);
+    // Create aes-256-cbc decipher object using secret key and random initialization vector
     const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
 
     // Retrieve hex data from base64 encoded string
