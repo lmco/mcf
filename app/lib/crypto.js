@@ -17,9 +17,9 @@
 // Node modules
 const crypto = require('crypto');  // NOTE: Refers to standard node crypto library
 
-// Initialize an IV (Initialization Vector) for the createCipheriv and createDecipheriv functions
-let iv = Buffer.alloc(16);
-iv = Buffer.from(Array.prototype.map.call(iv, () => Math.floor(Math.random() * 256)));
+// Create an Initialization Vector (IV) of 16 random bytes for the createCipheriv
+// and createDecipheriv functions
+const iv = crypto.randomBytes(16);
 
 /**
  * @description Encrypts data with AES-256 using the app secret and returns the
@@ -30,9 +30,9 @@ iv = Buffer.from(Array.prototype.map.call(iv, () => Math.floor(Math.random() * 2
  * @returns {string} Encrypted data.
  */
 module.exports.encrypt = function encrypt(data) {
-  // Generate a key from the secret in the config
-  let key = Buffer.alloc(32);
-  key = Buffer.concat([Buffer.from(M.config.server.secret)], key.length);
+  // Generate a cryptographic key in buffer form from the secret in the config.
+  // Limit size of the buffer to 32 bytes.
+  const key = Buffer.concat([Buffer.from(M.config.server.secret)], 32);
   const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
 
   // Encrypt input using aes-256 cipher
