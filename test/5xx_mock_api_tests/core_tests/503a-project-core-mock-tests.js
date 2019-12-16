@@ -21,7 +21,6 @@ const chai = require('chai');
 
 // MBEE modules
 const APIController = M.require('controllers.api-controller');
-const db = M.require('db');
 const jmi = M.require('lib.jmi-conversions');
 const utils = M.require('lib.utils');
 
@@ -44,45 +43,31 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * Before: Run before all tests. Creates the admin user and test org.
    */
-  before((done) => {
-    // Connect db
-    db.connect()
-    // Create test admin
-    .then(() => testUtils.createTestAdmin())
-    .then((_adminUser) => {
-      // Set global admin user
-      adminUser = _adminUser;
-
-      // Create test org
-      return testUtils.createTestOrg(adminUser);
-    })
-    .then((retOrg) => {
-      org = retOrg;
-      done();
-    })
-    .catch((error) => {
+  before(async () => {
+    try {
+      adminUser = await testUtils.createTestAdmin();
+      org = await testUtils.createTestOrg(adminUser);
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**
    * After: Delete admin user and test org.
    */
-  after((done) => {
-    // Removing the test organization
-    testUtils.removeTestOrg()
-    .then(() => testUtils.removeTestAdmin())
-    .then(() => db.disconnect())
-    .then(() => done())
-    .catch((error) => {
+  after(async () => {
+    try {
+      await testUtils.removeTestOrg();
+      await testUtils.removeTestAdmin();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /* Execute tests */

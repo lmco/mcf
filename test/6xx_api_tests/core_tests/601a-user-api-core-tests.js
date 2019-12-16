@@ -21,7 +21,6 @@ const chai = require('chai');
 const request = require('request');
 
 // MBEE modules
-const db = M.require('db');
 const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */
@@ -40,14 +39,10 @@ let adminUser = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Run before all tests. Find
-   * non-admin user and elevate to admin user.
+   * Before: Runs before all tests. Creates admin user.
    */
   before(async () => {
     try {
-      // Open the database connection
-      await db.connect();
-      // Create test admin
       adminUser = await testUtils.createTestAdmin();
     }
     catch (error) {
@@ -58,13 +53,12 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Delete admin user.
+   * After: Runs after all tests. Deletes admin user.
    */
   after(async () => {
     try {
       // Delete test admin
       await testUtils.removeTestAdmin();
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);

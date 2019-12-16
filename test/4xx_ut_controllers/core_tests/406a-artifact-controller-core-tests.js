@@ -25,7 +25,6 @@ const jmi = M.require('lib.jmi-conversions');
 
 // MBEE modules
 const ArtifactController = M.require('controllers.artifact-controller');
-const db = M.require('db');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
@@ -52,9 +51,6 @@ describe(M.getModuleName(module.filename), () => {
    */
   before(async () => {
     try {
-      // Connect to the database
-      await db.connect();
-
       adminUser = await testUtils.createTestAdmin();
       // Create the organization model object
       org = await testUtils.createTestOrg(adminUser);
@@ -87,7 +83,6 @@ describe(M.getModuleName(module.filename), () => {
     try {
       // Remove the org created in before()
       await testUtils.removeTestOrg();
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);

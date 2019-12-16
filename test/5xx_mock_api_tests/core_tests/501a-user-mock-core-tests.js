@@ -21,7 +21,6 @@ const chai = require('chai');
 
 // MBEE modules
 const APIController = M.require('controllers.api-controller');
-const db = M.require('db');
 const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */
@@ -44,7 +43,6 @@ describe(M.getModuleName(module.filename), () => {
    */
   before(async () => {
     try {
-      await db.connect();
       adminUser = await testUtils.createTestAdmin();
     }
     catch (error) {
@@ -60,7 +58,6 @@ describe(M.getModuleName(module.filename), () => {
   after(async () => {
     try {
       await testUtils.removeTestAdmin();
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);

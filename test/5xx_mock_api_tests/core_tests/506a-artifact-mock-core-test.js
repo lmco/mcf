@@ -24,7 +24,6 @@ const chai = require('chai'); // Test framework
 
 // MBEE modules
 const apiController = M.require('controllers.api-controller');
-const db = M.require('db');
 const utils = M.require('lib.utils');
 const jmi = M.require('lib.jmi-conversions');
 
@@ -37,7 +36,7 @@ let org = null;
 let orgID = null;
 let proj = null;
 let projID = null;
-let branchID = null;
+const branchID = testData.branches[0].id;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -48,13 +47,10 @@ let branchID = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, and project.
+   * Before: Create an admin user, organization, and project.
    */
   before(async () => {
     try {
-      // Connect to the database
-      await db.connect();
-
       // Create test admin
       adminUser = await testUtils.createTestAdmin();
 
@@ -65,7 +61,6 @@ describe(M.getModuleName(module.filename), () => {
       // Create project
       proj = await testUtils.createTestProject(adminUser, orgID);
       projID = utils.parseID(proj._id).pop();
-      branchID = testData.branches[0].id;
     }
     catch (error) {
       M.log.error(error);
@@ -84,7 +79,6 @@ describe(M.getModuleName(module.filename), () => {
       // Note: Projects under organization will also be removed
       await testUtils.removeTestOrg();
       await testUtils.removeTestAdmin();
-      await db.disconnect();
     }
     catch (error) {
       // Expect no error
