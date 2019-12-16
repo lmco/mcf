@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.auth_tests.801-local-strategy
+ * @module test.801-auth-local-strategy
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
