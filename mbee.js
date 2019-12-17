@@ -24,7 +24,7 @@ const path = require('path');                   // Find directory paths
 const { execSync } = require('child_process');  // Execute shell commands
 
 // Project Metadata
-const pkg = require('./package.json');
+const pkg = require(path.join(__dirname, 'package.json'));
 
 
 // The global MBEE helper object

@@ -87,15 +87,15 @@ function loadPlugins() {
     // Removes old plugins
     if (!pluginNames.includes(f)) {
       M.log.info(`Removing plugin '${f}' ...`);
-      const c = `${rmd} ${path.join(__dirname, f)}`;
+      const c = `${rmd} ${path.join(M.root, f)}`;
       const stdout = execSync(c);
       M.log.verbose(stdout.toString());
     }
     // If package.json doesn't exist, it is not a valid plugin. Skip it.
-    const pluginPath = path.join(__dirname, f);
+    const pluginPath = path.join(M.root, f);
     if (!fs.existsSync(path.join(pluginPath, 'package.json'))) {
       M.log.info(`Removing invalid plugin '${f}' ...`);
-      const c = `${rmd} ${path.join(__dirname, f)}`;
+      const c = `${rmd} ${path.join(M.root, f)}`;
       const stdout = execSync(c);
       M.log.verbose(stdout.toString());
       return;

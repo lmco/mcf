@@ -64,7 +64,7 @@ class Element extends Component {
     const elementId = this.props.id;
 
     if (elementId) {
-      // Initalize variables
+      // Initialize variables
       const url = `${this.props.url}/elements/${elementId}?minified=true&includeArchived=true`;
       // Get project data
       $.ajax({
@@ -156,7 +156,7 @@ class Element extends Component {
               .replace(']', '\\]')
               .replace('-', '\\-');
               // Create the regex for replacement
-              const re = new RegExp(ref, 'g');
+              const re = new RegExp(ref, 'g'); // eslint-disable-line security/detect-non-literal-regexp
 
               // Capture the element ID and link
               const id = uniqCrossRefs[refs[i]].id;
