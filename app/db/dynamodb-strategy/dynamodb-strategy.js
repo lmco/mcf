@@ -1729,7 +1729,7 @@ class Model {
       // Ensure there are no immutable fields in the update
       Object.keys(doc).forEach((k) => {
         if (this.definition.immutables.includes(k)) {
-          throw new M.PermissionError(`${this.modelName} validation failed: `
+          throw new M.OperationError(`${this.modelName} validation failed: `
             + `${k}: Path \`${k}\` is immutable and cannot be modified.`);
         }
       });
