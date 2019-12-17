@@ -426,7 +426,8 @@ class Query {
       // If the value is an object, and the first key is $in, handle it separately
       if (typeof filter[key] === 'object' && filter[key] !== null
         && Object.keys(filter[key])[0] === '$in') {
-        inVals[key] = Object.values(filter[key])[0];
+        // Convert to Set and back to array to remove any duplicates
+        inVals[key] = Array.from(new Set(Object.values(filter[key])[0]));
       }
       else {
         base[key] = this.formatJSON(filter[key]);
@@ -1235,6 +1236,7 @@ class Model {
    * any. Defaults to an empty array if no documents are found.
    */
   async find(filter, projection, options) {
+    console.log(filter);
     try {
       // If $text in query, performing a text search
       if (Object.keys(filter).includes('$text')) {
