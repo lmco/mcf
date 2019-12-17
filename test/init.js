@@ -45,6 +45,12 @@ before(async () => {
 
 // After function, is run after all tests are run
 after(async () => {
-  // Disconnect from the database
-  await db.disconnect();
+  try {
+    // Disconnect from the database
+    await db.disconnect();
+  }
+  catch (error) {
+    M.log.error(error);
+    process.exit(1);
+  }
 });
