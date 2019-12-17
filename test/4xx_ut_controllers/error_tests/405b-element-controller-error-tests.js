@@ -31,7 +31,6 @@ const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const Branch = M.require('models.branch');
 const Element = M.require('models.element');
-const db = M.require('db');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
@@ -54,14 +53,10 @@ let tagID = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, project,
-   * and elements.
+   * After: Create an admin user, organization, project, and elements.
    */
   before(async () => {
     try {
-      // Open the database connection
-      await db.connect();
-
       // Create test admin
       adminUser = await testUtils.createTestAdmin();
 
@@ -101,7 +96,6 @@ describe(M.getModuleName(module.filename), () => {
 
   /**
    * After: Remove organization, project and elements.
-   * Close database connection.
    */
   after(async () => {
     try {
@@ -110,7 +104,6 @@ describe(M.getModuleName(module.filename), () => {
       await testUtils.removeTestOrg();
       await testUtils.removeNonAdminUser();
       await testUtils.removeTestAdmin();
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);

@@ -25,7 +25,6 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const ProjectController = M.require('controllers.project-controller');
-const db = M.require('db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -45,55 +44,40 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * Before: Create admin user. Creates two test projects.
    */
-  before((done) => {
-    // Connect to the database
-    db.connect()
-    // Create test admin
-    .then(() => testUtils.createTestAdmin())
-    .then((user) => {
-      // Set global admin user
-      adminUser = user;
+  before(async () => {
+    try {
+      // Create test admin
+      adminUser = await testUtils.createTestAdmin();
       // Create the test org
-      return testUtils.createTestOrg(adminUser);
-    })
-    .then((retOrg) => {
-      org = retOrg;
-
+      org = await testUtils.createTestOrg(adminUser);
       // Create the projects
-      return ProjectController.create(adminUser, org._id,
+      const createdProjects = await ProjectController.create(adminUser, org._id,
         [testData.projects[0], testData.projects[1]]);
-    })
-    .then((createdProj) => {
       // Expect array to contain 2 projects
-      chai.expect(createdProj.length).to.equal(2);
-      done();
-    })
-    .catch((error) => {
+      chai.expect(createdProjects.length).to.equal(2);
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**
    * After: Delete admin user. Deletes the two test projects.
    */
-  after((done) => {
-    ProjectController.remove(adminUser, org._id,
-      [testData.projects[0].id, testData.projects[1].id])
-    // Removing the organization created
-    .then(() => testUtils.removeTestOrg())
-    // Removing admin user
-    .then(() => testUtils.removeTestAdmin())
-    .then(() => db.disconnect())
-    .then(() => done())
-    .catch((error) => {
+  after(async () => {
+    try {
+      // Removing the organization created
+      await testUtils.removeTestOrg();
+      // Removing admin user
+      await testUtils.removeTestAdmin();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /* Execute the tests */

@@ -32,7 +32,6 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const User = M.require('models.user');
-const db = M.require('db');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
@@ -46,30 +45,6 @@ const testData = testUtils.importTestData('test_data.json');
  * name of the current file.
  */
 describe(M.getModuleName(module.filename), () => {
-  /**
-   * Before: runs before all tests. Open the database connection.
-   */
-  before(async () => {
-    try {
-      await db.connect();
-    }
-    catch (error) {
-      chai.expect(error.message).to.equal(null);
-    }
-  });
-
-  /**
-   * After: runs after all tests. Close database connection.
-   */
-  after(async () => {
-    try {
-      db.disconnect();
-    }
-    catch (error) {
-      chai.expect(error.message).to.equal(null);
-    }
-  });
-
   /* Execute the tests */
   it('should create a user', createUser);
   it('should verify a valid password', verifyValidPassword);

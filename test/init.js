@@ -36,7 +36,16 @@ before(async () => {
     await Promise.all([Artifact.init(), Branch.init(), Element.init(),
       Organization.init(), Project.init(), ServerData.init(), User.init(),
       Webhook.init()]);
+  }
+  catch (error) {
+    M.log.error(error);
+    process.exit(1);
+  }
+});
 
+// After function, is run after all tests are run
+after(async () => {
+  try {
     // Disconnect from the database
     await db.disconnect();
   }

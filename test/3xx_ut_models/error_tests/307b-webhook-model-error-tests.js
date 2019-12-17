@@ -25,7 +25,6 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const Webhook = M.require('models.webhook');
-const db = M.require('db');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
@@ -40,34 +39,6 @@ const webhookID = uuidv4();
  * name of the current file.
  */
 describe(M.getModuleName(module.filename), () => {
-  /**
-   * Before: runs before all tests. Opens database connection.
-   */
-  before(async () => {
-    try {
-      await db.connect();
-    }
-    catch (error) {
-      M.log.error(error);
-      // Expect no error
-      chai.expect(error).to.equal(null);
-    }
-  });
-
-  /**
-   * After: runs after all tests. Closes database connection.
-   */
-  after(async () => {
-    try {
-      await db.disconnect();
-    }
-    catch (error) {
-      M.log.error(error);
-      // Expect no error
-      chai.expect(error).to.equal(null);
-    }
-  });
-
   /* Execute the tests */
   it('should reject creating a webhook without an _id', noID);
   it('should reject creating a webhook without a type', noType);

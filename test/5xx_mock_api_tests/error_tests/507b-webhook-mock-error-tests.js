@@ -22,7 +22,6 @@ const chai = require('chai');
 const APIController = M.require('controllers.api-controller');
 const WebhookController = M.require('controllers.webhook-controller');
 const Webhook = M.require('models.webhook');
-const db = M.require('db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -41,12 +40,10 @@ let webhookID;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Runs before all tests. Connects to the database, creates an admin user, and
-   * creates a test webhook.
+   * Before: Runs before all tests. Creates an admin user and a test webhook.
    */
   before(async () => {
     try {
-      await db.connect();
       adminUser = await testUtils.createTestAdmin();
 
       // Create an incoming webhook for the trigger tests
@@ -62,14 +59,12 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Runs after all tests. Removes any remaining test webhooks, deletes the admin user,
-   * and disconnects from database.
+   * After: Runs after all tests. Removes any remaining test webhooks and deletes the admin user.
    */
   after(async () => {
     try {
       await Webhook.deleteMany({ _id: webhookID });
       await testUtils.removeTestAdmin();
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);
