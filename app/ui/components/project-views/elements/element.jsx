@@ -181,7 +181,9 @@ class Element extends Component {
             // Refresh when session expires
             window.location.reload();
           },
-          404: (err) => reject(err.responseText)
+          // Even though error occurred, return element. Cross reference does not exist
+          // so return documentation as is
+          404: () => resolve(_element)
         }
       });
     });
