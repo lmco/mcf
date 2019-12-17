@@ -61,7 +61,7 @@
     "react-router-dom": "^5.0.1",
     "reactstrap": "^8.0.1",
     "sinon": "^7.5.0",
-    "webpack": "^4.41.2"
+    "webpack": "^4.41.3"
   },
   "scripts": {
     "build": "node mbee build",
