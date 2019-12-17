@@ -20,8 +20,7 @@
 const chai = require('chai');
 
 // MBEE modules
-const db = M.require('db');
-const apiController = M.require('controllers.api-controller');
+const APIController = M.require('controllers.api-controller');
 const jmi = M.require('lib.jmi-conversions');
 
 /* --------------------( Test Data )-------------------- */
@@ -42,37 +41,29 @@ describe(M.getModuleName(module.filename), () => {
   /**
    * Before: Run before all tests. Creates the admin user.
    */
-  before((done) => {
-    // Connect to the database
-    db.connect()
-    // Create test admin
-    .then(() => testUtils.createTestAdmin())
-    .then((reqUser) => {
-      adminUser = reqUser;
-      done();
-    })
-    .catch((error) => {
+  before(async () => {
+    try {
+      adminUser = await testUtils.createTestAdmin();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**
    * After: Delete admin user.
    */
-  after((done) => {
-    // Remove admin user
-    testUtils.removeTestAdmin()
-    .then(() => db.disconnect())
-    .then(() => done())
-    .catch((error) => {
+  after(async () => {
+    try {
+      await testUtils.removeTestAdmin();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /* Execute tests */
@@ -137,7 +128,7 @@ function postOrg(done) {
   };
 
   // POSTs an org
-  apiController.postOrg(req, res, next(req, res));
+  APIController.postOrg(req, res, next(req, res));
 }
 
 /**
@@ -199,7 +190,7 @@ function postOrgs(done) {
   };
 
   // POSTs multiple orgs
-  apiController.postOrgs(req, res, next(req, res));
+  APIController.postOrgs(req, res, next(req, res));
 }
 
 /**
@@ -249,7 +240,7 @@ function putOrg(done) {
   };
 
   // PUTs an org
-  apiController.putOrg(req, res, next(req, res));
+  APIController.putOrg(req, res, next(req, res));
 }
 
 /**
@@ -313,7 +304,7 @@ function putOrgs(done) {
   };
 
   // PUTs multiple orgs
-  apiController.putOrgs(req, res, next(req, res));
+  APIController.putOrgs(req, res, next(req, res));
 }
 
 /**
@@ -362,7 +353,7 @@ function getOrg(done) {
   };
 
   // GETs an org
-  apiController.getOrg(req, res, next(req, res));
+  APIController.getOrg(req, res, next(req, res));
 }
 
 /**
@@ -426,7 +417,7 @@ function getOrgs(done) {
   };
 
   // GETs all orgs
-  apiController.getOrgs(req, res, next(req, res));
+  APIController.getOrgs(req, res, next(req, res));
 }
 
 /**
@@ -492,7 +483,7 @@ function getAllOrgs(done) {
   };
 
   // GETs all orgs
-  apiController.getOrgs(req, res, next(req, res));
+  APIController.getOrgs(req, res, next(req, res));
 }
 
 /**
@@ -540,7 +531,7 @@ function patchOrg(done) {
   };
 
   // PATCHs an org
-  apiController.patchOrg(req, res, next(req, res));
+  APIController.patchOrg(req, res, next(req, res));
 }
 
 /**
@@ -607,7 +598,7 @@ function patchOrgs(done) {
   };
 
   // PATCHs multiple orgs
-  apiController.patchOrgs(req, res, next(req, res));
+  APIController.patchOrgs(req, res, next(req, res));
 }
 
 /**
@@ -644,7 +635,7 @@ function deleteOrg(done) {
   };
 
   // DELETEs an org
-  apiController.deleteOrg(req, res, next(req, res));
+  APIController.deleteOrg(req, res, next(req, res));
 }
 
 /**
@@ -683,5 +674,5 @@ function deleteOrgs(done) {
   };
 
   // DELETEs multiple orgs
-  apiController.deleteOrgs(req, res, next(req, res));
+  APIController.deleteOrgs(req, res, next(req, res));
 }

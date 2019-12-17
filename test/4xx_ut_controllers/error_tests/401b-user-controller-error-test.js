@@ -25,7 +25,6 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const UserController = M.require('controllers.user-controller');
-const db = M.require('db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -47,8 +46,6 @@ describe(M.getModuleName(module.filename), () => {
    */
   before(async () => {
     try {
-      // Connect to the database
-      await db.connect();
       // Create test admin
       adminUser = await testUtils.createTestAdmin();
       // Create the users
@@ -69,7 +66,6 @@ describe(M.getModuleName(module.filename), () => {
       await UserController.remove(adminUser,
         [testData.users[1].username, testData.users[2].username]);
       await testUtils.removeTestAdmin();
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);

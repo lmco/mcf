@@ -22,7 +22,6 @@ const chai = require('chai');
 // MBEE modules
 const WebhookController = M.require('controllers.webhook-controller');
 const Webhook = M.require('models.webhook');
-const db = M.require('db');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
@@ -44,12 +43,10 @@ const webhookIDs = [];
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: runs before all tests. Opens database connection, creates test admin,
-   * test org, and test project.
+   * Before: runs before all tests. Creates test admin, test org, and test project.
    */
   before(async () => {
     try {
-      await db.connect();
       adminUser = await testUtils.createTestAdmin();
       org = await testUtils.createTestOrg(adminUser);
       project = await testUtils.createTestProject(adminUser, org._id);
@@ -63,15 +60,14 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: runs after all tests. Removes any remaining test webhooks, removes the test org and
-   * test admin, and disconnects from the database.
+   * After: runs after all tests. Removes any remaining test webhooks, and removes the test org and
+   * test admin.
    */
   after(async () => {
     try {
       await Webhook.deleteMany({ _id: { $in: webhookIDs } });
       await testUtils.removeTestOrg();
       await testUtils.removeTestAdmin();
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);

@@ -28,7 +28,6 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const Webhook = M.require('models.webhook');
-const db = M.require('db');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
@@ -45,27 +44,12 @@ const webhookIDs = [webhookID];
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: runs before all tests. Opens database connection.
-   */
-  before(async () => {
-    try {
-      await db.connect();
-    }
-    catch (error) {
-      M.log.error(error);
-      // Expect no error
-      should.not.exist(error);
-    }
-  });
-
-  /**
-   * After: runs after all tests. Removes any remaining webhooks and closes database connection.
+   * After: runs after all tests. Removes any remaining webhooks.
    */
   after(async () => {
     try {
       // Remove the webhook
       await Webhook.deleteMany({ _id: { $in: webhookIDs } });
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);

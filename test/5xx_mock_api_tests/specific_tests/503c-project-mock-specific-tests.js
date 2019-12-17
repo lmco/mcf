@@ -25,8 +25,7 @@ const chai = require('chai');
 
 // MBEE modules
 const ProjectController = M.require('controllers.project-controller');
-const apiController = M.require('controllers.api-controller');
-const db = M.require('db');
+const APIController = M.require('controllers.api-controller');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
@@ -50,8 +49,6 @@ describe(M.getModuleName(module.filename), () => {
    */
   before(async () => {
     try {
-      // Open the database connection
-      await db.connect();
       // Create test admin
       adminUser = await testUtils.createTestAdmin();
       // Create organization
@@ -75,7 +72,6 @@ describe(M.getModuleName(module.filename), () => {
       await testUtils.removeTestOrg();
       await testUtils.removeTestAdmin();
       await fs.unlinkSync(filepath);
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);
@@ -143,7 +139,7 @@ function postGzip(done) {
   };
 
   // POSTs a project
-  apiController.postProjects(req, res, next(req, res));
+  APIController.postProjects(req, res, next(req, res));
 }
 
 /**
@@ -198,7 +194,7 @@ function putGzip(done) {
   };
 
   // PUTs a project
-  apiController.putProjects(req, res, next(req, res));
+  APIController.putProjects(req, res, next(req, res));
 }
 
 /**
@@ -258,6 +254,6 @@ function patchGzip(done) {
     };
 
     // PATCHes a project
-    apiController.patchProjects(req, res, next(req, res));
+    APIController.patchProjects(req, res, next(req, res));
   });
 }

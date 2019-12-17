@@ -26,8 +26,7 @@ const chai = require('chai');
 // MBEE modules
 const ElementController = M.require('controllers.element-controller');
 const ProjectController = M.require('controllers.project-controller');
-const apiController = M.require('controllers.api-controller');
-const db = M.require('db');
+const APIController = M.require('controllers.api-controller');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
@@ -50,12 +49,10 @@ const branchID = 'master';
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, and project.
+   * Before: Create an admin user, organization, and project.
    */
   before(async () => {
     try {
-      // Open the database connection
-      await db.connect();
       // Create test admin
       adminUser = await testUtils.createTestAdmin();
       // Create organization
@@ -74,8 +71,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Remove Organization and project.
-   * Close database connection.
+   * After: Remove test admin and organization.
    */
   after(async () => {
     try {
@@ -84,7 +80,6 @@ describe(M.getModuleName(module.filename), () => {
       await testUtils.removeTestOrg();
       await testUtils.removeTestAdmin();
       await fs.unlinkSync(filepath);
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);
@@ -155,7 +150,7 @@ function postGzip(done) {
   };
 
   // POST elements
-  apiController.postElements(req, res, next(req, res));
+  APIController.postElements(req, res, next(req, res));
 }
 
 /**
@@ -213,7 +208,7 @@ function putGzip(done) {
   };
 
   // PUT elements
-  apiController.putElements(req, res, next(req, res));
+  APIController.putElements(req, res, next(req, res));
 }
 
 /**
@@ -274,6 +269,6 @@ function patchGzip(done) {
     };
 
     // PATCH elements
-    apiController.patchElements(req, res, next(req, res));
+    APIController.patchElements(req, res, next(req, res));
   });
 }
