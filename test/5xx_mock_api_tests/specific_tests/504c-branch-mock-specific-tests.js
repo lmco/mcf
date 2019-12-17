@@ -25,8 +25,7 @@ const chai = require('chai');
 
 // MBEE modules
 const BranchController = M.require('controllers.branch-controller');
-const apiController = M.require('controllers.api-controller');
-const db = M.require('db');
+const APIController = M.require('controllers.api-controller');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
@@ -52,8 +51,6 @@ describe(M.getModuleName(module.filename), () => {
    */
   before(async () => {
     try {
-      // Open the database connection
-      await db.connect();
       // Create test admin
       adminUser = await testUtils.createTestAdmin();
       // Create organization
@@ -72,8 +69,7 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Remove Organization and project.
-   * Close database connection.
+   * After: Remove test admin and organization.
    */
   after(async () => {
     try {
@@ -82,7 +78,6 @@ describe(M.getModuleName(module.filename), () => {
       await testUtils.removeTestOrg();
       await testUtils.removeTestAdmin();
       await fs.unlinkSync(filepath);
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);
@@ -147,11 +142,11 @@ function postGzip(done) {
     fs.truncateSync(filepath);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // POSTs a branch
-  apiController.postBranches(req, res, next(req, res));
+  APIController.postBranches(req, res, next(req, res));
 }
 
 /**
@@ -211,10 +206,10 @@ function patchGzip(done) {
       fs.truncateSync(filepath);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // PATCHes a branch
-    apiController.patchBranches(req, res, next(req, res));
+    APIController.patchBranches(req, res, next(req, res));
   });
 }

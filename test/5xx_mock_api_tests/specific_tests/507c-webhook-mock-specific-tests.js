@@ -19,7 +19,6 @@
 const chai = require('chai');
 
 // MBEE modules
-const db = M.require('db');
 const APIController = M.require('controllers.api-controller');
 const Webhook = M.require('models.webhook');
 const jmi = M.require('lib.jmi-conversions');
@@ -49,13 +48,10 @@ const branchWebhooks = [];
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Runs before all tests. Connects to database, creates an admin user, a test
-   * org, and a test project.
+   * Before: Runs before all tests. Creates an admin user, an org, and a project.
    */
   before(async () => {
     try {
-      await db.connect();
-
       adminUser = await testUtils.createTestAdmin();
       org = await testUtils.createTestOrg(adminUser);
       project = await testUtils.createTestProject(adminUser, org._id);
@@ -69,15 +65,14 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Runs after all tests. Removes any remaining webhooks, removes the test org and test
-   * admin user, and disconnects from database.
+   * After: Runs after all tests. Removes any remaining webhooks and removes the test org and
+   * admin user.
    */
   after(async () => {
     try {
       await Webhook.deleteMany({ _id: { $in: webhookIDs } });
       await testUtils.removeTestOrg();
       await testUtils.removeTestAdmin();
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);
@@ -202,7 +197,7 @@ function post(reference) {
       webhookIDs.push(createdWebhook.id);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // POSTs a webhook
@@ -316,7 +311,7 @@ function postMany(reference) {
       chai.expect(res.statusCode).to.equal(200);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // POSTs a webhook
@@ -422,7 +417,7 @@ function getAll(reference) {
       chai.expect(res.statusCode).to.equal(200);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // GETs all webhooks at a reference level
@@ -510,7 +505,7 @@ function patch(reference) {
       chai.expect(res.statusCode).to.equal(200);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // PATCHes a webhook
@@ -616,7 +611,7 @@ function patchMany(reference) {
       chai.expect(res.statusCode).to.equal(200);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // PATCHes multiple webhooks
@@ -668,7 +663,7 @@ function remove(reference) {
       chai.expect(res.statusCode).to.equal(200);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // DELETEs a webhook
@@ -720,7 +715,7 @@ function removeMany(reference) {
       chai.expect(res.statusCode).to.equal(200);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // DELETEs a webhook

@@ -20,7 +20,6 @@ const chai = require('chai');
 const request = require('request');
 
 // MBEE modules
-const db = M.require('db');
 const WebhookController = M.require('controllers.webhook-controller');
 const Webhook = M.require('models.webhook');
 const jmi = M.require('lib.jmi-conversions');
@@ -42,11 +41,10 @@ const webhookIDs = [];
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Runs before all tests. Connects to database, and creates an admin user.
+   * Before: Runs before all tests. Creates an admin user.
    */
   before(async () => {
     try {
-      await db.connect();
       adminUser = await testUtils.createTestAdmin();
     }
     catch (error) {
@@ -57,14 +55,13 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Runs after all tests. Removes any remaining test webhooks, removes the test admin user,
-   * and disconnects from the database.
+   * After: Runs after all tests. Removes any remaining test webhooks and removes the test
+   * admin user.
    */
   after(async () => {
     try {
       await Webhook.deleteMany({ _id: { $in: webhookIDs } });
       await testUtils.removeTestAdmin();
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);

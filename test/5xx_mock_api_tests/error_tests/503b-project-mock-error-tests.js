@@ -26,7 +26,6 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const APIController = M.require('controllers.api-controller');
-const db = M.require('db');
 
 /* --------------------( Test Data )-------------------- */
 // Variables used across test functions
@@ -50,9 +49,7 @@ describe(M.getModuleName(module.filename), () => {
    */
   before(async () => {
     try {
-      await db.connect();
       adminUser = await testUtils.createTestAdmin();
-      await testUtils.createNonAdminUser();
       org = await testUtils.createTestOrg(adminUser);
     }
     catch (error) {
@@ -63,15 +60,12 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Runs after all tests. Removes the test users and org and disconnects from the
-   * database.
+   * After: Runs after all tests. Removes the test user and org.
    */
   after(async () => {
     try {
-      await testUtils.removeTestAdmin();
-      await testUtils.removeNonAdminUser();
       await testUtils.removeTestOrg();
-      await db.disconnect();
+      await testUtils.removeTestAdmin();
     }
     catch (error) {
       M.log.error(error);
@@ -155,7 +149,7 @@ function noReqUser(endpoint) {
       res.statusCode.should.equal(500);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // Sends the mock request
@@ -195,7 +189,7 @@ function invalidOptions(endpoint) {
       res.statusCode.should.equal(400);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // Sends the mock request
@@ -235,7 +229,7 @@ function conflictingIDs(endpoint) {
       res.statusCode.should.equal(400);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // Sends the mock request
@@ -278,7 +272,7 @@ function notFound(endpoint) {
       res.statusCode.should.equal(404);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // Sends the mock request
@@ -316,7 +310,7 @@ function noArrays(endpoint) {
       res.statusCode.should.equal(400);
 
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     };
 
     // Sends the mock request

@@ -22,7 +22,6 @@ const chai = require('chai');
 // MBEE modules
 const ArtifactController = M.require('controllers.artifact-controller');
 const Artifact = M.require('models.artifact');
-const db = M.require('db');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
@@ -43,13 +42,10 @@ let artifacts = [];
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, project,
-   * and artifacts.
+   * Before: Create an admin user, organization, project, and artifacts.
    */
   before(async () => {
     try {
-      // Open the database connection
-      await db.connect();
       // Create test admin
       adminUser = await testUtils.createTestAdmin();
 
@@ -76,7 +72,6 @@ describe(M.getModuleName(module.filename), () => {
 
   /**
    * After: Remove organization, project and artifacts.
-   * Close database connection.
    */
   after(async () => {
     try {
@@ -84,7 +79,6 @@ describe(M.getModuleName(module.filename), () => {
       // Note: Projects and artifacts under organization will also be removed
       await testUtils.removeTestOrg();
       await testUtils.removeTestAdmin();
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);

@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.artifact_tests.821-local-strategy
+ * @module test.821-artifact-local-strategy
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

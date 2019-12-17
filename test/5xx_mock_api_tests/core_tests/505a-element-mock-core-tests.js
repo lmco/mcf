@@ -19,9 +19,8 @@
 const chai = require('chai');
 
 // MBEE modules
-const ProjController = M.require('controllers.project-controller');
-const apiController = M.require('controllers.api-controller');
-const db = M.require('db');
+const ProjectController = M.require('controllers.project-controller');
+const APIController = M.require('controllers.api-controller');
 const utils = M.require('lib.utils');
 const jmi = M.require('lib.jmi-conversions');
 
@@ -44,61 +43,38 @@ const branchID = 'master';
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, and project.
+   * Before: Create a global admin user, organization, and project.
    */
-  before((done) => {
-    // Open the database connection
-    db.connect()
-    // Create test admin
-    .then(() => testUtils.createTestAdmin())
-    .then((_adminUser) => {
-      // Set global admin user
-      adminUser = _adminUser;
-
-      // Create organization
-      return testUtils.createTestOrg(adminUser);
-    })
-    .then((retOrg) => {
-      // Set global organization
-      org = retOrg;
-
-      // Define project data
-      const projData = testData.projects[0];
-
-      // Create project
-      return ProjController.create(adminUser, org._id, projData);
-    })
-    .then((retProj) => {
-      // Set global project
-      proj = retProj;
+  before(async () => {
+    try {
+      adminUser = await testUtils.createTestAdmin();
+      org = await testUtils.createTestOrg(adminUser);
+      proj = await ProjectController.create(adminUser, org._id, testData.projects[0]);
       projID = utils.parseID(proj[0]._id).pop();
-      done();
-    })
-    .catch((error) => {
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /**
    * After: Remove Organization and project.
    * Close database connection.
    */
-  after((done) => {
-    // Remove organization
-    // Note: Projects under organization will also be removed
-    testUtils.removeTestOrg()
-    .then(() => testUtils.removeTestAdmin())
-    .then(() => db.disconnect())
-    .then(() => done())
-    .catch((error) => {
+  after(async () => {
+    try {
+      // Remove organization
+      // Note: Projects under organization will also be removed
+      await testUtils.removeTestOrg();
+      await testUtils.removeTestAdmin();
+    }
+    catch (error) {
       M.log.error(error);
       // Expect no error
       chai.expect(error).to.equal(null);
-      done();
-    });
+    }
   });
 
   /* Execute tests */
@@ -184,11 +160,11 @@ function postElement(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // POSTs an element
-  apiController.postElement(req, res, next(req, res));
+  APIController.postElement(req, res, next(req, res));
 }
 
 /**
@@ -267,11 +243,11 @@ function postElements(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // POSTs multiple elements
-  apiController.postElements(req, res, next(req, res));
+  APIController.postElements(req, res, next(req, res));
 }
 
 /**
@@ -341,11 +317,11 @@ function putElement(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // PUTs an element
-  apiController.putElement(req, res, next(req, res));
+  APIController.putElement(req, res, next(req, res));
 }
 
 /**
@@ -425,11 +401,11 @@ function putElements(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // PUTs multiple elements
-  apiController.putElements(req, res, next(req, res));
+  APIController.putElements(req, res, next(req, res));
 }
 
 /**
@@ -499,11 +475,11 @@ function getElement(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // GETs an element
-  apiController.getElement(req, res, next(req, res));
+  APIController.getElement(req, res, next(req, res));
 }
 
 /**
@@ -585,11 +561,11 @@ function getElements(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // GETs multiple elements
-  apiController.getElements(req, res, next(req, res));
+  APIController.getElements(req, res, next(req, res));
 }
 
 /**
@@ -671,11 +647,11 @@ function getAllElements(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // GETs multiple elements
-  apiController.getElements(req, res, next(req, res));
+  APIController.getElements(req, res, next(req, res));
 }
 
 /**
@@ -750,11 +726,11 @@ function searchElement(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // GETs elements through text search
-  apiController.searchElements(req, res, next(req, res));
+  APIController.searchElements(req, res, next(req, res));
 }
 
 /**
@@ -828,11 +804,11 @@ function patchElement(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // PATCHs an element
-  apiController.patchElement(req, res, next(req, res));
+  APIController.patchElement(req, res, next(req, res));
 }
 
 /**
@@ -920,11 +896,11 @@ function patchElements(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // PATCHs multiple elements
-  apiController.patchElements(req, res, next(req, res));
+  APIController.patchElements(req, res, next(req, res));
 }
 
 /**
@@ -959,11 +935,11 @@ function deleteElement(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // DELETEs an element
-  apiController.deleteElement(req, res, next(req, res));
+  APIController.deleteElement(req, res, next(req, res));
 }
 
 /**
@@ -1002,9 +978,9 @@ function deleteElements(done) {
     chai.expect(res.statusCode).to.equal(200);
 
     // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
   };
 
   // DELETEs multiple elements
-  apiController.deleteElements(req, res, next(req, res));
+  APIController.deleteElements(req, res, next(req, res));
 }

@@ -25,8 +25,7 @@ const chai = require('chai');
 
 // MBEE modules
 const OrgController = M.require('controllers.organization-controller');
-const apiController = M.require('controllers.api-controller');
-const db = M.require('db');
+const APIController = M.require('controllers.api-controller');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
@@ -44,13 +43,10 @@ let adminUser = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user.
+   * Before: Creates an admin user.
    */
   before(async () => {
     try {
-      // Open the database connection
-      await db.connect();
-      // Create test admin
       adminUser = await testUtils.createTestAdmin();
     }
     catch (error) {
@@ -61,14 +57,12 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Remove test admin. Close database connection.
+   * After: Removes test admin and test file.
    */
   after(async () => {
     try {
-      // Remove test admin
       await testUtils.removeTestAdmin();
       await fs.unlinkSync(filepath);
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);
@@ -133,12 +127,12 @@ function postGzip(done) {
     OrgController.remove(adminUser, orgData.id)
     .then(() => {
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     });
   };
 
   // POSTs an org
-  apiController.postOrgs(req, res, next(req, res));
+  APIController.postOrgs(req, res, next(req, res));
 }
 
 /**
@@ -190,12 +184,12 @@ function putGzip(done) {
     OrgController.remove(adminUser, orgData.id)
     .then(() => {
       // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
     });
   };
 
   // PUTs a org
-  apiController.putOrgs(req, res, next(req, res));
+  APIController.putOrgs(req, res, next(req, res));
 }
 
 /**
@@ -250,11 +244,11 @@ function patchGzip(done) {
       OrgController.remove(adminUser, orgData.id)
       .then(() => {
         // Ensure the response was logged correctly
-        setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+        setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
       });
     };
 
     // PATCHes an org
-    apiController.patchOrgs(req, res, next(req, res));
+    APIController.patchOrgs(req, res, next(req, res));
   });
 }

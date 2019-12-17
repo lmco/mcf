@@ -24,7 +24,6 @@ const chai = require('chai');
 const ElementController = M.require('controllers.element-controller');
 const ProjectController = M.require('controllers.project-controller');
 const Element = M.require('models.element');
-const db = M.require('db');
 const jmi = M.require('lib.jmi-conversions');
 const utils = M.require('lib.utils');
 
@@ -48,13 +47,10 @@ let artifactID = null;
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, project,
-   * and elements.
+   * Before: Create an admin user, organization, project, and elements.
    */
   before(async () => {
     try {
-      // Open the database connection
-      await db.connect();
       // Create test admin
       adminUser = await testUtils.createTestAdmin();
 
@@ -107,7 +103,6 @@ describe(M.getModuleName(module.filename), () => {
 
   /**
    * After: Remove organization, project and elements.
-   * Close database connection.
    */
   after(async () => {
     try {
@@ -115,7 +110,6 @@ describe(M.getModuleName(module.filename), () => {
       // Note: Projects and elements under organization will also be removed
       await testUtils.removeTestOrg();
       await testUtils.removeTestAdmin();
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);
