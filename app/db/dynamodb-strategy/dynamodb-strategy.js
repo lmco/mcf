@@ -1236,7 +1236,6 @@ class Model {
    * any. Defaults to an empty array if no documents are found.
    */
   async find(filter, projection, options) {
-    console.log(filter);
     try {
       // If $text in query, performing a text search
       if (Object.keys(filter).includes('$text')) {
