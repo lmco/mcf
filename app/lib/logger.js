@@ -248,8 +248,8 @@ function logResponse(responseLength, req, res) {
  * to a special security log file.
  *
  * @param {object} req - Request express object.
- * @param {string} message - The message sent by the API controller; contains requested
- * information.
+ * @param {string} message - The message sent by the API controller; contains info about
+ * the response.
  */
 function logSecurityEndpoints(req, message) {
   // Grab the url without the query if the query exists
