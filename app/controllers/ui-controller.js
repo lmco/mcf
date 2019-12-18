@@ -286,7 +286,8 @@ function login(req, res) {
   }
 
   // Log the login
-  logger.logResponse(res.locals.message.length, req, res);
+  logger.logSecurityResponse(req, res);
+  logger.logResponse(req, res);
 
   // handle the redirect
   M.log.info(`Redirecting to ${next} ...`);

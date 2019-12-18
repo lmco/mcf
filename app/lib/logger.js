@@ -208,18 +208,48 @@ function makeLogger(subcommand, opts) {
   return winston.createLogger(loggerConfig);
 }
 
-
 // Add defined colors to winston logger
 winston.addColors(colors);
 
 /**
- * @description Log the response to an HTTP request.
+ * @description Logs the response to an HTTP request.
  *
- * @param {number} responseLength - The length of the response in bytes.
  * @param {object} req - Request object from express.
  * @param {object} res - Response object from express.
  */
-function logResponse(responseLength, req, res) {
+function logResponse(req, res) {
+  const message = formatResponseLog(req, res);
+  // Log the info at 'info' level
+  M.log.info(message);
+}
+
+/**
+ * @description Logs the response to an HTTP request to a separate security log file for
+ * security-sensitive API endpoints.
+ *
+ * @param {object} req - Request object from express.
+ * @param {object} res - Response object from express.
+ */
+function logSecurityResponse(req, res) {
+  const message = formatResponseLog(req, res);
+  // Log the info to the security log
+  fs.appendFileSync(path.join('logs', M.config.log.security_file), `${message}\n`);
+}
+
+/**
+ * @description A helper function to format messages that log responses to API calls.
+ *
+ * @param {object} req - Request object from express.
+ * @param {object} res - Response object from express.
+ *
+ * @returns {string} A formatted message containing information about the response to
+ * an HTTP request.
+ */
+function formatResponseLog(req, res) {
+  const responseMessage = res.locals.message ? res.locals.message : '';
+  const responseLength = responseMessage.length;
+  const statusCode = res.statusCode ? res.statusCode : res.locals.statusCode;
+
   // Set username to anonymous if req.user is not defined
   const username = (req.user) ? (req.user._id || req.user.username) : 'anonymous';
   const date = JSON.stringify(new Date()).replace(/"/g, '');
@@ -233,54 +263,12 @@ function logResponse(responseLength, req, res) {
     ip = ip.replace('::ffff:', '');
   }
 
-  const message = `RESPONSE: ${ip} ${username} [${date}] "${req.method} `
-    + `${req.originalUrl}" ${res.statusCode} ${responseLength.toString()}`;
-
-  // Log the info at 'info' level
-  M.log.info(message);
-  // Check if this is a security-sensitive endpoint and perform additional logging
-  logSecurityEndpoints(req, message);
-}
-
-/**
- * @description - Tests the url and method of the incoming request object against a list of
- * security-sensitive api endpoints. If there's a match, the response message is also logged
- * to a special security log file.
- *
- * @param {object} req - Request express object.
- * @param {string} message - The message sent by the API controller; contains requested
- * information.
- */
-function logSecurityEndpoints(req, message) {
-  // Grab the url without the query if the query exists
-  const url = req.url.match(/(.*?)(?=\?)/) ? req.url.match(/(.*?)(?=\?)/)[0] : req.url;
-  const method = req.method;
-  const securityEndpoints = [/login/, /orgs/, /orgs\/(.*?)(?=\/)/, /orgs\/*\/projects/,
-    /users/, /users\/(.*?)(?=\/)/, /webhooks/, /webhooks\/(?!trigger)(.*)/, /logs/];
-  let securityMethods = ['POST', 'PUT', 'DELETE'];
-
-  // Check if the url matches a security-sensitive url
-  if (securityEndpoints.some((val) => url.match(val))) {
-    // Reformat securityMethods depending on the url
-    if (url.match(/projects/)) securityMethods = ['DELETE'];
-    else if (url.match(/login/)) securityMethods = ['GET', 'POST'];
-    else if (url.match(/webhooks/)) securityMethods = ['GET', 'POST', 'PATCH', 'DELETE'];
-    else if (url.match(/logs/)) securityMethods = ['GET'];
-  }
-  else {
-    // No match; exit function
-    return;
-  }
-
-  // Final check - was a security-sensitive method used on a security-sensitive url?
-  if (securityMethods.includes(method)) {
-    // Add it to the security log
-    fs.appendFileSync(path.join('logs', M.config.log.security_file), `${message}\n`);
-  }
+  return `RESPONSE: ${ip} ${username} [${date}] "${req.method} `
+    + `${req.originalUrl}" ${statusCode} ${responseLength.toString()}`;
 }
 
 module.exports = {
   makeLogger,
   logResponse,
-  logSecurityEndpoints
+  logSecurityResponse
 };

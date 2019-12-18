@@ -160,7 +160,11 @@ function getLogsNegativeLimit(done) {
     }
 
     // Read the log file
-    const logContent = fs.readFileSync(logFilePath).toString();
+    let logContent = fs.readFileSync(logFilePath).toString();
+
+    // Have to remove the last line of the log file because it was added after the getLogs function
+    // created _data
+    logContent = `${logContent.split('\n').slice(0, -2).join('\n')}\n`;
 
     chai.expect(logContent).to.equal(_data);
 

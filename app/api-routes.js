@@ -74,7 +74,9 @@ api.get(
  */
 api.get('/doc/swagger.json',
   Middleware.logRoute,
-  APIController.swaggerJSON);
+  APIController.swaggerJSON,
+  Middleware.logResponse,
+  Middleware.respond);
 
 
 /**
@@ -101,9 +103,12 @@ api.get('/doc/swagger.json',
 api.route('/login')
 .post(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   AuthController.doLogin,
   APIController.login,
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -131,7 +136,9 @@ api.route('/version')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.version
+  APIController.version,
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 /**
@@ -184,10 +191,13 @@ api.route('/version')
 api.route('/logs')
 .get(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.pluginPre('getLogs'),
   APIController.getLogs,
   Middleware.pluginPost('getLogs'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -561,22 +571,29 @@ api.route('/orgs')
   Middleware.pluginPre('getOrgs'),
   APIController.getOrgs,
   Middleware.pluginPost('getOrgs'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .post(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.pluginPre('postOrgs'),
   APIController.postOrgs,
   Middleware.pluginPost('postOrgs'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 )
 .put(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.pluginPre('putOrgs'),
   APIController.putOrgs,
   Middleware.pluginPost('putOrgs'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 )
 .patch(
@@ -585,14 +602,18 @@ api.route('/orgs')
   Middleware.pluginPre('patchOrgs'),
   APIController.patchOrgs,
   Middleware.pluginPre('patchOrgs'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .delete(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.pluginPre('deleteOrgs'),
   APIController.deleteOrgs,
   Middleware.pluginPost('deleteOrgs'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -918,22 +939,29 @@ api.route('/orgs/:orgid')
   Middleware.pluginPre('getOrg'),
   APIController.getOrg,
   Middleware.pluginPost('getOrg'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .post(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.pluginPre('postOrg'),
   APIController.postOrg,
-  Middleware.pluginPost('postOrgs'),
+  Middleware.pluginPost('postOrg'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 )
 .put(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.pluginPre('putOrg'),
   APIController.putOrg,
   Middleware.pluginPost('putOrg'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 )
 .patch(
@@ -942,14 +970,18 @@ api.route('/orgs/:orgid')
   Middleware.pluginPre('patchOrg'),
   APIController.patchOrg,
   Middleware.pluginPost('patchOrg'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .delete(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.pluginPre('deleteOrg'),
   APIController.deleteOrg,
   Middleware.pluginPost('deleteOrg'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -1063,6 +1095,7 @@ api.route('/projects')
   Middleware.pluginPre('getAllProjects'),
   APIController.getAllProjects,
   Middleware.pluginPost('getAllProjects'),
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -1495,6 +1528,7 @@ api.route('/orgs/:orgid/projects')
   Middleware.pluginPre('getProjects'),
   APIController.getProjects,
   Middleware.pluginPost('getProjects'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .post(
@@ -1503,6 +1537,7 @@ api.route('/orgs/:orgid/projects')
   Middleware.pluginPre('postProjects'),
   APIController.postProjects,
   Middleware.pluginPost('postProjects'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .put(
@@ -1511,6 +1546,7 @@ api.route('/orgs/:orgid/projects')
   Middleware.pluginPre('putProjects'),
   APIController.putProjects,
   Middleware.pluginPost('putProjects'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .patch(
@@ -1519,14 +1555,18 @@ api.route('/orgs/:orgid/projects')
   Middleware.pluginPre('patchProjects'),
   APIController.patchProjects,
   Middleware.pluginPost('patchProjects'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .delete(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.pluginPre('deleteProjects'),
   APIController.deleteProjects,
   Middleware.pluginPost('deleteProjects'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -1905,6 +1945,7 @@ api.route('/orgs/:orgid/projects/:projectid')
   Middleware.pluginPre('getProject'),
   APIController.getProject,
   Middleware.pluginPost('getProject'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .post(
@@ -1913,6 +1954,7 @@ api.route('/orgs/:orgid/projects/:projectid')
   Middleware.pluginPre('postProject'),
   APIController.postProject,
   Middleware.pluginPost('postProject'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .put(
@@ -1921,6 +1963,7 @@ api.route('/orgs/:orgid/projects/:projectid')
   Middleware.pluginPre('putProject'),
   APIController.putProject,
   Middleware.pluginPost('putProject'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .patch(
@@ -1929,14 +1972,18 @@ api.route('/orgs/:orgid/projects/:projectid')
   Middleware.pluginPre('patchProject'),
   APIController.patchProject,
   Middleware.pluginPost('patchProject'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .delete(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.pluginPre('deleteProject'),
   APIController.deleteProject,
   Middleware.pluginPre('deleteProject'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -2316,6 +2363,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches')
   Middleware.pluginPre('getBranches'),
   APIController.getBranches,
   Middleware.pluginPost('getBranches'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .post(
@@ -2324,6 +2372,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches')
   Middleware.pluginPre('postBranches'),
   APIController.postBranches,
   Middleware.pluginPost('postBranches'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .patch(
@@ -2332,6 +2381,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches')
   Middleware.pluginPre('patchBranches'),
   APIController.patchBranches,
   Middleware.pluginPost('patchBranches'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .delete(
@@ -2340,6 +2390,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches')
   Middleware.pluginPre('deleteBranches'),
   APIController.deleteBranches,
   Middleware.pluginPre('deleteBranches'),
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -2654,6 +2705,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
   Middleware.pluginPre('getBranch'),
   APIController.getBranch,
   Middleware.pluginPost('getBranch'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .post(
@@ -2662,6 +2714,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
   Middleware.pluginPre('postBranch'),
   APIController.postBranch,
   Middleware.pluginPost('postBranch'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .patch(
@@ -2670,6 +2723,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
   Middleware.pluginPre('patchBranch'),
   APIController.patchBranch,
   Middleware.pluginPost('patchBranch'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .delete(
@@ -2678,6 +2732,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
   Middleware.pluginPre('deleteBranch'),
   APIController.deleteBranch,
   Middleware.pluginPost('deleteBranch'),
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -2836,6 +2891,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
   Middleware.pluginPre('searchElements'),
   APIController.searchElements,
   Middleware.pluginPost('searchElements'),
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -3466,6 +3522,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
   Middleware.pluginPre('getElements'),
   APIController.getElements,
   Middleware.pluginPost('getElements'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .post(
@@ -3474,6 +3531,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
   Middleware.pluginPre('postElements'),
   APIController.postElements,
   Middleware.pluginPost('postElements'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .put(
@@ -3482,6 +3540,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
   Middleware.pluginPre('putElements'),
   APIController.putElements,
   Middleware.pluginPost('putElements'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .patch(
@@ -3490,6 +3549,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
   Middleware.pluginPre('patchElements'),
   APIController.patchElements,
   Middleware.pluginPost('patchElements'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .delete(
@@ -3498,6 +3558,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
   Middleware.pluginPre('deleteElements'),
   APIController.deleteElements,
   Middleware.pluginPost('deleteElements'),
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -4057,6 +4118,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
   Middleware.pluginPre('getElement'),
   APIController.getElement,
   Middleware.pluginPost('getElement'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .post(
@@ -4065,6 +4127,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
   Middleware.pluginPre('postElement'),
   APIController.postElement,
   Middleware.pluginPost('postElement'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .put(
@@ -4073,6 +4136,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
   Middleware.pluginPost('putElement'),
   APIController.putElement,
   Middleware.pluginPost('putElement'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .patch(
@@ -4081,6 +4145,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
   Middleware.pluginPre('patchElement'),
   APIController.patchElement,
   Middleware.pluginPost('patchElement'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .delete(
@@ -4089,6 +4154,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
   Middleware.pluginPre('deleteElement'),
   APIController.deleteElement,
   Middleware.pluginPost('deleteElement'),
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -4267,6 +4333,7 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
   Middleware.pluginPre('getBlob'),
   APIController.getBlob,
   Middleware.pluginPost('getBlob'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .post(
@@ -4275,6 +4342,7 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
   Middleware.pluginPre('postBlob'),
   APIController.postBlob,
   Middleware.pluginPost('postBlob'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .delete(
@@ -4283,6 +4351,7 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
   Middleware.pluginPre('deleteBlob'),
   APIController.deleteBlob,
   Middleware.pluginPost('deleteBlob'),
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -4696,6 +4765,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
   Middleware.pluginPre('getArtifacts'),
   APIController.getArtifacts,
   Middleware.pluginPost('getArtifacts'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .post(
@@ -4704,6 +4774,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
   Middleware.pluginPre('postArtifacts'),
   APIController.postArtifacts,
   Middleware.pluginPost('postArtifacts'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .patch(
@@ -4712,6 +4783,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
   Middleware.pluginPre('patchArtifacts'),
   APIController.patchArtifacts,
   Middleware.pluginPost('patchArtifacts'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .delete(
@@ -4720,6 +4792,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
   Middleware.pluginPre('deleteArtifacts'),
   APIController.deleteArtifacts,
   Middleware.pluginPost('deleteArtifacts'),
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -5061,6 +5134,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
   Middleware.pluginPre('getArtifact'),
   APIController.getArtifact,
   Middleware.pluginPost('getArtifact'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .post(
@@ -5069,6 +5143,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
   Middleware.pluginPre('postArtifact'),
   APIController.postArtifact,
   Middleware.pluginPost('postArtifact'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .patch(
@@ -5077,6 +5152,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
   Middleware.pluginPre('patchArtifact'),
   APIController.patchArtifact,
   Middleware.pluginPost('patchArtifact'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .delete(
@@ -5085,6 +5161,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
   Middleware.pluginPre('deleteArtifact'),
   APIController.deleteArtifact,
   Middleware.pluginPost('deleteArtifact'),
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -5151,6 +5228,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
   Middleware.pluginPre('getBlobById'),
   APIController.getBlobById,
   Middleware.pluginPost('getBlobById'),
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -5580,24 +5658,31 @@ api.route('/users')
   Middleware.pluginPre('getUsers'),
   APIController.getUsers,
   Middleware.pluginPost('getUsers'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .post(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.disableUserAPI,
   Middleware.pluginPre('postUsers'),
   APIController.postUsers,
   Middleware.pluginPost('postUsers'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 )
 .put(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.disableUserAPI,
   Middleware.pluginPre('putUsers'),
   APIController.putUsers,
   Middleware.pluginPost('putUsers'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 )
 .patch(
@@ -5607,15 +5692,19 @@ api.route('/users')
   Middleware.pluginPre('patchUsers'),
   APIController.patchUsers,
   Middleware.pluginPost('patchUsers'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .delete(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.disableUserAPI,
   Middleware.pluginPre('deleteUsers'),
   APIController.deleteUsers,
   Middleware.pluginPost('deleteUsers'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -5661,6 +5750,7 @@ api.route('/users/whoami')
   Middleware.pluginPre('whoami'),
   APIController.whoami,
   Middleware.pluginPost('whoami'),
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -5743,6 +5833,7 @@ api.route('/users/search')
   Middleware.pluginPre('searchUsers'),
   APIController.searchUsers,
   Middleware.pluginPost('searchUsers'),
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -6099,24 +6190,31 @@ api.route('/users/:username')
   Middleware.pluginPre('getUser'),
   APIController.getUser,
   Middleware.pluginPost('getUser'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .post(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.disableUserAPI,
   Middleware.pluginPre('postUser'),
   APIController.postUser,
   Middleware.pluginPost('postUser'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 )
 .put(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.disableUserAPI,
   Middleware.pluginPre('putUser'),
   APIController.putUser,
   Middleware.pluginPost('putUser'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 )
 .patch(
@@ -6126,15 +6224,19 @@ api.route('/users/:username')
   Middleware.pluginPre('patchUser'),
   APIController.patchUser,
   Middleware.pluginPost('patchUser'),
+  Middleware.logResponse,
   Middleware.respond
 )
 .delete(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.disableUserAPI,
   Middleware.pluginPre('deleteUser'),
   APIController.deleteUser,
   Middleware.pluginPost('deleteUser'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -6201,9 +6303,13 @@ api.route('/users/:username')
 api.route('/users/:username/password')
 .patch(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.disableUserPatchPassword,
-  APIController.patchPassword
+  APIController.patchPassword,
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -6604,34 +6710,46 @@ api.route('/users/:username/password')
 api.route('/webhooks')
 .get(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.pluginPre('getWebhooks'),
   APIController.getWebhooks,
   Middleware.pluginPost('getWebhooks'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 )
 .post(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.pluginPre('postWebhooks'),
   APIController.postWebhooks,
   Middleware.pluginPost('postWebhooks'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 )
 .patch(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.pluginPre('patchWebhooks'),
   APIController.patchWebhooks,
   Middleware.pluginPost('patchWebhooks'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 )
 .delete(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.pluginPre('deleteWebhooks'),
   APIController.deleteWebhooks,
   Middleware.pluginPost('deleteWebhooks'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -6672,6 +6790,7 @@ api.route('/webhooks/trigger/:encodedid')
   Middleware.pluginPre('triggerWebhook'),
   APIController.triggerWebhook,
   Middleware.pluginPost('triggerWebhook'),
+  Middleware.logResponse,
   Middleware.respond
 );
 
@@ -6881,32 +7000,41 @@ api.route('/webhooks/trigger/:encodedid')
 api.route('/webhooks/:webhookid')
 .get(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.pluginPre('getWebhook'),
   APIController.getWebhook,
   Middleware.pluginPost('getWebhook'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 )
 .patch(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.pluginPre('patchWebhook'),
   APIController.patchWebhook,
   Middleware.pluginPost('patchWebhook'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 )
 .delete(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.pluginPre('deleteWebhook'),
   APIController.deleteWebhook,
   Middleware.pluginPost('deleteWebhook'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
   Middleware.respond
 );
 
 
 // Catches any invalid api route not defined above.
-api.use('*', APIController.invalidRoute);
+api.use('*', APIController.invalidRoute, Middleware.respond);
 
 // Export the API router
 module.exports = api;

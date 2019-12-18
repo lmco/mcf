@@ -183,13 +183,14 @@ function swaggerSpec() {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function.
  *
  * @returns {object} Response object with swagger JSON
  */
-function swaggerJSON(req, res) {
+function swaggerJSON(req, res, next) {
   // Return swagger specification
   const json = formatJSON(swaggerSpec());
-  return utils.returnResponse(req, res, json, 200);
+  return utils.sendResponse(req, res, json, 200, next);
 }
 
 /**
@@ -230,10 +231,11 @@ function test(req, res) {
  *
  * @param {object} req - Request express object.
  * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with version
  */
-function version(req, res) {
+function version(req, res, next) {
   // Create version object
   const json = formatJSON({
     version: M.version,
@@ -241,7 +243,7 @@ function version(req, res) {
   });
 
   // Return version object
-  return utils.returnResponse(req, res, json, 200);
+  return utils.sendResponse(req, res, json, 200, next);
 }
 
 /**
@@ -262,7 +264,7 @@ function getLogs(req, res, next) {
   let returnedLines;
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Ensure that the user has permission to get the logs
   try {
@@ -270,7 +272,7 @@ function getLogs(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Define valid options and their types
@@ -296,7 +298,7 @@ function getLogs(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   const logPath = path.join(M.root, 'logs', M.config.log.file);
@@ -308,14 +310,14 @@ function getLogs(req, res, next) {
       const error = new M.ServerError('There is not enough memory to read the log'
         + ' file. Please consider restarting the process with the flag '
         + '--max-old-space-size.', 'error');
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
 
     logContent = fs.readFileSync(logPath).toString();
   }
   else {
     const error = new M.ServerError('Server log file does not exist.', 'critical');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Get the number of lines in the log file
@@ -406,7 +408,7 @@ async function getOrgs(req, res, next) {
   }
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -415,7 +417,7 @@ async function getOrgs(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check query for ids
@@ -464,7 +466,7 @@ async function getOrgs(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -493,7 +495,7 @@ async function postOrgs(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -502,7 +504,7 @@ async function postOrgs(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -520,7 +522,7 @@ async function postOrgs(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
   }
   else {
@@ -548,7 +550,7 @@ async function postOrgs(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -578,7 +580,7 @@ async function putOrgs(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -587,7 +589,7 @@ async function putOrgs(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -605,7 +607,7 @@ async function putOrgs(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
   }
   else {
@@ -633,7 +635,7 @@ async function putOrgs(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -662,7 +664,7 @@ async function patchOrgs(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -671,7 +673,7 @@ async function patchOrgs(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -689,7 +691,7 @@ async function patchOrgs(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
   }
   else {
@@ -717,7 +719,7 @@ async function patchOrgs(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -746,7 +748,7 @@ async function deleteOrgs(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -755,7 +757,7 @@ async function deleteOrgs(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If req.body contains objects, grab the org IDs from the objects
@@ -784,7 +786,7 @@ async function deleteOrgs(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -814,7 +816,7 @@ async function getOrg(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -823,7 +825,7 @@ async function getOrg(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -860,7 +862,7 @@ async function getOrg(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -890,12 +892,12 @@ async function postOrg(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -903,7 +905,7 @@ async function postOrg(req, res, next) {
     const error = new M.DataFormatError(
       'Organization ID in the body does not match ID in the params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -913,7 +915,7 @@ async function postOrg(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Set the org ID in the body equal req.params.orgid
@@ -946,7 +948,7 @@ async function postOrg(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -976,12 +978,12 @@ async function putOrg(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -989,7 +991,7 @@ async function putOrg(req, res, next) {
     const error = new M.DataFormatError(
       'Organization ID in the body does not match ID in the params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -999,7 +1001,7 @@ async function putOrg(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Set the org ID in the body equal req.params.orgid
@@ -1032,7 +1034,7 @@ async function putOrg(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -1061,12 +1063,12 @@ async function patchOrg(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -1074,7 +1076,7 @@ async function patchOrg(req, res, next) {
     const error = new M.DataFormatError(
       'Organization ID in the body does not match ID in the params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -1084,7 +1086,7 @@ async function patchOrg(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Set body org id
@@ -1117,7 +1119,7 @@ async function patchOrg(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -1145,7 +1147,7 @@ async function deleteOrg(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -1154,7 +1156,7 @@ async function deleteOrg(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -1181,7 +1183,7 @@ async function deleteOrg(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -1231,7 +1233,7 @@ async function getAllProjects(req, res, next) {
   }
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -1240,7 +1242,7 @@ async function getAllProjects(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -1273,7 +1275,7 @@ async function getAllProjects(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -1325,7 +1327,7 @@ async function getProjects(req, res, next) {
   }
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -1334,7 +1336,7 @@ async function getProjects(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check if ids was provided in the request query
@@ -1384,7 +1386,7 @@ async function getProjects(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -1413,7 +1415,7 @@ async function postProjects(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -1422,7 +1424,7 @@ async function postProjects(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -1440,7 +1442,7 @@ async function postProjects(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
   }
   else {
@@ -1468,7 +1470,7 @@ async function postProjects(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -1498,7 +1500,7 @@ async function putProjects(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -1507,7 +1509,7 @@ async function putProjects(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -1525,7 +1527,7 @@ async function putProjects(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
   }
   else {
@@ -1553,7 +1555,7 @@ async function putProjects(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -1582,7 +1584,7 @@ async function patchProjects(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -1591,7 +1593,7 @@ async function patchProjects(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -1609,7 +1611,7 @@ async function patchProjects(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
   }
   else {
@@ -1637,7 +1639,7 @@ async function patchProjects(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -1666,7 +1668,7 @@ async function deleteProjects(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -1675,7 +1677,7 @@ async function deleteProjects(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If req.body contains objects, grab the project IDs from the objects
@@ -1707,7 +1709,7 @@ async function deleteProjects(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -1737,7 +1739,7 @@ async function getProject(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -1746,7 +1748,7 @@ async function getProject(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -1783,7 +1785,7 @@ async function getProject(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -1813,12 +1815,12 @@ async function postProject(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
@@ -1826,7 +1828,7 @@ async function postProject(req, res, next) {
     const error = new M.DataFormatError(
       'Project ID in the body does not match ID in the params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -1836,7 +1838,7 @@ async function postProject(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Set the projectid in req.body in case it wasn't provided
@@ -1868,7 +1870,7 @@ async function postProject(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -1898,12 +1900,12 @@ async function putProject(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
@@ -1911,7 +1913,7 @@ async function putProject(req, res, next) {
     const error = new M.DataFormatError(
       'Project ID in the body does not match ID in the params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -1921,7 +1923,7 @@ async function putProject(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Set the orgid in req.body in case it wasn't provided
@@ -1954,7 +1956,7 @@ async function putProject(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -1983,12 +1985,12 @@ async function patchProject(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If project ID was provided in the body, ensure it matches project ID in params
@@ -1996,7 +1998,7 @@ async function patchProject(req, res, next) {
     const error = new M.DataFormatError(
       'Project ID in the body does not match ID in the params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -2006,7 +2008,7 @@ async function patchProject(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Set the orgid in req.body in case it wasn't provided
@@ -2039,7 +2041,7 @@ async function patchProject(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -2067,7 +2069,7 @@ async function deleteProject(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -2076,7 +2078,7 @@ async function deleteProject(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -2104,7 +2106,7 @@ async function deleteProject(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -2148,7 +2150,7 @@ async function getUsers(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -2157,7 +2159,7 @@ async function getUsers(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Set usernames to undefined
@@ -2212,7 +2214,7 @@ async function getUsers(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -2242,7 +2244,7 @@ async function postUsers(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -2251,7 +2253,7 @@ async function postUsers(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -2269,7 +2271,7 @@ async function postUsers(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
   }
   else {
@@ -2296,7 +2298,7 @@ async function postUsers(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -2326,7 +2328,7 @@ async function putUsers(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -2335,7 +2337,7 @@ async function putUsers(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -2353,7 +2355,7 @@ async function putUsers(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
   }
   else {
@@ -2380,7 +2382,7 @@ async function putUsers(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -2410,7 +2412,7 @@ async function patchUsers(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -2419,7 +2421,7 @@ async function patchUsers(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -2437,7 +2439,7 @@ async function patchUsers(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
   }
   else {
@@ -2464,7 +2466,7 @@ async function patchUsers(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -2493,7 +2495,7 @@ async function deleteUsers(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -2502,7 +2504,7 @@ async function deleteUsers(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -2527,7 +2529,7 @@ async function deleteUsers(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -2557,7 +2559,7 @@ async function getUser(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -2566,7 +2568,7 @@ async function getUser(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -2605,7 +2607,7 @@ async function getUser(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -2635,12 +2637,12 @@ async function postUser(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If username was provided in the body, ensure it matches username in params
@@ -2648,7 +2650,7 @@ async function postUser(req, res, next) {
     const error = new M.DataFormatError(
       'Username in body does not match username in params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Set the username in req.body in case it wasn't provided
@@ -2661,7 +2663,7 @@ async function postUser(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -2690,7 +2692,7 @@ async function postUser(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -2720,12 +2722,12 @@ async function putUser(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If username was provided in the body, ensure it matches username in params
@@ -2733,7 +2735,7 @@ async function putUser(req, res, next) {
     const error = new M.DataFormatError(
       'Username in body does not match username in params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Set the username in req.body in case it wasn't provided
@@ -2746,7 +2748,7 @@ async function putUser(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -2775,7 +2777,7 @@ async function putUser(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -2805,12 +2807,12 @@ async function patchUser(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If username was provided in the body, ensure it matches username in params
@@ -2818,7 +2820,7 @@ async function patchUser(req, res, next) {
     const error = new M.DataFormatError(
       'Username in body does not match username in params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -2828,7 +2830,7 @@ async function patchUser(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Set body username
@@ -2860,7 +2862,7 @@ async function patchUser(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -2888,12 +2890,12 @@ async function deleteUser(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -2903,7 +2905,7 @@ async function deleteUser(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -2930,7 +2932,7 @@ async function deleteUser(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -2957,7 +2959,7 @@ async function whoami(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -2966,7 +2968,7 @@ async function whoami(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -3021,7 +3023,7 @@ async function searchUsers(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -3030,7 +3032,7 @@ async function searchUsers(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for q (query)
@@ -3073,7 +3075,7 @@ async function searchUsers(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -3084,10 +3086,11 @@ async function searchUsers(req, res, next) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response object with updated user public data.
  */
-async function patchPassword(req, res) {
+async function patchPassword(req, res, next) {
   // Define options
   // Note: Undefined if not set
   let options;
@@ -3099,30 +3102,30 @@ async function patchPassword(req, res) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Ensure old password was provided
   if (!req.body.oldPassword) {
     const error = new M.DataFormatError('Old password not in request body.', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Ensure new password was provided
   if (!req.body.password) {
     const error = new M.DataFormatError('New password not in request body.', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Ensure confirmed password was provided
   if (!req.body.confirmPassword) {
     const error = new M.DataFormatError('Confirmed password not in request body.', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Ensure user is not trying to change another user's password
   if (req.user._id !== req.params.username) {
     const error = new M.OperationError('Cannot change another user\'s password.', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -3132,7 +3135,7 @@ async function patchPassword(req, res) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -3152,12 +3155,16 @@ async function patchPassword(req, res) {
     // Format JSON
     const json = formatJSON(publicUserData, minified);
 
-    // Returns 200: OK and the updated user's public data
-    return utils.returnResponse(req, res, json, 200);
+    // Sends 200: OK and the updated user's public data
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
+    next();
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -3216,7 +3223,7 @@ async function getElements(req, res, next) {
   }
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -3225,7 +3232,7 @@ async function getElements(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check query for element IDs
@@ -3249,7 +3256,7 @@ async function getElements(req, res, next) {
     if (!validFormats.includes(options.format)) {
       const error = new M.DataFormatError(`The format ${options.format} is not a `
         + 'valid format.', 'warn');
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
     format = options.format;
     delete options.format;
@@ -3297,8 +3304,12 @@ async function getElements(req, res, next) {
         // Format JSON
         const json = formatJSON(jmiData, minified);
 
-        // Return a 200: OK and public JMI type 3 element data
-        return utils.returnResponse(req, res, json, 200);
+        // Send a 200: OK and public JMI type 3 element data
+        res.locals = {
+          message: json,
+          statusCode: 200
+        };
+        next();
       }
       catch (err) {
         throw err;
@@ -3317,7 +3328,7 @@ async function getElements(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -3347,7 +3358,7 @@ async function postElements(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -3356,7 +3367,7 @@ async function postElements(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -3374,7 +3385,7 @@ async function postElements(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
   }
   else {
@@ -3402,7 +3413,7 @@ async function postElements(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -3432,7 +3443,7 @@ async function putElements(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -3441,7 +3452,7 @@ async function putElements(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -3459,7 +3470,7 @@ async function putElements(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
   }
   else {
@@ -3487,7 +3498,7 @@ async function putElements(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -3516,7 +3527,7 @@ async function patchElements(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -3525,7 +3536,7 @@ async function patchElements(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -3543,7 +3554,7 @@ async function patchElements(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
   }
   else {
@@ -3571,7 +3582,7 @@ async function patchElements(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -3599,7 +3610,7 @@ async function deleteElements(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -3608,7 +3619,7 @@ async function deleteElements(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -3636,7 +3647,7 @@ async function deleteElements(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -3691,7 +3702,7 @@ async function searchElements(req, res, next) {
   }
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -3700,7 +3711,7 @@ async function searchElements(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for q (query)
@@ -3741,7 +3752,7 @@ async function searchElements(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -3773,7 +3784,7 @@ async function getElement(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -3782,7 +3793,7 @@ async function getElement(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -3824,7 +3835,7 @@ async function getElement(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -3853,12 +3864,12 @@ async function postElement(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -3866,7 +3877,7 @@ async function postElement(req, res, next) {
     const error = new M.DataFormatError(
       'Element ID in the body does not match ID in the params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -3876,7 +3887,7 @@ async function postElement(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Set the element ID in the body equal req.params.elementid
@@ -3909,7 +3920,7 @@ async function postElement(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -3939,12 +3950,12 @@ async function putElement(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -3952,7 +3963,7 @@ async function putElement(req, res, next) {
     const error = new M.DataFormatError(
       'Element ID in the body does not match ID in the params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -3962,7 +3973,7 @@ async function putElement(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Set the element ID in the body equal req.params.elementid
@@ -3995,7 +4006,7 @@ async function putElement(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -4024,12 +4035,12 @@ async function patchElement(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -4037,7 +4048,7 @@ async function patchElement(req, res, next) {
     const error = new M.DataFormatError(
       'Element ID in the body does not match ID in the params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -4047,7 +4058,7 @@ async function patchElement(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Set the element ID in the body equal req.params.elementid
@@ -4080,7 +4091,7 @@ async function patchElement(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -4107,7 +4118,7 @@ async function deleteElement(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -4116,7 +4127,7 @@ async function deleteElement(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -4144,7 +4155,7 @@ async function deleteElement(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -4197,7 +4208,7 @@ async function getBranches(req, res, next) {
   }
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -4206,7 +4217,7 @@ async function getBranches(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check query for branch IDs
@@ -4255,7 +4266,7 @@ async function getBranches(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -4284,7 +4295,7 @@ async function postBranches(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -4293,7 +4304,7 @@ async function postBranches(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -4311,7 +4322,7 @@ async function postBranches(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
   }
   else {
@@ -4339,7 +4350,7 @@ async function postBranches(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -4368,7 +4379,7 @@ async function patchBranches(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -4377,7 +4388,7 @@ async function patchBranches(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -4395,7 +4406,7 @@ async function patchBranches(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
   }
   else {
@@ -4423,7 +4434,7 @@ async function patchBranches(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -4451,7 +4462,7 @@ async function deleteBranches(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -4460,7 +4471,7 @@ async function deleteBranches(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If req.body contains objects, grab the branch IDs from the objects
@@ -4492,7 +4503,7 @@ async function deleteBranches(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -4522,7 +4533,7 @@ async function getBranch(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -4531,7 +4542,7 @@ async function getBranch(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -4568,7 +4579,7 @@ async function getBranch(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -4597,12 +4608,12 @@ async function postBranch(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -4610,7 +4621,7 @@ async function postBranch(req, res, next) {
     const error = new M.DataFormatError(
       'Branch ID in the body does not match ID in the params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -4620,7 +4631,7 @@ async function postBranch(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Set the branch ID in the body equal req.params.branchid
@@ -4653,7 +4664,7 @@ async function postBranch(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -4682,12 +4693,12 @@ async function patchBranch(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If an ID was provided in the body, ensure it matches the ID in params
@@ -4695,7 +4706,7 @@ async function patchBranch(req, res, next) {
     const error = new M.DataFormatError(
       'Branch ID in the body does not match ID in the params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -4705,7 +4716,7 @@ async function patchBranch(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Set the branch ID in the body equal req.params.branchid
@@ -4738,7 +4749,7 @@ async function patchBranch(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -4766,7 +4777,7 @@ async function deleteBranch(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -4775,7 +4786,7 @@ async function deleteBranch(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -4803,7 +4814,7 @@ async function deleteBranch(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -4846,7 +4857,7 @@ async function getArtifacts(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -4855,7 +4866,7 @@ async function getArtifacts(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check query for artifact IDs
@@ -4879,7 +4890,7 @@ async function getArtifacts(req, res, next) {
     if (!validFormats.includes(options.format)) {
       const error = new M.DataFormatError(`The format ${options.format} is not a `
         + 'valid format.', 'warn');
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
     format = options.format;
     delete options.format;
@@ -4924,8 +4935,12 @@ async function getArtifacts(req, res, next) {
         // Format JSON
         const json = formatJSON(jmiData, minified);
 
-        // Return a 200: OK and public JMI artifact data
-        return utils.returnResponse(req, res, json, 200);
+        // Sets the message to the public JMI artifact data and the status code to 200
+        res.locals = {
+          message: json,
+          statusCode: 200
+        };
+        next();
       }
       catch (err) {
         throw err;
@@ -4944,7 +4959,7 @@ async function getArtifacts(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -4974,7 +4989,7 @@ async function postArtifacts(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -4983,7 +4998,7 @@ async function postArtifacts(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -5001,7 +5016,7 @@ async function postArtifacts(req, res, next) {
     }
     catch (error) {
       // Error occurred, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
   }
   else {
@@ -5029,7 +5044,7 @@ async function postArtifacts(req, res, next) {
     next();
   }
   catch (error) {
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -5058,7 +5073,7 @@ async function patchArtifacts(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -5067,7 +5082,7 @@ async function patchArtifacts(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -5085,7 +5100,7 @@ async function patchArtifacts(req, res, next) {
     }
     catch (error) {
       // Error occurred with options, report it
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
   }
   else {
@@ -5115,7 +5130,7 @@ async function patchArtifacts(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -5143,7 +5158,7 @@ async function deleteArtifacts(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -5152,7 +5167,7 @@ async function deleteArtifacts(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -5179,7 +5194,7 @@ async function deleteArtifacts(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -5209,7 +5224,7 @@ async function getArtifact(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -5218,7 +5233,7 @@ async function getArtifact(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -5256,7 +5271,7 @@ async function getArtifact(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -5285,7 +5300,7 @@ async function postArtifact(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -5294,7 +5309,7 @@ async function postArtifact(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -5306,7 +5321,7 @@ async function postArtifact(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If artifact ID was provided in the body, ensure it matches artifact ID in params
@@ -5314,7 +5329,7 @@ async function postArtifact(req, res, next) {
     const error = new M.DataFormatError(
       'Artifact ID in the body does not match ID in the params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Set the artifact ID in the body equal req.params.artifactid
@@ -5340,7 +5355,7 @@ async function postArtifact(req, res, next) {
     next();
   }
   catch (error) {
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -5369,7 +5384,7 @@ async function patchArtifact(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -5378,7 +5393,7 @@ async function patchArtifact(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -5390,7 +5405,7 @@ async function patchArtifact(req, res, next) {
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Sanitize body
@@ -5401,7 +5416,7 @@ async function patchArtifact(req, res, next) {
     const error = new M.DataFormatError(
       'Artifact ID in the body does not match ID in the params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Set the artifact ID in the body equal req.params.artifactid
@@ -5429,7 +5444,7 @@ async function patchArtifact(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -5456,7 +5471,7 @@ async function deleteArtifact(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -5465,7 +5480,7 @@ async function deleteArtifact(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -5492,7 +5507,7 @@ async function deleteArtifact(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -5509,7 +5524,7 @@ async function deleteArtifact(req, res, next) {
  */
 async function getBlob(req, res, next) {
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   try {
     const artifactBlob = await ArtifactController.getBlob(req.user, req.params.orgid,
@@ -5529,7 +5544,7 @@ async function getBlob(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -5548,19 +5563,19 @@ async function getBlob(req, res, next) {
 async function postBlob(req, res, next) {
   await upload(req, res, async function(err) {
     // Sanity Check: there should always be a user in the request
-    if (!req.user) return noUserError(req, res);
+    if (!req.user) return noUserError(req, res, next);
 
     if (err instanceof multer.MulterError) {
       // A Multer error occurred when uploading.
       M.log.error(err);
       const error = new M.ServerError('Artifact upload failed.', 'warn');
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
 
     // Sanity Check: file is required
     if (!req.file) {
       const error = new M.DataFormatError('Artifact Blob file must be defined.', 'warn');
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
 
     try {
@@ -5581,7 +5596,7 @@ async function postBlob(req, res, next) {
       next();
     }
     catch (error) {
-      return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+      return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
   });
 }
@@ -5600,7 +5615,7 @@ async function postBlob(req, res, next) {
  */
 async function deleteBlob(req, res, next) {
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   try {
     const artifact = await ArtifactController.deleteBlob(req.user, req.params.orgid,
@@ -5621,7 +5636,7 @@ async function deleteBlob(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -5648,7 +5663,7 @@ async function getBlobById(req, res, next) {
   };
 
   // Sanity Check: there should always be a user in the request
-  if (!req.user) return noUserError(req, res);
+  if (!req.user) return noUserError(req, res, next);
 
   // Attempt to parse query options
   try {
@@ -5657,7 +5672,7 @@ async function getBlobById(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   try {
@@ -5692,7 +5707,7 @@ async function getBlobById(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -5752,7 +5767,7 @@ async function getWebhooks(req, res, next) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     const error = new M.ServerError('Request Failed');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -5762,7 +5777,7 @@ async function getWebhooks(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check query for webhook IDs
@@ -5811,7 +5826,7 @@ async function getWebhooks(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -5842,7 +5857,7 @@ async function postWebhooks(req, res, next) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     const error = new M.ServerError('Request Failed');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -5852,7 +5867,7 @@ async function postWebhooks(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -5882,7 +5897,7 @@ async function postWebhooks(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -5913,7 +5928,7 @@ async function patchWebhooks(req, res, next) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     const error = new M.ServerError('Request Failed');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -5923,7 +5938,7 @@ async function patchWebhooks(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -5953,7 +5968,7 @@ async function patchWebhooks(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -5982,7 +5997,7 @@ async function deleteWebhooks(req, res, next) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     const error = new M.ServerError('Request Failed');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -5992,7 +6007,7 @@ async function deleteWebhooks(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -6017,7 +6032,7 @@ async function deleteWebhooks(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -6049,7 +6064,7 @@ async function getWebhook(req, res, next) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     const error = new M.ServerError('Request Failed');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -6059,7 +6074,7 @@ async function getWebhook(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -6097,7 +6112,7 @@ async function getWebhook(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -6128,13 +6143,13 @@ async function patchWebhook(req, res, next) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     const error = new M.ServerError('Request Failed');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Singular api: should not accept arrays
   if (Array.isArray(req.body)) {
     const error = new M.DataFormatError('Input cannot be an array', 'warn');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // If there's a webhookid in the body, check that it matches the params
@@ -6142,7 +6157,7 @@ async function patchWebhook(req, res, next) {
     const error = new M.DataFormatError(
       'Webhook ID in body does not match webhook ID in params.', 'warn'
     );
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
   // Set body id to params id
   req.body.id = req.params.webhookid;
@@ -6154,7 +6169,7 @@ async function patchWebhook(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -6185,7 +6200,7 @@ async function patchWebhook(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -6214,7 +6229,7 @@ async function deleteWebhook(req, res, next) {
   if (!req.user) {
     M.log.critical('No requesting user available.');
     const error = new M.ServerError('Request Failed');
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Attempt to parse query options
@@ -6224,7 +6239,7 @@ async function deleteWebhook(req, res, next) {
   }
   catch (error) {
     // Error occurred with options, report it
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
   // Check options for minified
@@ -6249,7 +6264,7 @@ async function deleteWebhook(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -6325,7 +6340,7 @@ async function triggerWebhook(req, res, next) {
   }
   catch (error) {
     // If an error was thrown, return it and its status
-    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+    return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 }
 
@@ -6337,12 +6352,13 @@ async function triggerWebhook(req, res, next) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response error message
  */
-function invalidRoute(req, res) {
+function invalidRoute(req, res, next) {
   const json = 'Invalid Route or Method.';
-  return utils.returnResponse(req, res, json, 404);
+  return utils.sendResponse(req, res, json, 404, next);
 }
 
 /**
@@ -6351,11 +6367,12 @@ function invalidRoute(req, res) {
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
  *
  * @returns {object} Response error message
  */
-function noUserError(req, res) {
+function noUserError(req, res, next) {
   M.log.critical('No requesting user available.');
   const error = new M.ServerError('Request Failed');
-  return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
+  return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
 }

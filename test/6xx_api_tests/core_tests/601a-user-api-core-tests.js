@@ -121,11 +121,13 @@ function whoami(done) {
  */
 function postUser(done) {
   const userData = testData.users[0];
+  const url = `/api/users/${userData.username}`;
+  const method = 'POST';
   request({
-    url: `${test.url}/api/users/${userData.username}`,
+    url: `${test.url}${url}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: 'POST',
+    method: method,
     body: JSON.stringify(userData)
   },
   (err, response, body) => {
@@ -153,7 +155,10 @@ function postUser(done) {
     chai.expect(createdUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdUser.archived).to.equal(false);
     chai.expect(createdUser).to.not.have.any.keys('archivedOn', 'archivedBy');
-    done();
+
+    // Ensure the response was saved to the security log
+    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
+      100);
   });
 }
 
@@ -167,8 +172,10 @@ function postUsers(done) {
     testData.users[1],
     testData.users[2]
   ];
+  const url = '/api/users/';
+  const method = 'POST';
   request({
-    url: `${test.url}/api/users`,
+    url: `${test.url}${url}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'POST',
@@ -208,7 +215,10 @@ function postUsers(done) {
       chai.expect(createdUser.archived).to.equal(false);
       chai.expect(createdUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
-    done();
+
+    // Ensure the response was saved to the security log
+    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
+      100);
   });
 }
 
@@ -219,11 +229,13 @@ function postUsers(done) {
  */
 function putUser(done) {
   const userData = testData.users[0];
+  const url = `/api/users/${userData.username}`;
+  const method = 'PUT';
   request({
-    url: `${test.url}/api/users/${userData.username}`,
+    url: `${test.url}${url}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: 'PUT',
+    method: method,
     body: JSON.stringify(userData)
   },
   (err, response, body) => {
@@ -251,7 +263,10 @@ function putUser(done) {
     chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(replacedUser.archived).to.equal(false);
     chai.expect(replacedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
-    done();
+
+    // Ensure the response was saved to the security log
+    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
+      100);
   });
 }
 
@@ -266,11 +281,13 @@ function putUsers(done) {
     testData.users[2],
     testData.users[3]
   ];
+  const url = '/api/users/';
+  const method = 'PUT';
   request({
-    url: `${test.url}/api/users`,
+    url: `${test.url}${url}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: 'PUT',
+    method: method,
     body: JSON.stringify(userData)
   },
   (err, response, body) => {
@@ -307,7 +324,10 @@ function putUsers(done) {
       chai.expect(replacedUser.archived).to.equal(false);
       chai.expect(replacedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
-    done();
+
+    // Ensure the response was saved to the security log
+    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
+      100);
   });
 }
 
@@ -650,16 +670,19 @@ function patchUsers(done) {
 function patchUserPassword(done) {
   // Create request object
   const userData = testData.users[0];
+  userData._id = userData.username;
   const updateObj = {
     password: 'NewPass1234?',
     confirmPassword: 'NewPass1234?',
     oldPassword: userData.password
   };
+  const url = `/api/users/${userData.username}/password`;
+  const method = 'PATCH';
   request({
-    url: `${test.url}/api/users/${userData.username}/password`,
+    url: `${test.url}${url}`,
     headers: testUtils.getHeaders('application/json', userData),
     ca: testUtils.readCaFile(),
-    method: 'PATCH',
+    method: method,
     body: JSON.stringify(updateObj)
   },
   (err, response, body) => {
@@ -687,7 +710,10 @@ function patchUserPassword(done) {
     chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedUser.archived).to.equal(false);
     chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
-    done();
+
+    // Ensure the response was saved to the security log
+    setTimeout(() => testUtils.testSecurityResponseLogging(response, userData, method, url, done),
+      100);
   });
 }
 
