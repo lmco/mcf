@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module db.dynamodb-strategy
+ * @module db.dynamodb-strategy.dynamodb-strategy
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
