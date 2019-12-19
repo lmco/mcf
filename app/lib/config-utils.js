@@ -206,7 +206,7 @@ module.exports.validate = function(config) {
   // ----------------------------- Verify log ----------------------------- //
   test(config, 'log', 'object');
   test(config, 'log.level', 'string');
-  const logLevels = ['info', 'verbose', 'debug', 'security', 'warn', 'error', 'critical'];
+  const logLevels = ['info', 'verbose', 'debug', 'warn', 'error', 'critical'];
   if (!logLevels.includes(config.log.level)) {
     throw new Error(`Configuration file: ${config.log.level} in "log.level" is not a valid`
       + 'log level.');
