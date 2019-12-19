@@ -92,7 +92,7 @@ function loadPlugins() {
       M.log.verbose(stdout.toString());
     }
     // If package.json doesn't exist, it is not a valid plugin. Skip it.
-    const pluginPath = path.join(M.root, f);
+    const pluginPath = path.join(__dirname, f);
     if (!fs.existsSync(path.join(pluginPath, 'package.json'))) {
       M.log.info(`Removing invalid plugin '${f}' ...`);
       const c = `${rmd} ${path.join(__dirname, f)}`;
