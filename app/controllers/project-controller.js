@@ -361,6 +361,7 @@ async function create(requestingUser, organizationID, projects, options) {
       }
       arrIDs.push(proj.id);
       proj._id = proj.id;
+      delete proj.id;
 
       // If user not setting permissions, add the field
       if (!proj.hasOwnProperty('permissions')) {
@@ -373,13 +374,13 @@ async function create(requestingUser, organizationID, projects, options) {
       index++;
     });
 
-    // Create searchQuery to search for any existing, conflicting projects
-    const searchQuery = { _id: { $in: arrIDs } };
-
     // Find the organization, validate that it exists and is not archived
     const foundOrg = await helper.findAndValidate(Organization, orgID);
     // Permissions check
     permissions.createProject(reqUser, foundOrg);
+
+    // Create searchQuery to search for any existing, conflicting projects
+    const searchQuery = { _id: { $in: arrIDs } };
 
     // Search for projects with the same id
     const foundProjects = await Project.find(searchQuery, '_id');
@@ -391,6 +392,21 @@ async function create(requestingUser, organizationID, projects, options) {
       // There are one or more projects with conflicting IDs
       throw new M.OperationError('Projects with the following IDs already exist'
         + ` [${foundProjectIDs.toString()}].`, 'warn');
+    }
+
+    // Enforce that project ids are unique across orgs if configured
+    if (M.config.server.uniqueProjects) {
+      const allProjects = await Project.find({}, '_id');
+      const projectIDs = allProjects.map((p) => utils.parseID(p._id).pop());
+
+      // Check that this project id hasn't been used yet
+      projectsToCreate.forEach((p) => {
+        if (projectIDs.includes(utils.parseID(p._id).pop())) {
+          throw new M.OperationError(
+            `Project id [${utils.parseID(p._id).pop()}] is already in use.`, 'warn'
+          );
+        }
+      });
     }
 
     // Get all existing users for permissions
