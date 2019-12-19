@@ -125,7 +125,7 @@ function postOrg(done) {
 
     // Ensure the response was saved to the security log
     setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      100);
+      250);
   });
 }
 
@@ -183,7 +183,7 @@ function postOrgs(done) {
 
     // Ensure the response was saved to the security log
     setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      100);
+      250);
   });
 }
 
@@ -228,7 +228,7 @@ function putOrg(done) {
 
     // Ensure the response was saved to the security log
     setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      100);
+      250);
   });
 }
 
@@ -287,7 +287,7 @@ function putOrgs(done) {
 
     // Ensure the response was saved to the security log
     setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      100);
+      250);
   });
 }
 
@@ -577,7 +577,7 @@ function deleteOrg(done) {
 
     // Ensure the response was saved to the security log
     setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      100);
+      250);
   });
 }
 
@@ -614,6 +614,6 @@ function deleteOrgs(done) {
 
     // Ensure the response was saved to the security log
     setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      100);
+      250);
   });
 }

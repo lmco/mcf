@@ -158,7 +158,7 @@ function postUser(done) {
 
     // Ensure the response was saved to the security log
     setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      100);
+      250);
   });
 }
 
@@ -218,7 +218,7 @@ function postUsers(done) {
 
     // Ensure the response was saved to the security log
     setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      100);
+      250);
   });
 }
 
@@ -266,7 +266,7 @@ function putUser(done) {
 
     // Ensure the response was saved to the security log
     setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      100);
+      250);
   });
 }
 
@@ -327,7 +327,7 @@ function putUsers(done) {
 
     // Ensure the response was saved to the security log
     setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      100);
+      250);
   });
 }
 
@@ -713,7 +713,7 @@ function patchUserPassword(done) {
 
     // Ensure the response was saved to the security log
     setTimeout(() => testUtils.testSecurityResponseLogging(response, userData, method, url, done),
-      100);
+      250);
   });
 }
 

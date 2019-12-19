@@ -652,7 +652,7 @@ function deleteProject(done) {
 
     // Ensure the response was saved to the security log
     setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      100);
+      250);
   });
 }
 
@@ -691,6 +691,6 @@ function deleteProjects(done) {
 
     // Ensure the response was saved to the security log
     setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      100);
+      250);
   });
 }
