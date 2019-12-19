@@ -95,7 +95,7 @@ function loadPlugins() {
     const pluginPath = path.join(M.root, f);
     if (!fs.existsSync(path.join(pluginPath, 'package.json'))) {
       M.log.info(`Removing invalid plugin '${f}' ...`);
-      const c = `${rmd} ${path.join(M.root, f)}`;
+      const c = `${rmd} ${path.join(__dirname, f)}`;
       const stdout = execSync(c);
       M.log.verbose(stdout.toString());
       return;
