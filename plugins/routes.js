@@ -87,7 +87,7 @@ function loadPlugins() {
     // Removes old plugins
     if (!pluginNames.includes(f)) {
       M.log.info(`Removing plugin '${f}' ...`);
-      const c = `${rmd} ${path.join(M.root, f)}`;
+      const c = `${rmd} ${path.join(__dirname, f)}`;
       const stdout = execSync(c);
       M.log.verbose(stdout.toString());
     }
