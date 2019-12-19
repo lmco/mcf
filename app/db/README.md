@@ -150,7 +150,7 @@ and the [MongoDB Getting Started Guide](https://docs.mongodb.com/manual/tutorial
 ## DynamoDB
 
 Support for DynamoDB was added to help test out the database abstraction layer.
-While stable, it has not been thoroughly tested ans should be considered to be
+While stable, it has not been thoroughly tested and should be considered to be
 in alpha. If working with critical information, we strongly recommend using
 MongoDB as it has been thoroughly tested and is much more efficient than the
 current DynamoDB implementation.
