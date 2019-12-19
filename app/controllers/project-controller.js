@@ -394,11 +394,12 @@ async function create(requestingUser, organizationID, projects, options) {
         + ` [${foundProjectIDs.toString()}].`, 'warn');
     }
 
-    //
+    // Enforce that project ids are unique across orgs if configured
     if (M.config.server.uniqueProjects) {
       const allProjects = await Project.find({}, '_id');
       const projectIDs = allProjects.map((p) => utils.parseID(p._id).pop());
 
+      // Check that this project id hasn't been used yet
       projectsToCreate.forEach((p) => {
         if (projectIDs.includes(utils.parseID(p._id).pop())) {
           throw new M.OperationError(
