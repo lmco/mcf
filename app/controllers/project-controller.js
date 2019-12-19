@@ -446,8 +446,8 @@ async function create(requestingUser, organizationID, projects, options) {
         // Check if they have been added to the org
         if (!foundOrg.permissions.hasOwnProperty(u)) {
           // Add user to org with read permissions
-          const updateQuery = {};
-          updateQuery[`permissions.${u}`] = ['read'];
+          foundOrg.permissions[u] = ['read'];
+          const updateQuery = { permissions: foundOrg.permissions };
           promises.push(Organization.updateOne({ _id: orgID }, updateQuery));
         }
       });
@@ -818,8 +818,8 @@ async function update(requestingUser, organizationID, projects, options) {
             // If not removing a user, check if they have been added to the org
             if (permValue !== 'remove_all' && !foundOrg.permissions.hasOwnProperty(user)) {
               // Add user to org with read permissions
-              const updateQuery = {};
-              updateQuery[`permissions.${user}`] = ['read'];
+              foundOrg.permissions[user] = ['read'];
+              const updateQuery = { permissions: foundOrg.permissions };
               promises.push(Organization.updateOne({ _id: orgID }, updateQuery));
             }
           });
