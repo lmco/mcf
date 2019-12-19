@@ -46,6 +46,7 @@
     "enzyme-adapter-react-16": "^1.14.0",
     "eslint": "^6.2.1",
     "eslint-plugin-jsdoc": "^15.9.2",
+    "eslint-plugin-security": "^1.4.0",
     "gulp": "^4.0.0",
     "gulp-concat": "^2.6.1",
     "gulp-markdown": "^5.0.0",
@@ -62,7 +63,7 @@
     "react-router-dom": "^5.0.1",
     "reactstrap": "^8.0.1",
     "sinon": "^7.5.0",
-    "webpack": "^4.39.2"
+    "webpack": "^4.41.3"
   },
   "scripts": {
     "build": "node mbee build",
