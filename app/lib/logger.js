@@ -246,7 +246,7 @@ function logSecurityResponse(req, res) {
  * an HTTP request.
  */
 function formatResponseLog(req, res) {
-  const responseMessage = res.locals.message ? res.locals.message : '';
+  const responseMessage = (res.locals && res.locals.message) ? res.locals.message : '';
   const responseLength = responseMessage.length;
   const statusCode = res.statusCode ? res.statusCode : res.locals.statusCode;
 

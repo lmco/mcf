@@ -221,7 +221,7 @@ function login(req, res, next) {
  */
 function test(req, res) {
   res.status(200).send('');
-  logger.logResponse(0, req, res);
+  logger.logResponse(req, res);
 }
 
 /**

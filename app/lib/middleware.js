@@ -194,7 +194,10 @@ module.exports.pluginPost = function pluginPost(endpoint) {
 
     return async function(req, res, next) {
       // If the response has already been sent, return
-      if (res.statusCode) return;
+      if (res.statusCode) {
+        next();
+        return;
+      }
       // Otherwise, run the plugin functions
       for (let i = 0; i < pluginFunctions[endpoint].post.length; i++) {
         // eslint-disable-next-line no-await-in-loop
