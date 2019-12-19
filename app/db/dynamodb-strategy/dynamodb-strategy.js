@@ -497,7 +497,7 @@ class Query {
 
       // For each document in the batch of no more than 25
       batch.forEach((doc) => {
-        // If preforming an insert
+        // If performing an insert
         if (op === 'PutRequest') {
           const putObj = {
             PutRequest: {
