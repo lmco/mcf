@@ -1561,7 +1561,7 @@ class Model {
    * @description Preforms a text search of fields which have a text index.
    * Please note that this function is very inefficient. Because of a lack of
    * support for text based search in DynamoDB, this function must use scan()
-   * to find all documents, and preform parsing via regex post-find.
+   * to find all documents, and perform parsing via regex post-find.
    *
    * @param {object} filter - The query to filter on.
    * @param {string} projection - A space delimited string containing the fields
