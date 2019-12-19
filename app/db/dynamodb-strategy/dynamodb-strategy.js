@@ -313,10 +313,8 @@ class Schema {
    * @param {Function} fn - The function to be added to the model.
    */
   static(name, fn) {
-    const obj = {};
-    obj[name] = fn;
     // Add the static function onto the schema statics array
-    this.definition.statics.push(obj);
+    this.definition.statics.push({ [name]: fn });
   }
 
 }
