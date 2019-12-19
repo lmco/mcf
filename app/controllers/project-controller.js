@@ -361,6 +361,7 @@ async function create(requestingUser, organizationID, projects, options) {
       }
       arrIDs.push(proj.id);
       proj._id = proj.id;
+      delete proj.id;
 
       // If user not setting permissions, add the field
       if (!proj.hasOwnProperty('permissions')) {
@@ -393,14 +394,15 @@ async function create(requestingUser, organizationID, projects, options) {
         + ` [${foundProjectIDs.toString()}].`, 'warn');
     }
 
-    if (M.config.uniqueProjects) {
+    //
+    if (M.config.server.uniqueProjects) {
       const allProjects = await Project.find({}, '_id');
       const projectIDs = allProjects.map((p) => utils.parseID(p._id).pop());
 
       projectsToCreate.forEach((p) => {
-        if (projectIDs.includes(utils.parseID(p.id).pop())) {
+        if (projectIDs.includes(utils.parseID(p._id).pop())) {
           throw new M.OperationError(
-            `Project id [${utils.parseID(p.id).pop()}] is already in use.`, 'warn'
+            `Project id [${utils.parseID(p._id).pop()}] is already in use.`, 'warn'
           );
         }
       });

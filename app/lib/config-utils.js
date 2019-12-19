@@ -242,6 +242,7 @@ module.exports.validate = function(config) {
     if (config.server.api.userAPI.patchPassword) test(config, 'server.api.userAPI.patchPassword', 'boolean');
     if (config.server.api.userAPI.delete) test(config, 'server.api.userAPI.delete', 'boolean');
   }
+  if (config.server.hasOwnProperty('uniqueProjects')) test(config, 'server.uniqueProjects', 'boolean');
   test(config, 'server.plugins', 'object');
   test(config, 'server.plugins.enabled', 'boolean');
   if (config.server.plugins.enabled) {
