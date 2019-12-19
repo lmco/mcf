@@ -507,7 +507,7 @@ class Query {
           putObj.PutRequest.Item = this.formatJSON(doc);
           tmpQuery.RequestItems[this.model.TableName].push(putObj);
         }
-        // If preforming a deletion
+        // If performing a deletion
         else {
           const deleteObj = {
             DeleteRequest: {
