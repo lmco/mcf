@@ -23,11 +23,10 @@ See [nodejs.org](https://nodejs.org/en/) for information on Node.js.
 
 **Database**
 You will also need an instance of a document based database. MongoDB is the
-preferred and only currently supported database, but MBEE does support 
-plug-n-play with different databases, as long as a database strategy has been
-defined. To view more information on the database abstraction layer and
-how to configure existing strategies, please visit 
-[the README in app/db](app/db/README.md).
+preferred database, but MBEE does support plug-n-play with different databases,
+as long as a database strategy has been defined. To view more information on the
+database abstraction layer and how to configure existing strategies, please
+visit [the README in app/db](app/db/README.md).
 
 **Source Code**
 1. Clone the MBEE code by running: `git clone https://github.com/lmco/mbee.git`. 

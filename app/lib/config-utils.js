@@ -170,6 +170,24 @@ module.exports.validate = function(config) {
       }
     }
   }
+  // Test DynamoDB strategy
+  else if (config.db.strategy === 'dynamodb-strategy') {
+    test(config, 'db.url', 'string');
+    test(config, 'db.port', 'number');
+    test(config, 'db.accessKeyId', 'string');
+    test(config, 'db.secretAccessKey', 'string');
+    test(config, 'db.region', 'string');
+    test(config, 'db.ssl', 'boolean');
+    test(config, 'db.billingMode', 'string');
+    // Ensure billing mode is either PAY_PER_REQUEST or PROVISIONED
+    if (config.db.billingMode !== 'PAY_PER_REQUEST' && config.db.billingMode !== 'PROVISIONED') {
+      throw new Error('DynamoDB Billing Mode must either be "PAY_PER_REQUEST" or "PROVISIONED".');
+    }
+    // Test the optional proxy field
+    if (config.db.proxy) {
+      test(config, 'db.proxy', 'string');
+    }
+  }
 
 
   // ----------------------------- Verify docker ----------------------------- //
