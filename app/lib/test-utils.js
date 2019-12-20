@@ -628,6 +628,27 @@ module.exports.testResponseLogging = async function(responseLength, req, res, do
 
   done();
 };
+module.exports.testResponseLogging2 = async function(responseLength, req, res, done) {
+  // Get the log file path
+  const filePath = path.join(M.root, 'logs', M.config.log.security_file);
+
+  // Read the file
+  const fileContents = fs.readFileSync(filePath).toString();
+  // Split the file, and remove an non-response entries, and get the final response
+  const response = fileContents.split('\n').filter(e => e.includes('RESPONSE: ')).pop();
+  // split on spaces
+  const content = response.split('RESPONSE: ')[1].split(' ');
+
+  // Ensure parts of response log are correct
+  chai.expect(content[0]).to.equal((req.ip === '::1') ? '127.0.0.1' : req.ip);
+  chai.expect(content[1]).to.equal((req.user) ? req.user._id : 'anonymous');
+  chai.expect(content[3]).to.equal(`"${req.method}`);
+  chai.expect(content[4]).to.equal(`${req.originalUrl}"`);
+  chai.expect(content[5]).to.equal(res.statusCode.toString());
+  chai.expect(content[6]).to.equal(responseLength.toString());
+
+  done();
+};
 
 /**
  * @description Tests security response logging. This is designed for the 600 tests.
@@ -798,8 +819,8 @@ function generateCustomTestData() {
  * @returns {Function} The Middleware respond function.
  */
 module.exports.next = function next(req, res) {
-  return function n() {
-    logger.logResponse(req, res, () => 1);
+  return function() {
+    logger.logResponse(req, res);
     Middleware.respond(req, res);
   };
 };

@@ -237,9 +237,6 @@ function logResponse(req, res) {
 function logSecurityResponse(req, res) {
   const message = formatResponseLog(req, res);
   // Log the info to the security log
-  M.log.info('debugging log security response');
-  M.log.info(message);
-  M.log.info('-------------------------------');
   fs.appendFileSync(path.join('logs', M.config.log.security_file), `${message}\n`);
 }
 
