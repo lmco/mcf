@@ -1,6 +1,61 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.10.4] - 2019-12-20
+### Major Features and Improvements
+* Added a new database strategy for Amazon's DynamoDB. At this time the strategy
+  is still in beta and should NOT be used in production
+* Added the ability to allow for plugin functions to be triggered
+  **synchronously** before and after most API routes
+* Added a new system-admin only API endpoint to retrieve system logs
+* Added a configuration option to enforce unique project ids, allowing for
+  better backwards compatibility with the MMS API
+* Added support for a configuration option which allows for enforcing how old a
+  password must be, before in can be reused
+* Added a new log file for requests and responses to security related endpoints
+  
+  
+### Bug Fixes and Other Changes
+* Added support for the `immutable` field in the `mongoose-mongodb-strategy.js`
+* Fixed a bug where artifact documents were not cloned on creation of a branch
+* Fixed a deprecation warning from the `crypto` library
+* Added an ESlint plugin which enforces security related best practices
+
+### Configuration Changes
+* With the addition of the DynamoDB database strategy, there are new 
+  configuration options when the DynamoDB strategy is selected. Please refer to
+  the database [README](/app/db/README.md) for configuration guidance
+* Added the **required** string `log.security_file`, which specifies the name of
+  the log file which stores requests/responses of security related endpoints
+```json
+{
+  "log": {
+    "security_file": "security.log"
+  }
+}
+``` 
+* Added the optional number `auth.oldPasswords` which specifies the minimum
+  number of different passwords before a password can be reused. If this
+  option is not supplied, there is no limit.
+```json
+{
+  "auth": {
+    "oldPasswords": 12
+  }
+}
+```
+* Added the optional boolean `server.uniqueProjects` which if true, enforces
+  project IDs to be unique. Normally, two projects can have the same ID on
+  different orgs, but if this option is true, attempting this will result in an
+  error. This option helps support backwards compatibility with the MMS API
+```json
+{
+  "server": {
+    "uniqueProjects": true
+  }
+}
+```
+
 ## [0.10.3] - 2019-12-06
 ### Major Features and Improvements
 * Added page in UI for managing Artifacts. Allows the user to create,
