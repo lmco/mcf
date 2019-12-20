@@ -142,8 +142,7 @@ function noReqUser(endpoint) {
       // Expect the statusCode to be 500
       res.statusCode.should.equal(500);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+      done();
     };
 
     // Sends the mock request
@@ -182,8 +181,7 @@ function invalidOptions(endpoint) {
       // Expect the statusCode to be 400
       res.statusCode.should.equal(400);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+      done();
     };
 
     // Sends the mock request
@@ -222,8 +220,7 @@ function conflictingIDs(endpoint) {
       // Expect the statusCode to be 400
       res.statusCode.should.equal(400);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+      done();
     };
 
     // Sends the mock request
@@ -265,8 +262,7 @@ function notFound(endpoint) {
       // Expect the statusCode to be 404
       res.statusCode.should.equal(404);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+      done();
     };
 
     // Sends the mock request
@@ -303,8 +299,7 @@ function noArrays(endpoint) {
       // Expect the statusCode to be 400
       res.statusCode.should.equal(400);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+      done();
     };
 
     // Sends the mock request

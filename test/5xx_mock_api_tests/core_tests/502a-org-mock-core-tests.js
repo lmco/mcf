@@ -123,8 +123,7 @@ function postOrg(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // POSTs an org
@@ -185,8 +184,7 @@ function postOrgs(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // POSTs multiple orgs
@@ -235,8 +233,7 @@ function putOrg(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // PUTs an org
@@ -299,8 +296,7 @@ function putOrgs(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // PUTs multiple orgs
@@ -348,8 +344,7 @@ function getOrg(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // GETs an org
@@ -412,8 +407,7 @@ function getOrgs(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // GETs all orgs
@@ -478,8 +472,7 @@ function getAllOrgs(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // GETs all orgs
@@ -526,8 +519,7 @@ function patchOrg(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // PATCHs an org
@@ -593,8 +585,7 @@ function patchOrgs(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // PATCHs multiple orgs
@@ -630,8 +621,7 @@ function deleteOrg(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // DELETEs an org
@@ -669,8 +659,7 @@ function deleteOrgs(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // DELETEs multiple orgs

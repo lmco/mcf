@@ -145,8 +145,7 @@ function postGzip(done) {
     // Clear the data used for testing
     fs.truncateSync(filepath);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // POST elements
@@ -203,8 +202,7 @@ function putGzip(done) {
     // Clear the data used for testing
     fs.truncateSync(filepath);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // PUT elements
@@ -264,8 +262,7 @@ function patchGzip(done) {
       // Clear the data used for testing
       fs.truncateSync(filepath);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+      done();
     };
 
     // PATCH elements

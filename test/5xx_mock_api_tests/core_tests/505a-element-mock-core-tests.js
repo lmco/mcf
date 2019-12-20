@@ -159,8 +159,7 @@ function postElement(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // POSTs an element
@@ -242,8 +241,7 @@ function postElements(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // POSTs multiple elements
@@ -316,8 +314,7 @@ function putElement(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // PUTs an element
@@ -400,8 +397,7 @@ function putElements(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // PUTs multiple elements
@@ -474,8 +470,7 @@ function getElement(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // GETs an element
@@ -560,8 +555,7 @@ function getElements(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // GETs multiple elements
@@ -646,8 +640,7 @@ function getAllElements(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // GETs multiple elements
@@ -725,8 +718,7 @@ function searchElement(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // GETs elements through text search
@@ -803,8 +795,7 @@ function patchElement(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // PATCHs an element
@@ -895,8 +886,7 @@ function patchElements(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // PATCHs multiple elements
@@ -934,8 +924,7 @@ function deleteElement(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // DELETEs an element
@@ -977,8 +966,7 @@ function deleteElements(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // DELETEs multiple elements

@@ -196,8 +196,7 @@ function post(reference) {
       levelData.push(createdWebhook);
       webhookIDs.push(createdWebhook.id);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+      done();
     };
 
     // POSTs a webhook
@@ -310,8 +309,7 @@ function postMany(reference) {
 
       chai.expect(res.statusCode).to.equal(200);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+      done();
     };
 
     // POSTs a webhook
@@ -416,8 +414,7 @@ function getAll(reference) {
       // Expect the statusCode to be 200
       chai.expect(res.statusCode).to.equal(200);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+      done();
     };
 
     // GETs all webhooks at a reference level
@@ -504,8 +501,7 @@ function patch(reference) {
       // Expect the statusCode to be 200
       chai.expect(res.statusCode).to.equal(200);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+      done();
     };
 
     // PATCHes a webhook
@@ -610,8 +606,7 @@ function patchMany(reference) {
       // Expect the statusCode to be 200
       chai.expect(res.statusCode).to.equal(200);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+      done();
     };
 
     // PATCHes multiple webhooks
@@ -662,8 +657,7 @@ function remove(reference) {
       // Expect the statusCode to be 200
       chai.expect(res.statusCode).to.equal(200);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+      done();
     };
 
     // DELETEs a webhook
@@ -714,8 +708,7 @@ function removeMany(reference) {
       // Expect the statusCode to be 200
       chai.expect(res.statusCode).to.equal(200);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+      done();
     };
 
     // DELETEs a webhook

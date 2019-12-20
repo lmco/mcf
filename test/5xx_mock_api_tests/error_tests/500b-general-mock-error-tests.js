@@ -111,8 +111,7 @@ function noReqUser(endpoint) {
       // Expect the statusCode to be 500
       res.statusCode.should.equal(500);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+      done();
     };
 
     // Sends the mock request
@@ -152,8 +151,7 @@ function invalidOptions(endpoint) {
       // Expect the statusCode to be 400
       res.statusCode.should.equal(400);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+      done();
     };
 
     // Sends the mock request
@@ -183,8 +181,7 @@ function getLogsNonAdmin(done) {
     res.statusCode.should.equal(403);
     _data.should.equal('User does not have permission to view system logs.');
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // GETs the system logs
@@ -214,8 +211,7 @@ function limit0(done) {
     res.statusCode.should.equal(400);
     _data.should.equal('A limit of 0 is not allowed.');
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // GETs the system logs

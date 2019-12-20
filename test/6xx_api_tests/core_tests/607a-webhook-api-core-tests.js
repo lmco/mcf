@@ -95,7 +95,6 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postWebhooks(done) {
   const webhookData = testData.webhooks;
-
   request({
     url: `${test.url}/api/webhooks`,
     headers: testUtils.getHeaders(),
@@ -161,7 +160,6 @@ function postWebhooks(done) {
  */
 function getWebhook(done) {
   const webhookData = testData.webhooks[0];
-
   request({
     url: `${test.url}/api/webhooks/${webhookData.id}`,
     headers: testUtils.getHeaders(),
@@ -194,6 +192,7 @@ function getWebhook(done) {
     // Verify specific fields not returned
     chai.expect(foundWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
     done();
   });
 }
@@ -205,7 +204,6 @@ function getWebhook(done) {
  */
 function getWebhooks(done) {
   const webhookData = testData.webhooks.slice(0, 2);
-
   request({
     url: `${test.url}/api/webhooks`,
     headers: testUtils.getHeaders(),
@@ -255,6 +253,7 @@ function getWebhooks(done) {
       chai.expect(foundWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
     done();
   });
 }
@@ -266,7 +265,6 @@ function getWebhooks(done) {
  */
 function getAllWebhooks(done) {
   const webhookData = testData.webhooks;
-
   request({
     url: `${test.url}/api/webhooks`,
     headers: testUtils.getHeaders(),
@@ -316,6 +314,7 @@ function getAllWebhooks(done) {
       chai.expect(foundWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
     done();
   });
 }
@@ -331,7 +330,6 @@ function patchWebhook(done) {
     id: webhookData.id,
     name: 'test update'
   };
-
   request({
     url: `${test.url}/api/webhooks/${webhookData.id}`,
     headers: testUtils.getHeaders(),
@@ -383,7 +381,6 @@ function patchWebhooks(done) {
     id: webhookData[1].id,
     name: 'test update'
   }];
-
   request({
     url: `${test.url}/api/webhooks`,
     headers: testUtils.getHeaders(),
@@ -444,7 +441,6 @@ function patchWebhooks(done) {
  */
 function deleteWebhook(done) {
   const deleteID = testData.webhooks[0].id;
-
   request({
     url: `${test.url}/api/webhooks/${deleteID}`,
     headers: testUtils.getHeaders(),
@@ -474,7 +470,6 @@ function deleteWebhook(done) {
  */
 function deleteWebhooks(done) {
   const deleteIDs = testData.webhooks.slice(1, 3).map((w) => w.id);
-
   request({
     url: `${test.url}/api/webhooks`,
     headers: testUtils.getHeaders(),
