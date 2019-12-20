@@ -660,13 +660,11 @@ function patchUserPassword(done) {
     confirmPassword: 'NewPass1234?',
     oldPassword: userData.password
   };
-  const url = `/api/users/${userData.username}/password`;
-  const method = 'PATCH';
   request({
-    url: `${test.url}${url}`,
+    url: `${test.url}/api/users/${userData.username}/password`,
     headers: testUtils.getHeaders('application/json', userData),
     ca: testUtils.readCaFile(),
-    method: method,
+    method: 'PATCH',
     body: JSON.stringify(updateObj)
   },
   (err, response, body) => {
@@ -695,9 +693,7 @@ function patchUserPassword(done) {
     chai.expect(updatedUser.archived).to.equal(false);
     chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
 
-    // Ensure the response was saved to the security log
-    setTimeout(() => testUtils.testSecurityResponseLogging(response, userData, method, url, done),
-      250);
+    done();
   });
 }
 
