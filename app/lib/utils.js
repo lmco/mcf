@@ -27,7 +27,6 @@ const zlib = require('zlib');
 
 // MBEE modules
 const publicData = M.require('lib.get-public-data');
-const logger = M.require('lib.logger');
 
 // Define mine type to content type look up table
 const mineTypeTable = {
@@ -475,6 +474,17 @@ module.exports.validateOptions = function(options, validOptions, model) {
       // Return the parsed sort option in the format {sort_field: order}
       validatedOptions.sort[val] = order;
     }
+
+    // Handle the deleteBlob option
+    if (opt === 'deleteBlob') {
+      // Ensure the value is a boolean
+      if (typeof options.deleteBlob !== 'boolean') {
+        throw new M.DataFormatError('The option \'deleteBlob\' is not a boolean.', 'warn');
+      }
+
+      // Set the deleteBlob option in the returnObject
+      validatedOptions.deleteBlob = val;
+    }
   });
 
   return validatedOptions;
@@ -574,13 +584,12 @@ module.exports.readFileCheck = function(filePath) {
  * @param {object} res - The response object.
  * @param {string} message - The response message or error message.
  * @param {number} statusCode - The status code for the response.
+ * @param {Function} next - Callback to to trigger the next middleware.
  * @param {string} [contentType="application/json"] - The content type for
  * the response.
- *
- * @returns {object} The response object.
  */
-module.exports.returnResponse = function returnResponse(req, res, message, statusCode,
-  contentType = 'application/json') {
+module.exports.sendResponse = function sendResponse(req, res, message, statusCode,
+  next = null, contentType = 'application/json') {
   if (statusCode === 200) {
     // We send these headers for a success response
     res.header('Content-Type', contentType);
@@ -590,10 +599,13 @@ module.exports.returnResponse = function returnResponse(req, res, message, statu
     res.header('Content-Type', 'text/plain');
   }
 
-  // Send the message
-  res.status(statusCode).send(message);
-  // Log the response
-  logger.logResponse(message.length, req, res);
-  // Return res
-  return res;
+  // Set the status code
+  res.status(statusCode);
+
+  // Pass the message along
+  res.locals.message = message;
+
+  // Calling next() allows post-APIController middleware to log the response. next should only
+  // be passed in to this function when this function is called due to an error.
+  if (next !== null) next();
 };

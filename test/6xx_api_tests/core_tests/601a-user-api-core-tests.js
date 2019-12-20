@@ -153,6 +153,7 @@ function postUser(done) {
     chai.expect(createdUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdUser.archived).to.equal(false);
     chai.expect(createdUser).to.not.have.any.keys('archivedOn', 'archivedBy');
+
     done();
   });
 }
@@ -168,7 +169,7 @@ function postUsers(done) {
     testData.users[2]
   ];
   request({
-    url: `${test.url}/api/users`,
+    url: `${test.url}/api/users/`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'POST',
@@ -208,6 +209,7 @@ function postUsers(done) {
       chai.expect(createdUser.archived).to.equal(false);
       chai.expect(createdUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
+
     done();
   });
 }
@@ -251,6 +253,7 @@ function putUser(done) {
     chai.expect(replacedUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(replacedUser.archived).to.equal(false);
     chai.expect(replacedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
+
     done();
   });
 }
@@ -267,7 +270,7 @@ function putUsers(done) {
     testData.users[3]
   ];
   request({
-    url: `${test.url}/api/users`,
+    url: `${test.url}/api/users/`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'PUT',
@@ -307,6 +310,7 @@ function putUsers(done) {
       chai.expect(replacedUser.archived).to.equal(false);
       chai.expect(replacedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
     });
+
     done();
   });
 }
@@ -650,6 +654,7 @@ function patchUsers(done) {
 function patchUserPassword(done) {
   // Create request object
   const userData = testData.users[0];
+  userData._id = userData.username;
   const updateObj = {
     password: 'NewPass1234?',
     confirmPassword: 'NewPass1234?',
@@ -687,6 +692,7 @@ function patchUserPassword(done) {
     chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedUser.archived).to.equal(false);
     chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
+
     done();
   });
 }

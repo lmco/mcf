@@ -113,8 +113,7 @@ function getLogsPositiveLimit(done) {
     // Expect a specific number of lines to be returned
     chai.expect(_data.split('\n').length).to.equal(req.query.limit);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // GETs the system logs
@@ -164,8 +163,7 @@ function getLogsNegativeLimit(done) {
 
     chai.expect(logContent).to.equal(_data);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // GETs the system logs
@@ -218,8 +216,7 @@ function getLogsSkip(done) {
     // Expect the NEXT line to be included
     chai.expect(_data).to.include(logContent[req.query.skip]);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // GETs the system logs
@@ -261,8 +258,7 @@ function getLogsColorRemoved(done) {
     // Ensure colorChars are not found in response
     chai.expect(_data).to.satisfy(s => colorChars.every(c => !s.includes(c)));
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // GETs the system logs

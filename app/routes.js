@@ -20,6 +20,7 @@ const express = require('express');
 const router = express.Router();
 
 // MBEE modules
+const APIController = M.require('controllers.api-controller');
 const UIController = M.require('controllers.ui-controller');
 const AuthController = M.require('lib.auth');
 const Middleware = M.require('lib.middleware');
@@ -67,6 +68,7 @@ router.route('/login')
   AuthController.authenticate,
   Middleware.logRoute,
   AuthController.doLogin,
+  APIController.login,
   UIController.login
 );
 

@@ -156,8 +156,7 @@ function postGzip(done) {
     // Clear the data used for testing
     fs.truncateSync(filepath);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // POSTs an artifact
@@ -226,8 +225,7 @@ function patchGzip(done) {
       // Clear the data used for testing
       fs.truncateSync(filepath);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+      done();
     };
 
     // PATCH artifacts

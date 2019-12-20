@@ -120,6 +120,7 @@ function postOrg(done) {
     // Verify specific fields not returned
     chai.expect(postedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
     done();
   });
 }
@@ -173,6 +174,7 @@ function postOrgs(done) {
       chai.expect(postedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
     done();
   });
 }
@@ -213,6 +215,7 @@ function putOrg(done) {
     // Verify specific fields not returned
     chai.expect(replacedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
     done();
   });
 }
@@ -267,6 +270,7 @@ function putOrgs(done) {
       chai.expect(replacedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
     done();
   });
 }
@@ -552,6 +556,7 @@ function deleteOrg(done) {
 
     // Verify correct orgs deleted
     chai.expect(deletedID).to.equal(orgData.id);
+
     done();
   });
 }
@@ -584,6 +589,7 @@ function deleteOrgs(done) {
 
     // Verify correct orgs deleted
     chai.expect(deletedIDs).to.have.members(orgData.map(p => p.id));
+
     done();
   });
 }

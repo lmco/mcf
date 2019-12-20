@@ -647,6 +647,7 @@ function deleteProject(done) {
 
     // Verify correct project deleted
     chai.expect(deletedID).to.equal(projData.id);
+
     done();
   });
 }
@@ -681,6 +682,7 @@ function deleteProjects(done) {
 
     // Verify correct project deleted
     chai.expect(deletedIDs).to.have.members(projData.map(p => p.id));
+
     done();
   });
 }
