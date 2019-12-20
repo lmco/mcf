@@ -4738,6 +4738,13 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: deleteBlob
+ *         description: If true, deletes the associated blob this artifact
+ *                      document is pointing to based on location and filename.
+ *                      This only applies to blobs that no longer have documents
+ *                      that reference them.
+ *         in: query
+ *         type: boolean
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE artifacts, returns deleted
@@ -5107,6 +5114,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: deleteBlob
+ *         description: If true, deletes the associated blob this artifact
+ *                      document is pointing to based on location and filename.
+ *                      This only applies to blobs that no longer have documents
+ *                      that reference them.
+ *         in: query
+ *         type: boolean
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE artifact, returns deleted
