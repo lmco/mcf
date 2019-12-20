@@ -138,8 +138,7 @@ function postWebhook(done) {
     webhookIDs.push(postedWebhook.id);
     webhookData.id = postedWebhook.id;
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // POSTs a webhook
@@ -211,8 +210,7 @@ function postWebhooks(done) {
       webhookDataObj.id = createdWebhook.id;
     });
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // POSTs multiple webhooks
@@ -263,8 +261,7 @@ function getWebhook(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // GETs a webhook
@@ -333,8 +330,7 @@ function getWebhooks(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // GETs webhooks
@@ -403,8 +399,7 @@ function getAllWebhooks(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // GETs all webhooks
@@ -459,8 +454,7 @@ function patchWebhook(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // PATCHes a webhook
@@ -535,8 +529,7 @@ function patchWebhooks(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // PATCHes multiple webhooks
@@ -572,8 +565,7 @@ function deleteWebhook(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // DELETEs a webhook
@@ -609,8 +601,7 @@ function deleteWebhooks(done) {
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // DELETEs multiple webhooks
@@ -668,8 +659,8 @@ async function triggerWebhook() {
 
       // Expect the statusCode to be 200
       chai.expect(res.statusCode).to.equal(200);
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, resolve), 100);
+
+      resolve();
     };
 
     // GETs the webhook trigger endpoint

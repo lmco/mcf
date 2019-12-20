@@ -43,7 +43,6 @@ const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
 const validators = M.require('lib.validators');
-const logger = M.require('lib.logger');
 let testData = JSON.parse(fs.readFileSync(path.join(M.root, 'test', 'test_data.json')).toString());
 
 /**
@@ -599,88 +598,6 @@ module.exports.readCaFile = function() {
 };
 
 /**
- * @description Tests response logging. This is designed for the 500 tests and
- * expects the res and req objects to be the mock objects created in those tests.
- *
- * @param {number} responseLength - The length of the response in bytes.
- * @param {object} req - The request object.
- * @param {object} res - The response object.
- * @param {Function} done - The callback function to mark the end of the test.
- */
-module.exports.testResponseLogging = async function(responseLength, req, res, done) {
-  // Get the log file path
-  const filePath = path.join(M.root, 'logs', M.config.log.file);
-
-  // Read the file
-  const fileContents = fs.readFileSync(filePath).toString();
-  // Split the file, and remove an non-response entries, and get the final response
-  const response = fileContents.split('\n').filter(e => e.includes('RESPONSE: ')).pop();
-  // split on spaces
-  const content = response.split('RESPONSE: ')[1].split(' ');
-
-  // Ensure parts of response log are correct
-  chai.expect(content[0]).to.equal((req.ip === '::1') ? '127.0.0.1' : req.ip);
-  chai.expect(content[1]).to.equal((req.user) ? req.user._id : 'anonymous');
-  chai.expect(content[3]).to.equal(`"${req.method}`);
-  chai.expect(content[4]).to.equal(`${req.originalUrl}"`);
-  chai.expect(content[5]).to.equal(res.statusCode.toString());
-  chai.expect(content[6]).to.equal(responseLength.toString());
-
-  done();
-};
-module.exports.testResponseLogging2 = async function(responseLength, req, res, done) {
-  // Get the log file path
-  const filePath = path.join(M.root, 'logs', M.config.log.security_file);
-
-  // Read the file
-  const fileContents = fs.readFileSync(filePath).toString();
-  // Split the file, and remove an non-response entries, and get the final response
-  const response = fileContents.split('\n').filter(e => e.includes('RESPONSE: ')).pop();
-  // split on spaces
-  const content = response.split('RESPONSE: ')[1].split(' ');
-
-  // Ensure parts of response log are correct
-  chai.expect(content[0]).to.equal((req.ip === '::1') ? '127.0.0.1' : req.ip);
-  chai.expect(content[1]).to.equal((req.user) ? req.user._id : 'anonymous');
-  chai.expect(content[3]).to.equal(`"${req.method}`);
-  chai.expect(content[4]).to.equal(`${req.originalUrl}"`);
-  chai.expect(content[5]).to.equal(res.statusCode.toString());
-  chai.expect(content[6]).to.equal(responseLength.toString());
-
-  done();
-};
-
-/**
- * @description Tests security response logging. This is designed for the 600 tests.
- *
- * @param {object} res - The response object.
- * @param {object} user - The user object.
- * @param {string} method - The method of the request.
- * @param {string} url - The url targeted by the request.
- * @param {Function} done - The callback function to mark the end of the test.
- */
-module.exports.testSecurityResponseLogging = async function(res, user, method, url, done) {
-  // Get the log file path
-  const filePath = path.join(M.root, 'logs', M.config.log.security_file);
-
-  // Read the file
-  const fileContents = fs.readFileSync(filePath).toString();
-  // Split the file, and remove an non-response entries, and get the final response
-  const response = fileContents.split('\n').filter(e => e.includes('RESPONSE: ')).pop();
-  // split on spaces
-  const content = response.split('RESPONSE: ')[1].split(' ');
-
-  // Ensure parts of response log are correct
-  chai.expect(content[1]).to.equal((user) ? user._id : 'anonymous');
-  chai.expect(content[3]).to.equal(`"${method}`);
-  chai.expect(content[4]).to.equal(`${url}"`);
-  chai.expect(content[5]).to.equal(res.statusCode.toString());
-  chai.expect(content[6]).to.equal(res.body.length.toString());
-
-  done();
-};
-
-/**
  * @description A helper function to parse the api endpoint string into a http method.
  *
  * @param {string} endpoint - The api endpoint string.
@@ -820,7 +737,6 @@ function generateCustomTestData() {
  */
 module.exports.next = function next(req, res) {
   return function() {
-    logger.logResponse(req, res);
     Middleware.respond(req, res);
   };
 };

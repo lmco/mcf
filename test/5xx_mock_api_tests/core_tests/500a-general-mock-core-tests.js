@@ -115,8 +115,7 @@ function getLogs(done) {
       chai.expect(logContent.toString()).to.include(_data);
     }
 
-    // Ensure the response was logged correctly
-    setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 100);
+    done();
   };
 
   // GETs the system logs
