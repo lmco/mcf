@@ -5149,12 +5149,15 @@ async function patchArtifacts(req, res, next) {
 async function deleteArtifacts(req, res, next) {
   // Define options
   // Note: Undefined if not set
+  let artIDs;
   let options;
   let minified = false;
 
   // Define valid option and its parsed type
   const validOptions = {
-    minified: 'boolean'
+    minified: 'boolean',
+    deleteBlob: 'boolean',
+    ids: 'array'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -5170,6 +5173,20 @@ async function deleteArtifacts(req, res, next) {
     return utils.sendResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
+  // Check query for artifact IDs
+  if (options.ids) {
+    artIDs = options.ids;
+    delete options.ids;
+  }
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
+    // No IDs included in options, check body
+    artIDs = req.body;
+  }
+  // Check artifact object in body
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
+    artIDs = req.body.map(a => a.id);
+  }
+
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
@@ -5178,9 +5195,9 @@ async function deleteArtifacts(req, res, next) {
   try {
     // Remove the specified artifacts
     // NOTE: remove() sanitizes input params
-    const artIDs = await ArtifactController.remove(req.user, req.params.orgid,
-      req.params.projectid, req.params.branchid, req.body, options);
-    const parsedIDs = artIDs.map(a => utils.parseID(a).pop());
+    const removedArtIDs = await ArtifactController.remove(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, artIDs, options);
+    const parsedIDs = removedArtIDs.map(a => utils.parseID(a).pop());
 
     // Format JSON
     const json = formatJSON(parsedIDs, minified);
@@ -5467,7 +5484,8 @@ async function deleteArtifact(req, res, next) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    minified: 'boolean'
+    minified: 'boolean',
+    deleteBlob: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request

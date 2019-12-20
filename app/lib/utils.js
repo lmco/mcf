@@ -474,6 +474,17 @@ module.exports.validateOptions = function(options, validOptions, model) {
       // Return the parsed sort option in the format {sort_field: order}
       validatedOptions.sort[val] = order;
     }
+
+    // Handle the deleteBlob option
+    if (opt === 'deleteBlob') {
+      // Ensure the value is a boolean
+      if (typeof options.deleteBlob !== 'boolean') {
+        throw new M.DataFormatError('The option \'deleteBlob\' is not a boolean.', 'warn');
+      }
+
+      // Set the deleteBlob option in the returnObject
+      validatedOptions.deleteBlob = val;
+    }
   });
 
   return validatedOptions;

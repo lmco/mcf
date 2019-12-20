@@ -493,13 +493,13 @@ async function postBlob() {
   };
 
   try {
-    const createdArtifact = await ArtifactController.postBlob(adminUser, orgID,
+    const createdBlob = await ArtifactController.postBlob(adminUser, orgID,
       projectID, artData, artifactBlob1);
 
     // Verify response
-    chai.expect(createdArtifact.filename).to.equal(testData.artifacts[0].filename);
-    chai.expect(createdArtifact.project).to.equal(projectID);
-    chai.expect(createdArtifact.location).to.equal(testData.artifacts[0].location);
+    chai.expect(createdBlob.filename).to.equal(testData.artifacts[0].filename);
+    chai.expect(createdBlob.project).to.equal(projectID);
+    chai.expect(createdBlob.location).to.equal(testData.artifacts[0].location);
   }
   catch (error) {
     M.log.error(error);
