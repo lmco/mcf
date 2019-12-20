@@ -91,13 +91,11 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postOrg(done) {
   const orgData = testData.orgs[0];
-  const url = `/api/orgs/${orgData.id}`;
-  const method = 'POST';
   request({
-    url: `${test.url}${url}`,
+    url: `${test.url}/api/orgs/${orgData.id}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: method,
+    method: 'POST',
     body: JSON.stringify(orgData)
   },
   (err, response, body) => {
@@ -123,9 +121,7 @@ function postOrg(done) {
     chai.expect(postedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
 
-    // Ensure the response was saved to the security log
-    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      250);
+    done();
   });
 }
 
@@ -139,10 +135,8 @@ function postOrgs(done) {
     testData.orgs[1],
     testData.orgs[2]
   ];
-  const url = '/api/orgs';
-  const method = 'POST';
   request({
-    url: `${test.url}${url}`,
+    url: `${test.url}/api/orgs`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'POST',
@@ -181,9 +175,7 @@ function postOrgs(done) {
         '__v', '_id');
     });
 
-    // Ensure the response was saved to the security log
-    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      250);
+    done();
   });
 }
 
@@ -194,13 +186,11 @@ function postOrgs(done) {
  */
 function putOrg(done) {
   const orgData = testData.orgs[0];
-  const url = `/api/orgs/${orgData.id}`;
-  const method = 'PUT';
   request({
-    url: `${test.url}${url}`,
+    url: `${test.url}/api/orgs/${orgData.id}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: method,
+    method: 'PUT',
     body: JSON.stringify(orgData)
   },
   (err, response, body) => {
@@ -226,9 +216,7 @@ function putOrg(done) {
     chai.expect(replacedOrg).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
 
-    // Ensure the response was saved to the security log
-    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      250);
+    done();
   });
 }
 
@@ -243,13 +231,11 @@ function putOrgs(done) {
     testData.orgs[2],
     testData.orgs[3]
   ];
-  const url = '/api/orgs';
-  const method = 'PUT';
   request({
-    url: `${test.url}${url}`,
+    url: `${test.url}/api/orgs`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: method,
+    method: 'PUT',
     body: JSON.stringify(orgData)
   },
   (err, response, body) => {
@@ -285,9 +271,7 @@ function putOrgs(done) {
         '__v', '_id');
     });
 
-    // Ensure the response was saved to the security log
-    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      250);
+    done();
   });
 }
 
@@ -556,13 +540,11 @@ function patchOrgs(done) {
  */
 function deleteOrg(done) {
   const orgData = testData.orgs[0];
-  const url = `/api/orgs/${orgData.id}`;
-  const method = 'DELETE';
   request({
-    url: `${test.url}${url}`,
+    url: `${test.url}/api/orgs/${orgData.id}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: method
+    method: 'DELETE'
   },
   function(err, response, body) {
     // Expect no error
@@ -575,9 +557,7 @@ function deleteOrg(done) {
     // Verify correct orgs deleted
     chai.expect(deletedID).to.equal(orgData.id);
 
-    // Ensure the response was saved to the security log
-    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      250);
+    done();
   });
 }
 
@@ -592,13 +572,11 @@ function deleteOrgs(done) {
     testData.orgs[2],
     testData.orgs[3]
   ];
-  const url = '/api/orgs';
-  const method = 'DELETE';
   request({
-    url: `${test.url}${url}`,
+    url: `${test.url}/api/orgs`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: method,
+    method: 'DELETE',
     body: JSON.stringify(orgData)
   },
   function(err, response, body) {
@@ -612,8 +590,6 @@ function deleteOrgs(done) {
     // Verify correct orgs deleted
     chai.expect(deletedIDs).to.have.members(orgData.map(p => p.id));
 
-    // Ensure the response was saved to the security log
-    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      250);
+    done();
   });
 }

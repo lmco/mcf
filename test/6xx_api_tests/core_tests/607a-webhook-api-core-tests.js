@@ -95,13 +95,11 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postWebhooks(done) {
   const webhookData = testData.webhooks;
-  const url = '/api/webhooks';
-  const method = 'POST';
   request({
-    url: `${test.url}${url}`,
+    url: `${test.url}/api/webhooks`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: method,
+    method: 'POST',
     body: JSON.stringify(webhookData)
   },
   (err, response, body) => {
@@ -151,9 +149,7 @@ function postWebhooks(done) {
       webhookDataObj.id = createdWebhook.id;
     });
 
-    // Ensure the response was saved to the security log
-    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      250);
+    done();
   });
 }
 
@@ -164,13 +160,11 @@ function postWebhooks(done) {
  */
 function getWebhook(done) {
   const webhookData = testData.webhooks[0];
-  const url = `/api/webhooks/${webhookData.id}`;
-  const method = 'GET';
   request({
-    url: `${test.url}${url}`,
+    url: `${test.url}/api/webhooks/${webhookData.id}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: method,
+    method: 'GET',
     body: null
   },
   (err, response, body) => {
@@ -199,9 +193,7 @@ function getWebhook(done) {
     chai.expect(foundWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
 
-    // Ensure the response was saved to the security log
-    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      250);
+    done();
   });
 }
 
@@ -212,13 +204,11 @@ function getWebhook(done) {
  */
 function getWebhooks(done) {
   const webhookData = testData.webhooks.slice(0, 2);
-  const url = '/api/webhooks';
-  const method = 'GET';
   request({
-    url: `${test.url}${url}`,
+    url: `${test.url}/api/webhooks`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: method,
+    method: 'GET',
     body: JSON.stringify(webhookData.map(w => w.id))
   },
   (err, response, body) => {
@@ -264,9 +254,7 @@ function getWebhooks(done) {
         '__v', '_id');
     });
 
-    // Ensure the response was saved to the security log
-    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      250);
+    done();
   });
 }
 
@@ -277,13 +265,11 @@ function getWebhooks(done) {
  */
 function getAllWebhooks(done) {
   const webhookData = testData.webhooks;
-  const url = '/api/webhooks';
-  const method = 'GET';
   request({
-    url: `${test.url}${url}`,
+    url: `${test.url}/api/webhooks`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: method,
+    method: 'GET',
     body: null
   },
   (err, response, body) => {
@@ -329,9 +315,7 @@ function getAllWebhooks(done) {
         '__v', '_id');
     });
 
-    // Ensure the response was saved to the security log
-    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      250);
+    done();
   });
 }
 
@@ -346,13 +330,11 @@ function patchWebhook(done) {
     id: webhookData.id,
     name: 'test update'
   };
-  const url = `/api/webhooks/${webhookData.id}`;
-  const method = 'PATCH';
   request({
-    url: `${test.url}${url}`,
+    url: `${test.url}/api/webhooks/${webhookData.id}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: method,
+    method: 'PATCH',
     body: JSON.stringify(webhookUpdate)
   },
   (err, response, body) => {
@@ -381,9 +363,7 @@ function patchWebhook(done) {
     chai.expect(updatedWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
 
-    // Ensure the response was saved to the security log
-    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      250);
+    done();
   });
 }
 
@@ -401,13 +381,11 @@ function patchWebhooks(done) {
     id: webhookData[1].id,
     name: 'test update'
   }];
-  const url = '/api/webhooks';
-  const method = 'PATCH';
   request({
-    url: `${test.url}${url}`,
+    url: `${test.url}/api/webhooks`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: method,
+    method: 'PATCH',
     body: JSON.stringify(webhookUpdate)
   },
   (err, response, body) => {
@@ -452,9 +430,7 @@ function patchWebhooks(done) {
         '__v', '_id');
     });
 
-    // Ensure the response was saved to the security log
-    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      250);
+    done();
   });
 }
 
@@ -465,13 +441,11 @@ function patchWebhooks(done) {
  */
 function deleteWebhook(done) {
   const deleteID = testData.webhooks[0].id;
-  const url = `/api/webhooks/${deleteID}`;
-  const method = 'DELETE';
   request({
-    url: `${test.url}${url}`,
+    url: `${test.url}/api/webhooks/${deleteID}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: method,
+    method: 'DELETE',
     body: null
   },
   (err, response, body) => {
@@ -485,9 +459,7 @@ function deleteWebhook(done) {
     chai.expect(deletedWebhooks.length).to.equal(1);
     chai.expect(deletedWebhooks[0]).to.equal(deleteID);
 
-    // Ensure the response was saved to the security log
-    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      250);
+    done();
   });
 }
 
@@ -498,10 +470,8 @@ function deleteWebhook(done) {
  */
 function deleteWebhooks(done) {
   const deleteIDs = testData.webhooks.slice(1, 3).map((w) => w.id);
-  const url = '/api/webhooks';
-  const method = 'DELETE';
   request({
-    url: `${test.url}${url}`,
+    url: `${test.url}/api/webhooks`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
     method: 'DELETE',
@@ -518,9 +488,7 @@ function deleteWebhooks(done) {
     chai.expect(deletedWebhooks.length).to.equal(2);
     chai.expect(deletedWebhooks).to.have.members(deleteIDs);
 
-    // Ensure the response was saved to the security log
-    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      250);
+    done();
   });
 }
 

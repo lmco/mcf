@@ -631,13 +631,11 @@ function patchProjects(done) {
  */
 function deleteProject(done) {
   const projData = testData.projects[0];
-  const url = `/api/orgs/${org._id}/projects/${projData.id}`;
-  const method = 'DELETE';
   request({
-    url: `${test.url}${url}`,
+    url: `${test.url}/api/orgs/${org._id}/projects/${projData.id}`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: method
+    method: 'DELETE'
   },
   (err, response, body) => {
     // Expect no error
@@ -650,9 +648,7 @@ function deleteProject(done) {
     // Verify correct project deleted
     chai.expect(deletedID).to.equal(projData.id);
 
-    // Ensure the response was saved to the security log
-    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      250);
+    done();
   });
 }
 
@@ -669,13 +665,11 @@ function deleteProjects(done) {
     testData.projects[3],
     testData.projects[4]
   ];
-  const url = `/api/orgs/${org._id}/projects`;
-  const method = 'DELETE';
   request({
-    url: `${test.url}${url}`,
+    url: `${test.url}/api/orgs/${org._id}/projects`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: method,
+    method: 'DELETE',
     body: JSON.stringify(projData.map(p => p.id))
   },
   (err, response, body) => {
@@ -689,8 +683,6 @@ function deleteProjects(done) {
     // Verify correct project deleted
     chai.expect(deletedIDs).to.have.members(projData.map(p => p.id));
 
-    // Ensure the response was saved to the security log
-    setTimeout(() => testUtils.testSecurityResponseLogging(response, adminUser, method, url, done),
-      250);
+    done();
   });
 }
