@@ -28,7 +28,6 @@ const path = require('path');
 const fs = require('fs');
 
 // NPM modules
-const chai = require('chai');
 const Randexp = require('randexp');
 
 // MBEE modules
