@@ -20,6 +20,9 @@ All notable changes to this project will be documented in this file.
 * Fixed a bug where artifact documents were not cloned on creation of a branch
 * Fixed a deprecation warning from the `crypto` library
 * Added an ESlint plugin which enforces security related best practices
+* Added an option to DELETE `/artifacts` and `/artifacts/:artifactid`
+  called `deleteBlob` which if true, deletes the associated blob if no other
+  artifact documents reference it
 
 ### Configuration Changes
 * With the addition of the DynamoDB database strategy, there are new 
