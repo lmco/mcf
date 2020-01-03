@@ -19,7 +19,6 @@
 const chai = require('chai');
 
 // MBEE modules
-const db = M.require('db');
 const APIController = M.require('controllers.api-controller');
 const Webhook = M.require('models.webhook');
 const jmi = M.require('lib.jmi-conversions');
@@ -29,6 +28,7 @@ const utils = M.require('lib.utils');
 // Variables used across test functions
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
+const next = testUtils.next;
 let adminUser;
 let org;
 let project;
@@ -48,13 +48,10 @@ const branchWebhooks = [];
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Runs before all tests. Connects to database, creates an admin user, a test
-   * org, and a test project.
+   * Before: Runs before all tests. Creates an admin user, an org, and a project.
    */
   before(async () => {
     try {
-      await db.connect();
-
       adminUser = await testUtils.createTestAdmin();
       org = await testUtils.createTestOrg(adminUser);
       project = await testUtils.createTestProject(adminUser, org._id);
@@ -68,15 +65,14 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Runs after all tests. Removes any remaining webhooks, removes the test org and test
-   * admin user, and disconnects from database.
+   * After: Runs after all tests. Removes any remaining webhooks and removes the test org and
+   * admin user.
    */
   after(async () => {
     try {
       await Webhook.deleteMany({ _id: { $in: webhookIDs } });
       await testUtils.removeTestOrg();
       await testUtils.removeTestAdmin();
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);
@@ -200,12 +196,11 @@ function post(reference) {
       levelData.push(createdWebhook);
       webhookIDs.push(createdWebhook.id);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      done();
     };
 
     // POSTs a webhook
-    APIController.postWebhooks(req, res);
+    APIController.postWebhooks(req, res, next(req, res));
   };
 }
 
@@ -314,12 +309,11 @@ function postMany(reference) {
 
       chai.expect(res.statusCode).to.equal(200);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      done();
     };
 
     // POSTs a webhook
-    APIController.postWebhooks(req, res);
+    APIController.postWebhooks(req, res, next(req, res));
   };
 }
 
@@ -420,12 +414,11 @@ function getAll(reference) {
       // Expect the statusCode to be 200
       chai.expect(res.statusCode).to.equal(200);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      done();
     };
 
     // GETs all webhooks at a reference level
-    APIController.getWebhooks(req, res);
+    APIController.getWebhooks(req, res, next(req, res));
   };
 }
 
@@ -508,12 +501,11 @@ function patch(reference) {
       // Expect the statusCode to be 200
       chai.expect(res.statusCode).to.equal(200);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      done();
     };
 
     // PATCHes a webhook
-    APIController.patchWebhook(req, res);
+    APIController.patchWebhook(req, res, next(req, res));
   };
 }
 
@@ -614,12 +606,11 @@ function patchMany(reference) {
       // Expect the statusCode to be 200
       chai.expect(res.statusCode).to.equal(200);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      done();
     };
 
     // PATCHes multiple webhooks
-    APIController.patchWebhooks(req, res);
+    APIController.patchWebhooks(req, res, next(req, res));
   };
 }
 
@@ -666,12 +657,11 @@ function remove(reference) {
       // Expect the statusCode to be 200
       chai.expect(res.statusCode).to.equal(200);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      done();
     };
 
     // DELETEs a webhook
-    APIController.deleteWebhook(req, res);
+    APIController.deleteWebhook(req, res, next(req, res));
   };
 }
 
@@ -718,11 +708,10 @@ function removeMany(reference) {
       // Expect the statusCode to be 200
       chai.expect(res.statusCode).to.equal(200);
 
-      // Ensure the response was logged correctly
-      setTimeout(() => testUtils.testResponseLogging(_data.length, req, res, done), 50);
+      done();
     };
 
     // DELETEs a webhook
-    APIController.deleteWebhooks(req, res);
+    APIController.deleteWebhooks(req, res, next(req, res));
   };
 }

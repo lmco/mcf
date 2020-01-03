@@ -86,7 +86,7 @@ const utils = M.require('lib.utils');
  * element is a relationship. NOTE: If target is provided, source is required.
  * @property {string} documentation - The element documentation.
  * @property {string} type - An optional type string.
- *
+ * @property {string} artifact - A reference to an artifact.
  */
 const ElementSchema = new db.Schema({
   _id: {
@@ -94,7 +94,7 @@ const ElementSchema = new db.Schema({
     required: true,
     validate: [{
       validator: validators.element._id.reserved,
-      message: 'Element ID cannot include the following words: '
+      message: props => 'Element ID cannot include the following words: '
         + `[${validators.reserved}].`
     }, {
       validator: validators.element._id.match,
@@ -123,7 +123,8 @@ const ElementSchema = new db.Schema({
     validate: [{
       validator: validators.element.project,
       message: props => `${props.value} is not a valid project ID.`
-    }]
+    }],
+    immutable: true
   },
   branch: {
     type: 'String',
@@ -133,7 +134,8 @@ const ElementSchema = new db.Schema({
     validate: [{
       validator: validators.element.branch,
       message: props => `${props.value} is not a valid branch ID.`
-    }]
+    }],
+    immutable: true
   },
   parent: {
     type: 'String',
@@ -155,7 +157,7 @@ const ElementSchema = new db.Schema({
       message: props => `${props.value} is not a valid source ID.`
     }, {
       validator: validators.element.source.target,
-      message: 'Target is required if source is provided.'
+      message: props => 'Target is required if source is provided.'
     }]
   },
   target: {
@@ -168,7 +170,7 @@ const ElementSchema = new db.Schema({
       message: props => `${props.value} is not a valid target ID.`
     }, {
       validator: validators.element.target.source,
-      message: 'Source is required if target is provided.'
+      message: props => 'Source is required if target is provided.'
     }]
   },
   documentation: {

@@ -71,7 +71,7 @@ const BranchSchema = new db.Schema({
     required: true,
     validate: [{
       validator: validators.branch._id.reserved,
-      message: 'Branch ID cannot include the following words: '
+      message: props => 'Branch ID cannot include the following words: '
         + `[${validators.reserved}].`
     }, {
       validator: validators.branch._id.match,
@@ -97,7 +97,8 @@ const BranchSchema = new db.Schema({
     validate: [{
       validator: validators.branch.project,
       message: props => `${props.value} is not a valid project ID.`
-    }]
+    }],
+    immutable: true
   },
   name: {
     type: 'String',
@@ -110,11 +111,13 @@ const BranchSchema = new db.Schema({
     validate: [{
       validator: validators.branch.source,
       message: props => `${props.value} is not a valid source ID.`
-    }]
+    }],
+    immutable: true
   },
   tag: {
     type: 'Boolean',
-    default: false
+    default: false,
+    immutable: true
   }
 });
 

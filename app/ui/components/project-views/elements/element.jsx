@@ -64,7 +64,7 @@ class Element extends Component {
     const elementId = this.props.id;
 
     if (elementId) {
-      // Initalize variables
+      // Initialize variables
       const url = `${this.props.url}/elements/${elementId}?minified=true&includeArchived=true`;
       // Get project data
       $.ajax({
@@ -156,7 +156,7 @@ class Element extends Component {
               .replace(']', '\\]')
               .replace('-', '\\-');
               // Create the regex for replacement
-              const re = new RegExp(ref, 'g');
+              const re = new RegExp(ref, 'g'); // eslint-disable-line security/detect-non-literal-regexp
 
               // Capture the element ID and link
               const id = uniqCrossRefs[refs[i]].id;
@@ -181,7 +181,9 @@ class Element extends Component {
             // Refresh when session expires
             window.location.reload();
           },
-          404: (err) => reject(err.responseText)
+          // Even though error occurred, return element. Cross reference does not exist
+          // so return documentation as is
+          404: () => resolve(_element)
         }
       });
     });

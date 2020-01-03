@@ -74,7 +74,9 @@ api.get(
  */
 api.get('/doc/swagger.json',
   Middleware.logRoute,
-  APIController.swaggerJSON);
+  APIController.swaggerJSON,
+  Middleware.logResponse,
+  Middleware.respond);
 
 
 /**
@@ -101,9 +103,13 @@ api.get('/doc/swagger.json',
 api.route('/login')
 .post(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   AuthController.doLogin,
-  APIController.login
+  APIController.login,
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -130,9 +136,70 @@ api.route('/version')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.version
+  APIController.version,
+  Middleware.logResponse,
+  Middleware.respond
 );
 
+/**
+ * @swagger
+ * /api/logs:
+ *   get:
+ *     tags:
+ *       - general
+ *     description: Returns the contents of the main server log file. This
+ *                  endpoint is reserved for system-wide admins only.
+ *     produces:
+ *       - text/plain
+ *     parameters:
+ *       - name: skip
+ *         description: Allows for pagination of log content by skipping a
+ *                      certain number of lines. A skip value of less than 0
+ *                      will be treated as 0.
+ *         in: query
+ *         type: number
+ *         default: 0
+ *       - name: limit
+ *         description: Limits the number of lines returned. The default is 1000
+ *                      lines. A limit of less than 0 will return ALL log
+ *                      content. A limit of 0 is not allowed.
+ *         in: query
+ *         type: number
+ *         default: 1000
+ *       - name: removeColor
+ *         description: Removes any characters used to colorize the logs, if
+ *                      they exist.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET the logs.
+ *       400:
+ *         description: Bad Request, Failed to GET logs due to improperly
+ *                      formatted query options.
+ *       401:
+ *         description: Unauthorized, Failed to GET the logs due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET logs due to lack of correct
+ *                      permissions.
+ *       500:
+ *         description: Internal Server Error, Failed to GET logs due to a
+ *                      server side issue, or the log file not existing.
+ */
+api.route('/logs')
+.get(
+  AuthController.authenticate,
+  Middleware.logSecurityRoute,
+  Middleware.logRoute,
+  Middleware.pluginPre('getLogs'),
+  APIController.getLogs,
+  Middleware.pluginPost('getLogs'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
+);
 
 /**
  * @swagger
@@ -501,27 +568,53 @@ api.route('/orgs')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getOrgs
+  Middleware.pluginPre('getOrgs'),
+  APIController.getOrgs,
+  Middleware.pluginPost('getOrgs'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .post(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
-  APIController.postOrgs
+  Middleware.pluginPre('postOrgs'),
+  APIController.postOrgs,
+  Middleware.pluginPost('postOrgs'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 )
 .put(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
-  APIController.putOrgs
+  Middleware.pluginPre('putOrgs'),
+  APIController.putOrgs,
+  Middleware.pluginPost('putOrgs'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchOrgs
+  Middleware.pluginPre('patchOrgs'),
+  APIController.patchOrgs,
+  Middleware.pluginPre('patchOrgs'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .delete(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
-  APIController.deleteOrgs
+  Middleware.pluginPre('deleteOrgs'),
+  APIController.deleteOrgs,
+  Middleware.pluginPost('deleteOrgs'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -843,27 +936,53 @@ api.route('/orgs/:orgid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getOrg
+  Middleware.pluginPre('getOrg'),
+  APIController.getOrg,
+  Middleware.pluginPost('getOrg'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .post(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
-  APIController.postOrg
+  Middleware.pluginPre('postOrg'),
+  APIController.postOrg,
+  Middleware.pluginPost('postOrg'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 )
 .put(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
-  APIController.putOrg
+  Middleware.pluginPre('putOrg'),
+  APIController.putOrg,
+  Middleware.pluginPost('putOrg'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchOrg
+  Middleware.pluginPre('patchOrg'),
+  APIController.patchOrg,
+  Middleware.pluginPost('patchOrg'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .delete(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
-  APIController.deleteOrg
+  Middleware.pluginPre('deleteOrg'),
+  APIController.deleteOrg,
+  Middleware.pluginPost('deleteOrg'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -973,7 +1092,11 @@ api.route('/projects')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getAllProjects
+  Middleware.pluginPre('getAllProjects'),
+  APIController.getAllProjects,
+  Middleware.pluginPost('getAllProjects'),
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -1402,27 +1525,49 @@ api.route('/orgs/:orgid/projects')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getProjects
+  Middleware.pluginPre('getProjects'),
+  APIController.getProjects,
+  Middleware.pluginPost('getProjects'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postProjects
+  Middleware.pluginPre('postProjects'),
+  APIController.postProjects,
+  Middleware.pluginPost('postProjects'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .put(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.putProjects
+  Middleware.pluginPre('putProjects'),
+  APIController.putProjects,
+  Middleware.pluginPost('putProjects'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchProjects
+  Middleware.pluginPre('patchProjects'),
+  APIController.patchProjects,
+  Middleware.pluginPost('patchProjects'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .delete(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
-  APIController.deleteProjects
+  Middleware.pluginPre('deleteProjects'),
+  APIController.deleteProjects,
+  Middleware.pluginPost('deleteProjects'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -1797,27 +1942,49 @@ api.route('/orgs/:orgid/projects/:projectid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getProject
+  Middleware.pluginPre('getProject'),
+  APIController.getProject,
+  Middleware.pluginPost('getProject'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postProject
+  Middleware.pluginPre('postProject'),
+  APIController.postProject,
+  Middleware.pluginPost('postProject'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .put(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.putProject
+  Middleware.pluginPre('putProject'),
+  APIController.putProject,
+  Middleware.pluginPost('putProject'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchProject
+  Middleware.pluginPre('patchProject'),
+  APIController.patchProject,
+  Middleware.pluginPost('patchProject'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .delete(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
-  APIController.deleteProject
+  Middleware.pluginPre('deleteProject'),
+  APIController.deleteProject,
+  Middleware.pluginPre('deleteProject'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -2193,22 +2360,38 @@ api.route('/orgs/:orgid/projects/:projectid/branches')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getBranches
+  Middleware.pluginPre('getBranches'),
+  APIController.getBranches,
+  Middleware.pluginPost('getBranches'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postBranches
+  Middleware.pluginPre('postBranches'),
+  APIController.postBranches,
+  Middleware.pluginPost('postBranches'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchBranches
+  Middleware.pluginPre('patchBranches'),
+  APIController.patchBranches,
+  Middleware.pluginPost('patchBranches'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.deleteBranches
+  Middleware.pluginPre('deleteBranches'),
+  APIController.deleteBranches,
+  Middleware.pluginPre('deleteBranches'),
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -2519,22 +2702,38 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getBranch
+  Middleware.pluginPre('getBranch'),
+  APIController.getBranch,
+  Middleware.pluginPost('getBranch'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postBranch
+  Middleware.pluginPre('postBranch'),
+  APIController.postBranch,
+  Middleware.pluginPost('postBranch'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchBranch
+  Middleware.pluginPre('patchBranch'),
+  APIController.patchBranch,
+  Middleware.pluginPost('patchBranch'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.deleteBranch
+  Middleware.pluginPre('deleteBranch'),
+  APIController.deleteBranch,
+  Middleware.pluginPost('deleteBranch'),
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -2689,7 +2888,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.searchElements
+  Middleware.pluginPre('searchElements'),
+  APIController.searchElements,
+  Middleware.pluginPost('searchElements'),
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -3316,27 +3519,47 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getElements
+  Middleware.pluginPre('getElements'),
+  APIController.getElements,
+  Middleware.pluginPost('getElements'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postElements
+  Middleware.pluginPre('postElements'),
+  APIController.postElements,
+  Middleware.pluginPost('postElements'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .put(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.putElements
+  Middleware.pluginPre('putElements'),
+  APIController.putElements,
+  Middleware.pluginPost('putElements'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchElements
+  Middleware.pluginPre('patchElements'),
+  APIController.patchElements,
+  Middleware.pluginPost('patchElements'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.deleteElements
+  Middleware.pluginPre('deleteElements'),
+  APIController.deleteElements,
+  Middleware.pluginPost('deleteElements'),
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -3892,27 +4115,47 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getElement
+  Middleware.pluginPre('getElement'),
+  APIController.getElement,
+  Middleware.pluginPost('getElement'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postElement
+  Middleware.pluginPre('postElement'),
+  APIController.postElement,
+  Middleware.pluginPost('postElement'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .put(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.putElement
+  Middleware.pluginPost('putElement'),
+  APIController.putElement,
+  Middleware.pluginPost('putElement'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchElement
+  Middleware.pluginPre('patchElement'),
+  APIController.patchElement,
+  Middleware.pluginPost('patchElement'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.deleteElement
+  Middleware.pluginPre('deleteElement'),
+  APIController.deleteElement,
+  Middleware.pluginPost('deleteElement'),
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -4087,16 +4330,29 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getBlob
+  Middleware.pluginPre('getBlob'),
+  APIController.getBlob,
+  Middleware.pluginPost('getBlob'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postBlob
-).delete(
+  Middleware.pluginPre('postBlob'),
+  APIController.postBlob,
+  Middleware.pluginPost('postBlob'),
+  Middleware.logResponse,
+  Middleware.respond
+)
+.delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.deleteBlob
+  Middleware.pluginPre('deleteBlob'),
+  APIController.deleteBlob,
+  Middleware.pluginPost('deleteBlob'),
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -4482,6 +4738,13 @@ api.route('/orgs/:orgid/projects/:projectid/artifacts/blob')
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: deleteBlob
+ *         description: If true, deletes the associated blob this artifact
+ *                      document is pointing to based on location and filename.
+ *                      This only applies to blobs that no longer have documents
+ *                      that reference them.
+ *         in: query
+ *         type: boolean
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE artifacts, returns deleted
@@ -4506,22 +4769,38 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getArtifacts
+  Middleware.pluginPre('getArtifacts'),
+  APIController.getArtifacts,
+  Middleware.pluginPost('getArtifacts'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postArtifacts
+  Middleware.pluginPre('postArtifacts'),
+  APIController.postArtifacts,
+  Middleware.pluginPost('postArtifacts'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchArtifacts
+  Middleware.pluginPre('patchArtifacts'),
+  APIController.patchArtifacts,
+  Middleware.pluginPost('patchArtifacts'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.deleteArtifacts
+  Middleware.pluginPre('deleteArtifacts'),
+  APIController.deleteArtifacts,
+  Middleware.pluginPost('deleteArtifacts'),
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -4835,6 +5114,13 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts')
  *         in: query
  *         type: boolean
  *         default: false
+ *       - name: deleteBlob
+ *         description: If true, deletes the associated blob this artifact
+ *                      document is pointing to based on location and filename.
+ *                      This only applies to blobs that no longer have documents
+ *                      that reference them.
+ *         in: query
+ *         type: boolean
  *     responses:
  *       200:
  *         description: OK, Succeeded to DELETE artifact, returns deleted
@@ -4859,22 +5145,38 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getArtifact
+  Middleware.pluginPre('getArtifact'),
+  APIController.getArtifact,
+  Middleware.pluginPost('getArtifact'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.postArtifact
+  Middleware.pluginPre('postArtifact'),
+  APIController.postArtifact,
+  Middleware.pluginPost('postArtifact'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.patchArtifact
+  Middleware.pluginPre('patchArtifact'),
+  APIController.patchArtifact,
+  Middleware.pluginPost('patchArtifact'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .delete(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.deleteArtifact
+  Middleware.pluginPre('deleteArtifact'),
+  APIController.deleteArtifact,
+  Middleware.pluginPost('deleteArtifact'),
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -4937,7 +5239,11 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/artifacts/:artifa
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.getBlobById
+  Middleware.pluginPre('getBlobById'),
+  APIController.getBlobById,
+  Middleware.pluginPost('getBlobById'),
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -5363,31 +5669,57 @@ api.route('/users')
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.getUsers
+  Middleware.pluginPre('getUsers'),
+  APIController.getUsers,
+  Middleware.pluginPost('getUsers'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .post(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.postUsers
+  Middleware.pluginPre('postUsers'),
+  APIController.postUsers,
+  Middleware.pluginPost('postUsers'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 )
 .put(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.putUsers
+  Middleware.pluginPre('putUsers'),
+  APIController.putUsers,
+  Middleware.pluginPost('putUsers'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.patchUsers
+  Middleware.pluginPre('patchUsers'),
+  APIController.patchUsers,
+  Middleware.pluginPost('patchUsers'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .delete(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.deleteUsers
+  Middleware.pluginPre('deleteUsers'),
+  APIController.deleteUsers,
+  Middleware.pluginPost('deleteUsers'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -5429,7 +5761,11 @@ api.route('/users/whoami')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.whoami
+  Middleware.pluginPre('whoami'),
+  APIController.whoami,
+  Middleware.pluginPost('whoami'),
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -5507,7 +5843,12 @@ api.route('/users/search')
 .get(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.searchUsers
+  Middleware.disableUserAPI,
+  Middleware.pluginPre('searchUsers'),
+  APIController.searchUsers,
+  Middleware.pluginPost('searchUsers'),
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -5860,31 +6201,57 @@ api.route('/users/:username')
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.getUser
+  Middleware.pluginPre('getUser'),
+  APIController.getUser,
+  Middleware.pluginPost('getUser'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .post(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.postUser
+  Middleware.pluginPre('postUser'),
+  APIController.postUser,
+  Middleware.pluginPost('postUser'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 )
 .put(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.putUser
+  Middleware.pluginPre('putUser'),
+  APIController.putUser,
+  Middleware.pluginPost('putUser'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 )
 .patch(
   AuthController.authenticate,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.patchUser
+  Middleware.pluginPre('patchUser'),
+  APIController.patchUser,
+  Middleware.pluginPost('patchUser'),
+  Middleware.logResponse,
+  Middleware.respond
 )
 .delete(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.disableUserAPI,
-  APIController.deleteUser
+  Middleware.pluginPre('deleteUser'),
+  APIController.deleteUser,
+  Middleware.pluginPost('deleteUser'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -5950,9 +6317,13 @@ api.route('/users/:username')
 api.route('/users/:username/password')
 .patch(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
   Middleware.disableUserPatchPassword,
-  APIController.patchPassword
+  APIController.patchPassword,
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -6353,23 +6724,47 @@ api.route('/users/:username/password')
 api.route('/webhooks')
 .get(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
-  APIController.getWebhooks
+  Middleware.pluginPre('getWebhooks'),
+  APIController.getWebhooks,
+  Middleware.pluginPost('getWebhooks'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 )
 .post(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
-  APIController.postWebhooks
+  Middleware.pluginPre('postWebhooks'),
+  APIController.postWebhooks,
+  Middleware.pluginPost('postWebhooks'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 )
 .patch(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
-  APIController.patchWebhooks
+  Middleware.pluginPre('patchWebhooks'),
+  APIController.patchWebhooks,
+  Middleware.pluginPost('patchWebhooks'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 )
 .delete(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
-  APIController.deleteWebhooks
+  Middleware.pluginPre('deleteWebhooks'),
+  APIController.deleteWebhooks,
+  Middleware.pluginPost('deleteWebhooks'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -6406,7 +6801,11 @@ api.route('/webhooks/trigger/:encodedid')
 .post(
   AuthController.authenticate,
   Middleware.logRoute,
-  APIController.triggerWebhook
+  Middleware.pluginPre('triggerWebhook'),
+  APIController.triggerWebhook,
+  Middleware.pluginPost('triggerWebhook'),
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
@@ -6615,23 +7014,41 @@ api.route('/webhooks/trigger/:encodedid')
 api.route('/webhooks/:webhookid')
 .get(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
-  APIController.getWebhook
+  Middleware.pluginPre('getWebhook'),
+  APIController.getWebhook,
+  Middleware.pluginPost('getWebhook'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 )
 .patch(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
-  APIController.patchWebhook
+  Middleware.pluginPre('patchWebhook'),
+  APIController.patchWebhook,
+  Middleware.pluginPost('patchWebhook'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 )
 .delete(
   AuthController.authenticate,
+  Middleware.logSecurityRoute,
   Middleware.logRoute,
-  APIController.deleteWebhook
+  Middleware.pluginPre('deleteWebhook'),
+  APIController.deleteWebhook,
+  Middleware.pluginPost('deleteWebhook'),
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
 // Catches any invalid api route not defined above.
-api.use('*', APIController.invalidRoute);
+api.use('*', APIController.invalidRoute, Middleware.respond);
 
 // Export the API router
 module.exports = api;

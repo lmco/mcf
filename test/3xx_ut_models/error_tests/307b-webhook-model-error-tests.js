@@ -25,7 +25,6 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 
 // MBEE modules
 const Webhook = M.require('models.webhook');
-const db = M.require('db');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
@@ -40,34 +39,6 @@ const webhookID = uuidv4();
  * name of the current file.
  */
 describe(M.getModuleName(module.filename), () => {
-  /**
-   * Before: runs before all tests. Opens database connection.
-   */
-  before(async () => {
-    try {
-      await db.connect();
-    }
-    catch (error) {
-      M.log.error(error);
-      // Expect no error
-      chai.expect(error).to.equal(null);
-    }
-  });
-
-  /**
-   * After: runs after all tests. Closes database connection.
-   */
-  after(async () => {
-    try {
-      await db.disconnect();
-    }
-    catch (error) {
-      M.log.error(error);
-      // Expect no error
-      chai.expect(error).to.equal(null);
-    }
-  });
-
   /* Execute the tests */
   it('should reject creating a webhook without an _id', noID);
   it('should reject creating a webhook without a type', noType);
@@ -102,7 +73,7 @@ async function noID() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    Webhook.deleteMany({ _id: { $in: webhookID } });
+    Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error
@@ -126,7 +97,7 @@ async function noType() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    Webhook.deleteMany({ _id: { $in: webhookID } });
+    Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error
@@ -150,7 +121,7 @@ async function invalidType() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    Webhook.deleteMany({ _id: { $in: webhookID } });
+    Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error
@@ -173,14 +144,10 @@ async function typeImmutable() {
       type: 'Incoming'
     };
 
-    // Update webhook; it won't actually throw an error
-    await Webhook.updateOne({ _id: webhookID }, update);
-
-    // Find the webhook
-    const webhook = await Webhook.findOne({ _id: { $in: webhookID } });
-
-    // Expect the type to still be outgoing
-    webhook.type.should.equal('Outgoing');
+    // Update webhook; expect specific error message
+    await Webhook.updateOne({ _id: webhookID }, update)
+    .should.eventually.be.rejectedWith('Webhook validation failed: type: Path'
+      + ' `type` is immutable and cannot be modified.');
   }
   catch (error) {
     M.log.error(error);
@@ -189,7 +156,7 @@ async function typeImmutable() {
   }
   finally {
     // Remove the webhook
-    await Webhook.deleteMany({ _id: { $in: webhookID } });
+    await Webhook.deleteMany({ _id: webhookID });
   }
 }
 
@@ -209,7 +176,7 @@ async function noTriggers() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    await Webhook.deleteMany({ _id: { $in: webhookID } });
+    await Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error
@@ -233,7 +200,7 @@ async function invalidTriggers() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    await Webhook.deleteMany({ _id: { $in: webhookID } });
+    await Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error
@@ -258,7 +225,7 @@ async function noResponseOutgoing() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    await Webhook.deleteMany({ _id: { $in: webhookID } });
+    await Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error
@@ -285,7 +252,7 @@ async function responseIncoming() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    await Webhook.deleteMany({ _id: { $in: webhookID } });
+    await Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error
@@ -309,7 +276,7 @@ async function noUrlInResponse() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    await Webhook.deleteMany({ _id: { $in: webhookID } });
+    await Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error
@@ -337,7 +304,7 @@ async function invalidMethodInResponse() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    await Webhook.deleteMany({ _id: { $in: webhookID } });
+    await Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error
@@ -365,7 +332,7 @@ async function invalidTokenInResponse() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    await Webhook.deleteMany({ _id: { $in: webhookID } });
+    await Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error
@@ -393,7 +360,7 @@ async function invalidFieldInResponse() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    await Webhook.deleteMany({ _id: { $in: webhookID } });
+    await Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error
@@ -419,7 +386,7 @@ async function noTokenIncoming() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    await Webhook.deleteMany({ _id: { $in: webhookID } });
+    await Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error
@@ -445,7 +412,7 @@ async function noTokenLocationIncoming() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    await Webhook.deleteMany({ _id: { $in: webhookID } });
+    await Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error
@@ -471,7 +438,7 @@ async function tokenOutgoing() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    await Webhook.deleteMany({ _id: { $in: webhookID } });
+    await Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error
@@ -497,7 +464,7 @@ async function tokenLocationOutgoing() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    await Webhook.deleteMany({ _id: { $in: webhookID } });
+    await Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error
@@ -532,6 +499,6 @@ async function verifyToken() {
   }
   finally {
     // Remove the webhook
-    await Webhook.deleteMany({ _id: { $in: webhookID } });
+    await Webhook.deleteMany({ _id: webhookID });
   }
 }

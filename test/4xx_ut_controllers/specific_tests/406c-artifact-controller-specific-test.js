@@ -20,9 +20,10 @@
 const chai = require('chai');
 
 // MBEE modules
+const fs = require('fs');
+const path = require('path');
 const ArtifactController = M.require('controllers.artifact-controller');
 const Artifact = M.require('models.artifact');
-const db = M.require('db');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
@@ -33,6 +34,7 @@ let org = null;
 let projID = null;
 let branchID = null;
 let artifacts = [];
+let artifactBlob = null;
 
 /* --------------------( Main )-------------------- */
 /**
@@ -43,13 +45,10 @@ let artifacts = [];
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * After: Connect to database. Create an admin user, organization, project,
-   * and artifacts.
+   * Before: Create an admin user, organization, project, and artifacts.
    */
   before(async () => {
     try {
-      // Open the database connection
-      await db.connect();
       // Create test admin
       adminUser = await testUtils.createTestAdmin();
 
@@ -66,6 +65,14 @@ describe(M.getModuleName(module.filename), () => {
       // Create test artifacts for the main project
       const arts = testData.artifacts;
       artifacts = await ArtifactController.create(adminUser, org._id, projID, branchID, arts);
+
+      // Get png test file
+      const artifactPath = path.join(
+        M.root, testData.artifacts[0].location, testData.artifacts[0].filename
+      );
+
+      // Get the test file
+      artifactBlob = await fs.readFileSync(artifactPath);
     }
     catch (error) {
       M.log.error(error);
@@ -76,7 +83,6 @@ describe(M.getModuleName(module.filename), () => {
 
   /**
    * After: Remove organization, project and artifacts.
-   * Close database connection.
    */
   after(async () => {
     try {
@@ -84,7 +90,6 @@ describe(M.getModuleName(module.filename), () => {
       // Note: Projects and artifacts under organization will also be removed
       await testUtils.removeTestOrg();
       await testUtils.removeTestAdmin();
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);
@@ -114,6 +119,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should return an artifact with only the specific fields specified from'
     + ' update()', optionFieldsUpdate);
   it('should sort find results', optionSortFind);
+  // ------------- Delete -------------
+  it('should delete blob with artifact document', optionDeleteBlob);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -672,6 +679,51 @@ async function optionSortFind() {
   }
   catch (error) {
     M.log.error(error.message);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
+ * @description Verifies that option 'deletetBlob' deletes a no longer referenced
+ * blob when an artifact document is deleted.
+ */
+async function optionDeleteBlob() {
+  try {
+    const artData = {
+      project: projID,
+      org: org._id,
+      location: testData.artifacts[0].location,
+      filename: testData.artifacts[0].filename
+    };
+
+    // Create the options object
+    const options = { deleteBlob: true };
+
+    // Post blob
+    await ArtifactController.postBlob(adminUser, org._id,
+      projID, artData, artifactBlob);
+
+    // Get the artifact ID
+    const artID = utils.parseID(artifacts[0]._id).pop();
+
+    // Delete the artifact and its non referenced blob
+    const deleteArtIDs = await ArtifactController.remove(adminUser, org._id, projID,
+      branchID, artID, options);
+
+    // Verify response
+    chai.expect(deleteArtIDs[0]).to.equal(
+      utils.createID(org._id, projID, branchID, artID)
+    );
+
+    // Ensure blob not found
+    await ArtifactController.getBlob(adminUser,
+      org._id, projID, artData).should.eventually.be.rejectedWith(
+      'Artifact blob not found.'
+    );
+  }
+  catch (error) {
+    M.log.error(error);
     // Expect no error
     chai.expect(error.message).to.equal(null);
   }

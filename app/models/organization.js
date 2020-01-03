@@ -69,7 +69,7 @@ const OrganizationSchema = new db.Schema({
     required: true,
     validate: [{
       validator: validators.org._id.reserved,
-      message: 'Organization ID cannot include the following words: '
+      message: props => 'Organization ID cannot include the following words: '
         + `[${validators.reserved}].`
     }, {
       validator: validators.org._id.match,
@@ -94,7 +94,8 @@ const OrganizationSchema = new db.Schema({
     default: {},
     validate: [{
       validator: validators.org.permissions,
-      message: 'The organization permissions object is not properly formatted.'
+      message: props => 'The organization permissions object is not properly '
+        + 'formatted.'
     }]
   }
 });

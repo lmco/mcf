@@ -86,7 +86,7 @@ const ProjectSchema = new db.Schema({
     required: true,
     validate: [{
       validator: validators.project._id.reserved,
-      message: 'Project ID cannot include the following words: '
+      message: props => 'Project ID cannot include the following words: '
       + `[${validators.reserved}].`
     }, {
       validator: validators.project._id.match,
@@ -112,7 +112,8 @@ const ProjectSchema = new db.Schema({
     validate: [{
       validator: validators.project.org,
       message: props => `${props.value} is not a valid org ID.`
-    }]
+    }],
+    immutable: true
   },
   name: {
     type: 'String',

@@ -20,7 +20,6 @@ const chai = require('chai');
 const request = require('request');
 
 // MBEE modules
-const db = M.require('db');
 const WebhookController = M.require('controllers.webhook-controller');
 const Webhook = M.require('models.webhook');
 const jmi = M.require('lib.jmi-conversions');
@@ -42,11 +41,10 @@ const webhookIDs = [];
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: Runs before all tests. Connects to database, and creates an admin user.
+   * Before: Runs before all tests. Creates an admin user.
    */
   before(async () => {
     try {
-      await db.connect();
       adminUser = await testUtils.createTestAdmin();
     }
     catch (error) {
@@ -57,14 +55,13 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Runs after all tests. Removes any remaining test webhooks, removes the test admin user,
-   * and disconnects from the database.
+   * After: Runs after all tests. Removes any remaining test webhooks and removes the test
+   * admin user.
    */
   after(async () => {
     try {
       await Webhook.deleteMany({ _id: { $in: webhookIDs } });
       await testUtils.removeTestAdmin();
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);
@@ -98,7 +95,6 @@ describe(M.getModuleName(module.filename), () => {
  */
 function postWebhooks(done) {
   const webhookData = testData.webhooks;
-
   request({
     url: `${test.url}/api/webhooks`,
     headers: testUtils.getHeaders(),
@@ -164,7 +160,6 @@ function postWebhooks(done) {
  */
 function getWebhook(done) {
   const webhookData = testData.webhooks[0];
-
   request({
     url: `${test.url}/api/webhooks/${webhookData.id}`,
     headers: testUtils.getHeaders(),
@@ -197,6 +192,7 @@ function getWebhook(done) {
     // Verify specific fields not returned
     chai.expect(foundWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
+
     done();
   });
 }
@@ -208,7 +204,6 @@ function getWebhook(done) {
  */
 function getWebhooks(done) {
   const webhookData = testData.webhooks.slice(0, 2);
-
   request({
     url: `${test.url}/api/webhooks`,
     headers: testUtils.getHeaders(),
@@ -258,6 +253,7 @@ function getWebhooks(done) {
       chai.expect(foundWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
     done();
   });
 }
@@ -269,7 +265,6 @@ function getWebhooks(done) {
  */
 function getAllWebhooks(done) {
   const webhookData = testData.webhooks;
-
   request({
     url: `${test.url}/api/webhooks`,
     headers: testUtils.getHeaders(),
@@ -319,6 +314,7 @@ function getAllWebhooks(done) {
       chai.expect(foundWebhook).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
     });
+
     done();
   });
 }
@@ -334,7 +330,6 @@ function patchWebhook(done) {
     id: webhookData.id,
     name: 'test update'
   };
-
   request({
     url: `${test.url}/api/webhooks/${webhookData.id}`,
     headers: testUtils.getHeaders(),
@@ -386,7 +381,6 @@ function patchWebhooks(done) {
     id: webhookData[1].id,
     name: 'test update'
   }];
-
   request({
     url: `${test.url}/api/webhooks`,
     headers: testUtils.getHeaders(),
@@ -447,7 +441,6 @@ function patchWebhooks(done) {
  */
 function deleteWebhook(done) {
   const deleteID = testData.webhooks[0].id;
-
   request({
     url: `${test.url}/api/webhooks/${deleteID}`,
     headers: testUtils.getHeaders(),
@@ -477,7 +470,6 @@ function deleteWebhook(done) {
  */
 function deleteWebhooks(done) {
   const deleteIDs = testData.webhooks.slice(1, 3).map((w) => w.id);
-
   request({
     url: `${test.url}/api/webhooks`,
     headers: testUtils.getHeaders(),

@@ -30,7 +30,6 @@ const Webhook = M.require('models.webhook');
 const Organization = M.require('models.organization');
 const Project = M.require('models.project');
 const Branch = M.require('models.branch');
-const db = M.require('db');
 const utils = M.require('lib.utils');
 
 /* --------------------( Test Data )-------------------- */
@@ -58,13 +57,11 @@ const branchWebhooks = [];
  */
 describe(M.getModuleName(module.filename), () => {
   /**
-   * Before: runs before all tests. Opens database connection, creates an admin user, a non admin
+   * Before: runs before all tests. Creates an admin user, a non admin
    * user, an org, a project, and several test webhooks.
    */
   before(async () => {
     try {
-      await db.connect();
-
       adminUser = await testUtils.createTestAdmin();
       nonAdminUser = await testUtils.createNonAdminUser();
       org = await testUtils.createTestOrg(adminUser);
@@ -116,8 +113,8 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: runs after all tests. Removes any remaining test webhooks, removes the test org
-   * and users, and closes database connection.
+   * After: runs after all tests. Removes any remaining test webhooks, abd removes the test org
+   * and users.
    */
   after(async () => {
     try {
@@ -125,7 +122,6 @@ describe(M.getModuleName(module.filename), () => {
       await testUtils.removeTestOrg();
       await testUtils.removeNonAdminUser();
       await testUtils.removeTestAdmin();
-      await db.disconnect();
     }
     catch (error) {
       M.log.error(error);

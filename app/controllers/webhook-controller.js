@@ -113,7 +113,7 @@ async function find(requestingUser, webhooks, options) {
     helper.checkParamsDataType(['undefined', 'object', 'string'], webhooks, 'Webhooks');
 
     // Sanitize input parameters and create function-wide variables
-    const saniWebhooks = (webhooks !== undefined)
+    let saniWebhooks = (webhooks !== undefined)
       ? sani.db(JSON.parse(JSON.stringify(webhooks)))
       : undefined;
     const reqUser = JSON.parse(JSON.stringify(requestingUser));
@@ -146,6 +146,9 @@ async function find(requestingUser, webhooks, options) {
         }
       });
     }
+
+    // Ensure saniWebhooks is an array
+    if (saniWebhooks !== undefined && !Array.isArray(saniWebhooks)) saniWebhooks = [saniWebhooks];
 
     // Add webhook ids to the search query
     if (saniWebhooks !== undefined) searchQuery._id = { $in: saniWebhooks };
@@ -632,7 +635,7 @@ async function remove(requestingUser, webhooks, options) {
     await checkPermissions(reqUser, foundWebhooks, 'deleteWebhook');
 
     // Delete the webhooks
-    await Webhook.deleteMany({ _id: webhooksToDelete });
+    await Webhook.deleteMany({ _id: { $in: webhooksToDelete } });
 
     // Emit event for webhook deletion
     EventEmitter.emit('webhooks-deleted', foundWebhooks);
@@ -646,7 +649,7 @@ async function remove(requestingUser, webhooks, options) {
 
 /**
  * @description A helper function that parses the reference id of a webhook and then
- * checks that the requsting user has permission to access the webhook.
+ * checks that the requesting user has permission to access the webhook.
  *
  * @param {User} reqUser - The model representing the requesting user.
  * @param {Webhook[]} webhooks - An array of webhooks to check permissions for.
