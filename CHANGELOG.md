@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.10.5] - 2020-01-06
+### Bug Fixes and Other Changes
+* Upgraded the minimum mongoose version due to bug with one of it's dependencies
+
 ## [0.10.4] - 2019-12-20
 ### Major Features and Improvements
 * Added a new database strategy for Amazon's DynamoDB. At this time the strategy
@@ -13,8 +17,8 @@ All notable changes to this project will be documented in this file.
 * Added support for a configuration option which allows for enforcing how old a
   password must be, before in can be reused
 * Added a new log file for requests and responses to security related endpoints
-  
-  
+
+
 ### Bug Fixes and Other Changes
 * Added support for the `immutable` field in the `mongoose-mongodb-strategy.js`
 * Fixed a bug where artifact documents were not cloned on creation of a branch
@@ -25,7 +29,7 @@ All notable changes to this project will be documented in this file.
   artifact documents reference it
 
 ### Configuration Changes
-* With the addition of the DynamoDB database strategy, there are new 
+* With the addition of the DynamoDB database strategy, there are new
   configuration options when the DynamoDB strategy is selected. Please refer to
   the database [README](/app/db/README.md) for configuration guidance
 * Added the **required** string `log.security_file`, which specifies the name of
@@ -36,7 +40,7 @@ All notable changes to this project will be documented in this file.
     "security_file": "security.log"
   }
 }
-``` 
+```
 * Added the optional number `auth.oldPasswords` which specifies the minimum
   number of different passwords before a password can be reused. If this
   option is not supplied, there is no limit.
@@ -107,7 +111,7 @@ All notable changes to this project will be documented in this file.
   `name` to `description`
 * Updated the Element schema by adding an `artifact` field which allows for
   referencing an artifact.
-  
+
 ### Bug Fixes and Other Changes
 * Refactored the database abstraction layer by removing the need to support
   callback functions in the parameters and by adding the requirement for
@@ -123,7 +127,7 @@ All notable changes to this project will be documented in this file.
 * Added batch CRUD operations for artifact documents
 * Refactored the Database Abstraction layer by removing the required methods
   `Schema.pre()`, `Schema.method()` and` Model.createDocument()`
-* Updated tests to use random test data generated from custom validators if 
+* Updated tests to use random test data generated from custom validators if
   custom validators are defined in the running config
 
 ### Bug Fixes and Other Changes
@@ -145,7 +149,7 @@ All notable changes to this project will be documented in this file.
   which are archived
 * Added a configuration validator, which verifies the running config has all
   required fields
-  
+
 ### Bug Fixes and Other Changes
 * Added pages for viewing all organizations and projects in the admin console
 * Added `rootpath` option to GET `/elements/:elementid` which returns all
@@ -158,7 +162,7 @@ All notable changes to this project will be documented in this file.
 * Removed usage of $or and $regex in database queries to aid in implementation
   of different database strategies
 * Removed organization and project pages from the profile page on the UI
-  
+
 ### Configuration Changes
 * Added the **required** field `db.strategy` whose value is a string, the name
   of the selected strategy. Please note that each strategy will have its own
