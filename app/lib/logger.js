@@ -211,9 +211,6 @@ function makeLogger(subcommand, opts) {
 // Add defined colors to winston logger
 winston.addColors(colors);
 
-// Create the security log if it doesn't already exist
-const securityPath = path.join('logs', M.config.log.security_file);
-if (!fs.existsSync(securityPath)) fs.appendFileSync(securityPath, '');
 
 /**
  * @description Logs the response to an HTTP request.
