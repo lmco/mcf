@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.10.5] - 2020-01-06
 ### Bug Fixes and Other Changes
-* Upgraded the minimum mongoose version due to bug with one of it's dependencies
+* Upgraded the minimum mongoose version due to a bug with one of its dependencies
 
 ## [0.10.4] - 2019-12-20
 ### Major Features and Improvements
