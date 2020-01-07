@@ -705,7 +705,7 @@ async function optionDeleteBlob() {
       projID, artData, artifactBlob);
 
     // Get the artifact ID
-    const artID = utils.parseID(artifacts[0]._id).pop();
+    const artID = testData.artifacts[0].id;
 
     // Delete the artifact and its non referenced blob
     const deleteArtIDs = await ArtifactController.remove(adminUser, org._id, projID,
