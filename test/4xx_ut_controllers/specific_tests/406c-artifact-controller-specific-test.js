@@ -33,7 +33,6 @@ let adminUser = null;
 let org = null;
 let projID = null;
 let branchID = null;
-let artifacts = [];
 let artifactBlob = null;
 
 /* --------------------( Main )-------------------- */
@@ -64,7 +63,7 @@ describe(M.getModuleName(module.filename), () => {
 
       // Create test artifacts for the main project
       const arts = testData.artifacts;
-      artifacts = await ArtifactController.create(adminUser, org._id, projID, branchID, arts);
+      await ArtifactController.create(adminUser, org._id, projID, branchID, arts);
 
       // Get png test file
       const artifactPath = path.join(
@@ -163,7 +162,7 @@ async function createArchivedArtifact() {
 async function archiveArtifact() {
   try {
     // Get the ID of the artifact to archive
-    const artID = utils.parseID(artifacts[3]._id).pop();
+    const artID = testData.artifacts[3].id;
     // Create the update object
     const updateObj = {
       id: artID,
@@ -201,7 +200,7 @@ async function optionPopulateFind() {
   // Create the options object
   const options = { populate: pop };
   // Get the artifact ID
-  const artID = utils.parseID(artifacts[0]._id).pop();
+  const artID = testData.artifacts[0].id;
 
   try {
     // Find an artifact using the populate option
@@ -244,7 +243,7 @@ async function optionPopulateFind() {
  */
 async function optionArchivedFind() {
   try {
-    const artID = utils.parseID(artifacts[3]._id).pop();
+    const artID = testData.artifacts[3].id;
 
     // Create the options object
     const options = { archived: true };
@@ -283,7 +282,7 @@ async function optionArchivedFind() {
 async function optionFieldsFind() {
   try {
     // Get the ID of the artifact to find
-    const artID = utils.parseID(artifacts[0]._id);
+    const artID = testData.artifacts[0].id;
     // Create the options object with the list of fields specifically find
     const findOptions = { fields: ['description', 'createdBy'] };
     // Create the options object with the list of fields to specifically NOT find
