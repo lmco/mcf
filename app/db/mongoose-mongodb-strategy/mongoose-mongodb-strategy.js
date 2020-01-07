@@ -287,7 +287,7 @@ class Model {
       if (Object.keys(o)[0] === 'updateOne') {
         // Verify there are no immutable fields in the doc
         Object.keys(o.updateOne.update).forEach((k) => {
-          if (this.schema.tree[k].immutable === true) {
+          if (this.schema.tree[k] && this.schema.tree[k].immutable === true) {
             throw new M.OperationError(`${this.modelName} validation failed: `
               + `${k}: Path \`${k}\` is immutable and cannot be modified.`);
           }
@@ -543,7 +543,7 @@ class Model {
   async updateMany(filter, doc, options) {
     // Verify there are no immutable fields in the doc
     Object.keys(doc).forEach((k) => {
-      if (this.schema.tree[k].immutable === true) {
+      if (this.schema.tree[k] && this.schema.tree[k].immutable === true) {
         throw new M.OperationError(`${this.modelName} validation failed: `
           + `${k}: Path \`${k}\` is immutable and cannot be modified.`);
       }
@@ -570,7 +570,7 @@ class Model {
   async updateOne(filter, doc, options) {
     // Verify there are no immutable fields in the doc
     Object.keys(doc).forEach((k) => {
-      if (this.schema.tree[k].immutable === true) {
+      if (this.schema.tree[k] && this.schema.tree[k].immutable === true) {
         throw new M.OperationError(`${this.modelName} validation failed: `
           + `${k}: Path \`${k}\` is immutable and cannot be modified.`);
       }
