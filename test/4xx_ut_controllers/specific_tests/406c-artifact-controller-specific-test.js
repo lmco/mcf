@@ -684,7 +684,7 @@ async function optionSortFind() {
 }
 
 /**
- * @description Verifies that option 'deletetBlob' deletes a no longer referenced
+ * @description Verifies that option 'deleteBlob' deletes a no longer referenced
  * blob when an artifact document is deleted.
  */
 async function optionDeleteBlob() {
