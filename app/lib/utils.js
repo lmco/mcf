@@ -588,7 +588,7 @@ module.exports.readFileCheck = function(filePath) {
  * @param {string} [contentType="application/json"] - The content type for
  * the response.
  */
-module.exports.sendResponse = function sendResponse(req, res, message, statusCode,
+module.exports.formatResponse = function formatResponse(req, res, message, statusCode,
   next = null, contentType = 'application/json') {
   if (statusCode === 200) {
     // We send these headers for a success response
@@ -604,6 +604,9 @@ module.exports.sendResponse = function sendResponse(req, res, message, statusCod
 
   // Pass the message along
   res.locals.message = message;
+
+  // Set a marker that this response has been formatted
+  res.locals.responseFormatted = true;
 
   // Calling next() allows post-APIController middleware to log the response. next should only
   // be passed in to this function when this function is called due to an error.
