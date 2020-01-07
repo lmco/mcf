@@ -704,7 +704,6 @@ async function optionDeleteBlob() {
     await ArtifactController.postBlob(adminUser, org._id,
       projID, artData, artifactBlob);
 
-    // Get the artifact ID
     const artID = testData.artifacts[0].id;
 
     // Delete the artifact and its non referenced blob
