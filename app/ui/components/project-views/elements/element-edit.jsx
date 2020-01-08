@@ -42,7 +42,6 @@ class ElementEdit extends Component {
   constructor(props) {
     // Initialize parent props
     super(props);
-
     // Set mounted variable
     this.mounted = false;
 

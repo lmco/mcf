@@ -301,7 +301,7 @@ class Element extends Component {
                             Delete
                           </UncontrolledTooltip>
                           <i id='deleteBtn' className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteToggle}/>
-                          <i id='editBtn' className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
+                          <i id='editBtn' className='fas fa-edit edit-btn' onClick={this.props.toggle}/>
                           <Tooltip
                             placement='left'
                             isOpen={this.state.isTooltipOpen}
