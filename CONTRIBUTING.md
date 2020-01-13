@@ -25,8 +25,8 @@ Any additional information which may be useful in reporducting the bug would be
 greatly appreciated, such as details from the running configuration or the stack
 trace of the error.
 
-If you believe the bug to be a security vulnerability, **do not report is as an
-issue on GitHub.** Instead, email the same information above to
+**If you believe the bug to be a security vulnerability, do not report it on
+GitHub.** Instead, email the same information above to
 [mbee-software.fc-space@lmco.com](mailto:mbee-software.fc-space@lmco.com). To
 see more information about security vulnerability reporting, see the 
 [SECURITY.md](./SECURITY.md).
