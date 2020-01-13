@@ -718,7 +718,7 @@ function generateCustomTestData() {
     while (id.length < min) {
       id = generator.gen();
       if (count > retries) {
-        M.log.error(`An id could not be generated for the RegEx pattern ${pattern} from the custom`
+        M.log.critical(`An id could not be generated for the RegEx pattern ${pattern} from the custom`
           + ' validators in the config which also meets the criteria for a minimum length of '
           + `${min}.`);
         process.exit(0);
