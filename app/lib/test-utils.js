@@ -709,9 +709,21 @@ function generateCustomTestData() {
     // Generate a new random id
     let id = generator.gen();
 
-    // Ensure that the id is always at least the minimum length
+    // Set counter and number of retries for generating an id
+    let count = 0;
+    const retries = 50;
+
+    // Attempt to ensure that the id is at least the minimum length
+    // Sometimes, if the user supplies a bad RegEx, this will never work
     while (id.length < min) {
       id = generator.gen();
+      if (count > retries) {
+        M.log.error(`An id could not be generated for the RegEx pattern ${pattern} from the custom`
+          + ' validators in the config which also meets the criteria for a minimum length of '
+          + `${min}.`);
+        process.exit(0);
+      }
+      count++;
     }
 
     return id;
