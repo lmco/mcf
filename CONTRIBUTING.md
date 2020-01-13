@@ -1,13 +1,39 @@
 # Contributing to MBEE
 
 **Contents**
+- [Reporting Bugs](#reporting-bugs)
 - [Pull Requests](#pull-requests)
   - [Linter](#linter)
   - [Tests](#tests)
   - [Errors](#errors)
   - [Commenting](#commenting)
-  - [DFARS Requirements](dfars-requirements)
+  - [DFARS Requirements](#dfars-requirements)
 - [Contributors](#contributors)
+
+### Reporting Bugs
+To report any bugs found in the software, please open a new issue on the 
+[MBEE GitHub](https://github.com/lmco/mbee/issues/new). It is important that you
+provide as much information as possible to help us reproduce and fix the bug.
+The following information will be expected in all bug reports:
+
+- A detailed description of the issue
+- MBEE Version (found in [package.json](./package.json))
+- Node Version (found by running `node -v`)
+- Database Version
+
+Any additional information which may be useful in reporducting the bug would be
+greatly appreciated, such as details from the running configuration or the stack
+trace of the error.
+
+If you believe the bug to be a security vulnerability, **do not report is as an
+issue on GitHub.** Instead, email the same information above to
+[mbee-software.fc-space@lmco.com](mailto:mbee-software.fc-space@lmco.com). To
+see more information about security vulnerability reporting, see the 
+[SECURITY.md](./SECURITY.md).
+
+With any bug or vulnerability reported, the Lockheed Martin MBEE team will make
+an effort to address the issue within 1 buisness day, and provide a detailed
+follow-up within 5 business days.
 
 ### Pull Requests
 As an open-sourced project, MBEE is open to contributions from community members

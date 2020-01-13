@@ -1,7 +1,7 @@
 # MBEE Security
 
 **Contents**
-- [Reporting Vulnerabilities and Bugs](#reporting-vulnerabilities-and-bugs)
+- [Reporting Security Vulnerabilities](#reporting-security-vulnerabilities)
 - [Disclosure and Security Update Policy](#disclosure-and-security-update-policy)
 - [Known Gaps and Issues](#known-gaps-and-issues)
 - [Security Related Configuration](#security-related-configuration)
@@ -13,8 +13,9 @@
   - [Authentication](#authentication)
 
 
-## Reporting Vulnerabilities and Bugs
-If an issue is identified in the open source version MBEE, please email
+## Reporting Security Vulnerabilities
+If a security related  issue is identified in the open source version MBEE,
+please email
 [mbee-software.fc-space@lmco.com](mailto:mbee-software.fc-space@lmco.com).
 This will notify the Lockheed Martin MBEE Software Engineering team of the
 issue. Your email will be acknowledged within 1 business day and a more detailed
@@ -80,7 +81,6 @@ Then encrypt your message by running:
 ```
 gpg -e -r mbee-software file_to_encrypt.txt
 ```
-
 
 ## Disclosure and Security Update Policy
 If and when security-related updates are made to MBEE, refer to `CHANGELOG.md`
