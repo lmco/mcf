@@ -21,7 +21,7 @@ The following information will be expected in all bug reports:
 - Node Version (found by running `node -v`)
 - Database Version
 
-Any additional information which may be useful in reporducting the bug would be
+Any additional information which may be useful in reproducing the bug would be
 greatly appreciated, such as details from the running configuration or the stack
 trace of the error.
 
@@ -32,13 +32,13 @@ see more information about security vulnerability reporting, see the
 [SECURITY.md](./SECURITY.md).
 
 With any bug or vulnerability reported, the Lockheed Martin MBEE team will make
-an effort to address the issue within 1 buisness day, and provide a detailed
+an effort to address the issue within 1 business day, and provide a detailed
 follow-up within 5 business days.
 
 ### Pull Requests
 As an open-sourced project, MBEE is open to contributions from community members
-who wish to enhance or fix portions of the software. Below are some quidelines
-to follow which will help your pull request be approved and ultimatley keep the
+who wish to enhance or fix portions of the software. Below are some guidelines
+to follow which will help your pull request be approved and ultimately keep the
 code base clean, readable, and maintainable.
 
 #### Linter
@@ -53,7 +53,7 @@ linter. Currently, two plugins are added to the code base,
 [eslint-plugin-jsdoc](https://github.com/gajus/eslint-plugin-jsdoc) which lints
 and enforces JSDoc headers and 
 [eslint-plugin-security](https://github.com/nodesecurity/eslint-plugin-security)
-which checks for possible security vulnerabilites in the code. Currently, a
+which checks for possible security vulnerabilities in the code. Currently, a
 custom ESLint plugin for MBEE is in the works, and further documentation on
 defining rules in this custom plugin will be added when it is released.
 
@@ -63,19 +63,19 @@ root MBEE directory.
 
 #### Tests
 All code contributed to the MBEE code base **must** pass every unit tests. Tests
-are written using the [mocha](https://mochajs.org/) framework, and take 
-advantage of [chai](https://www.chaijs.com/) for easier assertions in the tests.
-As MBEE tries to follow a test-driven development workflow, it is expected that
+are written using the [Mocha](https://mochajs.org/) framework, and take 
+advantage of [Chai](https://www.chaijs.com/) for easier assertions in the tests.
+As MBEE tries to follow a test-driven development work-flow, it is expected that
 every piece of code merged in should modify or add new tests.
 
 To run the tests, run the command `node mbee test --all` from the root MBEE
-directory. Without providiing the `--all` command, only the suites 1, 2, 3, 4,
+directory. Without providing the `--all` command, only the suites 1, 2, 3, 4,
 5, and 7 will be run. *Please note, the 0 and 9 tests suite will completely wipe
 your database, so please ensure the data is backed up.*
 
 #### Errors
 Throughout the code, MBEE takes advantage of a [library](./app/lib/errors.js) of
-custom errors. Each of these errors is associated with a specifc HTTP status
+custom errors. Each of these errors is associated with a specific HTTP status
 code which will be sent in response from the API. These errors are attached to
 the global M object, and can be created like so:
 
@@ -98,7 +98,7 @@ first glance. All code merged in is expected to follow similar standards.
 #### DFARS Requirements
 To allow for MBEE to be used on all levels of DoD programs, the software has
 been written to follow the DoD DFARS Requirements as best as possible. Currently
-with the correct configuration, MBEE **can** be DFARS compliant, althought
+with the correct configuration, MBEE **can** be DFARS compliant, although
 efforts are being made to ensure all configurations meet the requirements.
 
 All code merged in should be DFARS compliant; if the code breaks compliance, it
