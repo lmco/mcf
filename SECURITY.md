@@ -110,7 +110,7 @@ it is not in the plans to officially support MBEE for Internet Explorer.
 #### Plugin Loading
 Due to the nature of how plugins are loaded, the API and UI are not accessible
 until a plugin has been succesfully loaded. This can cause issues if plugins
-hang while loading, and can result in the UI and API from being accessible.
+hang while loading, and can prevent the UI and API from being accessible.
 
 ## Security Related Configuration
 
