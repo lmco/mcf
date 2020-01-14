@@ -249,7 +249,7 @@ function logSecurityResponse(req, res) {
 function formatResponseLog(req, res) {
   const responseMessage = (res.locals && res.locals.message) ? res.locals.message : '';
   const responseLength = responseMessage.length;
-  const statusCode = res.statusCode ? res.statusCode : res.locals.statusCode;
+  const statusCode = res.locals.statusCode ? res.locals.statusCode : res.statusCode;
 
   // Set username to anonymous if req.user is not defined
   const username = (req.user) ? (req.user._id || req.user.username) : 'anonymous';
