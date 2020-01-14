@@ -94,6 +94,12 @@ an arbitrary admin user in the database.
 
 It's important to ensure that all test users are deleted from the database.
 
+Additionally, when using custom id validators in the config, the testing script
+will attempt to generate new ids for test data that match the custom validators.
+However, if an invalid RegEx is supplied for a custom validator, or a RegEx that
+otherwise conflicts with the maximum or minimum id length, a critical error will
+be logged and the process will exit due to not being able to generate test data.
+
 #### Element Search UI
 A known issue exists in the advanced element search in the UI. If the same field
 is selected more than once for the advanced search, only the first value is
