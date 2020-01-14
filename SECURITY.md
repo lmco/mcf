@@ -94,6 +94,12 @@ an arbitrary admin user in the database.
 
 It's important to ensure that all test users are deleted from the database.
 
+Additionally, when using custom id validators in the config, the testing script
+will attempt to generate new ids for test data that match the custom validators.
+However, if an invalid RegEx is supplied for a custom validator, or a RegEx that
+otherwise conflicts with the maximum or minimum id length, a critical error will
+be logged and the process will exit due to not being able to generate test data.
+
 #### Element Search UI
 A known issue exists in the advanced element search in the UI. If the same field
 is selected more than once for the advanced search, only the first value is
@@ -110,7 +116,7 @@ it is not in the plans to officially support MBEE for Internet Explorer.
 #### Plugin Loading
 Due to the nature of how plugins are loaded, the API and UI are not accessible
 until a plugin has been succesfully loaded. This can cause issues if plugins
-hang while loading, and can result in the UI and API from being accessible.
+hang while loading, and can prevent the UI and API from being accessible.
 
 ## Security Related Configuration
 
