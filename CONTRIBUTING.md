@@ -43,7 +43,7 @@ code base clean, readable, and maintainable.
 
 #### Linter
 MBEE has been configured to use [ESLint](https://github.com/eslint/eslint) as
-it's linter. The [.eslintrc](./.eslintrc) file found in the root directory
+its linter. The [.eslintrc](./.eslintrc) file found in the root directory
 defines the rules and configurations which MBEE uses. A list of available ESLint
 rules, as well as detailed descriptions of each, can be found
 [here](https://eslint.org/docs/rules/).
