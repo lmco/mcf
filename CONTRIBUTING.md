@@ -57,12 +57,12 @@ which checks for possible security vulnerabilities in the code. Currently, a
 custom ESLint plugin for MBEE is in the works, and further documentation on
 defining rules in this custom plugin will be added when it is released.
 
-For code to be merged in, it **must** successfully pass the linter without an
+For code to be merged in, it **must** successfully pass the linter without any
 errors or warnings. To run the linter, run the command `node mbee lint` from the
 root MBEE directory.
 
 #### Tests
-All code contributed to the MBEE code base **must** pass every unit tests. Tests
+All code contributed to the MBEE code base **must** pass every unit test. Tests
 are written using the [Mocha](https://mochajs.org/) framework, and take 
 advantage of [Chai](https://www.chaijs.com/) for easier assertions in the tests.
 As MBEE tries to follow a test-driven development work-flow, it is expected that
