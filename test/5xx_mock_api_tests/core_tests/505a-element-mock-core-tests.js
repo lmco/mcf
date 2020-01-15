@@ -162,7 +162,7 @@ function postElement(done) {
     done();
   };
 
-  // POSTs an element
+  // POST an element
   APIController.postElement(req, res, next(req, res));
 }
 
@@ -244,7 +244,7 @@ function postElements(done) {
     done();
   };
 
-  // POSTs multiple elements
+  // POST multiple elements
   APIController.postElements(req, res, next(req, res));
 }
 
@@ -473,7 +473,7 @@ function getElement(done) {
     done();
   };
 
-  // GETs an element
+  // GET an element
   APIController.getElement(req, res, next(req, res));
 }
 
@@ -558,7 +558,7 @@ function getElements(done) {
     done();
   };
 
-  // GETs multiple elements
+  // GET multiple elements
   APIController.getElements(req, res, next(req, res));
 }
 
@@ -643,7 +643,7 @@ function getAllElements(done) {
     done();
   };
 
-  // GETs multiple elements
+  // GET multiple elements
   APIController.getElements(req, res, next(req, res));
 }
 
@@ -721,7 +721,7 @@ function searchElement(done) {
     done();
   };
 
-  // GETs elements through text search
+  // GET elements through text search
   APIController.searchElements(req, res, next(req, res));
 }
 
@@ -798,7 +798,7 @@ function patchElement(done) {
     done();
   };
 
-  // PATCHs an element
+  // PATCH an element
   APIController.patchElement(req, res, next(req, res));
 }
 
@@ -889,7 +889,7 @@ function patchElements(done) {
     done();
   };
 
-  // PATCHs multiple elements
+  // PATCH multiple elements
   APIController.patchElements(req, res, next(req, res));
 }
 
@@ -927,7 +927,7 @@ function deleteElement(done) {
     done();
   };
 
-  // DELETEs an element
+  // DELETE an element
   APIController.deleteElement(req, res, next(req, res));
 }
 
@@ -969,6 +969,6 @@ function deleteElements(done) {
     done();
   };
 
-  // DELETEs multiple elements
+  // DELETE multiple elements
   APIController.deleteElements(req, res, next(req, res));
 }

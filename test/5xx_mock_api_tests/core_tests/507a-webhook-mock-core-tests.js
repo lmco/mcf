@@ -56,7 +56,8 @@ describe(M.getModuleName(module.filename), () => {
   });
 
   /**
-   * After: Runs after all tests. Removes any remaining test webhooks and eletes the admin user.
+   * After: Runs after all tests. Removes any remaining test webhooks and
+   * deletes the admin user.
    */
   after(async () => {
     try {
@@ -141,7 +142,7 @@ function postWebhook(done) {
     done();
   };
 
-  // POSTs a webhook
+  // POST a webhook
   APIController.postWebhooks(req, res, next(req, res));
 }
 
@@ -213,7 +214,7 @@ function postWebhooks(done) {
     done();
   };
 
-  // POSTs multiple webhooks
+  // POST multiple webhooks
   APIController.postWebhooks(req, res, next(req, res));
 }
 
@@ -264,7 +265,7 @@ function getWebhook(done) {
     done();
   };
 
-  // GETs a webhook
+  // GET a webhook
   APIController.getWebhook(req, res, next(req, res));
 }
 
@@ -333,7 +334,7 @@ function getWebhooks(done) {
     done();
   };
 
-  // GETs webhooks
+  // GET webhooks
   APIController.getWebhooks(req, res, next(req, res));
 }
 
@@ -402,7 +403,7 @@ function getAllWebhooks(done) {
     done();
   };
 
-  // GETs all webhooks
+  // GET all webhooks
   APIController.getWebhooks(req, res, next(req, res));
 }
 
@@ -413,12 +414,11 @@ function getAllWebhooks(done) {
  */
 function patchWebhook(done) {
   const webhookData = testData.webhooks[0];
-  const webhookUpdate = {
+  // Create request object
+  const body = {
     id: webhookIDs[0],
     name: 'Patch test'
   };
-  // Create request object
-  const body = webhookUpdate;
   const params = { webhookid: webhookData.id };
   const method = 'PATCH';
   const req = testUtils.createRequest(adminUser, params, body, method);
@@ -457,7 +457,7 @@ function patchWebhook(done) {
     done();
   };
 
-  // PATCHes a webhook
+  // PATCH a webhook
   APIController.patchWebhook(req, res, next(req, res));
 }
 
@@ -468,15 +468,14 @@ function patchWebhook(done) {
  */
 function patchWebhooks(done) {
   const webhookData = testData.webhooks.slice(1, 3);
-  const webhookUpdates = [{
+  // Create request object
+  const body = [{
     id: webhookIDs[1],
     name: 'Patch test'
   }, {
     id: webhookIDs[2],
     name: 'Patch test'
   }];
-  // Create request object
-  const body = webhookUpdates;
   const method = 'PATCH';
   const req = testUtils.createRequest(adminUser, {}, body, method);
 
@@ -532,7 +531,7 @@ function patchWebhooks(done) {
     done();
   };
 
-  // PATCHes multiple webhooks
+  // PATCH multiple webhooks
   APIController.patchWebhooks(req, res, next(req, res));
 }
 
@@ -568,7 +567,7 @@ function deleteWebhook(done) {
     done();
   };
 
-  // DELETEs a webhook
+  // DELETE a webhook
   APIController.deleteWebhook(req, res, next(req, res));
 }
 
@@ -604,7 +603,7 @@ function deleteWebhooks(done) {
     done();
   };
 
-  // DELETEs multiple webhooks
+  // DELETE multiple webhooks
   APIController.deleteWebhooks(req, res, next(req, res));
 }
 
@@ -663,7 +662,7 @@ async function triggerWebhook() {
       resolve();
     };
 
-    // GETs the webhook trigger endpoint
+    // GET the webhook trigger endpoint
     APIController.triggerWebhook(req, res, next(req, res));
   }));
 

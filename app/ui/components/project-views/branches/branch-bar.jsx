@@ -114,7 +114,7 @@ class BranchBar extends Component {
     const branchOptions = [];
     const tagOptions = [];
     // Only display options on the project elements page.
-    const displayOptions = !!(this.props.endpoint !== '/elements');
+    const displayOptions = (this.props.endpoint !== '/elements');
 
     // Verify branches were grabbed
     if (this.state.branches) {

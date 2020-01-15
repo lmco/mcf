@@ -144,7 +144,7 @@ function postGzip(done) {
     done();
   };
 
-  // POSTs a branch
+  // POST a branch
   APIController.postBranches(req, res, next(req, res));
 }
 
@@ -207,7 +207,7 @@ function patchGzip(done) {
       done();
     };
 
-    // PATCHes a branch
+    // PATCH a branch
     APIController.patchBranches(req, res, next(req, res));
   });
 }

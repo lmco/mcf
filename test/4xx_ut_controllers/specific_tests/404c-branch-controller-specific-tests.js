@@ -462,7 +462,7 @@ async function optionCreatedByFind() {
  */
 async function optionLastModifiedByFind() {
   try {
-    // Create lastModifedBy option
+    // Create lastModifiedBy option
     const options = { lastModifiedBy: 'test_admin' };
 
     // Find the branch

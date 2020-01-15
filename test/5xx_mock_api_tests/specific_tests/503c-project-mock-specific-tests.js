@@ -137,7 +137,7 @@ function postGzip(done) {
     done();
   };
 
-  // POSTs a project
+  // POST a project
   APIController.postProjects(req, res, next(req, res));
 }
 
@@ -250,7 +250,7 @@ function patchGzip(done) {
       done();
     };
 
-    // PATCHes a project
+    // PATCH a project
     APIController.patchProjects(req, res, next(req, res));
   });
 }

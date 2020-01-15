@@ -173,7 +173,7 @@ function postArtifact(done) {
     done();
   };
 
-  // POSTs an artifact
+  // POST an artifact
   apiController.postArtifact(req, res, next(req, res));
 }
 
@@ -318,7 +318,7 @@ function getArtifact(done) {
     done();
   };
 
-  // GETs an artifact
+  // GET an artifact
   apiController.getArtifact(req, res, next(req, res));
 }
 
@@ -454,7 +454,7 @@ function postBlob(done) {
 
     done();
   };
-  // POSTs a blob
+  // POST a blob
   apiController.postBlob(req, res, next(req, res));
 }
 
@@ -505,7 +505,7 @@ function getBlob(done) {
 
     done();
   };
-  // GETs a blob
+  // GET a blob
   apiController.getBlob(req, res, next(req, res));
 }
 
@@ -554,7 +554,7 @@ function getBlobById(done) {
 
     done();
   };
-  // GETs a blob
+  // GET a blob
   apiController.getBlobById(req, res, next(req, res));
 }
 
@@ -599,7 +599,7 @@ function deleteBlob(done) {
 
     done();
   };
-  // DELETEs a blob
+  // DELETE a blob
   apiController.deleteBlob(req, res, next(req, res));
 }
 
@@ -670,7 +670,7 @@ function patchArtifact(done) {
     done();
   };
 
-  // PATCHes an artifact
+  // PATCH an artifact
   apiController.patchArtifact(req, res, next(req, res));
 }
 
@@ -798,7 +798,7 @@ function deleteArtifact(done) {
     done();
   };
 
-  // DELETEs an artifact
+  // DELETE an artifact
   apiController.deleteArtifact(req, res, next(req, res));
 }
 

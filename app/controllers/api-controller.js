@@ -6231,7 +6231,7 @@ async function patchWebhook(req, res, next) {
  * @param {object} res - Response express object
  * @param {Function} next - Middleware callback to trigger the next function
  *
- * @returns {object} Respones object with the deleted webhook id.
+ * @returns {object} Response object with the deleted webhook id.
  */
 async function deleteWebhook(req, res, next) {
   // Define options

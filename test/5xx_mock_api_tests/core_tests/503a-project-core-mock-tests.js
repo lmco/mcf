@@ -137,7 +137,7 @@ function postProject(done) {
     done();
   };
 
-  // POSTs a project
+  // POST a project
   APIController.postProject(req, res, next(req, res));
 }
 
@@ -203,7 +203,7 @@ function postProjects(done) {
     done();
   };
 
-  // POSTs multiple projects
+  // POST multiple projects
   APIController.postProjects(req, res, next(req, res));
 }
 
@@ -380,7 +380,7 @@ function getProject(done) {
     done();
   };
 
-  // GETs a project
+  // GET a project
   APIController.getProject(req, res, next(req, res));
 }
 
@@ -448,7 +448,7 @@ function getProjects(done) {
     done();
   };
 
-  // GETs multiple projects
+  // GET multiple projects
   APIController.getProjects(req, res, next(req, res));
 }
 
@@ -517,7 +517,7 @@ function getAllProjectsOnOrg(done) {
     done();
   };
 
-  // GETs multiple projects
+  // GET multiple projects
   APIController.getProjects(req, res, next(req, res));
 }
 
@@ -596,7 +596,7 @@ function getAllProjects(done) {
     done();
   };
 
-  // GETs multiple projects
+  // GET multiple projects
   APIController.getAllProjects(req, res, next(req, res));
 }
 
@@ -655,7 +655,7 @@ function patchProject(done) {
     done();
   };
 
-  // PATCHs a project
+  // PATCH a project
   APIController.patchProject(req, res, next(req, res));
 }
 
@@ -727,7 +727,7 @@ function patchProjects(done) {
     done();
   };
 
-  // PATCHs multiple projects
+  // PATCH multiple projects
   APIController.patchProjects(req, res, next(req, res));
 }
 
@@ -766,7 +766,7 @@ function deleteProject(done) {
     done();
   };
 
-  // DELETEs a project
+  // DELETE a project
   APIController.deleteProject(req, res, next(req, res));
 }
 
@@ -809,6 +809,6 @@ function deleteProjects(done) {
     done();
   };
 
-  // DELETEs multiple project
+  // DELETE multiple project
   APIController.deleteProjects(req, res, next(req, res));
 }

@@ -153,7 +153,7 @@ async function authenticate(req, res, next) {
      **********************************************************************
      * This section authenticates a user via a bearer token.
      * This is primarily used when the API is being called via a script
-     * or some other external method such as a microservice.
+     * or some other external method such as a micro-service.
      */
     // Check for token authentication
     else if (RegExp('Bearer').test(scheme)) {

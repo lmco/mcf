@@ -159,7 +159,7 @@ function postGzip(done) {
     done();
   };
 
-  // POSTs an artifact
+  // POST an artifact
   APIController.postArtifacts(req, res, next(req, res));
 }
 
