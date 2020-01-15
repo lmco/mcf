@@ -42,7 +42,8 @@ class BranchBar extends Component {
     // Initialize state props
     this.state = {
       branches: null,
-      currentBranch: null
+      currentBranch: null,
+      error: null
     };
 
     this.handleChange = this.handleChange.bind(this);
