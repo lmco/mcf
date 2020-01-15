@@ -375,10 +375,7 @@ async function create(requestingUser, organizationID, projectID, branches, optio
     // will remove anything that has been partially created.
     try {
       // Create the branches
-      const createdBranches = await Branch.insertMany(branchObjects);
-
-      // Set the branches created to the new branches
-      newBranches = createdBranches;
+      newBranches = await Branch.insertMany(branchObjects);
 
       // Find all the elements in the branch we are branching from
       const elementsToClone = await Element.find({ branch: sourceID }, null);
@@ -494,7 +491,7 @@ async function create(requestingUser, organizationID, projectID, branches, optio
             const oldArtID = utils.parseID(a._id).pop();
             const artID = utils.createID(branch._id, oldArtID);
 
-            const artObj = {
+            return {
               _id: artID,
               project: a.project,
               branch: branch._id,
@@ -512,8 +509,6 @@ async function create(requestingUser, organizationID, projectID, branches, optio
               archivedOn: (a.archivedOn) ? a.archivedOn : null,
               archivedBy: (a.archivedBy) ? a.archivedBy : null
             };
-
-            return artObj;
           }));
         });
 
@@ -527,7 +522,7 @@ async function create(requestingUser, organizationID, projectID, branches, optio
       }
     }
     catch (error) {
-      const finalError = await new Promise(async (resolve) => {
+      throw await new Promise(async (resolve) => {
         try {
           // If there was an error with inserting elements into the branch
           // Delete any elements created from branch
@@ -544,7 +539,6 @@ async function create(requestingUser, organizationID, projectID, branches, optio
           resolve(err);
         }
       });
-      throw finalError;
     }
 
     // Emit the event branches-created

@@ -126,7 +126,7 @@ function postOrg(done) {
     done();
   };
 
-  // POSTs an org
+  // POST an org
   APIController.postOrg(req, res, next(req, res));
 }
 
@@ -187,7 +187,7 @@ function postOrgs(done) {
     done();
   };
 
-  // POSTs multiple orgs
+  // POST multiple orgs
   APIController.postOrgs(req, res, next(req, res));
 }
 
@@ -347,7 +347,7 @@ function getOrg(done) {
     done();
   };
 
-  // GETs an org
+  // GET an org
   APIController.getOrg(req, res, next(req, res));
 }
 
@@ -410,7 +410,7 @@ function getOrgs(done) {
     done();
   };
 
-  // GETs all orgs
+  // GET all orgs
   APIController.getOrgs(req, res, next(req, res));
 }
 
@@ -475,7 +475,7 @@ function getAllOrgs(done) {
     done();
   };
 
-  // GETs all orgs
+  // GET all orgs
   APIController.getOrgs(req, res, next(req, res));
 }
 
@@ -522,7 +522,7 @@ function patchOrg(done) {
     done();
   };
 
-  // PATCHs an org
+  // PATCH an org
   APIController.patchOrg(req, res, next(req, res));
 }
 
@@ -588,7 +588,7 @@ function patchOrgs(done) {
     done();
   };
 
-  // PATCHs multiple orgs
+  // PATCH multiple orgs
   APIController.patchOrgs(req, res, next(req, res));
 }
 
@@ -624,7 +624,7 @@ function deleteOrg(done) {
     done();
   };
 
-  // DELETEs an org
+  // DELETE an org
   APIController.deleteOrg(req, res, next(req, res));
 }
 
@@ -662,6 +662,6 @@ function deleteOrgs(done) {
     done();
   };
 
-  // DELETEs multiple orgs
+  // DELETE multiple orgs
   APIController.deleteOrgs(req, res, next(req, res));
 }

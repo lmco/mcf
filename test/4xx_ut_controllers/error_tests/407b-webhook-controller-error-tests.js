@@ -377,7 +377,7 @@ function archivedTest(model, operation) {
     .should.eventually.be.rejectedWith(`The ${name} [${utils.parseID(id).pop()}] is archived. `
       + 'It must first be unarchived before performing this operation.');
 
-    // Unarchive the object of interest
+    // un-archive the object of interest
     await model.updateOne({ _id: id }, { archived: false });
   };
 }

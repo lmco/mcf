@@ -526,7 +526,7 @@ module.exports.handleGzip = function(dataStream) {
  * @description Looks up the content type based on the file extension.
  * Defaults to 'application/octet-stream' if no extension is found.
  *
- * @param {string} filename - Name of the file.
+ * @param {(string|null)} filename - Name of the file.
  *
  * @returns {string} - The content type of the file.
  */

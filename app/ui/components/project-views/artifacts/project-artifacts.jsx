@@ -171,7 +171,7 @@ class ProjectArtifacts extends Component {
 
   // Render artifacts list items
   renderArtifacts(artifacts) {
-    const btnEdit = !!(this.props.permissions !== 'read');
+    const btnEdit = (this.props.permissions !== 'read');
 
     return (
       artifacts.map((artifact, idx) => (

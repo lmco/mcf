@@ -59,7 +59,7 @@ const ArtifactStrategy = M.require(`artifact.${M.config.artifact.strategy}`);
  * projects a user has read access to.
  *
  * @param {User} requestingUser - The object containing the requesting user.
- * @param {string} organizationID - The ID of the owning organization.
+ * @param {(string|null)} organizationID - The ID of the owning organization.
  * @param {(string|string[])} [projects] - The projects to find. Can either be
  * an array of project ids, a single project id, or not provided, which defaults
  * to every project being found.

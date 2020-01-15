@@ -115,7 +115,7 @@ function whoami(done) {
     done();
   };
 
-  // GETs the requesting user
+  // GET the requesting user
   APIController.whoami(req, res, next(req, res));
 }
 
@@ -164,7 +164,7 @@ function postUser(done) {
     done();
   };
 
-  // POSTs a user
+  // POST a user
   APIController.postUser(req, res, next(req, res));
 }
 
@@ -225,7 +225,7 @@ function postUsers(done) {
     done();
   };
 
-  // POSTs multiple users
+  // POST multiple users
   APIController.postUsers(req, res, next(req, res));
 }
 
@@ -385,7 +385,7 @@ function getUser(done) {
     done();
   };
 
-  // GETs a user
+  // GET a user
   APIController.getUser(req, res, next(req, res));
 }
 
@@ -448,7 +448,7 @@ function getUsers(done) {
     done();
   };
 
-  // GETs multiple users
+  // GET multiple users
   APIController.getUsers(req, res, next(req, res));
 }
 
@@ -521,7 +521,7 @@ function getAllUsers(done) {
     done();
   };
 
-  // GETs all users
+  // GET all users
   APIController.getUsers(req, res, next(req, res));
 }
 
@@ -642,7 +642,7 @@ function patchUser(done) {
     done();
   };
 
-  // PATCHs a user
+  // PATCH a user
   APIController.patchUser(req, res, next(req, res));
 }
 
@@ -708,7 +708,7 @@ function patchUsers(done) {
     done();
   };
 
-  // PATCHs multiple users
+  // PATCH multiple users
   APIController.patchUsers(req, res, next(req, res));
 }
 
@@ -763,7 +763,7 @@ function patchUserPassword(done) {
     done();
   };
 
-  // PATCHs a users password
+  // PATCH a users password
   APIController.patchPassword(req, res, next(req, res));
 }
 
@@ -797,7 +797,7 @@ function deleteUser(done) {
     done();
   };
 
-  // DELETEs a user
+  // DELETE a user
   APIController.deleteUser(req, res, next(req, res));
 }
 
@@ -836,6 +836,6 @@ function deleteUsers(done) {
     done();
   };
 
-  // DELETEs multiple users
+  // DELETE multiple users
   APIController.deleteUsers(req, res, next(req, res));
 }

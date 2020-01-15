@@ -1587,7 +1587,7 @@ function findElementTree(organizationID, projectID, branchID, elementIDs) {
       // Recursively find the sub-children of the found elements in batches of 50000 or less
       for (let i = 0; i < foundIDs.length / 50000; i++) {
         const tmpIDs = foundIDs.slice(i * 50000, i * 50000 + 50000);
-        return findElementTreeHelper(tmpIDs);
+        await findElementTreeHelper(tmpIDs); // eslint-disable-line no-await-in-loop
       }
     }
     catch (error) {

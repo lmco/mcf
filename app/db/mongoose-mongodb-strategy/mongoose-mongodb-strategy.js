@@ -65,7 +65,7 @@ function connect() {
 
     // Database debug logs
     // Additional arguments may provide too much information
-    mongoose.set('debug', function(collectionName, methodName, arg1, arg2, arg3) {
+    mongoose.set('debug', function(collectionName, methodName) {
       M.log.debug(`DB OPERATION: ${collectionName}, ${methodName}`);
     });
 
@@ -425,8 +425,7 @@ class Model {
       }
 
       // Add the text search specific fields to the projection
-      projection.score = {};
-      projection.score.$meta = 'textScore';
+      projection.score = { $meta: 'textScore' };
 
       // Delete the $natural sort option
       delete options.sort.$natural;
