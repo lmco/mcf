@@ -60,8 +60,7 @@ function connect() {
     mongoose.set('useFindAndModify', false);
     mongoose.set('useNewUrlParser', true);
     mongoose.set('useCreateIndex', true);
-    // Commenting out this line due to bug in latest mongoose version
-    // mongoose.set('useUnifiedTopology', true);
+    mongoose.set('useUnifiedTopology', true);
 
     // Database debug logs
     // Additional arguments may provide too much information
