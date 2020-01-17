@@ -512,7 +512,7 @@ async function optionArchivedFind() {
     chai.expect(webhook._id).to.equal(webhookData);
     chai.expect(webhook.archived).to.equal(true);
 
-    // Unarchive the webhook
+    // un-archive the webhook
     await Webhook.updateOne({ _id: webhookData }, { archived: false });
   }
   catch (error) {
@@ -546,7 +546,7 @@ async function optionIncludeArchivedFind() {
     chai.expect(webhook._id).to.equal(webhookData);
     chai.expect(webhook.archived).to.equal(true);
 
-    // Unarchive the webhook
+    // un-archive the webhook
     await Webhook.updateOne({ _id: webhookData }, { archived: false });
   }
   catch (error) {
@@ -557,8 +557,8 @@ async function optionIncludeArchivedFind() {
 }
 
 /**
- * @description Validates that the Webhook Controller can return only specified fields when
- * findind webhooks with the fields option.
+ * @description Validates that the Webhook Controller can return only specified
+ * fields when finding webhooks with the fields option.
  */
 async function optionFieldsFind() {
   try {
@@ -754,7 +754,7 @@ async function archiveWebhook() {
     chai.expect(webhook.archivedBy).to.equal(adminUser._id);
     chai.expect(webhook.archivedOn).to.not.equal(null);
 
-    // Unarchive the webhook for future use
+    // un-archive the webhook for future use
     Webhook.updateOne({ _id: webhookData.id }, { archived: false });
   }
   catch (error) {

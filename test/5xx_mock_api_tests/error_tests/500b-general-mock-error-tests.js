@@ -184,7 +184,7 @@ function getLogsNonAdmin(done) {
     done();
   };
 
-  // GETs the system logs
+  // GET the system logs
   APIController.getLogs(req, res, next(req, res));
 }
 
@@ -214,6 +214,6 @@ function limit0(done) {
     done();
   };
 
-  // GETs the system logs
+  // GET the system logs
   APIController.getLogs(req, res, next(req, res));
 }

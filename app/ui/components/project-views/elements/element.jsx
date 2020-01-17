@@ -112,7 +112,7 @@ class Element extends Component {
   handleCrossRefs(_element) {
     return new Promise((resolve, reject) => {
       // Match/find all cross references
-      const allCrossRefs = _element.documentation.match(/\[cf:[a-zA-Z0-9\-_]{0,}\]/g);
+      const allCrossRefs = _element.documentation.match(/\[cf:[a-zA-Z0-9\-_]*\]/g);
 
       // If no cross refs, resolve the element with no changes
       if (!allCrossRefs || allCrossRefs.length === 0) {

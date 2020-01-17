@@ -116,7 +116,7 @@ function getLogsPositiveLimit(done) {
     done();
   };
 
-  // GETs the system logs
+  // GET the system logs
   APIController.getLogs(req, res, next(req, res));
 }
 
@@ -166,7 +166,7 @@ function getLogsNegativeLimit(done) {
     done();
   };
 
-  // GETs the system logs
+  // GET the system logs
   APIController.getLogs(req, res, next(req, res));
 }
 
@@ -219,7 +219,7 @@ function getLogsSkip(done) {
     done();
   };
 
-  // GETs the system logs
+  // GET the system logs
   APIController.getLogs(req, res, next(req, res));
 }
 
@@ -261,6 +261,6 @@ function getLogsColorRemoved(done) {
     done();
   };
 
-  // GETs the system logs
+  // GET the system logs
   APIController.getLogs(req, res, next(req, res));
 }

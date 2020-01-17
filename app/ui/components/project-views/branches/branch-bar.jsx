@@ -42,7 +42,8 @@ class BranchBar extends Component {
     // Initialize state props
     this.state = {
       branches: null,
-      currentBranch: null
+      currentBranch: null,
+      error: null
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -114,7 +115,7 @@ class BranchBar extends Component {
     const branchOptions = [];
     const tagOptions = [];
     // Only display options on the project elements page.
-    const displayOptions = !!(this.props.endpoint !== '/elements');
+    const displayOptions = (this.props.endpoint !== '/elements');
 
     // Verify branches were grabbed
     if (this.state.branches) {

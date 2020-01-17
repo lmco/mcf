@@ -224,7 +224,7 @@ function archivedTest(model, operation) {
       should.not.exist(error);
     }
     finally {
-      // Unarchive the model
+      // un-archive the model
       await model.updateOne({ _id: id }, { archived: false });
     }
   };

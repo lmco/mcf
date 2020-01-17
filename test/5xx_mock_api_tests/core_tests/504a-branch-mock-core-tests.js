@@ -139,7 +139,7 @@ function postBranch(done) {
     done();
   };
 
-  // POSTs a branch
+  // POST a branch
   apiController.postBranch(req, res, next(req, res));
 }
 
@@ -209,7 +209,7 @@ function postBranches(done) {
     done();
   };
 
-  // POSTs multiple branches
+  // POST multiple branches
   apiController.postBranches(req, res, next(req, res));
 }
 
@@ -265,7 +265,7 @@ function getBranch(done) {
     done();
   };
 
-  // GETs an branch
+  // GET an branch
   apiController.getBranch(req, res, next(req, res));
 }
 
@@ -333,7 +333,7 @@ function getBranches(done) {
     done();
   };
 
-  // GETs multiple branches
+  // GET multiple branches
   apiController.getBranches(req, res, next(req, res));
 }
 
@@ -405,7 +405,7 @@ function getAllBranches(done) {
     done();
   };
 
-  // GETs multiple branches
+  // GET multiple branches
   apiController.getBranches(req, res, next(req, res));
 }
 
@@ -465,7 +465,7 @@ function patchBranch(done) {
     done();
   };
 
-  // PATCHs an branch
+  // PATCH an branch
   apiController.patchBranch(req, res, next(req, res));
 }
 
@@ -539,7 +539,7 @@ function patchBranches(done) {
     done();
   };
 
-  // PATCHs multiple branches
+  // PATCH multiple branches
   apiController.patchBranches(req, res, next(req, res));
 }
 
@@ -576,7 +576,7 @@ function deleteBranch(done) {
     done();
   };
 
-  // DELETEs an branch
+  // DELETE an branch
   apiController.deleteBranch(req, res, next(req, res));
 }
 
@@ -617,6 +617,6 @@ function deleteBranches(done) {
     done();
   };
 
-  // DELETEs multiple branches
+  // DELETE multiple branches
   apiController.deleteBranches(req, res, next(req, res));
 }

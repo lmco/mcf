@@ -161,11 +161,11 @@ const project = {
  *   - MUST only include lowercase letters, numbers, '_' or '-'
  *   - each segment MUST be of length 1 or more
  *   Examples:
- *      - orgid:projid:branchid [valid]
- *      - orgid:projid:my-branch [valid]
- *      - orgid:projid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
- *      - orgid:projid:-branch[invalid - must start with a letter or a number]
- *      - orgid:projid:myBranch [invalid - cannot use uppercase characters]
+ *      - orgid:projectid:branchid [valid]
+ *      - orgid:projectid:my-branch [valid]
+ *      - orgid:projectid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
+ *      - orgid:projectid:-branch[invalid - must start with a letter or a number]
+ *      - orgid:projectid:myBranch [invalid - cannot use uppercase characters]
  *      - my-branch [invalid - must contain org and proj segments]
  */
 const branch = {
@@ -207,11 +207,11 @@ const branch = {
  *   - MUST only include lowercase letters, numbers, '_' or '-'
  *   - each segment MUST be of length 1 or more
  *   Examples:
- *      - orgid:projid:branchid:artifactid [valid]
- *      - orgid:projid:branchid:my-artifact [valid]
- *      - orgid:projid:branchid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
- *      - orgid:projid:branchid:-artifact [invalid - must start with a letter or a number]
- *      - orgid:projid:branchid:myArtifact [invalid - cannot use uppercase characters]
+ *      - orgid:projectid:branchid:artifactid [valid]
+ *      - orgid:projectid:branchid:my-artifact [valid]
+ *      - orgid:projectid:branchid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
+ *      - orgid:projectid:branchid:-artifact [invalid - must start with a letter or a number]
+ *      - orgid:projectid:branchid:myArtifact [invalid - cannot use uppercase characters]
  *      - my-artifact [invalid - must contain org, proj, and branch segments]
  */
 const artifact = {
@@ -264,11 +264,11 @@ const artifact = {
  *   - MUST only include lowercase letters, numbers, '_' or '-'
  *   - each segment MUST be of length 2 or more
  *   Examples:
- *      - orgid:projid:branchid:elementid [valid]
- *      - orgid:projid:branchid:my-element [valid]
- *      - orgid:projid:branchid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
- *      - orgid:projid:branchid:-element [invalid - must start with a letter or a number]
- *      - orgid:projid:branchid:myElement [invalid - cannot use uppercase characters]
+ *      - orgid:projectid:branchid:elementid [valid]
+ *      - orgid:projectid:branchid:my-element [valid]
+ *      - orgid:projectid:branchid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6 [valid]
+ *      - orgid:projectid:branchid:-element [invalid - must start with a letter or a number]
+ *      - orgid:projectid:branchid:myElement [invalid - cannot use uppercase characters]
  *      - my-element [invalid - must contain org, proj, and branch segments]
  */
 const element = {

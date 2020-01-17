@@ -355,8 +355,6 @@ async function optionLimitFind() {
  */
 async function optionSkipFind() {
   try {
-    // Create an array to store first batch of artifact ids
-    let firstBatchIDs = [];
     // Create the first options object with just a limit
     const firstOptions = { limit: 2 };
     // Create the second options object with a limit and skip
@@ -368,7 +366,7 @@ async function optionSkipFind() {
     // Verify that no more than 2 artifacts were found
     chai.expect(foundArtifacts).to.have.lengthOf.at.most(2);
     // Add artifact ids to the firstBatchIDs array
-    firstBatchIDs = foundArtifacts.map(e => e._id);
+    const firstBatchIDs = foundArtifacts.map(e => e._id);
 
     // Find the next batch of artifacts
     const secondArtifacts = await ArtifactController.find(adminUser, org._id, projID, branchID,

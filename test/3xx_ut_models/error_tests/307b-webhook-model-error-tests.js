@@ -73,7 +73,7 @@ async function noID() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    Webhook.deleteMany({ _id: webhookID });
+    await Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error
@@ -97,7 +97,7 @@ async function noType() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    Webhook.deleteMany({ _id: webhookID });
+    await Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error
@@ -121,7 +121,7 @@ async function invalidType() {
   }
   catch (error) {
     // Remove the webhook in case the test failed
-    Webhook.deleteMany({ _id: webhookID });
+    await Webhook.deleteMany({ _id: webhookID });
 
     M.log.error(error);
     // There should be no error

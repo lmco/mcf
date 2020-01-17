@@ -69,7 +69,7 @@ const extensions = M.require('models.plugin.extensions');
  * @property {string} lname - The users last name.
  * @property {boolean} admin - Indicates if the user is a global admin.
  * @property {string} provider - Defines the authentication provider for the user.
- * @property {object} failedLogins - Stores the history of failed login attempts.
+ * @property {object} failedlogins - Stores the history of failed login attempts.
  * @property {object} oldPasswords - Stores previous passwords; used to prevent users
  * from re-using recent passwords.
  *

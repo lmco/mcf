@@ -130,7 +130,7 @@ function postGzip(done) {
     });
   };
 
-  // POSTs an org
+  // POST an org
   APIController.postOrgs(req, res, next(req, res));
 }
 
@@ -245,7 +245,7 @@ function patchGzip(done) {
       });
     };
 
-    // PATCHes an org
+    // PATCH an org
     APIController.patchOrgs(req, res, next(req, res));
   });
 }
