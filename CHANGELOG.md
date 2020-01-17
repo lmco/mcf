@@ -3,8 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## [1.0.0] - 2020-01-20
 ### Bug Fixes and Other Changes
-* Added CONTRIBUTING.md file for detailing expectation for code contribution
-* Updated Element edit modal in the UI
+* Added CONTRIBUTING.md file for detailing expectations for code contribution
+* Added 8.0 UI Overview page to flight manual
+* Updated element edit modal in the UI
 
 ## [0.10.5] - 2020-01-06
 ### Bug Fixes and Other Changes
