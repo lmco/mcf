@@ -70,7 +70,7 @@ every piece of code merged in should modify or add new tests.
 
 To run the tests, run the command `node mbee test --all` from the root MBEE
 directory. Without providing the `--all` command, only the suites 1, 2, 3, 4,
-5, and 7 will be run. *Please note, the 0 and 9 tests suite will completely wipe
+5, and 7 will be run. *Please note, the 0 and 9 test suites will completely wipe
 your database, so please ensure the data is backed up.*
 
 #### Errors
