@@ -231,8 +231,8 @@ async function validUpdateFields() {
 
 /**
  *
- * @description Verifies that the webhook model function getValidPopulaetFields returns the
- * correct fields.
+ * @description Verifies that the webhook model function
+ * getValidPopulateFields() returns the correct fields.
  */
 async function validPopulateFields() {
   try {

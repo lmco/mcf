@@ -199,7 +199,7 @@ function post(reference) {
       done();
     };
 
-    // POSTs a webhook
+    // POST a webhook
     APIController.postWebhooks(req, res, next(req, res));
   };
 }
@@ -312,7 +312,7 @@ function postMany(reference) {
       done();
     };
 
-    // POSTs a webhook
+    // POST a webhook
     APIController.postWebhooks(req, res, next(req, res));
   };
 }
@@ -417,7 +417,7 @@ function getAll(reference) {
       done();
     };
 
-    // GETs all webhooks at a reference level
+    // GET all webhooks at a reference level
     APIController.getWebhooks(req, res, next(req, res));
   };
 }
@@ -460,12 +460,11 @@ function patch(reference) {
         throw new Error('Invalid input to patch() test function');
     }
 
-    const webhookUpdate = {
+    // Create request object
+    const body = {
       id: webhookData._id,
       name: 'Patch test'
     };
-    // Create request object
-    const body = webhookUpdate;
     const params = { webhookid: webhookData._id };
     const method = 'PATCH';
     const req = testUtils.createRequest(adminUser, params, body, method);
@@ -504,7 +503,7 @@ function patch(reference) {
       done();
     };
 
-    // PATCHes a webhook
+    // PATCH a webhook
     APIController.patchWebhook(req, res, next(req, res));
   };
 }
@@ -547,15 +546,14 @@ function patchMany(reference) {
         throw new Error('Invalid input to patchMany() function');
     }
 
-    const webhookUpdate = [{
+    // Create request object
+    const body = [{
       id: webhookData[0]._id,
       name: 'Patch test'
     }, {
       id: webhookData[1]._id,
       name: 'Patch test'
     }];
-    // Create request object
-    const body = webhookUpdate;
     const params = {};
     const method = 'PATCH';
     const req = testUtils.createRequest(adminUser, params, body, method);
@@ -609,7 +607,7 @@ function patchMany(reference) {
       done();
     };
 
-    // PATCHes multiple webhooks
+    // PATCH multiple webhooks
     APIController.patchWebhooks(req, res, next(req, res));
   };
 }
@@ -660,7 +658,7 @@ function remove(reference) {
       done();
     };
 
-    // DELETEs a webhook
+    // DELETE a webhook
     APIController.deleteWebhook(req, res, next(req, res));
   };
 }
@@ -711,7 +709,7 @@ function removeMany(reference) {
       done();
     };
 
-    // DELETEs a webhook
+    // DELETE a webhook
     APIController.deleteWebhooks(req, res, next(req, res));
   };
 }

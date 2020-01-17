@@ -211,9 +211,6 @@ function makeLogger(subcommand, opts) {
 // Add defined colors to winston logger
 winston.addColors(colors);
 
-// Create the security log if it doesn't already exist
-const securityPath = path.join('logs', M.config.log.security_file);
-if (!fs.existsSync(securityPath)) fs.appendFileSync(securityPath, '');
 
 /**
  * @description Logs the response to an HTTP request.
@@ -252,7 +249,7 @@ function logSecurityResponse(req, res) {
 function formatResponseLog(req, res) {
   const responseMessage = (res.locals && res.locals.message) ? res.locals.message : '';
   const responseLength = responseMessage.length;
-  const statusCode = res.statusCode ? res.statusCode : res.locals.statusCode;
+  const statusCode = res.locals.statusCode ? res.locals.statusCode : res.statusCode;
 
   // Set username to anonymous if req.user is not defined
   const username = (req.user) ? (req.user._id || req.user.username) : 'anonymous';

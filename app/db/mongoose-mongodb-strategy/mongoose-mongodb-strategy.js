@@ -60,12 +60,11 @@ function connect() {
     mongoose.set('useFindAndModify', false);
     mongoose.set('useNewUrlParser', true);
     mongoose.set('useCreateIndex', true);
-    // Commenting out this line due to bug in latest mongoose version
-    // mongoose.set('useUnifiedTopology', true);
+    mongoose.set('useUnifiedTopology', true);
 
     // Database debug logs
     // Additional arguments may provide too much information
-    mongoose.set('debug', function(collectionName, methodName, arg1, arg2, arg3) {
+    mongoose.set('debug', function(collectionName, methodName) {
       M.log.debug(`DB OPERATION: ${collectionName}, ${methodName}`);
     });
 
@@ -287,7 +286,7 @@ class Model {
       if (Object.keys(o)[0] === 'updateOne') {
         // Verify there are no immutable fields in the doc
         Object.keys(o.updateOne.update).forEach((k) => {
-          if (this.schema.tree[k].immutable === true) {
+          if (this.schema.tree[k] && this.schema.tree[k].immutable === true) {
             throw new M.OperationError(`${this.modelName} validation failed: `
               + `${k}: Path \`${k}\` is immutable and cannot be modified.`);
           }
@@ -425,8 +424,7 @@ class Model {
       }
 
       // Add the text search specific fields to the projection
-      projection.score = {};
-      projection.score.$meta = 'textScore';
+      projection.score = { $meta: 'textScore' };
 
       // Delete the $natural sort option
       delete options.sort.$natural;
@@ -543,7 +541,7 @@ class Model {
   async updateMany(filter, doc, options) {
     // Verify there are no immutable fields in the doc
     Object.keys(doc).forEach((k) => {
-      if (this.schema.tree[k].immutable === true) {
+      if (this.schema.tree[k] && this.schema.tree[k].immutable === true) {
         throw new M.OperationError(`${this.modelName} validation failed: `
           + `${k}: Path \`${k}\` is immutable and cannot be modified.`);
       }
@@ -570,7 +568,7 @@ class Model {
   async updateOne(filter, doc, options) {
     // Verify there are no immutable fields in the doc
     Object.keys(doc).forEach((k) => {
-      if (this.schema.tree[k].immutable === true) {
+      if (this.schema.tree[k] && this.schema.tree[k].immutable === true) {
         throw new M.OperationError(`${this.modelName} validation failed: `
           + `${k}: Path \`${k}\` is immutable and cannot be modified.`);
       }

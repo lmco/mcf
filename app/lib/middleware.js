@@ -226,12 +226,12 @@ module.exports.pluginPost = function pluginPost(endpoint) {
 module.exports.respond = function respond(req, res) {
   const message = res.locals.message;
 
-  // If the statusCode hasn't been set already, format the response
-  if (!res.statusCode) {
-    const statusCode = res.locals.statusCode;
+  // If the response hasn't been formatted already, format it
+  if (!(res.locals && res.locals.responseFormatted)) {
+    const statusCode = res.locals.statusCode ? res.locals.statusCode : 200;
     const contentType = res.locals.contentType ? res.locals.contentType : 'application/json';
 
-    utils.sendResponse(req, res, message, statusCode, null, contentType);
+    utils.formatResponse(req, res, message, statusCode, null, contentType);
   }
 
   // Send the response

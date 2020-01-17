@@ -2967,7 +2967,7 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/search')
  *                      (-name). [archived, archivedBy, archivedOn, createdBy,
  *                      createdOn, custom, documentation, lastModifiedBy, name,
  *                      org, parent, project, source, target, type, updatedOn,
- *                      branch, aritfact]
+ *                      branch, artifact]
  *         in: query
  *         type: string
  *       - name: limit

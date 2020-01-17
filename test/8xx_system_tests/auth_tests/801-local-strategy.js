@@ -161,7 +161,7 @@ async function failedloginsField() {
     foundUser.should.have.property('failedlogins');
     res.statusCode.should.equal(200);
   };
-  // GETs the test user as an admin
+  // GET the test user as an admin
   await APIController.getUser(req, res, next(req, res));
 
   // *************** Verify failedlogins field not returned for non-admin *************** //
@@ -176,7 +176,7 @@ async function failedloginsField() {
     foundUser.should.not.have.property('failedlogins');
     res.statusCode.should.equal(200);
   };
-  // GETs the user as a non-admin
+  // GET the user as a non-admin
   await APIController.getUser(req, res, next(req, res));
 
   // Remove the test user

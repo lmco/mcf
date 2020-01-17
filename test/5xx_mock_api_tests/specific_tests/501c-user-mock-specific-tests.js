@@ -139,7 +139,7 @@ function postGzip(done) {
     });
   };
 
-  // POSTs a user
+  // POST a user
   APIController.postUsers(req, res, next(req, res));
 }
 
@@ -264,7 +264,7 @@ function patchGzip(done) {
       });
     };
 
-    // PATCHes a user
+    // PATCH a user
     APIController.patchUsers(req, res, next(req, res));
   });
 }

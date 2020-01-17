@@ -112,7 +112,7 @@ class Element extends Component {
   handleCrossRefs(_element) {
     return new Promise((resolve, reject) => {
       // Match/find all cross references
-      const allCrossRefs = _element.documentation.match(/\[cf:[a-zA-Z0-9\-_]{0,}\]/g);
+      const allCrossRefs = _element.documentation.match(/\[cf:[a-zA-Z0-9\-_]*\]/g);
 
       // If no cross refs, resolve the element with no changes
       if (!allCrossRefs || allCrossRefs.length === 0) {
@@ -301,7 +301,7 @@ class Element extends Component {
                             Delete
                           </UncontrolledTooltip>
                           <i id='deleteBtn' className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteToggle}/>
-                          <i id='editBtn' className='fas fa-edit edit-btn' onClick={this.props.editElementInfo}/>
+                          <i id='editBtn' className='fas fa-edit edit-btn' onClick={this.props.toggle}/>
                           <Tooltip
                             placement='left'
                             isOpen={this.state.isTooltipOpen}
