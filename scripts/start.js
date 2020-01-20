@@ -30,10 +30,10 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
-const https = require('https');
 
 // NPM Modules
 const express = require('express');
+const spdy = require('spdy');
 
 // MBEE modules
 const app = M.require('app');
@@ -115,11 +115,12 @@ function start(args) {
     // Set https credentials
     const privateKey = fs.readFileSync(path.join(M.root, M.config.server.https.sslKey), 'utf8');
     const certificate = fs.readFileSync(path.join(M.root, M.config.server.https.sslCert), 'utf8');
-    const credentials = {
+    const options = {
       key: privateKey,
-      cert: certificate
+      cert: certificate,
+      protocol: ['h2']
     };
-    httpsServer = https.createServer(credentials, app);
+    httpsServer = spdy.createServer(options, app);
 
     // If a timeout is defined in the config, set it
     if (M.config.server.requestTimeout) {
