@@ -88,10 +88,11 @@ async function getUser() {
   try {
     // Find the created user from the previous createUser test.
     const user = await User.findOne({ _id: testData.users[1].username });
-    // Check first, last, and preferred name
+    // Ensure all fields are as expected
     user.fname.should.equal(testData.users[1].fname);
     user.lname.should.equal(testData.users[1].lname);
     user.preferredName.should.equal(testData.users[1].preferredName);
+    user.changePassword.should.equal(testData.users[1].changePassword);
   }
   catch (error) {
     M.log.error(error);
