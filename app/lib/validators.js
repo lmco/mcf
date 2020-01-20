@@ -28,7 +28,7 @@ const artifactVal = M.require(`artifact.${M.config.artifact.strategy}`).validato
 const customValidators = M.config.validators || {};
 
 // This ID is used as the common regex for other ID fields in this module
-const id = customValidators.id || '([_a-z0-9])([-_a-z0-9.]){0,}';
+const id = customValidators.id || '([_a-zA-Z0-9])([-_a-zA-Z0-9.]){0,}';
 const idLength = customValidators.id_length || 36;
 
 // A list of reserved keywords which cannot be used in ids
