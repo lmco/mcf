@@ -118,6 +118,15 @@ Due to the nature of how plugins are loaded, the API and UI are not accessible
 until a plugin has been succesfully loaded. This can cause issues if plugins
 hang while loading, and can prevent the UI and API from being accessible.
 
+#### Cursor Flickering in UI Tables
+Hovering over edit/delete/add buttons within tables causes a flicker in 
+reactstrap 8.0.1. This issue has been reported as of 12/9/2019. 
+Per discussion on the [issue](https://github.com/reactstrap/reactstrap/issues/1728), 
+the recommended course of action is to downgrade to reactstrap 7.1.0. 
+Specifying "reactstrap": "7.1.0" within the package.json devDependencies or 
+running `npm i reactstrap@7.1.0 -D` within the project directory will 
+downgrade this package.
+
 ## Security Related Configuration
 
 ### Plugins and Integrations
