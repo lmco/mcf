@@ -239,8 +239,10 @@ class CreateBranch extends Component {
                      invalid={idInvalid}
                      onChange={this.handleChange}/>
               {/* If invalid id, notify user */}
+              {/* TODO: This error message might not be accurate if the server is
+                   running with custom validators */}
               <FormFeedback >
-                Invalid: A id may only contain lower case letters, numbers, or dashes.
+                Invalid: An id may only contain letters, numbers, or dashes.
               </FormFeedback>
             </FormGroup>
             {/* Create an input for project name */}
