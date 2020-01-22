@@ -842,7 +842,7 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
       }
 
       // If updating target, add ID to sourceTargetIDs
-      if (elem.target  && !elem.hasOwnProperty('targetNamespace')) {
+      if (elem.target && !elem.hasOwnProperty('targetNamespace')) {
         elem.target = utils.createID(orgID, projID, branID, elem.target);
         sourceTargetIDs.push(elem.target);
       }
