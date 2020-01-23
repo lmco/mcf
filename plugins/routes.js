@@ -244,7 +244,7 @@ function copyPluginFromLocalDir(data) {
     M.log.verbose(stdoutRmCmd.toString());
   }
 
-  /// Making the directory for the plugin
+  // Making the directory for the plugin
   fs.mkdirSync(path.join(M.root, 'plugins', data.name));
 
   // Execute the copy command
