@@ -15,8 +15,7 @@
       "admin": false,
       "custom": {
         "location": "Location00"
-      },
-      "changePassword": false
+      }
     },
     {
       "username": "testuser01",
@@ -28,8 +27,7 @@
       "admin": false,
       "custom": {
         "location": "Location01"
-      },
-      "changePassword": false
+      }
     },
     {
       "username": "testuser02",
@@ -41,8 +39,7 @@
       "admin": false,
       "custom": {
         "location": "Location02"
-      },
-      "changePassword": false
+      }
     },
     {
       "username": "testuser03",
@@ -54,8 +51,7 @@
       "admin": false,
       "custom": {
         "location": "Location03"
-      },
-      "changePassword": false
+      }
     },
     {
       "username": "testuser04",
@@ -67,8 +63,7 @@
       "admin": false,
       "custom": {
         "location": "Location04"
-      },
-      "changePassword": false
+      }
     }
   ],
 

@@ -92,7 +92,6 @@ async function getUser() {
     user.fname.should.equal(testData.users[1].fname);
     user.lname.should.equal(testData.users[1].lname);
     user.preferredName.should.equal(testData.users[1].preferredName);
-    user.changePassword.should.equal(testData.users[1].changePassword);
   }
   catch (error) {
     M.log.error(error);
