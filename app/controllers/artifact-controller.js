@@ -795,7 +795,7 @@ async function getBlob(requestingUser, organizationID,
     saniArt.org = orgID;
 
     // Include artifact blob in return obj
-    return ArtifactStrategy.getBlob(saniArt);
+    return await ArtifactStrategy.getBlob(saniArt);
   }
   catch (error) {
     throw errors.captureError(error);
@@ -853,7 +853,7 @@ async function postBlob(requestingUser, organizationID,
     saniArt.org = orgID;
 
     // Return artifact object
-    ArtifactStrategy.postBlob(saniArt, artifactBlob);
+    await ArtifactStrategy.postBlob(saniArt, artifactBlob);
 
     // Return artifact object
     return saniArt;
@@ -906,7 +906,7 @@ async function deleteBlob(requestingUser, organizationID, projectID,
     saniArt.org = orgID;
 
     // Delete the artifact blob
-    ArtifactStrategy.deleteBlob(saniArt);
+    await ArtifactStrategy.deleteBlob(saniArt);
 
     // Return Artifact obj
     return saniArt;

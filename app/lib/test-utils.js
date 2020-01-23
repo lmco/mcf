@@ -277,9 +277,8 @@ module.exports.removeTestOrg = async function() {
   // Delete any artifacts in the org
   await Artifact.deleteMany({ project: { $in: projectIDs } });
 
-  ArtifactStrategy.clear({
-    orgID: testData.orgs[0].id
-  });
+  // Clear blobs
+  await ArtifactStrategy.clear(testData.orgs[0].id);
 
   // Delete any elements in the found projects
   await Element.deleteMany({ project: { $in: projectIDs } });
