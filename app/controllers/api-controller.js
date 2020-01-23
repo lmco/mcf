@@ -6300,16 +6300,14 @@ async function deleteWebhook(req, res, next) {
  */
 async function triggerWebhook(req, res, next) {
   // Parse the webhook id from the base64 encoded url
-  const webhookID = Buffer.from(req.params.encodedid, 'base64').toString('ascii');
+  const webhookID = sani.db(Buffer.from(req.params.encodedid, 'base64').toString('ascii'));
 
   try {
-    const webhooks = await Webhook.find({ _id: webhookID });
+    const webhook = await Webhook.findOne({ _id: webhookID });
 
-    if (webhooks.length < 1) {
-      throw new M.NotFoundError('No webhooks found', 'warn');
+    if (webhook === null) {
+      throw new M.NotFoundError('Webhook not found', 'warn');
     }
-
-    const webhook = webhooks[0];
 
     // Sanity check: ensure the webhook is incoming and has a token and tokenLocation field
     if (webhook.type !== 'Incoming') {
@@ -6343,14 +6341,13 @@ async function triggerWebhook(req, res, next) {
     // Get the user and the original token value from the raw token
     const decodedToken = Buffer.from(rawToken, 'base64').toString('ascii');
     const decomposedToken = decodedToken.split(':');
-    const username = decomposedToken[0];
+    const username = sani.db(decomposedToken[0]);
 
     // Get the user
-    const users = await User.find({ _id: username });
-    if (users.length === 0) {
+    const user = await User.findOne({ _id: username });
+    if (user === null) {
       throw new M.DataFormatError('Invalid token', 'warn');
     }
-    const user = users[0];
 
     // Parse data from request
     const data = req.body.data ? req.body.data : null;
