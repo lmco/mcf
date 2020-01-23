@@ -63,7 +63,7 @@
     "react": "^16.8.2",
     "react-dom": "^16.8.2",
     "react-router-dom": "^5.0.1",
-    "reactstrap": "7.1.0",
+    "reactstrap": "^8.4.0",
     "sinon": "^7.5.0",
     "webpack": "^4.41.3"
   },
