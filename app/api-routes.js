@@ -6799,7 +6799,6 @@ api.route('/webhooks')
  */
 api.route('/webhooks/trigger/:encodedid')
 .post(
-  AuthController.authenticate,
   Middleware.logRoute,
   Middleware.pluginPre('triggerWebhook'),
   APIController.triggerWebhook,
