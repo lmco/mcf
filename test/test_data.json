@@ -241,7 +241,7 @@
       "id": "artifact00",
       "description": "artifact 00",
       "filename": "logo.png",
-      "location": "/test/test_files/",
+      "location": "test/test_files",
       "size": 26930,
       "custom": {
         "custom_key": "custom_value"
@@ -251,7 +251,7 @@
       "id": "artifact01",
       "description": "artifact 01",
       "filename": "mbee-concept.png",
-      "location": "/test/test_files/",
+      "location": "test/test_files",
       "size" : 199283,
       "custom": {
         "custom_key": "custom_value"
@@ -261,7 +261,7 @@
       "id": "artifact02",
       "description": "artifact 02",
       "filename": "text.txt",
-      "location": "/test/test_files/",
+      "location": "test/test_files",
       "size" : 13,
       "custom": {
         "custom_key": "custom_value"
@@ -271,7 +271,7 @@
       "id": "artifact03",
       "description": "artifact 03",
       "filename": "text.txt",
-      "location": "/test/test_files/",
+      "location": "test/test_files",
       "size" : 13,
       "custom": {
         "custom_key": "custom_value"
@@ -280,7 +280,7 @@
       "id": "artifact04",
       "description": "artifact 04",
       "filename": "text.txt",
-      "location": "/test/test_files/",
+      "location": "test/test_files",
       "size" : 13,
       "custom": {
         "custom_key": "custom_value"

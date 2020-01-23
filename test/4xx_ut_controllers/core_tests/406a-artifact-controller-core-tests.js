@@ -552,10 +552,9 @@ async function deleteBlob() {
     // Find and delete the artifact
     await ArtifactController.deleteBlob(adminUser, orgID, projectID, artData);
 
-    await ArtifactController.getBlob(adminUser, orgID,
-      projectID, artData).should.eventually.be.rejectedWith(
-      'Artifact blob not found.'
-    );
+    // Blob should NOT be found
+    await ArtifactController.getBlob(adminUser, orgID, projectID, artData)
+    .should.eventually.be.rejectedWith('Artifact blob not found.');
   }
   catch (error) {
     M.log.error(error);

@@ -836,13 +836,13 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
       }
 
       // If updating source, add ID to sourceTargetIDs
-      if (elem.source) {
+      if (elem.source && !elem.hasOwnProperty('sourceNamespace')) {
         elem.source = utils.createID(orgID, projID, branID, elem.source);
         sourceTargetIDs.push(elem.source);
       }
 
       // If updating target, add ID to sourceTargetIDs
-      if (elem.target) {
+      if (elem.target && !elem.hasOwnProperty('targetNamespace')) {
         elem.target = utils.createID(orgID, projID, branID, elem.target);
         sourceTargetIDs.push(elem.target);
       }
@@ -1969,9 +1969,8 @@ function sourceTargetNamespaceValidator(elem, index, orgID, projID, projectRefs,
       // Delete sourceNamespace, it does not get stored in the database
       delete elem.sourceNamespace;
 
-      // Remove the last source which has the wrong project
+      // Add source to array, used to ensure element exists
       if (sourceTargetIDs) {
-        sourceTargetIDs.pop();
         sourceTargetIDs.push(elem.source);
       }
     }
@@ -2010,9 +2009,8 @@ function sourceTargetNamespaceValidator(elem, index, orgID, projID, projectRefs,
       // Delete targetNamespace, it does not get stored in the database
       delete elem.targetNamespace;
 
-      // Remove the last target which has the wrong project
+      // Add target to array, used to ensure element exists
       if (sourceTargetIDs) {
-        sourceTargetIDs.pop();
         sourceTargetIDs.push(elem.target);
       }
     }
