@@ -5760,6 +5760,7 @@ api.route('/users')
 api.route('/users/whoami')
 .get(
   AuthController.authenticate,
+  Middleware.expiredPassword,
   Middleware.logRoute,
   Middleware.pluginPre('whoami'),
   APIController.whoami,

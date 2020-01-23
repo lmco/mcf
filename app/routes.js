@@ -78,6 +78,7 @@ router.route('/login')
 router.route('/')
 .get(
   AuthController.authenticate,
+  Middleware.expiredPassword,
   Middleware.logRoute,
   UIController.home
 );

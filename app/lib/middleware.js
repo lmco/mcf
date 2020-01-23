@@ -22,6 +22,7 @@ const path = require('path');
 const fs = require('fs');
 
 // MBEE modules
+const errors = M.require('lib.errors');
 const utils = M.require('lib.utils');
 const logger = M.require('lib.logger');
 
@@ -238,4 +239,15 @@ module.exports.respond = function respond(req, res) {
   res.send(message);
 
   return res;
+};
+
+module.exports.expiredPassword = function(req, res, next) {
+  if (req.user.changePassword) {
+    if (!req.originalUrl.startsWith('/api')) {
+      return res.redirect('/profile');
+    }
+    const error = new M.AuthorizationError('User\'s password has expired.');
+    return res.status(errors.getStatusCode(error)).send(error.message);
+  }
+  next();
 };
