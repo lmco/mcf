@@ -1,8 +1,7 @@
 {
   "adminUser": {
     "username": "test_admin",
-    "password": "Test12345@",
-    "changePassword": false
+    "password": "Test12345@"
   },
   "users": [
     {

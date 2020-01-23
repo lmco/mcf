@@ -109,7 +109,7 @@ async function logFailedLogin() {
 
   // Attempt to authenticate user with wrong password
   await localAuth.handleBasicAuth(req, res, user._id, 'wrongPassword')
-  .should.eventually.be.rejectedWith('Invalid password.');
+  .should.eventually.be.rejectedWith('Invalid username or password.');
 
   const foundUser = await User.findOne({ _id: user._id });
 
@@ -147,7 +147,7 @@ async function failedloginsField() {
 
   // Attempt to authenticate user with wrong password
   await localAuth.handleBasicAuth(req, res, user._id, 'wrongPassword')
-  .should.eventually.be.rejectedWith('Invalid password.');
+  .should.eventually.be.rejectedWith('Invalid username or password.');
 
   // *************** Verify failedlogins field returned for admin *************** //
   // Create a mock req object for the api controller
@@ -213,7 +213,7 @@ async function lockoutUser() {
   for (let i = 0; i < 4; i++) {
     // Attempt to authenticate user with wrong password
     await localAuth.handleBasicAuth(req, res, user._id, 'wrongPassword') // eslint-disable-line
-    .should.eventually.be.rejectedWith('Invalid password.');
+    .should.eventually.be.rejectedWith('Invalid username or password.');
   }
 
   // Fail for the 5th time
@@ -255,7 +255,7 @@ async function noAdminLockout() {
   for (let i = 0; i < 4; i++) {
     // Attempt to authenticate admin user with wrong password
     await localAuth.handleBasicAuth(req, res, adminUser._id, 'wrongPassword') // eslint-disable-line
-    .should.eventually.be.rejectedWith('Invalid password.');
+    .should.eventually.be.rejectedWith('Invalid username or password.');
   }
 
   // Expect specific error message for the only active admin user exceeding the login attempts

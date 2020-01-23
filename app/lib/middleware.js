@@ -241,13 +241,30 @@ module.exports.respond = function respond(req, res) {
   return res;
 };
 
+/**
+ * @description Checks a requesting user to see if their password has expired.
+ * If so, a 401 Unauthorized error is returned.
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {Function} next - Callback to express authentication flow.
+ */
+// eslint-disable-next-line consistent-return
 module.exports.expiredPassword = function(req, res, next) {
+  // If the user needs to change their password
   if (req.user.changePassword) {
+    // If it is NOT an API request
     if (!req.originalUrl.startsWith('/api')) {
+      // Redirect user to their profile page
       return res.redirect('/profile');
     }
-    const error = new M.AuthorizationError('User\'s password has expired.');
-    return res.status(errors.getStatusCode(error)).send(error.message);
+    // API request, return a 401 error
+    else {
+      const error = new M.AuthorizationError('User\'s password has expired.');
+      return res.status(errors.getStatusCode(error)).send(error.message);
+    }
   }
-  next();
+  // User does not need to change password, proceed with request
+  else {
+    next();
+  }
 };
