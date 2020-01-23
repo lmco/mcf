@@ -122,10 +122,16 @@ hang while loading, and can prevent the UI and API from being accessible.
 Hovering over edit/delete/add buttons within tables causes a flicker in 
 reactstrap 8.0.1. This issue has been reported as of 12/9/2019. 
 Per discussion on the [issue](https://github.com/reactstrap/reactstrap/issues/1728), 
-the recommended course of action is to downgrade to reactstrap 7.1.0. 
+there is a suggestion to downgrade to reactstrap 7.1.0. That version 
+introduces 'Component Lifecycle Deprecation Warnings' for the Modal Component. 
+
 Specifying "reactstrap": "7.1.0" within the package.json devDependencies or 
 running `npm i reactstrap@7.1.0 -D` within the project directory will 
 downgrade this package.
+
+Upon testing reactstrap 8.4.0, no cursor flickering was observed regarding the 
+aforementioned buttons. Additionally, this upgrade resolved the 
+'Component Lifecycle Deprecation Warnings' for the Modal Component. 
 
 ## Security Related Configuration
 
