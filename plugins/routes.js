@@ -245,7 +245,7 @@ function copyPluginFromLocalDir(data) {
   }
 
   /// Making the directory for the plugin
-  fsExtra.mkdirSync(path.join(M.root, 'plugins', data.name));
+  fs.mkdirSync(path.join(M.root, 'plugins', data.name));
 
   /// Execute the copy command
   M.log.info(`Copying plugin files to ${data.name} from ${data.source} ...`);
