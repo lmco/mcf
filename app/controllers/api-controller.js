@@ -39,6 +39,7 @@ const BranchController = M.require('controllers.branch-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
+const User = M.require('models.user');
 const WebhookController = M.require('controllers.webhook-controller');
 const Webhook = M.require('models.webhook');
 const EventEmitter = M.require('lib.events');
@@ -6302,7 +6303,7 @@ async function triggerWebhook(req, res, next) {
   const webhookID = Buffer.from(req.params.encodedid, 'base64').toString('ascii');
 
   try {
-    const webhooks = await WebhookController.find(req.user, webhookID);
+    const webhooks = await Webhook.find({ _id: webhookID });
 
     if (webhooks.length < 1) {
       throw new M.NotFoundError('No webhooks found', 'warn');
@@ -6321,13 +6322,13 @@ async function triggerWebhook(req, res, next) {
       throw new M.ServerError(`Webhook [${webhook._id}] does not have a token`, 'warn');
     }
 
-    // Get the token from an arbitrary depth of key nesting
-    let token = req;
+    // Get the raw token from an arbitrary depth of key nesting
+    let rawToken = req;
     try {
       const tokenPath = webhook.tokenLocation.split('.');
       for (let i = 0; i < tokenPath.length; i++) {
         const key = tokenPath[i];
-        token = token[key];
+        rawToken = rawToken[key];
       }
     }
     catch (error) {
@@ -6335,18 +6336,30 @@ async function triggerWebhook(req, res, next) {
       throw new M.DataFormatError('Token could not be found in the request.', 'warn');
     }
 
-    if (typeof token !== 'string') {
+    if (typeof rawToken !== 'string') {
       throw new M.DataFormatError('Token is not a string', 'warn');
     }
+
+    // Get the user and the original token value from the raw token
+    const decodedToken = Buffer.from(rawToken, 'base64').toString('ascii');
+    const decomposedToken = decodedToken.split(':');
+    const username = decomposedToken[0];
+
+    // Get the user
+    const users = await User.find({ _id: username });
+    if (users.length === 0) {
+      throw new M.DataFormatError('Invalid token', 'warn');
+    }
+    const user = users[0];
 
     // Parse data from request
     const data = req.body.data ? req.body.data : null;
 
-    Webhook.verifyAuthority(webhook, token);
+    Webhook.verifyAuthority(webhook, decodedToken);
 
     webhook.triggers.forEach((trigger) => {
-      if (Array.isArray(data)) EventEmitter.emit(trigger, req.user, ...data);
-      else EventEmitter.emit(trigger, req.user, data);
+      if (Array.isArray(data)) EventEmitter.emit(trigger, user, ...data);
+      else EventEmitter.emit(trigger, user, data);
     });
 
     // Sets the message to "success" and the status code to 200
@@ -6354,6 +6367,9 @@ async function triggerWebhook(req, res, next) {
       message: 'success',
       statusCode: 200
     };
+
+    // Set a mock user object to be used in the response logging middleware
+    req.user = { _id: `Trigger of webhook ${webhook._id}` };
     next();
   }
   catch (error) {

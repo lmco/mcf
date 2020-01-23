@@ -1014,6 +1014,12 @@ function getWebhookPublicData(webhook, options) {
     }
   }
 
+  // Process token for incoming webhooks
+  let token;
+  if (webhook.type === 'Incoming') {
+    token = Buffer.from(webhook.token, 'ascii').toString('base64');
+  }
+
   // Return the webhook public fields
   const data = {
     id: webhook._id,
@@ -1022,7 +1028,7 @@ function getWebhookPublicData(webhook, options) {
     description: webhook.description,
     triggers: webhook.triggers,
     response: webhook.response ? webhook.response : undefined,
-    token: webhook.token ? webhook.token : undefined,
+    token: token,
     tokenLocation: webhook.tokenLocation ? webhook.tokenLocation : undefined,
     reference: reference,
     custom: webhook.custom || {},
