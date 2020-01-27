@@ -19,6 +19,7 @@
     "express-ejs-layouts": "^2.4.0",
     "express-flash": "^0.0.2",
     "express-session": "^1.15.6",
+    "fs-extra": "8.1.0",
     "gulp-rename": "^1.4.0",
     "ldapjs": "^1.0.2",
     "mongoose": "^5.7.11",
