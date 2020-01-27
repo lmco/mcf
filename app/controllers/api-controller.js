@@ -6350,7 +6350,7 @@ async function triggerWebhook(req, res, next) {
     }
 
     // Parse data from request
-    const data = req.body.data ? req.body.data : null;
+    const data = req.body.data ? req.body.data : req.body;
 
     Webhook.verifyAuthority(webhook, decodedToken);
 
