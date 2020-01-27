@@ -1792,7 +1792,7 @@ async function search(requestingUser, organizationID, projectID, branchID, query
             throw new M.DataFormatError(`The option '${o}' is not a boolean.`, 'warn');
           }
           // Ensure the search option is a string
-          else if (typeof options[o] !== 'string' && o !== 'archived') {
+          else if (typeof options[o] !== 'string' && o !== 'archived' && !o.startsWith('custom.')) {
             throw new M.DataFormatError(`The option '${o}' is not a string.`, 'warn');
           }
 
