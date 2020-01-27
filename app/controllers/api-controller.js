@@ -3697,7 +3697,12 @@ async function searchElements(req, res, next) {
     Object.keys(req.query).forEach((k) => {
       // If the key starts with custom., add it to the validOptions object
       if (k.startsWith('custom.')) {
-        validOptions[k] = 'string';
+        if (req.query[k] === 'true' || req.query[k] === 'false') {
+          validOptions[k] = 'boolean';
+        }
+        else {
+          validOptions[k] = 'string';
+        }
       }
     });
   }
