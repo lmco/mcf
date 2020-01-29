@@ -39,6 +39,7 @@ const BranchController = M.require('controllers.branch-controller');
 const OrgController = M.require('controllers.organization-controller');
 const ProjectController = M.require('controllers.project-controller');
 const UserController = M.require('controllers.user-controller');
+const User = M.require('models.user');
 const WebhookController = M.require('controllers.webhook-controller');
 const Webhook = M.require('models.webhook');
 const EventEmitter = M.require('lib.events');
@@ -3696,7 +3697,12 @@ async function searchElements(req, res, next) {
     Object.keys(req.query).forEach((k) => {
       // If the key starts with custom., add it to the validOptions object
       if (k.startsWith('custom.')) {
-        validOptions[k] = 'string';
+        if (req.query[k] === 'true' || req.query[k] === 'false') {
+          validOptions[k] = 'boolean';
+        }
+        else {
+          validOptions[k] = 'string';
+        }
       }
     });
   }
@@ -6299,16 +6305,14 @@ async function deleteWebhook(req, res, next) {
  */
 async function triggerWebhook(req, res, next) {
   // Parse the webhook id from the base64 encoded url
-  const webhookID = Buffer.from(req.params.encodedid, 'base64').toString('ascii');
+  const webhookID = sani.db(Buffer.from(req.params.encodedid, 'base64').toString('ascii'));
 
   try {
-    const webhooks = await WebhookController.find(req.user, webhookID);
+    const webhook = await Webhook.findOne({ _id: webhookID });
 
-    if (webhooks.length < 1) {
-      throw new M.NotFoundError('No webhooks found', 'warn');
+    if (webhook === null) {
+      throw new M.NotFoundError('Webhook not found', 'warn');
     }
-
-    const webhook = webhooks[0];
 
     // Sanity check: ensure the webhook is incoming and has a token and tokenLocation field
     if (webhook.type !== 'Incoming') {
@@ -6321,13 +6325,13 @@ async function triggerWebhook(req, res, next) {
       throw new M.ServerError(`Webhook [${webhook._id}] does not have a token`, 'warn');
     }
 
-    // Get the token from an arbitrary depth of key nesting
-    let token = req;
+    // Get the raw token from an arbitrary depth of key nesting
+    let rawToken = req;
     try {
       const tokenPath = webhook.tokenLocation.split('.');
       for (let i = 0; i < tokenPath.length; i++) {
         const key = tokenPath[i];
-        token = token[key];
+        rawToken = rawToken[key];
       }
     }
     catch (error) {
@@ -6335,18 +6339,29 @@ async function triggerWebhook(req, res, next) {
       throw new M.DataFormatError('Token could not be found in the request.', 'warn');
     }
 
-    if (typeof token !== 'string') {
+    if (typeof rawToken !== 'string') {
       throw new M.DataFormatError('Token is not a string', 'warn');
     }
 
-    // Parse data from request
-    const data = req.body.data ? req.body.data : null;
+    // Get the user and the original token value from the raw token
+    const decodedToken = Buffer.from(rawToken, 'base64').toString('ascii');
+    const decomposedToken = decodedToken.split(':');
+    const username = sani.db(decomposedToken[0]);
 
-    Webhook.verifyAuthority(webhook, token);
+    // Get the user
+    const user = await User.findOne({ _id: username });
+    if (user === null) {
+      throw new M.DataFormatError('Invalid token', 'warn');
+    }
+
+    // Parse data from request
+    const data = req.body.data ? req.body.data : req.body;
+
+    Webhook.verifyAuthority(webhook, decodedToken);
 
     webhook.triggers.forEach((trigger) => {
-      if (Array.isArray(data)) EventEmitter.emit(trigger, ...data);
-      else EventEmitter.emit(trigger, data);
+      if (Array.isArray(data)) EventEmitter.emit(trigger, user, ...data);
+      else EventEmitter.emit(trigger, user, data);
     });
 
     // Sets the message to "success" and the status code to 200
@@ -6354,6 +6369,9 @@ async function triggerWebhook(req, res, next) {
       message: 'success',
       statusCode: 200
     };
+
+    // Set a mock user object to be used in the response logging middleware
+    req.user = { _id: `Trigger of webhook ${webhook._id}` };
     next();
   }
   catch (error) {
