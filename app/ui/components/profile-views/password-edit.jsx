@@ -198,9 +198,13 @@ class PasswordEdit extends Component {
                 </FormFeedback>
               </FormGroup>
               {/* Button to submit or cancel */}
-              <Button outline color='primary' disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
+              <Button outline color='primary'
+                      disabled={disableSubmit}
+                      onClick={this.onSubmit}> Submit </Button>
               {' '}
-              <Button outline disabled={this.props.passwordExpired} onClick={this.props.toggle}> Cancel </Button>
+              <Button outline
+                      disabled={this.props.passwordExpired}
+                      onClick={this.props.toggle}> Cancel </Button>
             </Form>
           </div>
         </div>

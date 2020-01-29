@@ -168,12 +168,14 @@ function getArtifactPublicData(requestingUser, artifact, options) {
     if (artifact.referencedBy.every(a => typeof a === 'object')) {
       // If the includeArchived option is supplied
       if (options.hasOwnProperty('includeArchived') && options.includeArchived === true) {
-        data.referencedBy = artifact.referencedBy.map(a => getElementPublicData(requestingUser, a, {}));
+        data.referencedBy = artifact.referencedBy
+        .map(a => getElementPublicData(requestingUser, a, {}));
       }
       else {
         // Remove all archived elements
         const nonArchivedElements = artifact.referencedBy.filter(a => a.archived !== true);
-        data.referencedBy = nonArchivedElements.map(a => getElementPublicData(requestingUser, a, {}));
+        data.referencedBy = nonArchivedElements
+        .map(a => getElementPublicData(requestingUser, a, {}));
       }
     }
   }
@@ -809,7 +811,8 @@ function getOrgPublicData(requestingUser, org, options) {
     if (org.projects.every(p => typeof p === 'object')) {
       // If the archived option is supplied
       if (options.hasOwnProperty('includeArchived') && options.includeArchived === true) {
-        projects = org.projects.map(p => getProjectPublicData(requestingUser, p, { archived: true }));
+        projects = org.projects
+        .map(p => getProjectPublicData(requestingUser, p, { archived: true }));
       }
       else {
         // Remove all archived projects

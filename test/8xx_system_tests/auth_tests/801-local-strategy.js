@@ -28,13 +28,11 @@ const should = chai.should(); // eslint-disable-line no-unused-vars
 // MBEE modules
 const User = M.require('models.user');
 const UserController = M.require('controllers.user-controller');
-const APIController = M.require('controllers.api-controller');
 const localAuth = M.require('auth.local-strategy');
 
 /* --------------------( Test Data )-------------------- */
 const testUtils = M.require('lib.test-utils');
 const testData = testUtils.importTestData('test_data.json');
-const next = testUtils.next;
 let adminUser = null;
 
 /* --------------------( Main )-------------------- */

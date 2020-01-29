@@ -34,7 +34,7 @@ class Profile extends Component {
     // Initialize parent props
     super(props);
 
-    const {changePassword} = this.props.user;
+    const { changePassword } = this.props.user;
 
     // Initialize state props
     this.state = {
