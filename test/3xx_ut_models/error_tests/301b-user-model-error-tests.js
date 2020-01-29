@@ -86,7 +86,7 @@ async function usernameTooLong() {
     const userData = Object.assign({}, testData.users[0]);
 
     // Change username to be too long.
-    userData._id = 'usernamewiththirtysevencharacters1234';
+    userData._id = 'usernamewiththirtysevencharacters12345678';
     delete userData.id;
 
     // Expect insertMany() to fail with specific error message

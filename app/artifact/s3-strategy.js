@@ -14,7 +14,6 @@
  * @description Implements an artifact storage strategy using Amazon s3,
  * a cloud storage service. This strategy uses the aws-sdk library.
  */
-
 // Define the root storage path for blobs
 const rootStoragePath = 'storage';
 
@@ -55,6 +54,7 @@ if (M.config.artifact.strategy === 's3-strategy') {
     secretAccessKey: M.config.artifact.s3.secretAccessKey,
     Bucket: M.config.artifact.s3.Bucket
   });
+
   s3 = new AWS.S3();
 }
 
