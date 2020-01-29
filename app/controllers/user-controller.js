@@ -948,7 +948,7 @@ async function search(requestingUser, query, options) {
  * currently stored password.
  *
  * @param {object} requestingUser - The object containing the requesting user.
- * @param {object} targetUser - The object containing the user whose password
+ * @param {string} targetUser - The object containing the user whose password
  * is to be changed.
  * @param {string|null} oldPassword - The old password to confirm.
  * @param {string} newPassword - THe new password the user would like to set.
