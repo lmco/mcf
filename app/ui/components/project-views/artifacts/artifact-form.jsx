@@ -194,8 +194,10 @@ class ArtifactForm extends Component {
     let title = 'Create Artifact';
     let artifactId = this.state.id;
     let disableUpdate = false;
+    let customInvalid = false;
+    let idInvalid = false;
 
-    // If user is editing an Artifact Document
+    // If user is editing an Artifact Document use ID from props
     if (this.props.artifactId) {
       title = 'Edit Artifact';
       artifactId = this.props.artifactId;
@@ -204,9 +206,15 @@ class ArtifactForm extends Component {
       disableUpdate = (!this.state.file);
     }
 
-    // Validate input
-    const idInvalid = (artifactId.length > 0) ? (!RegExp(validators.id).test(artifactId)) : false;
-    let customInvalid;
+    // Validate Artifact ID
+    const validatorsArtifactId = validators.artifact.id.split(validators.ID_DELIMITER).pop();
+    const maxLength = validators.artifact.idLength - validators.branch.idLength - 1;
+    const validLength = (artifactId.length <= maxLength);
+
+    // Only validate if ID has been entered
+    if (artifactId !== 0) {
+      idInvalid = (!validLength) && (!RegExp(validatorsArtifactId).test(artifactId));
+    }
 
     // Verify custom data is valid
     try {
