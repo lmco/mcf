@@ -979,7 +979,7 @@ async function updatePassword(requestingUser, targetUser, oldPassword, newPasswo
 
       // Ensure all provided passwords are strings (oldPassword is only validated if a user is
       // trying to set their own password)
-      if (requestingUser._id === targetUser._id) {
+      if (requestingUser._id === targetUser) {
         assert.ok(typeof oldPassword === 'string', 'Old Password is not a string.');
       }
       assert.ok(typeof newPassword === 'string', 'New Password is not a string.');
