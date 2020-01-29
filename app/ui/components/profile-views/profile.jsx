@@ -34,10 +34,14 @@ class Profile extends Component {
     // Initialize parent props
     super(props);
 
+    const {changePassword} = this.props.user;
+
     // Initialize state props
     this.state = {
-      modal: false,
-      editPasswordModal: false
+      modal: changePassword,
+      editPasswordModal: changePassword,
+      passwordExpired: changePassword,
+      staticBackdrop: (changePassword) ? 'static' : true
     };
 
     // Bind component functions
@@ -70,7 +74,9 @@ class Profile extends Component {
     return (
       <React.Fragment>
         {/* Modal for editing the information */}
-        <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
+        <Modal isOpen={this.state.modal}
+               toggle={this.handleToggle}
+               backdrop={this.state.staticBackdrop}>
           <ModalBody>
             {(!this.state.editPasswordModal)
               ? (<ProfileEdit user={this.props.user}
@@ -78,6 +84,7 @@ class Profile extends Component {
                               togglePasswordModal={this.togglePasswordModal}
                               toggle={this.handleToggle}/>)
               : (<PasswordEdit user={this.props.user}
+                               passwordExpired={this.state.passwordExpired}
                                toggle={this.handleToggle}/>)
             }
           </ModalBody>

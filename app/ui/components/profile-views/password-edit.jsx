@@ -106,7 +106,11 @@ class PasswordEdit extends Component {
       contentType: 'application/json',
       data: JSON.stringify(data),
       statusCode: {
-        200: () => { window.location.replace('/profile'); },
+        200: () => {
+          window.location.replace('/profile');
+          // Destroy the session, forcing stored user to be refreshed
+          window.sessionStorage.removeItem('mbee-user');
+        },
         401: (err) => {
           this.setState({ error: err.responseText });
 
@@ -142,7 +146,7 @@ class PasswordEdit extends Component {
     return (
       <div id='workspace'>
         <div className='workspace-header'>
-          <h2 className='workspace-title workspace-title-padding'>User Edit</h2>
+          <h2 className='workspace-title workspace-title-padding'>Change Password</h2>
         </div>
         <div id='workspace-body' className='extra-padding'>
           <div className='main-workspace'>
@@ -196,7 +200,7 @@ class PasswordEdit extends Component {
               {/* Button to submit or cancel */}
               <Button outline color='primary' disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
               {' '}
-              <Button outline onClick={this.props.toggle}> Cancel </Button>
+              <Button outline disabled={this.props.passwordExpired} onClick={this.props.toggle}> Cancel </Button>
             </Form>
           </div>
         </div>
