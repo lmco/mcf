@@ -29,7 +29,7 @@ const customValidators = M.config.validators || {};
 
 // This ID is used as the common regex for other ID fields in this module
 const id = customValidators.id || '([_a-zA-Z0-9])([-_a-zA-Z0-9.]){0,}';
-const idLength = customValidators.id_length || 36;
+const idLength = Number(customValidators.id_length) || 40;
 
 // A list of reserved keywords which cannot be used in ids
 const reservedKeywords = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
