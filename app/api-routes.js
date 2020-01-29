@@ -4161,6 +4161,56 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
 
 /**
  * @swagger
+ * /api/orgs/{orgid}/projects/{projectid}/artifacts/list:
+ *   get:
+ *     tags:
+ *       - artifacts
+ *     description: Returns a list of artifact blob locations and filenames within a project.
+ *                  Requesting user must have read access on the project to list artifacts.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization containing the specified
+ *                      project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project containing the artifact blob.
+ *         in: path
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to GET artifact, returns artifact list.
+ *       400:
+ *         description: Bad Request, Failed to GET artifact list due to invalid data.
+ *       401:
+ *         description: Unauthorized, Failed to GET artifact list due to not being
+ *                      logged in.
+ *       403:
+ *         description: Forbidden, Failed to GET artifact list due to not having
+ *                      permissions.
+ *       404:
+ *         description: Not Found, Failed to GET blob list due to artifact not
+ *                      existing.
+ *       500:
+ *         description: Internal Server Error, Failed to GET blob list due to
+ *                      server side issue.
+ */
+api.route('/orgs/:orgid/projects/:projectid/artifacts/list')
+.get(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  Middleware.pluginPre('listBlobs'),
+  APIController.listBlobs,
+  Middleware.pluginPost('listBlobs'),
+  Middleware.respond
+);
+
+/**
+ * @swagger
  * /api/orgs/{orgid}/projects/{projectid}/artifacts/blob:
  *   get:
  *     tags:

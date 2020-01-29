@@ -124,6 +124,7 @@ module.exports = {
   postBlob,
   deleteBlob,
   getBlobById,
+  listBlobs,
   getWebhooks,
   postWebhooks,
   patchWebhooks,
@@ -5532,6 +5533,38 @@ async function deleteArtifact(req, res, next) {
   catch (error) {
     // If an error was thrown, return it and its status
     return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
+  }
+}
+
+/**
+ * GET /api/orgs/:orgid/projects/:projectid/artifacts/list
+ *
+ * @description Gets a list of artifact blobs' location and filename by org.id, project.id.
+ *
+ * @param {object} req - Request express object
+ * @param {object} res - Response express object
+ * @param {Function} next - Middleware callback to trigger the next function
+ *
+ * @returns {object[]} An array of objects that contain artifact location, filename.
+ */
+async function listBlobs(req, res, next) {
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) return noUserError(req, res);
+
+  try {
+    const artifactList = await ArtifactController.listBlobs(req.user, req.params.orgid,
+      req.params.projectid);
+
+    // Sets the message to the public artifact data and the status code to 200
+    res.locals = {
+      message: artifactList,
+      statusCode: 200
+    };
+    next();
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return utils.returnResponse(req, res, error.message, errors.getStatusCode(error));
   }
 }
 
