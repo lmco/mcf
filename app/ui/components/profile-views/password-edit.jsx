@@ -39,12 +39,16 @@ class PasswordEdit extends Component {
     // Initialize parent props
     super(props);
 
+    // Get the session user, used to see if an admin is changing another user's password
+    const sessionUser = JSON.parse(window.sessionStorage.getItem('mbee-user'));
+
     // Initialize state props
     this.state = {
       oldPassword: '',
       newPassword: '',
       confirmNewPassword: '',
       newPasswordInvalid: false,
+      noOldPassword: sessionUser.admin && sessionUser.username !== this.props.user.username,
       error: null
     };
 
@@ -106,7 +110,10 @@ class PasswordEdit extends Component {
       contentType: 'application/json',
       data: JSON.stringify(data),
       statusCode: {
-        200: () => { window.location.replace('/profile'); },
+        200: () => this.props.toggle(),
+        400: (err) => {
+          this.setState({ error: err.responseText });
+        },
         401: (err) => {
           this.setState({ error: err.responseText });
 
@@ -142,7 +149,7 @@ class PasswordEdit extends Component {
     return (
       <div id='workspace'>
         <div className='workspace-header'>
-          <h2 className='workspace-title workspace-title-padding'>User Edit</h2>
+          <h2 className='workspace-title workspace-title-padding'>Password Edit</h2>
         </div>
         <div id='workspace-body' className='extra-padding'>
           <div className='main-workspace'>
@@ -155,15 +162,17 @@ class PasswordEdit extends Component {
             {/* Create form to update user password */}
             <Form>
               {/* Input old password */}
-              <FormGroup>
-                <Label for="oldPassword">Old Password</Label>
-                <Input type="password"
-                       name="oldPassword"
-                       id="oldPassword"
-                       placeholder="Old Password"
-                       value={this.state.oldPassword || ''}
-                       onChange={this.handleChange}/>
-              </FormGroup>
+              {(this.state.noOldPassword)
+                ? ''
+                : <FormGroup>
+                    <Label for="oldPassword">Old Password</Label>
+                    <Input type="password"
+                           name="oldPassword"
+                           id="oldPassword"
+                           placeholder="Old Password"
+                           value={this.state.oldPassword || ''}
+                           onChange={this.handleChange}/>
+                  </FormGroup>}
               {/* Input new password */}
               <FormGroup>
                 <Label for="newPassword">New Password</Label>
