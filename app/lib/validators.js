@@ -36,7 +36,7 @@ const reservedKeywords = ['css', 'js', 'img', 'doc', 'docs', 'webfonts',
   'login', 'about', 'assets', 'static', 'public', 'api', 'organizations',
   'orgs', 'projects', 'users', 'plugins', 'ext', 'extension', 'search',
   'whoami', 'profile', 'edit', 'proj', 'elements', 'branch', 'anonymous',
-  'blob', 'artifact', 'artifacts'];
+  'blob', 'artifact', 'artifacts', 'list'];
 
 // Create a validator function to test ids against the reserved keywords
 const reserved = function(data) {

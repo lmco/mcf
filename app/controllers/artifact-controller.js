@@ -26,7 +26,8 @@ module.exports = {
   remove,
   getBlob,
   postBlob,
-  deleteBlob
+  deleteBlob,
+  listBlobs
 };
 
 // Node modules
@@ -910,6 +911,50 @@ async function deleteBlob(requestingUser, organizationID, projectID,
 
     // Return Artifact obj
     return saniArt;
+  }
+  catch (error) {
+    throw errors.captureError(error);
+  }
+}
+
+/**
+ * @description This function returns a list of blobs location and filenames within a project.
+ *
+ * @param {User} requestingUser - The requesting user.
+ * @param {string} organizationID - The organization ID for the org the
+ * project belongs to.
+ * @param {string} projectID - The project ID of the project which contains
+ * the artifact blobs.
+ * @param {object} [options] - A parameter that provides supported options.
+ *
+ * @returns {Promise<object[]>} An array of objects that contain artifact location, filename.
+ */
+async function listBlobs(requestingUser, organizationID, projectID, options) {
+  try {
+    // Ensure input parameters are correct type
+    helper.checkParams(requestingUser, options, organizationID, projectID);
+
+    // Sanitize input parameters
+    const reqUser = JSON.parse(JSON.stringify(requestingUser));
+    const orgID = sani.db(organizationID);
+    const projID = sani.db(projectID);
+
+    // Find the organization
+    const organization = await helper.findAndValidate(Org, orgID);
+
+    // Find the project
+    const project = await helper.findAndValidate(Project, utils.createID(orgID, projID));
+
+    // Permissions check
+    permissions.listBlobs(reqUser, organization, project);
+
+    const artData = {
+      project: projID,
+      org: orgID
+    };
+
+    // Return the list of blob data
+    return ArtifactStrategy.listBlobs(artData);
   }
   catch (error) {
     throw errors.captureError(error);

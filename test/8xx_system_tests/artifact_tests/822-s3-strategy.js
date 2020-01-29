@@ -89,7 +89,6 @@ async function postBlob() {
     project: project.id,
     org: org.id
   };
-
   try {
     // Upload the blob
     await s3Strategy.postBlob(artData, artifactBlob0);
