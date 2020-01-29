@@ -79,7 +79,6 @@ describe(M.getModuleName(module.filename), () => {
   it('should PATCH a user', patchUser);
   it('should PATCH multiple users', patchUsers);
   it('should PATCH a user\'s own password', patchOwnPassword);
-  it('should PATCH another user\'s password as admin', patchOtherPassword);
   it('should DELETE a user', deleteUser);
   it('should DELETE multiple users', deleteUsers);
 });
@@ -733,63 +732,6 @@ function patchOwnPassword(done) {
 
   // Set the requesting user to the target user object
   req.user = userData;
-
-  // Create response object
-  const res = {};
-  testUtils.createResponse(res);
-
-  // Verifies the response data
-  res.send = function send(_data) {
-    // Convert response to JSON
-    const updatedUser = JSON.parse(_data);
-
-    // Verify expected response
-    chai.expect(updatedUser.username).to.equal(userData.username);
-    chai.expect(updatedUser.fname).to.equal('Updated First Name');
-    chai.expect(updatedUser.lname).to.equal(userData.lname);
-    chai.expect(updatedUser.preferredName).to.equal(userData.preferredName);
-    chai.expect(updatedUser.email).to.equal(userData.email);
-    chai.expect(updatedUser.custom).to.deep.equal(userData.custom);
-    chai.expect(updatedUser.admin).to.equal(userData.admin);
-    chai.expect(updatedUser).to.not.have.any.keys('password', '_id', '__v');
-
-    // Verify extra properties
-    chai.expect(updatedUser.createdOn).to.not.equal(null);
-    chai.expect(updatedUser.updatedOn).to.not.equal(null);
-    chai.expect(updatedUser.createdBy).to.equal(adminUser._id);
-    chai.expect(updatedUser.lastModifiedBy).to.equal(adminUser._id);
-    chai.expect(updatedUser.archived).to.equal(false);
-    chai.expect(updatedUser).to.not.have.any.keys('archivedOn', 'archivedBy');
-
-    // Expect the statusCode to be 200
-    chai.expect(res.statusCode).to.equal(200);
-
-    done();
-  };
-
-  // PATCH a users password
-  APIController.patchPassword(req, res, next(req, res));
-}
-
-/**
- * @description Verifies mock PATCH request to update a user's own password.
- *
- * @param {Function} done - The mocha callback.
- */
-function patchOtherPassword(done) {
-  // Create request object
-  const userData = testData.users[0];
-  userData._id = userData.username;
-  const body = {
-    password: 'NewPass12345?',
-    confirmPassword: 'NewPass12345?',
-    oldPassword: userData.password
-  };
-  const params = { username: userData.username };
-  const method = 'PATCH';
-  const req = testUtils.createRequest(userData, params, body, method);
-
-  req.user = adminUser;
 
   // Create response object
   const res = {};
