@@ -110,10 +110,6 @@ class PasswordEdit extends Component {
       contentType: 'application/json',
       data: JSON.stringify(data),
       statusCode: {
-//         200: () => {
-//           window.location.replace('/profile');
-//           // Destroy the session, forcing stored user to be refreshed
-//           window.sessionStorage.removeItem('mbee-user');
         200: () => this.props.toggle(),
         400: (err) => {
           this.setState({ error: err.responseText });

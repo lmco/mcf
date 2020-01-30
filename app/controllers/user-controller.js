@@ -1041,7 +1041,7 @@ async function updatePassword(requestingUser, targetUser, oldPassword, newPasswo
     await User.updateOne(userQuery, {
       password: foundUser.password,
       oldPasswords: oldPasswords,
-      changePassword: false
+      changePassword: reqUser._id !== tarUser
     });
 
     // Find and return the updated user

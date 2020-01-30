@@ -38,7 +38,7 @@ class Profile extends Component {
 
     // Initialize state props
     this.state = {
-      modal: changePassword,
+      modal: false,
       editPasswordModal: changePassword,
       passwordExpired: changePassword,
       staticBackdrop: (changePassword) ? 'static' : true
@@ -62,6 +62,7 @@ class Profile extends Component {
   // Define toggle function
   togglePasswordModal() {
     // Open or close modal
+    this.setState({ modal: false });
     this.setState({ editPasswordModal: !this.state.editPasswordModal });
   }
 
