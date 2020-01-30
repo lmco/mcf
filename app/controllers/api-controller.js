@@ -3106,10 +3106,15 @@ async function patchPassword(req, res, next) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) return noUserError(req, res, next);
 
-  // Ensure old password was provided
+  // Ensure old password was provided if user is changing their own password
   if (!req.body.oldPassword) {
-    const error = new M.DataFormatError('Old password not in request body.', 'warn');
-    return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
+    if (req.user._id !== req.params.username) {
+      req.body.oldPassword = null;
+    }
+    else {
+      const error = new M.DataFormatError('Old password not in request body.', 'warn');
+      return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
+    }
   }
 
   // Ensure new password was provided
@@ -3121,12 +3126,6 @@ async function patchPassword(req, res, next) {
   // Ensure confirmed password was provided
   if (!req.body.confirmPassword) {
     const error = new M.DataFormatError('Confirmed password not in request body.', 'warn');
-    return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
-  }
-
-  // Ensure user is not trying to change another user's password
-  if (req.user._id !== req.params.username) {
-    const error = new M.OperationError('Cannot change another user\'s password.', 'warn');
     return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
@@ -3148,8 +3147,8 @@ async function patchPassword(req, res, next) {
 
   try {
     // Update the password
-    const user = await UserController.updatePassword(req.user, req.body.oldPassword,
-      req.body.password, req.body.confirmPassword);
+    const user = await UserController.updatePassword(req.user, req.params.username,
+      req.body.oldPassword, req.body.password, req.body.confirmPassword);
     const publicUserData = sani.html(
       publicData.getPublicData(user, 'user', options)
     );

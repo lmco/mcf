@@ -72,14 +72,15 @@ class Profile extends Component {
         {/* Modal for editing the information */}
         <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
           <ModalBody>
-            {(!this.state.editPasswordModal)
-              ? (<ProfileEdit user={this.props.user}
+              <ProfileEdit user={this.props.user}
                               viewingUser={this.props.viewingUser}
                               togglePasswordModal={this.togglePasswordModal}
-                              toggle={this.handleToggle}/>)
-              : (<PasswordEdit user={this.props.user}
-                               toggle={this.handleToggle}/>)
-            }
+                              toggle={this.handleToggle}/>
+          </ModalBody>
+        </Modal>
+        <Modal isOpen={this.state.editPasswordModal} toggle={this.togglePasswordModal}>
+          <ModalBody>
+              <PasswordEdit user={this.props.user} toggle={this.togglePasswordModal}/>
           </ModalBody>
         </Modal>
         <div id='workspace'>

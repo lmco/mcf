@@ -148,7 +148,6 @@ class ProfileEdit extends Component {
     }
 
     if (this.props.viewingUser) {
-      localUser = false;
       adminUser = this.props.viewingUser.admin;
     }
 
@@ -173,25 +172,25 @@ class ProfileEdit extends Component {
       <div id='workspace'>
         <div className='workspace-header'>
           <h2 className={titleClass}>User Edit</h2>
-          {(!localUser)
-            ? ''
-            : (<div className='workspace-header-button'>
-                <Button className='bigger-width-btn'
-                        size='sm'
-                        outline color='primary'
-                        onClick={this.props.togglePasswordModal}>
-                  Edit Password
-                </Button>
-               </div>)
+          {(localUser && adminUser)
+            ? (<div className='workspace-header-button'>
+              <Button className='bigger-width-btn'
+                      size='sm'
+                      outline color='primary'
+                      onClick={this.props.togglePasswordModal}>
+                Edit Password
+              </Button>
+            </div>)
+            : ''
           }
         </div>
         <div id='workspace-body' className='extra-padding'>
           <div className='main-workspace'>
-            {(!this.state.error)
-              ? ''
-              : (<UncontrolledAlert color="danger">
-                  {this.state.error}
-                </UncontrolledAlert>)
+            {(this.state.error)
+              ? (<UncontrolledAlert color="danger">
+                {this.state.error}
+              </UncontrolledAlert>)
+              : ''
             }
             {/* Create form to update user data */}
             <Form>
