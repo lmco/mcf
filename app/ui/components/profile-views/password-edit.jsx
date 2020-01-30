@@ -194,7 +194,7 @@ class PasswordEdit extends Component {
                        invalid={confirmPasswordInvalid}
                        onChange={this.handleChange}/>
                 <FormFeedback>
-                  Invalid: Password are not the same.
+                  Invalid: Passwords are not the same.
                 </FormFeedback>
               </FormGroup>
               {/* Button to submit or cancel */}
