@@ -74,19 +74,21 @@ class Profile extends Component {
     return (
       <React.Fragment>
         {/* Modal for editing the information */}
-        <Modal isOpen={this.state.modal}
-               toggle={this.handleToggle}
-               backdrop={this.state.staticBackdrop}>
+        <Modal isOpen={this.state.modal} toggle={this.handleToggle}>
           <ModalBody>
-            {(!this.state.editPasswordModal)
-              ? (<ProfileEdit user={this.props.user}
+              <ProfileEdit user={this.props.user}
                               viewingUser={this.props.viewingUser}
                               togglePasswordModal={this.togglePasswordModal}
-                              toggle={this.handleToggle}/>)
-              : (<PasswordEdit user={this.props.user}
-                               passwordExpired={this.state.passwordExpired}
-                               toggle={this.handleToggle}/>)
-            }
+                              toggle={this.handleToggle}/>
+          </ModalBody>
+        </Modal>
+        <Modal isOpen={this.state.editPasswordModal}
+               toggle={this.togglePasswordModal}
+               backdrop={this.state.staticBackdrop}>
+          <ModalBody>
+              <PasswordEdit user={this.props.user}
+                            toggle={this.togglePasswordModal}
+                            passwordExpired={this.state.passwordExpired}/>
           </ModalBody>
         </Modal>
         <div id='workspace'>
