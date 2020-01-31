@@ -177,7 +177,7 @@ class ProfileEdit extends Component {
       <div id='workspace'>
         <div className='workspace-header'>
           <h2 className={titleClass}>User Edit</h2>
-          {(localUser && adminUser)
+          {(localUser)
             ? (<div className='workspace-header-button'>
               <Button className='bigger-width-btn'
                       size='sm'
