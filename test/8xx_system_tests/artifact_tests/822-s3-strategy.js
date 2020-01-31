@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module test.artifact_tests.822-s3-strategy
+ * @module test.822-artifact-s3-strategy
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -47,8 +47,8 @@ describe(M.getModuleName(module.filename), () => {
   before(async function() {
     // If not using the artifact-s3-strategy strategy, skip this test
     if (M.config.artifact.strategy !== 's3-strategy') {
-      M.log.verbose('Test skipped because the artifact-s3-strategy strategy is not '
-        + 'being used.');
+      M.log.verbose('Test skipped because the s3 artifact strategy is not being'
+        + ' used.');
       this.skip();
     }
 

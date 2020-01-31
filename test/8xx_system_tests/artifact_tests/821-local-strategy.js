@@ -48,7 +48,7 @@ describe(M.getModuleName(module.filename), () => {
   before(async function() {
     // If not using the artifact-local-strategy strategy, skip this test
     if (M.config.artifact.strategy !== 'local-strategy') {
-      M.log.verbose('Test skipped because the artifact-local-strategy strategy is not '
+      M.log.verbose('Test skipped because the local artifact strategy is not '
         + 'being used.');
       this.skip();
     }
