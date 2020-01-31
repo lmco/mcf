@@ -49,7 +49,8 @@ class PasswordEdit extends Component {
       confirmNewPassword: '',
       newPasswordInvalid: false,
       noOldPassword: sessionUser.admin && sessionUser.username !== this.props.user.username,
-      error: null
+      error: null,
+      sessionUser: sessionUser
     };
 
     // Bind component functions
@@ -110,7 +111,14 @@ class PasswordEdit extends Component {
       contentType: 'application/json',
       data: JSON.stringify(data),
       statusCode: {
-        200: () => this.props.toggle(),
+        200: () => {
+          this.props.toggle();
+
+          // Destroy the session if user changed their own password
+          if (this.state.sessionUser.username === this.props.user.username) {
+            window.sessionStorage.removeItem('mbee-user');
+          }
+        },
         400: (err) => {
           this.setState({ error: err.responseText });
         },
