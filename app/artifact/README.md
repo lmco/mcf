@@ -5,8 +5,8 @@ binary files) storage. All artifact strategies require specific functions to be
 implemented to work with MBEE. Each strategy may require different components
 for configuration. 
 
-Below are a list of currently supported artifact strategies and how to 
-information on how to configure each to work with MBEE.
+Below are a list of currently supported artifact strategies and information on
+how to configure each to work with MBEE.
 
 ### Local Strategy Configuration
 The local artifact strategy stores blobs locally on the same server that MBEE is
