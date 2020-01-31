@@ -148,9 +148,8 @@ class CreateBranch extends Component {
 
   render() {
     // Initialize validators
-    let idInvalid;
-    let customInvalid;
-    let disableSubmit;
+    let idInvalid = false;
+    let customInvalid = false;
 
     const branchOptions = [];
     const tagOptions = [];
@@ -177,15 +176,12 @@ class CreateBranch extends Component {
     }
 
     // Verify if id is valid
-    if (this.state.id.length !== 0) {
-      if (!RegExp(validators.id).test(this.state.id)) {
-        // Set invalid fields
-        idInvalid = true;
-        disableSubmit = true;
-      }
-    }
-    else {
-      disableSubmit = true;
+    const { id } = this.state;
+    const validatorsBranchId = validators.branch.id.split(validators.ID_DELIMITER).pop();
+    const maxLength = validators.branch.idLength - validators.project.idLength - 1;
+
+    if (id.length !== 0) {
+      idInvalid = (id.length > maxLength || (!RegExp(validatorsBranchId).test(id)));
     }
 
     // Verify custom data is valid
@@ -195,8 +191,9 @@ class CreateBranch extends Component {
     catch (err) {
       // Set invalid fields
       customInvalid = true;
-      disableSubmit = true;
     }
+
+    const disableSubmit = (customInvalid || idInvalid || id.length === 0);
 
     // Return the form to create a project
     return (
@@ -239,8 +236,10 @@ class CreateBranch extends Component {
                      invalid={idInvalid}
                      onChange={this.handleChange}/>
               {/* If invalid id, notify user */}
+              {/* TODO: This error message might not be accurate if the server is
+                   running with custom validators */}
               <FormFeedback >
-                Invalid: A id may only contain lower case letters, numbers, or dashes.
+                Invalid: An id may only contain letters, numbers, or dashes.
               </FormFeedback>
             </FormGroup>
             {/* Create an input for project name */}
