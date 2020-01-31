@@ -1,31 +1,33 @@
 # Supported Artifact Configurations
 
-MBEE supports two types of Artifact storage strategies. MBEE utilities
-artifact strategies for Blobs storage. (arbitrary binary files)
-All artifact strategy requires implementation of specific functions for
-MBEE to work. There configuration, however, may require different metadata.
+MBEE supports two types of Artifact storage strategies for blob (arbitrary
+binary files) storage. All artifact strategies require specific functions to be
+implemented to work with MBEE. Each strategy may require different components
+for configuration. 
 
-Below are a list of currently supported artifact strategies and how to
-configure each to work with MBEE.
+Below are a list of currently supported artifact strategies and how to 
+information on how to configure each to work with MBEE.
 
 ### Local Strategy Configuration
-Local strategy stores Blobs locally on the same server that MBEE runs on.
+The local artifact strategy stores blobs locally on the same server that MBEE is
+running on. 
 
-To configure MBEE to use the local strategy, the following `artifact` section
-of the running config should be configured as follows:
+To configure MBEE to use the local strategy, the `artifact` section of the
+running MBEE config should appear as follows:
 
 ```json
 "artifact": {
-    "strategy": "local-strategy"
-  }
+  "strategy": "local-strategy"
+}
 ```
 
 ### Amazon S3 Strategy Configuration
-Requires an existing Amazon s3 account, bucket, and user with full
-role to access the bucket via Access Key Id and Secret Access.
+The S3 artifact strategy requires an existing Amazon S3 account, bucket, and 
+user with permissions to access the bucket via an Access Key ID and Secret 
+Access Key.
 
-To configure MBEE to use the remote s3 strategy, the following `artifact` section
-of the running config should be configured as follows:
+To configure MBEE to use the remote S3 strategy, the `artifact` section of the
+running MBEE config should appear as follows:
 
 ```json
 "artifact": {
