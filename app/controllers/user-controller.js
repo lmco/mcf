@@ -1003,23 +1003,11 @@ async function updatePassword(requestingUser, targetUser, oldPassword, newPasswo
       throw new M.NotFoundError('User not found.', 'warn');
     }
 
-    // Check if requesting and target user are the same
-    if (reqUser._id !== tarUser) {
-      // Find the requesting user
-      const adminUserQuery = { _id: reqUser._id };
-      const adminUser = await User.findOne(adminUserQuery);
-
-      // Ensure the user was found
-      if (adminUser === null) {
-        throw new M.NotFoundError('User not found.', 'warn');
-      }
-
-      // Ensure the user is an admin
-      if (!adminUser.admin) {
-        throw new M.PermissionError('Cannot set another user\'s password.', 'warn');
-      }
+    // Check if requesting and target user are the same, and requesting user is not an admin
+    if (reqUser._id !== tarUser && !reqUser.admin) {
+      throw new M.PermissionError('Cannot set another user\'s password.', 'warn');
     }
-    else {
+    else if (reqUser._id === tarUser) {
       // Verify the old password matches
       const verified = await User.verifyPassword(foundUser, oldPassword);
 

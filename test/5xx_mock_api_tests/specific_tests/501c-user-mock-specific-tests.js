@@ -90,7 +90,8 @@ describe(M.getModuleName(module.filename), () => {
 
 /* --------------------( Tests )-------------------- */
 /**
- * @description Verifies mock PATCH request to update a user's own password.
+ * @description Verifies mock PATCH request to update another user's password as
+ * an admin.
  *
  * @param {Function} done - The mocha callback.
  */

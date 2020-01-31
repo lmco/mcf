@@ -4246,10 +4246,12 @@ api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/elements/:element
 api.route('/orgs/:orgid/projects/:projectid/artifacts/list')
 .get(
   AuthController.authenticate,
+  Middleware.expiredPassword,
   Middleware.logRoute,
   Middleware.pluginPre('listBlobs'),
   APIController.listBlobs,
   Middleware.pluginPost('listBlobs'),
+  Middleware.logResponse,
   Middleware.respond
 );
 

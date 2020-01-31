@@ -11,7 +11,7 @@
  *
  * @author Phillip Lee
  *
- * @description Implements an artifact storage strategy using Amazon s3,
+ * @description Implements an artifact storage strategy using Amazon S3,
  * a cloud storage service. This strategy uses the aws-sdk library.
  */
 // Define the root storage path for blobs
@@ -98,7 +98,7 @@ async function listBlobs(artMetadata) {
         break;
       }
       else {
-        // Objects Found, set if truncated
+        // Objects found, set isTruncated
         isTruncated = foundObj.IsTruncated;
 
         // Loop through each found object
@@ -190,9 +190,9 @@ async function postBlob(artMetadata, artifactBlob) {
       Body: artifactBlob
     };
 
-    // Check object exist
+    // Check object exists
     if (await doesObjectExist(params.Bucket, params.Key)) {
-      // Object Exist, throw error
+      // Object exists, throw error
       throw new M.DataFormatError('Artifact blob already exists.', 'warn');
     }
 
@@ -288,7 +288,7 @@ async function deleteBlob(artMetadata) {
 
     // Check object does NOT exist
     if (!(await doesObjectExist(params.Bucket, params.Key))) {
-      // Object does NOT Exist, throw error
+      // Object does NOT exist, throw error
       throw new M.DataFormatError('Artifact blob not found.', 'warn');
     }
 
