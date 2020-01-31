@@ -1038,8 +1038,11 @@ async function updatePassword(requestingUser, targetUser, oldPassword, newPasswo
     User.hashPassword(foundUser);
 
     // Save the user with the updated password
-    await User.updateOne(userQuery, { password: foundUser.password,
-      oldPasswords: oldPasswords });
+    await User.updateOne(userQuery, {
+      password: foundUser.password,
+      oldPasswords: oldPasswords,
+      changePassword: reqUser._id !== tarUser
+    });
 
     // Find and return the updated user
     return await User.findOne(userQuery);

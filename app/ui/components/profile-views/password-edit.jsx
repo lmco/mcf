@@ -49,7 +49,8 @@ class PasswordEdit extends Component {
       confirmNewPassword: '',
       newPasswordInvalid: false,
       noOldPassword: sessionUser.admin && sessionUser.username !== this.props.user.username,
-      error: null
+      error: null,
+      sessionUser: sessionUser
     };
 
     // Bind component functions
@@ -110,7 +111,14 @@ class PasswordEdit extends Component {
       contentType: 'application/json',
       data: JSON.stringify(data),
       statusCode: {
-        200: () => this.props.toggle(),
+        200: () => {
+          this.props.toggle();
+
+          // Destroy the session if user changed their own password
+          if (this.state.sessionUser.username === this.props.user.username) {
+            window.sessionStorage.removeItem('mbee-user');
+          }
+        },
         400: (err) => {
           this.setState({ error: err.responseText });
         },
@@ -149,7 +157,7 @@ class PasswordEdit extends Component {
     return (
       <div id='workspace'>
         <div className='workspace-header'>
-          <h2 className='workspace-title workspace-title-padding'>Password Edit</h2>
+          <h2 className='workspace-title workspace-title-padding'>Change Password</h2>
         </div>
         <div id='workspace-body' className='extra-padding'>
           <div className='main-workspace'>
@@ -199,13 +207,17 @@ class PasswordEdit extends Component {
                        invalid={confirmPasswordInvalid}
                        onChange={this.handleChange}/>
                 <FormFeedback>
-                  Invalid: Password are not the same.
+                  Invalid: Passwords are not the same.
                 </FormFeedback>
               </FormGroup>
               {/* Button to submit or cancel */}
-              <Button outline color='primary' disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
+              <Button outline color='primary'
+                      disabled={disableSubmit}
+                      onClick={this.onSubmit}> Submit </Button>
               {' '}
-              <Button outline onClick={this.props.toggle}> Cancel </Button>
+              <Button outline
+                      disabled={this.props.passwordExpired}
+                      onClick={this.props.toggle}> Cancel </Button>
             </Form>
           </div>
         </div>

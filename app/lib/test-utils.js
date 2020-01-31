@@ -120,7 +120,8 @@ module.exports.createTestAdmin = async function() {
         _id: testData.adminUser.username,
         password: testData.adminUser.password,
         provider: 'local',
-        admin: true
+        admin: true,
+        changePassword: false
       };
 
       User.hashPassword(user);

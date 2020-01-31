@@ -34,10 +34,14 @@ class Profile extends Component {
     // Initialize parent props
     super(props);
 
+    const { changePassword } = this.props.user;
+
     // Initialize state props
     this.state = {
       modal: false,
-      editPasswordModal: false
+      editPasswordModal: changePassword,
+      passwordExpired: changePassword,
+      staticBackdrop: (changePassword) ? 'static' : true
     };
 
     // Bind component functions
@@ -58,6 +62,7 @@ class Profile extends Component {
   // Define toggle function
   togglePasswordModal() {
     // Open or close modal
+    this.setState({ modal: false });
     this.setState({ editPasswordModal: !this.state.editPasswordModal });
   }
 
@@ -78,9 +83,13 @@ class Profile extends Component {
                               toggle={this.handleToggle}/>
           </ModalBody>
         </Modal>
-        <Modal isOpen={this.state.editPasswordModal} toggle={this.togglePasswordModal}>
+        <Modal isOpen={this.state.editPasswordModal}
+               toggle={this.togglePasswordModal}
+               backdrop={this.state.staticBackdrop}>
           <ModalBody>
-              <PasswordEdit user={this.props.user} toggle={this.togglePasswordModal}/>
+              <PasswordEdit user={this.props.user}
+                            toggle={this.togglePasswordModal}
+                            passwordExpired={this.state.passwordExpired}/>
           </ModalBody>
         </Modal>
         <div id='workspace'>
