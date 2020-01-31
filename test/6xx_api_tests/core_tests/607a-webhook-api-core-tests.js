@@ -77,13 +77,13 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET a webhook', getWebhook);
   it('should GET multiple webhooks', getWebhooks);
   it('should GET all webhooks', getAllWebhooks);
-  // // ------------ PATCH ------------
+  // ------------ PATCH ------------
   it('should PATCH a webhook', patchWebhook);
   it('should PATCH multiple webhooks', patchWebhooks);
-  // // ------------ DELETE ------------
+  // ------------ DELETE ------------
   it('should DELETE a webhook', deleteWebhook);
   it('should DELETE multiple webhooks', deleteWebhooks);
-  // // --------- POST (trigger) ---------
+  // --------- POST (trigger) ---------
   it('should trigger an incoming webhook', triggerWebhook);
 });
 

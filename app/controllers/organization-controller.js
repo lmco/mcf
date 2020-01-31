@@ -927,9 +927,7 @@ async function remove(requestingUser, orgs, options) {
 
     const promises = [];
     // Remove all blobs under org
-    foundOrgIDs.forEach((orgID) => {
-      promises.push(ArtifactStrategy.clear(orgID));
-    });
+    foundOrgIDs.forEach((orgID) => promises.push(ArtifactStrategy.clear(orgID)));
     await Promise.all(promises);
 
 
