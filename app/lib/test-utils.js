@@ -493,7 +493,7 @@ module.exports.createRequest = function(user, params, body, method, query = {}) 
   if (typeof params !== 'object') {
     throw M.DataFormatError('params is not of type object.', 'warn');
   }
-  if (typeof params !== 'object') {
+  if (typeof body !== 'object') {
     throw M.DataFormatError('body is not of type object.', 'warn');
   }
 
