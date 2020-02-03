@@ -447,8 +447,16 @@ module.exports.parseRegEx = function(configObj) {
   if (configObj.hasOwnProperty('validators')) {
     Object.keys(configObj.validators).forEach((key) => {
       // Remove ^ and $ from custom validator regex strings
-      configObj.validators[key] = configObj.validators[key].replace('^', '');
-      configObj.validators[key] = configObj.validators[key].replace('$', '');
+      if (typeof configObj.validators[key] === 'string' && !key.includes('length')) {
+        configObj.validators[key] = configObj.validators[key].replace(/\^|\$/g, (match, offset, string) => {
+          if (offset !== 0 && string[offset - 1] === '\'') {
+            return match;
+          }
+          else {
+            return '';
+          }
+        });
+      }
     });
   }
 };
