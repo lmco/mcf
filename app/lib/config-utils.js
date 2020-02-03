@@ -436,3 +436,19 @@ module.exports.removeComments = function(inputString) {
   // Return the now-valid JSON
   return arrCommRem.join('\n');
 };
+
+/**
+ * @description Removes '^' and '$' from the RegEx of custom validators because those characters
+ * are factored in in the validators.js file.
+ *
+ * @param {object} configObj - The config object, before it gets frozen on the M object.
+ */
+module.exports.parseRegEx = function(configObj) {
+  if (configObj.hasOwnProperty('validators')) {
+    Object.keys(configObj.validators).forEach((key) => {
+      // Remove ^ and $ from custom validator regex strings
+      configObj.validators[key] = configObj.validators[key].replace('^', '');
+      configObj.validators[key] = configObj.validators[key].replace('$', '');
+    });
+  }
+};
