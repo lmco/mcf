@@ -446,10 +446,11 @@ module.exports.removeComments = function(inputString) {
 module.exports.parseRegEx = function(configObj) {
   if (configObj.hasOwnProperty('validators')) {
     Object.keys(configObj.validators).forEach((key) => {
-      // Remove ^ and $ from custom validator regex strings
+      // Only search custom id validators, not id length validators
       if (typeof configObj.validators[key] === 'string' && !key.includes('length')) {
+        // Remove ^ and $ from custom validator regex strings
         configObj.validators[key] = configObj.validators[key].replace(/\^|\$/g, (match, offset, string) => {
-          if (offset !== 0 && string[offset - 1] === '\'') {
+          if (offset !== 0 && string[offset - 1] === '\\') {
             return match;
           }
           else {
