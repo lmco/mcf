@@ -11,8 +11,8 @@
  *
  * @author Phillip Lee
  *
- * @description Implements an artifact strategy for local
- * artifact storage. This should be the default artifact strategy for MBEE.
+ * @description Implements an artifact strategy for local artifact storage. This
+ * should be the default artifact strategy for MBEE.
  */
 
 // Define the root storage path for blobs

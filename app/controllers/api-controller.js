@@ -453,7 +453,7 @@ async function getOrgs(req, res, next) {
 
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org', options))
+      orgs.map(o => publicData.getPublicData(req.user, o, 'org', options))
     );
 
     // Format JSON
@@ -537,7 +537,7 @@ async function postOrgs(req, res, next) {
     const orgs = await OrgController.create(req.user, orgData, options);
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org', options))
+      orgs.map(o => publicData.getPublicData(req.user, o, 'org', options))
     );
 
     // Format JSON
@@ -622,7 +622,7 @@ async function putOrgs(req, res, next) {
     const orgs = await OrgController.createOrReplace(req.user, orgData, options);
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org', options))
+      orgs.map(o => publicData.getPublicData(req.user, o, 'org', options))
     );
 
     // Format JSON
@@ -706,7 +706,7 @@ async function patchOrgs(req, res, next) {
     const orgs = await OrgController.update(req.user, orgData, options);
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org', options))
+      orgs.map(o => publicData.getPublicData(req.user, o, 'org', options))
     );
 
     // Format JSON
@@ -849,7 +849,7 @@ async function getOrg(req, res, next) {
 
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org', options))
+      orgs.map(o => publicData.getPublicData(req.user, o, 'org', options))
     );
 
     // Format JSON
@@ -935,7 +935,7 @@ async function postOrg(req, res, next) {
     const orgs = await OrgController.create(req.user, req.body, options);
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org', options))
+      orgs.map(o => publicData.getPublicData(req.user, o, 'org', options))
     );
 
     // Format JSON
@@ -1021,7 +1021,7 @@ async function putOrg(req, res, next) {
     const orgs = await OrgController.createOrReplace(req.user, req.body, options);
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org', options))
+      orgs.map(o => publicData.getPublicData(req.user, o, 'org', options))
     );
 
     // Format JSON
@@ -1106,7 +1106,7 @@ async function patchOrg(req, res, next) {
     const orgs = await OrgController.update(req.user, req.body, options);
     // Get the public data of each org
     const orgsPublicData = sani.html(
-      orgs.map(o => publicData.getPublicData(o, 'org', options))
+      orgs.map(o => publicData.getPublicData(req.user, o, 'org', options))
     );
 
     // Format JSON
@@ -1262,7 +1262,7 @@ async function getAllProjects(req, res, next) {
     }
 
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project', options))
+      projects.map(p => publicData.getPublicData(req.user, p, 'project', options))
     );
 
     // Format JSON
@@ -1373,7 +1373,7 @@ async function getProjects(req, res, next) {
     }
 
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project', options))
+      projects.map(p => publicData.getPublicData(req.user, p, 'project', options))
     );
 
     // Format JSON
@@ -1457,7 +1457,7 @@ async function postProjects(req, res, next) {
     const projects = await ProjectController.create(req.user, req.params.orgid, projectData,
       options);
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project', options))
+      projects.map(p => publicData.getPublicData(req.user, p, 'project', options))
     );
 
     // Format JSON
@@ -1542,7 +1542,7 @@ async function putProjects(req, res, next) {
     const projects = await ProjectController.createOrReplace(req.user, req.params.orgid,
       projectData, options);
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project', options))
+      projects.map(p => publicData.getPublicData(req.user, p, 'project', options))
     );
 
     // Format JSON
@@ -1626,7 +1626,7 @@ async function patchProjects(req, res, next) {
     const projects = await ProjectController.update(req.user, req.params.orgid,
       projectData, options);
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project', options))
+      projects.map(p => publicData.getPublicData(req.user, p, 'project', options))
     );
 
     // Format JSON
@@ -1772,7 +1772,7 @@ async function getProject(req, res, next) {
     }
 
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project', options))
+      projects.map(p => publicData.getPublicData(req.user, p, 'project', options))
     );
 
     // Format JSON
@@ -1857,7 +1857,7 @@ async function postProject(req, res, next) {
     // NOTE: create() sanitizes req.params.orgid and req.body
     const projects = await ProjectController.create(req.user, req.params.orgid, req.body, options);
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project', options))
+      projects.map(p => publicData.getPublicData(req.user, p, 'project', options))
     );
 
     // Format JSON
@@ -1943,7 +1943,7 @@ async function putProject(req, res, next) {
     const projects = await ProjectController.createOrReplace(req.user, req.params.orgid,
       req.body, options);
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project', options))
+      projects.map(p => publicData.getPublicData(req.user, p, 'project', options))
     );
 
     // Format JSON
@@ -2028,7 +2028,7 @@ async function patchProject(req, res, next) {
     const projects = await ProjectController.update(req.user, req.params.orgid,
       req.body, options);
     const publicProjectData = sani.html(
-      projects.map(p => publicData.getPublicData(p, 'project', options))
+      projects.map(p => publicData.getPublicData(req.user, p, 'project', options))
     );
 
     // Format JSON
@@ -2192,11 +2192,8 @@ async function getUsers(req, res, next) {
     // NOTE: find() sanitizes req.usernames
     const users = await UserController.find(req.user, usernames, options);
 
-    // Set the failedlogins parameter to true if the requesting user is an admin
-    if (req.user.admin) options.failedlogins = true;
-
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user', options))
+      users.map(u => publicData.getPublicData(req.user, u, 'user', options))
     );
 
     // Verify users public data array is not empty
@@ -2285,7 +2282,7 @@ async function postUsers(req, res, next) {
     // NOTE: create() sanitizes userData
     const users = await UserController.create(req.user, userData, options);
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user', options))
+      users.map(u => publicData.getPublicData(req.user, u, 'user', options))
     );
 
     // Format JSON
@@ -2369,7 +2366,7 @@ async function putUsers(req, res, next) {
     // NOTE: createOrReplace() sanitizes userData
     const users = await UserController.createOrReplace(req.user, userData, options);
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user', options))
+      users.map(u => publicData.getPublicData(req.user, u, 'user', options))
     );
 
     // Format JSON
@@ -2453,7 +2450,7 @@ async function patchUsers(req, res, next) {
     // NOTE: update() sanitizes userData
     const users = await UserController.update(req.user, userData, options);
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user', options))
+      users.map(u => publicData.getPublicData(req.user, u, 'user', options))
     );
 
     // Format JSON
@@ -2590,11 +2587,8 @@ async function getUser(req, res, next) {
       );
     }
 
-    // Set the failedlogins parameter to true if the requesting user is an admin
-    if (req.user.admin) options.failedlogins = true;
-
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user', options))
+      users.map(u => publicData.getPublicData(req.user, u, 'user', options))
     );
 
     // Format JSON
@@ -2679,7 +2673,7 @@ async function postUser(req, res, next) {
     // NOTE: create() sanitizes req.body
     const users = await UserController.create(req.user, req.body, options);
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user', options))
+      users.map(u => publicData.getPublicData(req.user, u, 'user', options))
     );
 
     // Format JSON
@@ -2764,7 +2758,7 @@ async function putUser(req, res, next) {
     // NOTE: createOrReplace() sanitizes req.body
     const users = await UserController.createOrReplace(req.user, req.body, options);
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user', options))
+      users.map(u => publicData.getPublicData(req.user, u, 'user', options))
     );
 
     // Format JSON
@@ -2849,7 +2843,7 @@ async function patchUser(req, res, next) {
     // NOTE: update() sanitizes req.body
     const users = await UserController.update(req.user, req.body, options);
     const publicUserData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user', options))
+      users.map(u => publicData.getPublicData(req.user, u, 'user', options))
     );
 
     // Format JSON
@@ -2980,7 +2974,7 @@ async function whoami(req, res, next) {
   }
 
   const publicUserData = sani.html(
-    publicData.getPublicData(req.user, 'user', options)
+    publicData.getPublicData(req.user, req.user, 'user', options)
   );
 
   // Format JSON
@@ -3058,11 +3052,8 @@ async function searchUsers(req, res, next) {
       throw new M.NotFoundError('No users found.', 'warn');
     }
 
-    // Set the failedlogins parameter to true if the requesting user is an admin
-    if (req.user.admin) options.failedlogins = true;
-
     const usersPublicData = sani.html(
-      users.map(u => publicData.getPublicData(u, 'user', options))
+      users.map(u => publicData.getPublicData(req.user, u, 'user', options))
     );
 
     // Format JSON
@@ -3106,10 +3097,15 @@ async function patchPassword(req, res, next) {
   // Sanity Check: there should always be a user in the request
   if (!req.user) return noUserError(req, res, next);
 
-  // Ensure old password was provided
+  // Ensure old password was provided if user is changing their own password
   if (!req.body.oldPassword) {
-    const error = new M.DataFormatError('Old password not in request body.', 'warn');
-    return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
+    if (req.user._id !== req.params.username) {
+      req.body.oldPassword = null;
+    }
+    else {
+      const error = new M.DataFormatError('Old password not in request body.', 'warn');
+      return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
+    }
   }
 
   // Ensure new password was provided
@@ -3121,12 +3117,6 @@ async function patchPassword(req, res, next) {
   // Ensure confirmed password was provided
   if (!req.body.confirmPassword) {
     const error = new M.DataFormatError('Confirmed password not in request body.', 'warn');
-    return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
-  }
-
-  // Ensure user is not trying to change another user's password
-  if (req.user._id !== req.params.username) {
-    const error = new M.OperationError('Cannot change another user\'s password.', 'warn');
     return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
@@ -3148,10 +3138,10 @@ async function patchPassword(req, res, next) {
 
   try {
     // Update the password
-    const user = await UserController.updatePassword(req.user, req.body.oldPassword,
-      req.body.password, req.body.confirmPassword);
+    const user = await UserController.updatePassword(req.user, req.params.username,
+      req.body.oldPassword, req.body.password, req.body.confirmPassword);
     const publicUserData = sani.html(
-      publicData.getPublicData(user, 'user', options)
+      publicData.getPublicData(req.user, user, 'user', options)
     );
 
     // Format JSON
@@ -3276,7 +3266,7 @@ async function getElements(req, res, next) {
     const elements = await ElementController.find(req.user, req.params.orgid, req.params.projectid,
       req.params.branchid, elemIDs, options);
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element', options))
+      elements.map(e => publicData.getPublicData(req.user, e, 'element', options))
     );
 
     // Verify elements public data array is not empty
@@ -3400,7 +3390,7 @@ async function postElements(req, res, next) {
     const elements = await ElementController.create(req.user, req.params.orgid,
       req.params.projectid, req.params.branchid, elementData, options);
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element', options))
+      elements.map(e => publicData.getPublicData(req.user, e, 'element', options))
     );
 
     // Format JSON
@@ -3485,7 +3475,7 @@ async function putElements(req, res, next) {
     const elements = await ElementController.createOrReplace(req.user, req.params.orgid,
       req.params.projectid, req.params.branchid, elementData, options);
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element', options))
+      elements.map(e => publicData.getPublicData(req.user, e, 'element', options))
     );
 
     // Format JSON
@@ -3569,7 +3559,7 @@ async function patchElements(req, res, next) {
     const elements = await ElementController.update(req.user, req.params.orgid,
       req.params.projectid, req.params.branchid, elementData, options);
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element', options))
+      elements.map(e => publicData.getPublicData(req.user, e, 'element', options))
     );
 
     // Format JSON
@@ -3744,7 +3734,7 @@ async function searchElements(req, res, next) {
     }
 
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element', options))
+      elements.map(e => publicData.getPublicData(req.user, e, 'element', options))
     );
 
     // Format JSON
@@ -3822,7 +3812,7 @@ async function getElement(req, res, next) {
     }
 
     let elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element', options))
+      elements.map(e => publicData.getPublicData(req.user, e, 'element', options))
     );
 
     // If the subtree option was not provided, return only the first element
@@ -3912,7 +3902,7 @@ async function postElement(req, res, next) {
     const elements = await ElementController.create(req.user, req.params.orgid,
       req.params.projectid, req.params.branchid, req.body, options);
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element', options))
+      elements.map(e => publicData.getPublicData(req.user, e, 'element', options))
     );
 
     // Format JSON
@@ -3998,7 +3988,7 @@ async function putElement(req, res, next) {
     const elements = await ElementController.createOrReplace(req.user, req.params.orgid,
       req.params.projectid, req.params.branchid, req.body, options);
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element', options))
+      elements.map(e => publicData.getPublicData(req.user, e, 'element', options))
     );
 
     // Format JSON
@@ -4083,7 +4073,7 @@ async function patchElement(req, res, next) {
     const elements = await ElementController.update(req.user, req.params.orgid,
       req.params.projectid, req.params.branchid, req.body, options);
     const elementsPublicData = sani.html(
-      elements.map(e => publicData.getPublicData(e, 'element', options))
+      elements.map(e => publicData.getPublicData(req.user, e, 'element', options))
     );
 
     // Format JSON
@@ -4253,7 +4243,7 @@ async function getBranches(req, res, next) {
     const branches = await BranchController.find(req.user, req.params.orgid, req.params.projectid,
       branchIDs, options);
     const branchesPublicData = sani.html(
-      branches.map(b => publicData.getPublicData(b, 'branch', options))
+      branches.map(b => publicData.getPublicData(req.user, b, 'branch', options))
     );
 
     // Verify branches public data array is not empty
@@ -4342,7 +4332,7 @@ async function postBranches(req, res, next) {
     const branches = await BranchController.create(req.user, req.params.orgid, req.params.projectid,
       branchData, options);
     const publicBranchData = sani.html(
-      branches.map(b => publicData.getPublicData(b, 'branch', options))
+      branches.map(b => publicData.getPublicData(req.user, b, 'branch', options))
     );
 
     // Format JSON
@@ -4426,7 +4416,7 @@ async function patchBranches(req, res, next) {
     const branches = await BranchController.update(req.user, req.params.orgid, req.params.projectid,
       branchData, options);
     const branchesPublicData = sani.html(
-      branches.map(b => publicData.getPublicData(b, 'branch', options))
+      branches.map(b => publicData.getPublicData(req.user, b, 'branch', options))
     );
 
     // Format JSON
@@ -4571,7 +4561,7 @@ async function getBranch(req, res, next) {
     }
 
     const publicBranchData = sani.html(
-      branch.map(b => publicData.getPublicData(b, 'branch', options))
+      branch.map(b => publicData.getPublicData(req.user, b, 'branch', options))
     );
 
     // Format JSON
@@ -4656,7 +4646,7 @@ async function postBranch(req, res, next) {
     const branch = await BranchController.create(req.user, req.params.orgid, req.params.projectid,
       req.body, options);
     const branchesPublicData = sani.html(
-      branch.map(b => publicData.getPublicData(b, 'branch', options))
+      branch.map(b => publicData.getPublicData(req.user, b, 'branch', options))
     );
 
     // Format JSON
@@ -4741,7 +4731,7 @@ async function patchBranch(req, res, next) {
     const branch = await BranchController.update(req.user, req.params.orgid, req.params.projectid,
       req.body, options);
     const branchPublicData = sani.html(
-      branch.map(b => publicData.getPublicData(b, 'branch', options))
+      branch.map(b => publicData.getPublicData(req.user, b, 'branch', options))
     );
 
     // Format JSON
@@ -4915,7 +4905,7 @@ async function getArtifacts(req, res, next) {
     const artifacts = await ArtifactController.find(req.user, req.params.orgid,
       req.params.projectid, req.params.branchid, artIDs, options);
     const artifactsPublicData = sani.html(
-      artifacts.map(a => publicData.getPublicData(a, 'artifact', options))
+      artifacts.map(a => publicData.getPublicData(req.user, a, 'artifact', options))
     );
 
     // Verify artifacts public data array is not empty
@@ -5037,7 +5027,7 @@ async function postArtifacts(req, res, next) {
       req.params.projectid, req.params.branchid, artifactData, options);
 
     const artifactsPublicData = sani.html(
-      artifacts.map(a => publicData.getPublicData(a, 'artifact', options))
+      artifacts.map(a => publicData.getPublicData(req.user, a, 'artifact', options))
     );
 
     // Format JSON
@@ -5122,7 +5112,7 @@ async function patchArtifacts(req, res, next) {
       req.params.projectid, req.params.branchid, artifactData, options);
 
     const artifactsPublicData = sani.html(
-      artifacts.map(a => publicData.getPublicData(a, 'artifact', options))
+      artifacts.map(a => publicData.getPublicData(req.user, a, 'artifact', options))
     );
 
     // Format JSON
@@ -5280,7 +5270,7 @@ async function getArtifact(req, res, next) {
     }
 
     const publicArtifactData = sani.html(
-      artifact.map(a => publicData.getPublicData(a, 'artifact', options))
+      artifact.map(a => publicData.getPublicData(req.user, a, 'artifact', options))
     );
 
     // Format JSON
@@ -5366,7 +5356,7 @@ async function postArtifact(req, res, next) {
       req.params.projectid, req.params.branchid, req.body, options);
 
     const artifactsPublicData = sani.html(
-      artifact.map(a => publicData.getPublicData(a, 'artifact', options))
+      artifact.map(a => publicData.getPublicData(req.user, a, 'artifact', options))
     );
     // Format JSON
     const json = formatJSON(artifactsPublicData[0], minified);
@@ -5453,7 +5443,7 @@ async function patchArtifact(req, res, next) {
       req.params.projectid, req.params.branchid, req.body, options);
 
     const artifactsPublicData = sani.html(
-      artifact.map(a => publicData.getPublicData(a, 'artifact', options))
+      artifact.map(a => publicData.getPublicData(req.user, a, 'artifact', options))
     );
 
     // Format JSON
@@ -5863,7 +5853,7 @@ async function getWebhooks(req, res, next) {
 
     // Get public data of webhooks
     const webhooksPublicData = sani.html(
-      webhooks.map((w) => publicData.getPublicData(w, 'webhook', options))
+      webhooks.map((w) => publicData.getPublicData(req.user, w, 'webhook', options))
     );
 
     // Verify the webhooks public data array is not empty
@@ -5939,7 +5929,7 @@ async function postWebhooks(req, res, next) {
 
     // Get the webhooks' public data
     const webhookPublicData = sani.html(
-      webhooks.map((w) => publicData.getPublicData(w, 'webhook', options))
+      webhooks.map((w) => publicData.getPublicData(req.user, w, 'webhook', options))
     );
 
     // Format JSON
@@ -6010,7 +6000,7 @@ async function patchWebhooks(req, res, next) {
 
     // Get the webhooks' public data
     const webhookPublicData = sani.html(
-      webhooks.map((w) => publicData.getPublicData(w, 'webhook', options))
+      webhooks.map((w) => publicData.getPublicData(req.user, w, 'webhook', options))
     );
 
     // Format JSON
@@ -6154,7 +6144,7 @@ async function getWebhook(req, res, next) {
 
     // Get the public data for the webhook
     const webhookPublicData = sani.html(
-      publicData.getPublicData(webhook, 'webhook', options)
+      publicData.getPublicData(req.user, webhook, 'webhook', options)
     );
 
     // Format JSON
@@ -6242,7 +6232,7 @@ async function patchWebhook(req, res, next) {
 
     // Get the webhook public data
     const webhookPublicData = sani.html(
-      publicData.getPublicData(webhook, 'webhook', options)
+      publicData.getPublicData(req.user, webhook, 'webhook', options)
     );
 
     // Format JSON
