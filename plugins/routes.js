@@ -25,7 +25,6 @@ const express = require('express');
 const pluginRouter = express.Router();
 
 const protectedFileNames = ['routes.js'];
-const rmd = (process.platform === 'win32') ? 'RMDIR /S /Q' : 'rm -rf';
 
 // Load the plugins
 loadPlugins();
@@ -35,7 +34,7 @@ loadPlugins();
  * the plugins directory, then loops over those plugins to "require" them and
  * use them as part of the plugins routes.
  */
-function loadPlugins() {
+async function loadPlugins() {
   const loadedPlugins = [];
   const plugins = M.config.server.plugins.plugins;
 
@@ -88,17 +87,15 @@ function loadPlugins() {
     // Removes old plugins
     if (!pluginNames.includes(f)) {
       M.log.info(`Removing plugin '${f}' ...`);
-      const c = `${rmd} ${path.join(__dirname, f)}`;
-      const stdout = execSync(c);
-      M.log.verbose(stdout.toString());
+      const stdout = await fsExtra.remove(`${path.join(__dirname, f)}`);
+      M.log.verbose(stdout);
     }
     // If package.json doesn't exist, it is not a valid plugin. Skip it.
     const pluginPath = path.join(__dirname, f);
     if (!fs.existsSync(path.join(pluginPath, 'package.json'))) {
       M.log.info(`Removing invalid plugin '${f}' ...`);
-      const c = `${rmd} ${path.join(__dirname, f)}`;
-      const stdout = execSync(c);
-      M.log.verbose(stdout.toString());
+      const stdout = await fsExtra.remove(`${path.join(__dirname, f)}`);
+      M.log.verbose(stdout);
       return;
     }
 
@@ -194,10 +191,10 @@ function loadPlugins() {
  *
  * @param {object} data - The plugin configuration data.
  */
-function clonePluginFromGitRepo(data) {
+async function clonePluginFromGitRepo(data) {
   // Remove plugin if it already exists in plugins directory
-  const stdoutRmCmd = execSync(`${rmd} ${path.join(M.root, 'plugins', data.name)}`);
-  M.log.verbose(stdoutRmCmd.toString());
+  const stdoutRmCmd = await fsExtra.remove(`${path.join(M.root, 'plugins', data.name)}`);
+  M.log.verbose(stdoutRmCmd);
 
   try {
     // Set deploy key file permissions
@@ -237,11 +234,11 @@ function clonePluginFromGitRepo(data) {
  *
  * @param {object} data - The plugin configuration data.
  */
-function copyPluginFromLocalDir(data) {
+async function copyPluginFromLocalDir(data) {
   // Remove plugin if it already exists in plugins directory
   if (fs.existsSync(path.join(M.root, 'plugins', data.name))) {
-    const stdoutRmCmd = execSync(`${rmd} ${path.join(M.root, 'plugins', data.name)}`);
-    M.log.verbose(stdoutRmCmd.toString());
+    const stdoutRmCmd = await fsExtra.remove(`${path.join(M.root, 'plugins', data.name)}`);
+    M.log.verbose(stdoutRmCmd);
   }
 
   // Making the directory for the plugin
@@ -260,10 +257,10 @@ function copyPluginFromLocalDir(data) {
  *
  * @param {object} data - The plugin configuration data.
  */
-function downloadPluginFromWebsite(data) {
+async function downloadPluginFromWebsite(data) {
   // Remove plugin if it already exists in plugins directory
-  const stdoutRmCmd = execSync(`${rmd} ${path.join(M.root, 'plugins', data.name)}`);
-  M.log.verbose(stdoutRmCmd.toString());
+  const stdoutRmCmd = await fsExtra.remove(`${path.join(M.root, 'plugins', data.name)}`);
+  M.log.verbose(stdoutRmCmd);
 
   // Proxy information
   const httpProxy = M.config.server.proxy;

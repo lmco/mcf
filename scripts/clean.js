@@ -19,11 +19,9 @@
 
 // Node modules
 const fs = require('fs');
-const { execSync } = require('child_process');
+const fsExtra = require('fs-extra');
 const path = require('path');
 
-const rmd = (process.platform === 'win32') ? 'RMDIR /S /Q' : 'rm -rf';
-const rmf = (process.platform === 'win32') ? 'DEL /S /Q' : 'rm -rf';
 // eslint-disable-next-line no-console
 const log = (module.parent == null || typeof M === 'undefined') ? console.log : M.log.info;
 
@@ -51,7 +49,7 @@ if (module.parent == null || typeof M === 'undefined') {
  *
  * @param {string} _args - Additional options to pass into the clean function.
  */
-function clean(_args) {
+async function clean(_args) {
   const root = path.join(__dirname, '..');
 
   log('Cleaning MBEE...');
@@ -62,19 +60,19 @@ function clean(_args) {
   // Clean logs
   if (args.length === 0 || args.includes('--all')) {
     log('Cleaning logs...');
-    execSync(`${rmd} ${path.join(root, 'build')} ${path.join(root, 'logs')}`);
+    await fsExtra.remove(`${path.join(root, 'build')} ${path.join(root, 'logs')}`);
   }
 
   // Clean data
   if (args.includes('--all') || args.includes('--data')) {
     log('Cleaning data directory...');
-    execSync(`${rmf} ${path.join(root, 'data', '*')}`);
+    await fsExtra.remove(`${path.join(root, 'data', '*')}`);
   }
 
   // Clean node_modules
   if (args.includes('--all') || args.includes('--node-modules')) {
     log('Cleaning node_modules...');
-    execSync(`${rmd} ${path.join(root, 'node_modules')}`);
+    await fsExtra.remove(`${path.join(root, 'node_modules')}`);
   }
 
   // Clean plugins
@@ -92,8 +90,7 @@ function clean(_args) {
 
     // Format the string, concatenating full paths of all plugins
     const deleteString = plugins.map(p => path.join(root, 'plugins', p)).join(' ');
-
-    execSync(`${rmd} ${deleteString}`);
+    await fsExtra.remove(`${deleteString}`);
   }
 
   log('MBEE Cleaned.');
