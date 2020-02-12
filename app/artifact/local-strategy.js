@@ -357,13 +357,13 @@ function validateBlobMeta(artMetadata) {
  *
  * @param {string} clearPath - Path to clear.
  */
-async function clear(clearPath) {
+function clear(clearPath) {
   try {
     // Create the root artifact path
     const dirToDelete = path.join(M.root, rootStoragePath, clearPath);
 
     // Remove artifacts
-    await fsExtra.remove(`${dirToDelete}`);
+    fsExtra.removeSync(`${dirToDelete}`);
   }
   catch (err) {
     throw errors.captureError(err);

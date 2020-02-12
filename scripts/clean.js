@@ -49,7 +49,7 @@ if (module.parent == null || typeof M === 'undefined') {
  *
  * @param {string} _args - Additional options to pass into the clean function.
  */
-async function clean(_args) {
+function clean(_args) {
   const root = path.join(__dirname, '..');
 
   log('Cleaning MBEE...');
@@ -60,19 +60,19 @@ async function clean(_args) {
   // Clean logs
   if (args.length === 0 || args.includes('--all')) {
     log('Cleaning logs...');
-    await fsExtra.remove(`${path.join(root, 'build')} ${path.join(root, 'logs')}`);
+    fsExtra.removeSync(`${path.join(root, 'build')} ${path.join(root, 'logs')}`);
   }
 
   // Clean data
   if (args.includes('--all') || args.includes('--data')) {
     log('Cleaning data directory...');
-    await fsExtra.remove(`${path.join(root, 'data', '*')}`);
+    fsExtra.removeSync(`${path.join(root, 'data', '*')}`);
   }
 
   // Clean node_modules
   if (args.includes('--all') || args.includes('--node-modules')) {
     log('Cleaning node_modules...');
-    await fsExtra.remove(`${path.join(root, 'node_modules')}`);
+    fsExtra.removeSync(`${path.join(root, 'node_modules')}`);
   }
 
   // Clean plugins
@@ -90,7 +90,7 @@ async function clean(_args) {
 
     // Format the string, concatenating full paths of all plugins
     const deleteString = plugins.map(p => path.join(root, 'plugins', p)).join(' ');
-    await fsExtra.remove(`${deleteString}`);
+    fsExtra.removeSync(`${deleteString}`);
   }
 
   log('MBEE Cleaned.');

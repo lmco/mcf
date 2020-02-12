@@ -34,7 +34,7 @@ loadPlugins();
  * the plugins directory, then loops over those plugins to "require" them and
  * use them as part of the plugins routes.
  */
-async function loadPlugins() {
+function loadPlugins() {
   const loadedPlugins = [];
   const plugins = M.config.server.plugins.plugins;
 
@@ -87,15 +87,13 @@ async function loadPlugins() {
     // Removes old plugins
     if (!pluginNames.includes(f)) {
       M.log.info(`Removing plugin '${f}' ...`);
-      const stdout = await fsExtra.remove(`${path.join(__dirname, f)}`);
-      M.log.verbose(stdout);
+      fsExtra.removeSync(`${path.join(__dirname, f)}`);
     }
     // If package.json doesn't exist, it is not a valid plugin. Skip it.
     const pluginPath = path.join(__dirname, f);
     if (!fs.existsSync(path.join(pluginPath, 'package.json'))) {
       M.log.info(`Removing invalid plugin '${f}' ...`);
-      const stdout = await fsExtra.remove(`${path.join(__dirname, f)}`);
-      M.log.verbose(stdout);
+      fsExtra.removeSync(`${path.join(__dirname, f)}`);
       return;
     }
 
@@ -191,10 +189,9 @@ async function loadPlugins() {
  *
  * @param {object} data - The plugin configuration data.
  */
-async function clonePluginFromGitRepo(data) {
+function clonePluginFromGitRepo(data) {
   // Remove plugin if it already exists in plugins directory
-  const stdoutRmCmd = await fsExtra.remove(`${path.join(M.root, 'plugins', data.name)}`);
-  M.log.verbose(stdoutRmCmd);
+  fsExtra.removeSync(`${path.join(M.root, 'plugins', data.name)}`);
 
   try {
     // Set deploy key file permissions
@@ -234,11 +231,10 @@ async function clonePluginFromGitRepo(data) {
  *
  * @param {object} data - The plugin configuration data.
  */
-async function copyPluginFromLocalDir(data) {
+function copyPluginFromLocalDir(data) {
   // Remove plugin if it already exists in plugins directory
   if (fs.existsSync(path.join(M.root, 'plugins', data.name))) {
-    const stdoutRmCmd = await fsExtra.remove(`${path.join(M.root, 'plugins', data.name)}`);
-    M.log.verbose(stdoutRmCmd);
+    fsExtra.removeSync(`${path.join(M.root, 'plugins', data.name)}`);
   }
 
   // Making the directory for the plugin
@@ -257,10 +253,9 @@ async function copyPluginFromLocalDir(data) {
  *
  * @param {object} data - The plugin configuration data.
  */
-async function downloadPluginFromWebsite(data) {
+function downloadPluginFromWebsite(data) {
   // Remove plugin if it already exists in plugins directory
-  const stdoutRmCmd = await fsExtra.remove(`${path.join(M.root, 'plugins', data.name)}`);
-  M.log.verbose(stdoutRmCmd);
+  fsExtra.removeSync(`${path.join(M.root, 'plugins', data.name)}`);
 
   // Proxy information
   const httpProxy = M.config.server.proxy;
