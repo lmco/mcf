@@ -210,7 +210,7 @@ module.exports.getVersion = async function() {
       }
     }
     // One document exists, read and compare versions
-    if (serverData[0].version !== M.version) {
+    else if (serverData[0].version !== M.version) {
       throw new Error('Please run \'node mbee migrate\' to migrate the '
         + 'database.');
     }
