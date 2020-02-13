@@ -155,7 +155,7 @@ const formatter = printf((msg) => {
 // Check that the logs directory exists
 if (!fs.existsSync(path.join(M.root, 'logs'))) {
   // If logs directory doesn't exist, create it
-  fs.mkdir(path.join(M.root, 'logs'));
+  fs.mkdirSync(path.join(M.root, 'logs'));
 }
 
 /**
