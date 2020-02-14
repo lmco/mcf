@@ -556,6 +556,8 @@ module.exports.createReadStreamRequest = function(user, params, body, method, qu
  * @param {object} res - Response Object.
  */
 module.exports.createResponse = function(res) {
+  // By default, status code starts out as 200
+  res.statusCode = 200;
   // Verifies the response code: 200 OK
   res.status = function status(code) {
     res.statusCode = code;
