@@ -52,11 +52,13 @@ api.get(
   AuthController.authenticate,
   Middleware.expiredPassword,
   Middleware.logRoute,
-  (req, res) => {
-    const str = 'I\'m a teapot.';
-    res.status(418).send(str);
-    logger.logResponse(str.length, req, res);
-  }
+  (req, res, next) => {
+    res.locals.message = 'I\'m a teapot.';
+    res.locals.statusCode = 418;
+    next();
+  },
+  Middleware.logResponse,
+  Middleware.respond
 );
 
 
