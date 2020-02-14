@@ -31,7 +31,6 @@ const api = express.Router();
 const APIController = M.require('controllers.api-controller');
 const AuthController = M.require('lib.auth');
 const Middleware = M.require('lib.middleware');
-const logger = M.require('lib.logger');
 
 
 /**
