@@ -3304,6 +3304,7 @@ async function getElements(req, res, next) {
     archived: 'boolean',
     includeArchived: 'boolean',
     subtree: 'boolean',
+    depth: 'number',
     fields: 'array',
     limit: 'number',
     skip: 'number',
@@ -3911,6 +3912,7 @@ async function getElement(req, res, next) {
     populate: 'array',
     includeArchived: 'boolean',
     subtree: 'boolean',
+    depth: 'number',
     fields: 'array',
     minified: 'boolean',
     rootpath: 'boolean'
