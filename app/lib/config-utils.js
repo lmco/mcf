@@ -247,6 +247,9 @@ module.exports.validate = function(config) {
   test(config, 'server.https', 'object');
   test(config, 'server.https.enabled', 'boolean');
   if (config.server.https.enabled) test(config, 'server.http.port', 'number');
+  if (config.server.requestSize) {
+    limitRequestSize(config.server.requestSize);
+  }
   test(config, 'server.api', 'object');
   test(config, 'server.api.enabled', 'boolean');
   if (config.server.api.enabled) {
@@ -436,3 +439,59 @@ module.exports.removeComments = function(inputString) {
   // Return the now-valid JSON
   return arrCommRem.join('\n');
 };
+
+/**
+ * @description Removes '^' and '$' from the RegEx of custom validators because those characters
+ * are factored in in the validators.js file.
+ *
+ * @param {object} configObj - The config object, before it gets frozen on the M object.
+ */
+module.exports.parseRegEx = function(configObj) {
+  if (configObj.hasOwnProperty('validators')) {
+    Object.keys(configObj.validators).forEach((key) => {
+      // Only search custom id validators, not id length validators
+      if (typeof configObj.validators[key] === 'string' && !key.includes('length')) {
+        // Remove ^ and $ from custom validator regex strings
+        configObj.validators[key] = configObj.validators[key].replace(/\^|\$/g, (match, offset, string) => {
+          if (offset !== 0 && string[offset - 1] === '\\') {
+            return match;
+          }
+          else {
+            return '';
+          }
+        });
+      }
+    });
+  }
+};
+
+/**
+ * @description A helper function specifically to parse and validate the requestSize server option.
+ *
+ * @param {string} size - The requestSize specified in the config file.
+ */
+function limitRequestSize(size) {
+  if (typeof size !== 'string') throw new Error('Configuration file: requestSize is not a string.');
+  // Extract the number and the unit from the string
+  const number = Number(size.match(/(\d+)/g)[0]);
+  const unit = size.match(/(\D+)/g)[0];
+  switch (unit) {
+    case 'kb':
+      if (number > 1024 * 1024) {
+        throw new Error('Configuration file: requestSize cannot be greater than 1 gb.');
+      }
+      break;
+    case 'mb':
+      if (number > 1024) {
+        throw new Error('Configuration file: requestSize cannot be greater than 1 gb.');
+      }
+      break;
+    case 'gb':
+      if (number > 1) {
+        throw new Error('Configuration file: requestSize cannot be greater than 1 gb.');
+      }
+      break;
+    default:
+      throw new Error('Configuration file: invalid format for requestSize.');
+  }
+}
