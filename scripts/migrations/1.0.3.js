@@ -22,15 +22,15 @@ const path = require('path');
 const Webhook = M.require('models.webhook');
 
 /**
- * @description Handles the database migration from 1.0.1 to 1.0.3.
+ * @description Handles the database migration from 1.0.2 to 1.0.3.
  */
 module.exports.up = async function() {
   await webhookHelper();
 };
 
 /**
- * @description Helper function for 1.0.0 to 1.0.1 migration. Handles all
- * updates to the users collection.
+ * @description Helper function for 1.0.2 to 1.0.3 migration. Handles all
+ * updates to the webhook collection.
  * @async
  *
  * @returns {Promise} Returns an empty promise upon completion.
