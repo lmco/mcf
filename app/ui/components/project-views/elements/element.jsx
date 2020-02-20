@@ -26,8 +26,7 @@ import {
   Modal,
   ModalBody,
   UncontrolledTooltip,
-  Badge,
-  Tooltip
+  Badge
 } from 'reactstrap';
 import Delete from '../../shared-views/delete.jsx';
 import CustomData from '../../general/custom-data/custom-data.jsx';
@@ -48,14 +47,12 @@ class Element extends Component {
     this.state = {
       element: null,
       modalDelete: false,
-      isTooltipOpen: false,
       error: null
     };
 
     // Bind component functions
     this.getElement = this.getElement.bind(this);
     this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
-    this.handleTooltipToggle = this.handleTooltipToggle.bind(this);
     this.handleCrossRefs = this.handleCrossRefs.bind(this);
   }
 
@@ -99,14 +96,6 @@ class Element extends Component {
   handleDeleteToggle() {
     // Set the delete modal state
     this.setState({ modalDelete: !this.state.modalDelete });
-  }
-
-  componentDidMount() {
-    // Set the mounted variable
-    this.mounted = true;
-
-    // Get element information
-    this.getElement();
   }
 
   handleCrossRefs(_element) {
@@ -187,18 +176,6 @@ class Element extends Component {
         }
       });
     });
-  }
-
-  // Toggles the tooltip
-  handleTooltipToggle() {
-    const isTooltipOpen = this.state.isTooltipOpen;
-
-    // Verify component is not unmounted
-    if (!this.mounted) {
-      return;
-    }
-
-    return this.setState({ isTooltipOpen: !isTooltipOpen });
   }
 
   componentDidUpdate(prevProps) {
@@ -302,13 +279,9 @@ class Element extends Component {
                           </UncontrolledTooltip>
                           <i id='deleteBtn' className='fas fa-trash-alt delete-btn' onClick={this.handleDeleteToggle}/>
                           <i id='editBtn' className='fas fa-edit edit-btn' onClick={this.props.toggle}/>
-                          <Tooltip
-                            placement='left'
-                            isOpen={this.state.isTooltipOpen}
-                            target='editBtn'
-                            toggle={this.handleTooltipToggle}>
+                          <UncontrolledTooltip placement='left' target='editBtn'>
                             Edit
-                          </Tooltip>
+                          </UncontrolledTooltip>
                          </React.Fragment>)
                       : ''
                     }
