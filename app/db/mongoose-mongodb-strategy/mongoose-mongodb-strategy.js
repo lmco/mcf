@@ -72,8 +72,14 @@ function connect() {
     // TODO: investigate using async/await
     mongoose.connect(connectURL, options, (err) => {
       if (err) {
+        let error = err;
+        // Check error type
+        if (err.name && err.name === 'MongooseTimeoutError') {
+          // Set MongoDB connection error
+          error = new M.DatabaseError(`Could not connect to MongoDB at ${url}`, 'critical');
+        }
         // If error, reject it
-        return reject(err);
+        return reject(error);
       }
       return resolve();
     });
