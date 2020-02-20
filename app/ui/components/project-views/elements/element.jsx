@@ -161,14 +161,14 @@ class Element extends Component {
               // Capture the element ID and link
               const id = uniqCrossRefs[refs[i]].id;
               if (!elements.hasOwnProperty(id)) {
-                doc = doc.replace(re, ` <a class="cross-ref-broken" href="#">${refs[i]}</a> `);
+                doc = doc.replace(re, `<a class='cross-ref-broken' href='#'>${refs[i]}</a>`);
                 continue;
               }
               const oid = elements[id].org;
               const pid = elements[id].project;
               const bid = elements[id].branch;
-              const link = `/api/orgs/${oid}/projects/${pid}/branches/${bid}/elements/${id}`;
-              doc = doc.replace(re, ` <a class="cross-ref" href="${link}">${elements[id].name}</a> `);
+              const link = `/orgs/${oid}/projects/${pid}/branches/${bid}/elements#${id}`;
+              doc = doc.replace(re, `<a class='cross-ref' href='${link}' target='_blank'>${elements[id].name}</a>`);
             }
 
             // Resolve the element
