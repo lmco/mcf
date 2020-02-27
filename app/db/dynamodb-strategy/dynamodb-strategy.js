@@ -7,7 +7,7 @@
  *
  * @license MIT
  *
- * @owner Austin Bieber
+ * @owner Donte McDaniel
  *
  * @author Austin Bieber
  *
@@ -115,7 +115,6 @@ async function clear() {
   }
 }
 
-// TODO: Figure out if any data needs to be sanitized
 /**
  * @description Sanitizes the data to protect against database injections or
  * unauthorized access to data.
@@ -274,7 +273,6 @@ class Schema {
    * @param {object} [options] - An object containing options.
    */
   index(fields, options) {
-    // TODO: Handle other compound indexes
     // If every value is text, we have a text index
     if (Object.values(fields).every(v => v === 'text')) {
       // Add keys to the text array, only 1 text index per schema so no worry of duplicate keys
@@ -815,9 +813,6 @@ class Model {
       // Create the actual table
       await conn.createTable(this.schema).promise();
     }
-    else {
-      // TODO: We should update the table in case fields/indexes have been added
-    }
 
     // Add the model to the file-wide model object
     // This is used later for population
@@ -1038,9 +1033,6 @@ class Model {
           modifiedCount += 1;
         }));
       }
-      // TODO: Handle insertOne
-      // TODO: Handle deleteOne
-      // TODO: Handle deleteMany
     });
 
     // Wait for promises to complete
@@ -1424,7 +1416,6 @@ class Model {
    *
    * @returns {Promise<object[]>} Array of index objects.
    */
-  // TODO: We might have to include the GlobalSecondaryIndexes in here
   async getIndexes() {
     try {
       // Connect to the database

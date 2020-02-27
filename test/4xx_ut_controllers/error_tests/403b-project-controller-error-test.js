@@ -82,31 +82,12 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   // -------------- Find --------------
-  // TODO: it('should reject an unauthorized attempt to find a project', unauthorizedTest('find'));
   // ------------- Create -------------
-  // TODO: it('should reject an unauthorized attempt to create a project',
-  //  unauthorizedTest('create'));
-  // TODO: it('should reject an attempt to create a project on an archived org',
-  //  archivedTest(Organization, 'create'));
-  // TODO: it('should reject an attempt to create a project that already exists', createExisting);
   // ------------- Update -------------
-  // TODO: it('should reject an unauthorized attempt to update a project',
-  //  unauthorizedTest('update'));
-  // TODO: it('should reject an attempt to update a project on an archived org',
-  //  archivedTest(Organization, 'update'));
-  // TODO: it('should reject an attempt to update an archived project',
-  //  archivedTest(Project, 'update'));
   // ------------- Replace ------------
-  // TODO: it('should reject an unauthorized attempt to replace a project',
-  //  unauthorizedTest('createOrReplace'));
   it('should reject an attempt to replace a project with an invalid id', replaceInvalidId);
   it('should reject an attempt to replace a project without an id', replaceWithoutId);
   // ------------- Remove -------------
-  // TODO: it('should reject an unauthorized attempt to delete a project',
-  //  unauthorizedTest('remove'));
-  // TODO: it('should reject an attempt to delete a project on an archived org',
-  //  archivedTest(Organization, 'remove'));
-  // TODO: it('should reject an attempt to delete a project that doesn\'t exist', deleteNotFound);
 });
 
 /* --------------------( Tests )-------------------- */

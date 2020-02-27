@@ -1033,8 +1033,6 @@ async function createOrReplace(requestingUser, organizationID, projects, options
       throw new M.DataFormatError('Invalid input for updating projects.', 'warn');
     }
 
-    // TODO: Reevaluate placement of code block, \
-    //  consider putting after org find (inspect other fxn)
     // Create list of ids
     const arrIDs = [];
     let index = 1;

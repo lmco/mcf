@@ -186,7 +186,6 @@ class Schema extends mongoose.Schema {
     changeType(obj);
 
     // Call parent add
-    // TODO: This function does NOT return a promise, figure out what it does return
     return super.add(obj, prefix);
   }
 

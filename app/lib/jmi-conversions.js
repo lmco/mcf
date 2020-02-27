@@ -77,8 +77,6 @@ function jmi12(data, field) {
     });
   }
   catch (error) {
-    // TODO: This is super bad hardcoding... creating elements has nothing to do
-    //  with this function. We should really rethink this
     throw new M.DataFormatError('Cannot create multiple elements with the same ID.', 'warn');
   }
 
