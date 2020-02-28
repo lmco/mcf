@@ -124,6 +124,8 @@ describe(M.getModuleName(module.filename), () => {
   it('should find an archived element when the option archived is provided', optionArchivedFind);
   it('should find an element and its subtree when the option subtree '
     + 'is provided', optionSubtreeFind);
+  it('should find an element at its subtree up to a certain depth when the option depth is'
+    + 'provided', optionDepthFind);
   it('should return an element with only the specific fields specified from'
     + ' find()', optionFieldsFind);
   it('should return a limited number of elements from find()', optionLimitFind);
@@ -285,13 +287,46 @@ async function optionSubtreeFind() {
 }
 
 /**
+ * @description Verifies that an element and its subtree are returned when
+ * using the option 'subtree' in find().
+ */
+async function optionDepthFind() {
+  try {
+    // Set up
+    const elemID = utils.parseID(elements[2]._id).pop();
+
+    // Create the options object. Search for includeArchived:true since one child element
+    // was archived in a previous test
+    const options = { depth: 1, includeArchived: true };
+
+    // Find the element and its subtree
+    const foundElements = await ElementController.find(adminUser, org._id, projIDs[0], branchID,
+      elemID, options);
+
+    // Expect there to be 6 elements found, the searched element and 5 in subtree
+    chai.expect(foundElements.length).to.equal(6);
+
+    // Attempt to convert elements to JMI3, if successful then it's a valid tree
+    const jmi3Elements = jmi.convertJMI(1, 3, foundElements, '_id', '_id');
+
+    // Verify that there is only one top level key in jmi3, which should be the
+    // searched element
+    chai.expect(Object.keys(jmi3Elements).length).to.equal(1);
+    chai.expect(Object.keys(jmi3Elements)[0]).to.equal(elements[2]._id);
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error.message).to.equal(null);
+  }
+}
+
+/**
  * @description Verifies that option 'fields' returns an element with only
  * specific fields in find().
  */
 async function optionFieldsFind() {
   try {
-    // TODO: In the future, add a corner-case test to test for the fields option being supplied
-    // TODO: but not value being supplied.
     // Get the ID of the element to find
     const elemID = utils.parseID(elements[0]._id);
     // Create the options object with the list of fields specifically find

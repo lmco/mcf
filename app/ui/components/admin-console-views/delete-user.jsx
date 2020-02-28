@@ -108,7 +108,6 @@ class DeleteUser extends Component {
     this.setState({
       message: '',
       results: 'Searching ...'
-    //  TODO (ld/ je): Get rid of this if it doesnt effect anything
     }, () => { this.render(); });
 
     let query = this.state.username;
