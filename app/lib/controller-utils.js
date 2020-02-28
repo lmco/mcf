@@ -110,7 +110,6 @@ module.exports.findAndValidate = async function(model, id, archived = false) {
   const query = { _id: id };
   const result = await model.findOne(query, null);
   // Get the name of the particular model
-  // TODO: This may need to be updated with the DB abstraction layer
   const name = model.modelName;
 
   // Check that the model object was found
