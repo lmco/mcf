@@ -9,7 +9,7 @@ stages:
   - Build
   - Test
   - Prep DevOps
-  - Prep Prod
+
 
 Build MCF:
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-build-image:latest
