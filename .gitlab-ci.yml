@@ -1,0 +1,19 @@
+variables:
+  HTTP_PROXY: http://proxy-lmi.global.lmco.com:80
+  HTTPS_PROXY: http://proxy-lmi.global.lmco.com:80
+  http_proxy: http://proxy-lmi.global.lmco.com:80
+  https_proxy: http://proxy-lmi.global.lmco.com:80
+  NO_PROXY: 127.0.0.1,localhost
+
+stages:
+  - Build
+  - Test
+  - Prep DevOps
+  - Prep Prod
+
+Build MCF:
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-build-image:latest
+  stage: Build
+  dependencies: []
+  script:
+    - node --version
