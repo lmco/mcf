@@ -16,4 +16,6 @@ Build MCF:
   stage: Build
   dependencies: []
   script:
-    - node --version
+    - node mbee migrate -y
+    - sleep 5
+    - node mbee test
