@@ -16,6 +16,7 @@ Build MCF:
   stage: Build
   dependencies: []
   script:
+    - NOPOSTINSTALL=1 NOPREINSTALL=1 yarn install
     - node mbee migrate -y
     - sleep 5
     - node mbee test
