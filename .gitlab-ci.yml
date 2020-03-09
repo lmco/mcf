@@ -16,9 +16,9 @@ Build MCF:
   stage: Build
   dependencies: []
   script:
-    - npm config set proxy $HTTP_PROXY -g
-    - npm config set https-proxy $HTTPS_PROXY -g
-    - npm config set no_proxy $NO_PROXY -g
+    - yarn config set proxy $HTTP_PROXY -g
+    - yarn config set https-proxy $HTTPS_PROXY -g
+    - yarn config set no_proxy $NO_PROXY -g
     - NOPOSTINSTALL=1 NOPREINSTALL=1 yarn install
     - node mbee migrate -y
     - sleep 5
