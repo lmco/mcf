@@ -16,6 +16,9 @@ Build MCF:
   stage: Build
   dependencies: []
   script:
+    - export HTTP_PROXY=$HTTP_PROXY
+    - export HTTPS_PROXY=$HTTPS_PROXY
+    - export NO_PROXY=$NO_PROXY
     - yarn config set proxy $HTTP_PROXY -g
     - yarn config set https-proxy $HTTPS_PROXY -g
     - yarn config set no_proxy $NO_PROXY -g
