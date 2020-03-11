@@ -14,7 +14,7 @@ stages:
 Build MCF:
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
   tags:
-    - shell
+    - docker
   stage: Build
   dependencies: []
   script:
