@@ -22,6 +22,8 @@ Build MCF:
     - export HTTP_PROXY=http://proxy3.lmco.com:80
     - export HTTPS_PROXY=http://proxy3.lmco.com:80
     - export NO_PROXY=127.0.0.1,localhost
+    - node -v
+    - yarn -v
     - NOPOSTINSTALL=1 NOPREINSTALL=1 yarn install
     - node mbee migrate -y
     - sleep 5
