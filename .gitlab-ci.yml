@@ -14,7 +14,7 @@ stages:
 .run-docker-image: &run-docker-image
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
   tags:
-    - docker
+    - shell
 
 Build MCF:
   <<: *run-docker-image
