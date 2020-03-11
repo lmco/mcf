@@ -11,11 +11,13 @@ stages:
   - Prep DevOps
   - test2
 
+.run-docker-image: &run-docker-image
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
+  ags:
+    - docker
 
 Build MCF:
-  tags:
-    - docker
-  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
+  <<: *run-docker-image
   stage: Build
   dependencies: []
   script:
