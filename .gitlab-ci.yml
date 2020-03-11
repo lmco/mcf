@@ -1,8 +1,8 @@
 variables:
-  HTTP_PROXY: http://proxy-lmi.global.lmco.com:80
-  HTTPS_PROXY: http://proxy-lmi.global.lmco.com:80
-  http_proxy: http://proxy-lmi.global.lmco.com:80
-  https_proxy: http://proxy-lmi.global.lmco.com:80
+  HTTP_PROXY: http://proxy3.lmco.com:80
+  HTTPS_PROXY: http://proxy3.lmco.com:80
+  http_proxy: http://proxy3.lmco.com:80
+  https_proxy: http://proxy3.lmco.com:80
   NO_PROXY: 127.0.0.1,localhost
 
 stages:
@@ -16,12 +16,12 @@ Build MCF:
   stage: Build
   dependencies: []
   script:
-    - export HTTP_PROXY=$HTTP_PROXY
-    - export HTTPS_PROXY=$HTTPS_PROXY
-    - export NO_PROXY=$NO_PROXY
-    - yarn config set proxy $HTTP_PROXY -g
-    - yarn config set https-proxy $HTTPS_PROXY -g
-    - yarn config set no_proxy $NO_PROXY -g
+    - export HTTP_PROXY=http://proxy3.lmco.com:80
+    - export HTTPS_PROXY=http://proxy3.lmco.com:80
+    - export NO_PROXY=127.0.0.1,localhost
+    - yarn config set proxy http://proxy3.lmco.com:80 -g
+    - yarn config set https-proxy http://proxy3.lmco.com:80 -g
+    - yarn config set no_proxy 127.0.0.1,localhost -g
     - NOPOSTINSTALL=1 NOPREINSTALL=1 yarn install
     - node mbee migrate -y
     - sleep 5
