@@ -20,9 +20,6 @@ stages:
 
 Build MCF:
   <<: *docker-mongo
-  # image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
-  tags:
-    - docker
   stage: Build
   dependencies: []
   script:
