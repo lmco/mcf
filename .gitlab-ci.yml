@@ -16,7 +16,8 @@ stages:
   tags:
     - docker
   services: 
-    - registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+      alias: mongodb
 
 Build MCF:
   <<: *docker-mongo
