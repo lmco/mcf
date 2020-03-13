@@ -34,7 +34,7 @@ Build MCF:
     - yarn config set proxy http://proxy3.lmco.com:80
     - yarn config set https-proxy http://proxy3.lmco.com:80
     - yarn config set no_proxy 127.0.0.1,localhost
-    - NOPOSTINSTALL=1 NOPREINSTALL=1 yarn install
+    - NOPREINSTALL=1 yarn install
     - node mbee lint
     - sleep 10
     - node mbee migrate -y
