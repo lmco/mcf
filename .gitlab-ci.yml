@@ -8,8 +8,6 @@ variables:
 stages:
   - Build
   - Test
-  - Prep DevOps
-  - test2
 
 .docker-mongo: &docker-mongo
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
@@ -35,11 +33,19 @@ Build MCF:
     - yarn config set https-proxy http://proxy3.lmco.com:80
     - yarn config set no_proxy 127.0.0.1,localhost
     - NOPREINSTALL=1 yarn install
-    - node mbee lint
-    - sleep 10
     - node mbee migrate -y
     - sleep 5
-    - node mbee test --grep 000
-    - node mbee test --grep 401a; exit_code=$?
-    - if [ $exit_code -ne 0 ]; then echo "Previous command failed"; fi;
+    - node mbee start
 
+Test MCF:
+  <<: *docker-mongo
+  # image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
+  # tags:
+  #   - docker
+  stage: Test
+  dependencies: []
+  script:
+    - node mbee lint
+    - sleep 5
+    - node mbee test --all; exit_code=$?
+    - if [ $exit_code -ne 0 ]; then echo "Previous command failed"; fi;
