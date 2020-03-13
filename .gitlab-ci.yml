@@ -5,6 +5,18 @@ variables:
   https_proxy: http://proxy3.lmco.com:80
   NO_PROXY: 127.0.0.1,localhost
 
+default:
+  before_script:
+    - export HTTP_PROXY=http://proxy3.lmco.com:80
+    - export HTTPS_PROXY=http://proxy3.lmco.com:80
+    - export NO_PROXY=127.0.0.1,localhost
+    - yarn config set strict-ssl false
+    - yarn config set proxy http://proxy3.lmco.com:80
+    - yarn config set https-proxy http://proxy3.lmco.com:80
+    - yarn config set no_proxy 127.0.0.1,localhost
+    - NOPREINSTALL=1 yarn install
+    - node mbee migrate -y
+
 stages:
   - Build
   - Test
@@ -24,6 +36,7 @@ Build MCF:
   #   - docker
   stage: Build
   dependencies: []
+  before_script:
   script:
     - export HTTP_PROXY=http://proxy3.lmco.com:80
     - export HTTPS_PROXY=http://proxy3.lmco.com:80
