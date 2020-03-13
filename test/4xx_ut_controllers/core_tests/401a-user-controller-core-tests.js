@@ -46,7 +46,9 @@ describe(M.getModuleName(module.filename), () => {
   before(async () => {
     try {
       // Create test admin
+      M.log.info('before');
       adminUser = await testUtils.createTestAdmin();
+      M.log.info(adminUser);
     }
     catch (error) {
       M.log.error(error);
