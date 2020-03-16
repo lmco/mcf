@@ -7,7 +7,7 @@ variables:
 
 stages:
   - Build
-
+  - Test
 
 
 .docker-mongo: &docker-mongo
@@ -41,7 +41,7 @@ stages:
 
 Build MCF:
   tags:
-    -shell
+    - shell
   stage: Build
   dependencies: []
   script:
