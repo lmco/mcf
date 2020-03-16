@@ -67,7 +67,6 @@ COPY ./config config
 COPY ./scripts scripts
 COPY ./mbee.js mbee.js
 COPY ./plugins plugins
-COPY ./build build
 COPY ./app  app
 COPY ./README.md README.md
 
