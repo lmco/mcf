@@ -52,6 +52,25 @@ RUN yarn install
 #RUN git config --global http.proxy "http://proxy-lmi.global.lmco.com:80"
 #RUN git config --global https.proxy "http://proxy-lmi.global.lmco.com:80"
 
+# Create project directory structure
+RUN mkdir logs \
+    && mkdir -p config \
+    && mkdir -p scripts \
+    && mkdir -p plugins \
+    && mkdir -p build \
+    && mkdir -p public \
+    && mkdir -p app \
+    && mkdir -p /lm/mbee/data/db/log
+
+# Copy Project
+COPY ./config config
+COPY ./scripts scripts
+COPY ./mbee.js mbee.js
+COPY ./plugins plugins
+COPY ./build build
+COPY ./app  app
+COPY ./README.md README.md
+
 # Make entrypoint.sh an executable
 RUN chmod +x /lm/mbee/config/entrypoint.sh
 
