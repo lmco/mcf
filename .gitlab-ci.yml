@@ -47,7 +47,7 @@ Build MCF:
   dependencies: []
   before_script:
   script:
-    - docker build -t mcf-ci -f ./config/gitlab.Dockerfile -p 9080:9080 .
+    - docker build -t mcf-ci -f ./config/gitlab.Dockerfile .
     - docker tag mcf-ci registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci
     - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci:latest
 
