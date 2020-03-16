@@ -7,13 +7,13 @@ variables:
 
 stages:
   - Build
-  #- Test
+
 
 
 .docker-mongo: &docker-mongo
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
   tags:
-    - shell
+    - docker
   services: 
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
@@ -40,13 +40,10 @@ stages:
 
 
 Build MCF:
-  <<: *docker-mongo
-  # image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
-  # tags:
-  #   - docker
+  tags:
+    -shell
   stage: Build
   dependencies: []
-  before_script:
   script:
     - pwd
     - ls
