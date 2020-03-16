@@ -24,7 +24,7 @@ stages:
 .docker-mongo: &docker-mongo
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
   tags:
-    - docker
+    - shell
   services: 
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
@@ -56,9 +56,9 @@ Build MCF:
 Test MCF:
   <<: *mcf-test
   stage: Test
-  dependencies: []
+  dependencies:
+    - "Build MCF"
   script:
-    - sleep 15
     - node mbee lint
     - sleep 5
     - node mbee test --all
