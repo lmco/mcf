@@ -5,18 +5,6 @@ variables:
   https_proxy: http://proxy3.lmco.com:80
   NO_PROXY: 127.0.0.1,localhost
 
-default:
-  before_script:
-    - export HTTP_PROXY=http://proxy3.lmco.com:80
-    - export HTTPS_PROXY=http://proxy3.lmco.com:80
-    - export NO_PROXY=127.0.0.1,localhost
-    - yarn config set strict-ssl false
-    - yarn config set proxy http://proxy3.lmco.com:80
-    - yarn config set https-proxy http://proxy3.lmco.com:80
-    - yarn config set no_proxy 127.0.0.1,localhost
-    - NOPREINSTALL=1 yarn install
-    - node mbee migrate -y
-
 stages:
   - Build
   - Test
@@ -38,6 +26,16 @@ stages:
       alias: mongodb
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci:latest
       alias: mcf
+  before_script:
+    - export HTTP_PROXY=http://proxy3.lmco.com:80
+    - export HTTPS_PROXY=http://proxy3.lmco.com:80
+    - export NO_PROXY=127.0.0.1,localhost
+    - yarn config set strict-ssl false
+    - yarn config set proxy http://proxy3.lmco.com:80
+    - yarn config set https-proxy http://proxy3.lmco.com:80
+    - yarn config set no_proxy 127.0.0.1,localhost
+    - NOPREINSTALL=1 yarn install
+    - node mbee migrate -y
 
 
 Build MCF:
@@ -49,7 +47,7 @@ Build MCF:
   dependencies: []
   before_script:
   script:
-    - node mbee docker --build
+    - docker build -t mcf-ci -f ./config/gitlab.Dockerfile -p 9080:9080 .
     - docker tag mcf-ci registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci
     - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci:latest
 
