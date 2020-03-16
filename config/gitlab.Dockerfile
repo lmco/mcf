@@ -24,6 +24,16 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     https_proxy="http://proxy-lmi.global.lmco.com:80" \
     NO_PROXY=127.0.0.1,localhost
 
+# Install certs - If you have certs in a certs directory, uncomment the following lines
+RUN mkdir -p certs
+COPY ./certs certs
+RUN chmod 400 certs/*
+
+# Prerequisites for MongoDB install
+RUN apt-get install curl
+RUN curl --cacert "./certs/LockheedMartinCertificateAuthority.pem"  https://www.mongodb.org/static/pgp/server-4.0.asc | apt-key add -
+RUN echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/4.0 main" | tee /etc/apt/sources.list.d/mongodb-org-4.0.list
+
 # Install dependencies
 RUN apt-get -y upgrade \
   && apt-get -y update \
