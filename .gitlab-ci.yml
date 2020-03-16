@@ -29,6 +29,17 @@ stages:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
 
+.mcf-test: &mcf-test
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
+  tags:
+    - docker
+  services:
+    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+      alias: mongodb
+    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci:latest
+      alias: mcf
+
+
 Build MCF:
   <<: *docker-mongo
   # image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
@@ -38,28 +49,12 @@ Build MCF:
   dependencies: []
   before_script:
   script:
-    - export HTTP_PROXY=http://proxy3.lmco.com:80
-    - export HTTPS_PROXY=http://proxy3.lmco.com:80
-    - export NO_PROXY=127.0.0.1,localhost
-    - yarn config set strict-ssl false
-    - yarn config set proxy http://proxy3.lmco.com:80
-    - yarn config set https-proxy http://proxy3.lmco.com:80
-    - yarn config set no_proxy 127.0.0.1,localhost
-    - NOPREINSTALL=1 yarn install
-    - node mbee migrate -y
-
-Run MCF:
-  <<: *docker-mongo
-  # image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
-  # tags:
-  #   - docker
-  stage: Test
-  dependencies: []
-  script:
-    - node mbee start
+    - node mbee docker --build
+    - docker tag mcf-ci registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci
+    - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci:latest
 
 Test MCF:
-  <<: *docker-mongo
+  <<: *mcf-test
   stage: Test
   dependencies: []
   script:
