@@ -47,6 +47,7 @@ Build MCF:
   script:
     - docker build -t mcf-ci -f ./config/gitlab.Dockerfile .
     - docker tag mcf-ci registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci
+    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
     - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci:latest
 
 Test MCF:
