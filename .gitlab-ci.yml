@@ -58,4 +58,4 @@ Test MCF:
   script:
     - node mbee lint
     - sleep 5
-    - node mbee test --all
+    - node mbee test --grep ^[0-68-9]
