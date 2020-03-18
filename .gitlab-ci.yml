@@ -10,13 +10,13 @@ stages:
   - Test
 
 
-.docker-mongo: &docker-mongo
-  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
-  tags:
-    - docker
-  services: 
-    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
-      alias: mongodb
+#.docker-mongo: &docker-mongo
+#  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
+#  tags:
+#    - docker
+#  services:
+#    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+#      alias: mongodb
 
 .mcf-test: &mcf-test
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
@@ -25,8 +25,10 @@ stages:
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
-    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci:latest
-      alias: mcf
+    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+      alias: mongodb2
+#    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci:latest
+#      alias: mcf
   before_script:
     - export HTTP_PROXY=http://proxy3.lmco.com:80
     - export HTTPS_PROXY=http://proxy3.lmco.com:80
@@ -58,4 +60,7 @@ Test MCF:
   script:
     - node mbee lint
     - sleep 5
+    - nohup node mbee start &
+    - sleep 20
+    - sed s/'"url": "mongodb",'/'"url": "mongodb2",'/g ./config/default.cfg
     - node mbee test --grep 600
