@@ -25,8 +25,6 @@ stages:
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
-    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
-      alias: mongodb2
 #    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci:latest
 #      alias: mcf
   before_script:
@@ -62,5 +60,4 @@ Test MCF:
     - sleep 5
     - nohup node mbee start &
     - sleep 20
-    - sed s/'"url": "mongodb",'/'"url": "mongodb2",'/g ./config/default.cfg
     - node mbee test --grep 600
