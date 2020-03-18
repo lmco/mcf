@@ -77,9 +77,7 @@ RUN chmod +x /lm/mbee/config/entrypoint.sh
 VOLUME data
 
 # Expose ports
-EXPOSE 6233
-EXPOSE 6234
-EXPOSE 27024
+EXPOSE 9080
 
 # Run server
 ENTRYPOINT /lm/mbee/config/entrypoint.sh
