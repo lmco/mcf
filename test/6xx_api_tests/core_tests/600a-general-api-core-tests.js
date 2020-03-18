@@ -50,7 +50,6 @@ function upTest(done) {
     ca: testUtils.readCaFile()
   },
   (error, response, body) => {
-    M.log.info(JSON.stringify(response));
     // Expect no error
     chai.expect(error).to.equal(null);
     // Expect status 200 OK

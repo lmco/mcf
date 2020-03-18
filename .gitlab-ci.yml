@@ -60,4 +60,4 @@ Test MCF:
     - sleep 5
     - nohup node mbee start &
     - sleep 20
-    - node mbee test --grep 600
+    - node mbee test --all
