@@ -6,27 +6,18 @@ variables:
   NO_PROXY: 127.0.0.1,localhost
 
 stages:
-  - Build
   - Test
+  - Build
 
-
-#.docker-mongo: &docker-mongo
-#  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
-#  tags:
-#    - docker
-#  services:
-#    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
-#      alias: mongodb
-
-.mcf-test: &mcf-test
-  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
+Test MCF:
+  stage: Test
   tags:
     - docker
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
-      alias: mongodb
-#    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci:latest
-#      alias: mcf
+    alias: mongodb
+  dependencies: []
   before_script:
     - export HTTP_PROXY=http://proxy3.lmco.com:80
     - export HTTPS_PROXY=http://proxy3.lmco.com:80
@@ -37,27 +28,20 @@ stages:
     - yarn config set no_proxy 127.0.0.1,localhost
     - NOPREINSTALL=1 yarn install
     - node mbee migrate -y
-
-
-Build MCF:
-  tags:
-    - shell
-  stage: Build
-  dependencies: []
-  script:
-    - docker build -t mcf-ci -f ./config/gitlab.Dockerfile .
-    - docker tag mcf-ci registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci
-    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
-    - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci:latest
-
-Test MCF:
-  <<: *mcf-test
-  stage: Test
-  dependencies:
-    - "Build MCF"
   script:
     - node mbee lint
     - sleep 5
     - nohup node mbee start &
     - sleep 20
     - node mbee test --all
+
+Build MCF:
+  stage: Build
+  tags:
+    - shell
+  dependencies: []
+  script:
+    - docker build -t mcf-ci -f ./config/gitlab.Dockerfile .
+    - docker tag mcf-ci registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci
+    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
+    - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci:latest
