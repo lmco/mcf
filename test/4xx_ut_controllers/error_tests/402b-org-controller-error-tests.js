@@ -79,20 +79,12 @@ describe(M.getModuleName(module.filename), () => {
 
   /* Execute the tests */
   // -------------- Find --------------
-  // TODO: it('should reject an unauthorized attempt to find an org', unauthorizedTest('find'));
   // ------------- Create -------------
-  // TODO: it('should reject an unauthorized attempt to create an org', unauthorizedTest('create'));
-  // TODO: it('should reject an attempt to create an org that already exists', createExisting);
   // ------------- Update -------------
-  // TODO: it('should reject an unauthorized attempt to update an org', unauthorizedTest('update'));
-  // TODO: it('should reject an attempt to update an archived org', updateArchived);
   // ------------- Replace ------------
-  // TODO: it('should reject an unauthorized attempt to replace an org',
-  //  unauthorizedTest('createOrReplace'));
   it('should reject an attempt to replace an org with an invalid id', replaceInvalidId);
   it('should reject an attempt to replace an org without an id', replaceWithoutId);
   // ------------- Remove -------------
-  // TODO: it('should reject an unauthorized attempt to delete an org', unauthorizedTest('delete'));
 });
 
 /* --------------------( Tests )-------------------- */
