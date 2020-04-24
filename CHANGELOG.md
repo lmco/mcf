@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.5] - 2020-04-27
+### Bug Fixes and Other Changes
+* Fixed a bug where webhook custom data could not be updated.
+* Fixed a bug where webhooks could not be unarchived.
+  
 ## [1.0.4] - 2020-03-13
 ### Bug Fixes and Other Changes
 * Fixed a bug preventing Webhook creation with custom data.
