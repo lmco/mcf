@@ -468,13 +468,12 @@ function deleteWebhook(done) {
  */
 function deleteWebhooks(done) {
   const deleteIDs = testData.webhooks.slice(1, 3).map((w) => w.id);
-  const ids = deleteIDs.join(',');
-
   request({
-    url: `${test.url}/api/webhooks?ids=${ids}`,
+    url: `${test.url}/api/webhooks`,
     headers: testUtils.getHeaders(),
     ca: testUtils.readCaFile(),
-    method: 'DELETE'
+    method: 'DELETE',
+    body: JSON.stringify(deleteIDs)
   },
   (err, response, body) => {
     // Expect no error

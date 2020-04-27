@@ -443,7 +443,7 @@ async function getOrgs(req, res, next) {
     ids = options.ids;
     delete options.ids;
   }
-  // No IDs included in options, check body for IDs
+  // No IDs include in options, check body for IDs
   else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
     ids = req.body;
   }
@@ -753,8 +753,8 @@ async function patchOrgs(req, res, next) {
 /**
  * DELETE /api/orgs
  *
- * @description Deletes multiple orgs from an array of org IDs, an array of org
- * objects, or from a comma separated list of org IDs.
+ * @description Deletes multiple orgs from an array of org IDs or array of org
+ * objects.
  * NOTE: This function is system-admin ONLY.
  *
  * @param {object} req - Request express object.
@@ -774,8 +774,7 @@ async function deleteOrgs(req, res, next) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    minified: 'boolean',
-    ids: 'array'
+    minified: 'boolean'
   };
 
   // Sanity Check: there should always be a user in the request
@@ -791,11 +790,10 @@ async function deleteOrgs(req, res, next) {
     return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
-  // Extract IDs from request
-  const ids = utils.parseRequestIDs(req, options);
-
-  // Remove option IDs
-  delete options.ids;
+  // If req.body contains objects, grab the org IDs from the objects
+  if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
+    req.body = req.body.map(o => o.id);
+  }
 
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
@@ -805,7 +803,7 @@ async function deleteOrgs(req, res, next) {
 
   try {
     // Remove the specified orgs
-    const orgIDs = await OrgController.remove(req.user, ids, options);
+    const orgIDs = await OrgController.remove(req.user, req.body, options);
     // Format JSON
     const json = formatJSON(orgIDs, minified);
 
@@ -1729,7 +1727,6 @@ async function deleteProjects(req, res, next) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    ids: 'array',
     minified: 'boolean'
   };
 
@@ -1746,11 +1743,10 @@ async function deleteProjects(req, res, next) {
     return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
-  // Extract IDs from request
-  const ids = utils.parseRequestIDs(req, options);
-
-  // Remove option IDs
-  delete options.ids;
+  // If req.body contains objects, grab the project IDs from the objects
+  if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
+    req.body = req.body.map(p => p.id);
+  }
 
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
@@ -1760,7 +1756,8 @@ async function deleteProjects(req, res, next) {
 
   try {
     // Remove the specified projects
-    const projectIDs = await ProjectController.remove(req.user, req.params.orgid, ids, options);
+    const projectIDs = await ProjectController.remove(req.user, req.params.orgid,
+      req.body, options);
     const parsedIDs = projectIDs.map(p => utils.parseID(p).pop());
 
     // Format JSON
@@ -2584,7 +2581,6 @@ async function deleteUsers(req, res, next) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    ids: 'array',
     minified: 'boolean'
   };
 
@@ -2601,12 +2597,6 @@ async function deleteUsers(req, res, next) {
     return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
-  // Extract IDs from request
-  const ids = utils.parseRequestIDs(req, options, true);
-
-  // Remove option IDs
-  delete options.ids;
-
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
@@ -2616,7 +2606,7 @@ async function deleteUsers(req, res, next) {
   try {
     // Remove the specified users
     // NOTE: remove() sanitizes req.body
-    const usernames = await UserController.remove(req.user, ids, options);
+    const usernames = await UserController.remove(req.user, req.body, options);
     // Format JSON
     const json = formatJSON(usernames, minified);
 
@@ -3696,8 +3686,8 @@ async function patchElements(req, res, next) {
 /**
  * DELETE /api/orgs/:orgid/projects/:projectid/branches/:branchid/elements
  *
- * @description Deletes multiple elements from an array of element IDs, an array
- * of element objects, or from a comma separated list of element IDs.
+ * @description Deletes multiple elements from an array of element IDs or array
+ * of element objects.
  *
  * @param {object} req - Request express object
  * @param {object} res - Response express object
@@ -3716,7 +3706,6 @@ async function deleteElements(req, res, next) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    ids: 'array',
     minified: 'boolean'
   };
 
@@ -3733,12 +3722,6 @@ async function deleteElements(req, res, next) {
     return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
-  // Extract IDs from request
-  const ids = utils.parseRequestIDs(req, options);
-
-  // Remove option IDs
-  delete options.ids;
-
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
@@ -3749,7 +3732,7 @@ async function deleteElements(req, res, next) {
     // Remove the specified elements
     // NOTE: remove() sanitizes input params
     const elements = await ElementController.remove(req.user, req.params.orgid,
-      req.params.projectid, req.params.branchid, ids, options);
+      req.params.projectid, req.params.branchid, req.body, options);
     const parsedIDs = elements.map(e => utils.parseID(e).pop());
 
     // Format JSON
@@ -4611,7 +4594,6 @@ async function deleteBranches(req, res, next) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    ids: 'array',
     minified: 'boolean'
   };
 
@@ -4628,11 +4610,10 @@ async function deleteBranches(req, res, next) {
     return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
-  // Extract IDs from request
-  const ids = utils.parseRequestIDs(req, options);
-
-  // Remove option IDs
-  delete options.ids;
+  // If req.body contains objects, grab the branch IDs from the objects
+  if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
+    req.body = req.body.map(b => b.id);
+  }
 
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
@@ -4643,7 +4624,7 @@ async function deleteBranches(req, res, next) {
   try {
     // Remove the specified branches
     const branchIDs = await BranchController.remove(req.user, req.params.orgid,
-      req.params.projectid, ids, options);
+      req.params.projectid, req.body, options);
     const parsedIDs = branchIDs.map(p => utils.parseID(p).pop());
 
     // Format JSON
@@ -5328,6 +5309,7 @@ async function deleteArtifacts(req, res, next) {
 
   // Define options
   // Note: Undefined if not set
+  let artIDs;
   let options;
   let minified = false;
 
@@ -5351,11 +5333,19 @@ async function deleteArtifacts(req, res, next) {
     return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
-  // Extract IDs from request
-  const ids = utils.parseRequestIDs(req, options);
-
-  // Remove option IDs
-  delete options.ids;
+  // Check query for artifact IDs
+  if (options.ids) {
+    artIDs = options.ids;
+    delete options.ids;
+  }
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'string')) {
+    // No IDs included in options, check body
+    artIDs = req.body;
+  }
+  // Check artifact object in body
+  else if (Array.isArray(req.body) && req.body.every(s => typeof s === 'object')) {
+    artIDs = req.body.map(a => a.id);
+  }
 
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
@@ -5366,7 +5356,7 @@ async function deleteArtifacts(req, res, next) {
     // Remove the specified artifacts
     // NOTE: remove() sanitizes input params
     const removedArtIDs = await ArtifactController.remove(req.user, req.params.orgid,
-      req.params.projectid, req.params.branchid, ids, options);
+      req.params.projectid, req.params.branchid, artIDs, options);
     const parsedIDs = removedArtIDs.map(a => utils.parseID(a).pop());
 
     // Format JSON
@@ -6249,7 +6239,6 @@ async function deleteWebhooks(req, res, next) {
 
   // Define valid option and its parsed type
   const validOptions = {
-    ids: 'array',
     minified: 'boolean'
   };
 
@@ -6270,12 +6259,6 @@ async function deleteWebhooks(req, res, next) {
     return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
 
-  // Extract IDs from request
-  const ids = utils.parseRequestIDs(req, options);
-
-  // Remove option IDs
-  delete options.ids;
-
   // Check options for minified
   if (options.hasOwnProperty('minified')) {
     minified = options.minified;
@@ -6284,7 +6267,7 @@ async function deleteWebhooks(req, res, next) {
 
   try {
     // Remove the specified webhooks
-    const webhooks = await WebhookController.remove(req.user, ids, options);
+    const webhooks = await WebhookController.remove(req.user, req.body, options);
 
     // Format JSON
     const json = formatJSON(webhooks, minified);

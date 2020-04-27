@@ -947,14 +947,10 @@ function deleteElements(done) {
     testData.elements[6]
   ];
   const elemIDs = elemData.map(e => e.id);
-  const ids = elemIDs.join(',');
-
-  const body = {};
-  const query = { ids: ids };
 
   const params = { orgid: org._id, projectid: projID, branchid: branchID };
   const method = 'DELETE';
-  const req = testUtils.createRequest(adminUser, params, body, method, query);
+  const req = testUtils.createRequest(adminUser, params, elemIDs, method);
 
   // Set response as empty object
   const res = {};
@@ -965,7 +961,7 @@ function deleteElements(done) {
   // Verifies the response data
   res.send = function send(_data) {
     const arrDeletedElemIDs = JSON.parse(_data);
-    chai.expect(arrDeletedElemIDs).to.have.members(elemIDs);
+    chai.expect(arrDeletedElemIDs).to.have.members(elemData.map(p => p.id));
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);

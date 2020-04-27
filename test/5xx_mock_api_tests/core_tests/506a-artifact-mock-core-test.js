@@ -848,11 +848,6 @@ function deleteArtifacts(done) {
     testData.artifacts[2].id
   ];
 
-  const ids = artIDs.join(',');
-
-  const body = {};
-  const query = { ids: ids };
-
   // Create request params
   const params = {
     orgid: orgID,
@@ -860,7 +855,7 @@ function deleteArtifacts(done) {
     branchid: branchID
   };
   const method = 'DELETE';
-  const req = testUtils.createRequest(adminUser, params, body, method, query);
+  const req = testUtils.createRequest(adminUser, params, artIDs, method);
 
   // Set response as empty object
   const res = {};
