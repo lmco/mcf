@@ -576,14 +576,10 @@ function deleteWebhook(done) {
 function deleteWebhooks(done) {
   // Create request object
   const deleteIDs = webhookIDs.slice(1, 3);
-  const ids = deleteIDs.join(',');
-
-  const body = {};
-  const query = { ids: ids };
-
+  const body = deleteIDs;
   const params = {};
   const method = 'DELETE';
-  const req = testUtils.createRequest(adminUser, params, body, method, query);
+  const req = testUtils.createRequest(adminUser, params, body, method);
 
   // Set response as empty object
   const res = {};

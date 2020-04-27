@@ -816,16 +816,9 @@ function deleteUsers(done) {
     testData.users[2],
     testData.users[3]
   ];
-
-  const userIDs = userData.map(u => u.username);
-  const ids = userIDs.join(',');
-
-  const body = {};
-  const query = { ids: ids };
-
   const params = {};
   const method = 'DELETE';
-  const req = testUtils.createRequest(adminUser, params, body, method, query);
+  const req = testUtils.createRequest(adminUser, params, userData.map(u => u.username), method);
 
   // Create response object
   const res = {};
@@ -838,7 +831,7 @@ function deleteUsers(done) {
     chai.expect(deletedUsernames.length).to.equal(userData.length);
 
     // Verify expected response
-    chai.expect(deletedUsernames).to.have.members(userIDs);
+    chai.expect(deletedUsernames).to.have.members(userData.map(u => u.username));
 
     // Expect the statusCode to be 200
     chai.expect(res.statusCode).to.equal(200);

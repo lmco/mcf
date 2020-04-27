@@ -595,14 +595,10 @@ function deleteBranches(done) {
     testData.branches[6]
   ];
   const branchIDs = branchData.map(b => b.id);
-  const ids = branchIDs.join(',');
-
-  const body = {};
-  const query = { ids: ids };
 
   const params = { orgid: org._id, projectid: projID };
   const method = 'DELETE';
-  const req = testUtils.createRequest(adminUser, params, body, method, query);
+  const req = testUtils.createRequest(adminUser, params, branchIDs, method);
 
   // Set response as empty object
   const res = {};
