@@ -106,21 +106,21 @@ async function postElement() {
       headers: testUtils.getHeaders(),
       data: elemData
     };
-    
+
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
     const createdElement = res.data;
-  
+
     // Verify element created properly
     chai.expect(createdElement.id).to.equal(elemData.id);
     chai.expect(createdElement.name).to.equal(elemData.name);
     chai.expect(createdElement.custom || {}).to.deep.equal(elemData.custom);
     chai.expect(createdElement.project).to.equal(projID);
-  
+
     // If documentation was provided, verify it
     if (elemData.hasOwnProperty('documentation')) {
       chai.expect(createdElement.documentation).to.equal(elemData.documentation);
@@ -137,14 +137,14 @@ async function postElement() {
     if (elemData.hasOwnProperty('parent')) {
       chai.expect(createdElement.parent).to.equal(elemData.parent);
     }
-  
+
     // Verify additional properties
     chai.expect(createdElement.createdBy).to.equal(adminUser._id);
     chai.expect(createdElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdElement.createdOn).to.not.equal(null);
     chai.expect(createdElement.updatedOn).to.not.equal(null);
     chai.expect(createdElement.archived).to.equal(false);
-  
+
     // Verify specific fields not returned
     chai.expect(createdElement).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
@@ -176,15 +176,15 @@ async function postElements() {
       headers: testUtils.getHeaders(),
       data: elemData
     };
-    
+
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
     const createdElements = res.data;
-  
+
     // Expect createdElements not to be empty
     chai.expect(createdElements.length).to.equal(elemData.length);
     // Convert createdElements to JMI type 2 for easier lookup
@@ -192,13 +192,13 @@ async function postElements() {
     // Loop through each element data object
     elemData.forEach((elemObj) => {
       const createdElement = jmi2Elements[elemObj.id];
-    
+
       // Verify elements created properly
       chai.expect(createdElement.id).to.equal(elemObj.id);
       chai.expect(createdElement.name).to.equal(elemObj.name);
       chai.expect(createdElement.custom || {}).to.deep.equal(elemObj.custom);
       chai.expect(createdElement.project).to.equal(projID);
-    
+
       // If documentation was provided, verify it
       if (elemObj.hasOwnProperty('documentation')) {
         chai.expect(createdElement.documentation).to.equal(elemObj.documentation);
@@ -215,14 +215,14 @@ async function postElements() {
       if (elemObj.hasOwnProperty('parent')) {
         chai.expect(createdElement.parent).to.equal(elemObj.parent);
       }
-    
+
       // Verify additional properties
       chai.expect(createdElement.createdBy).to.equal(adminUser._id);
       chai.expect(createdElement.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(createdElement.createdOn).to.not.equal(null);
       chai.expect(createdElement.updatedOn).to.not.equal(null);
       chai.expect(createdElement.archived).to.equal(false);
-    
+
       // Verify specific fields not returned
       chai.expect(createdElement).to.not.have.any.keys('archivedOn',
         'archivedBy', '__v', '_id');
@@ -249,21 +249,21 @@ async function putElement() {
       headers: testUtils.getHeaders(),
       data: elemData
     };
-    
+
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
     const replacedElem = res.data;
-  
+
     // Verify element created/replaced properly
     chai.expect(replacedElem.id).to.equal(elemData.id);
     chai.expect(replacedElem.name).to.equal(elemData.name);
     chai.expect(replacedElem.custom || {}).to.deep.equal(elemData.custom);
     chai.expect(replacedElem.project).to.equal(projID);
-  
+
     // If documentation was provided, verify it
     if (elemData.hasOwnProperty('documentation')) {
       chai.expect(replacedElem.documentation).to.equal(elemData.documentation);
@@ -280,14 +280,14 @@ async function putElement() {
     if (elemData.hasOwnProperty('parent')) {
       chai.expect(replacedElem.parent).to.equal(elemData.parent);
     }
-  
+
     // Verify additional properties
     chai.expect(replacedElem.createdBy).to.equal(adminUser._id);
     chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(replacedElem.createdOn).to.not.equal(null);
     chai.expect(replacedElem.updatedOn).to.not.equal(null);
     chai.expect(replacedElem.archived).to.equal(false);
-  
+
     // Verify specific fields not returned
     chai.expect(replacedElem).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
@@ -319,15 +319,15 @@ async function putElements() {
       headers: testUtils.getHeaders(),
       data: elemData
     };
-    
+
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
     const replacedElements = res.data;
-  
+
     // Expect replacedElements not to be empty
     chai.expect(replacedElements.length).to.equal(elemData.length);
     // Convert replacedElements to JMI type 2 for easier lookup
@@ -335,13 +335,13 @@ async function putElements() {
     // Loop through each element data object
     elemData.forEach((elemObj) => {
       const replacedElem = jmi2Elements[elemObj.id];
-    
+
       // Verify elements created/replaced properly
       chai.expect(replacedElem.id).to.equal(elemObj.id);
       chai.expect(replacedElem.name).to.equal(elemObj.name);
       chai.expect(replacedElem.custom || {}).to.deep.equal(elemObj.custom);
       chai.expect(replacedElem.project).to.equal(projID);
-    
+
       // If documentation was provided, verify it
       if (elemObj.hasOwnProperty('documentation')) {
         chai.expect(replacedElem.documentation).to.equal(elemObj.documentation);
@@ -358,14 +358,14 @@ async function putElements() {
       if (elemObj.hasOwnProperty('parent')) {
         chai.expect(replacedElem.parent).to.equal(elemObj.parent);
       }
-    
+
       // Verify additional properties
       chai.expect(replacedElem.createdBy).to.equal(adminUser._id);
       chai.expect(replacedElem.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(replacedElem.createdOn).to.not.equal(null);
       chai.expect(replacedElem.updatedOn).to.not.equal(null);
       chai.expect(replacedElem.archived).to.equal(false);
-    
+
       // Verify specific fields not returned
       chai.expect(replacedElem).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
@@ -391,21 +391,21 @@ async function getElement() {
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/master/elements/${elemData.id}`,
       headers: testUtils.getHeaders()
     };
-    
+
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
     const foundElement = res.data;
-  
+
     // Verify element created properly
     chai.expect(foundElement.id).to.equal(elemData.id);
     chai.expect(foundElement.name).to.equal(elemData.name);
     chai.expect(foundElement.custom || {}).to.deep.equal(elemData.custom);
     chai.expect(foundElement.project).to.equal(projID);
-  
+
     // If documentation was provided, verify it
     if (elemData.hasOwnProperty('documentation')) {
       chai.expect(foundElement.documentation).to.equal(elemData.documentation);
@@ -422,14 +422,14 @@ async function getElement() {
     if (elemData.hasOwnProperty('parent')) {
       chai.expect(foundElement.parent).to.equal(elemData.parent);
     }
-  
+
     // Verify additional properties
     chai.expect(foundElement.createdBy).to.equal(adminUser._id);
     chai.expect(foundElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundElement.createdOn).to.not.equal(null);
     chai.expect(foundElement.updatedOn).to.not.equal(null);
     chai.expect(foundElement.archived).to.equal(false);
-  
+
     // Verify specific fields not returned
     chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
@@ -459,32 +459,34 @@ async function getElements() {
       method: 'get',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/master/elements`,
       headers: testUtils.getHeaders(),
-      params: elemData.map(e => e.id).toString()
+      params: {
+        ids: elemData.map(e => e.id).toString()
+      }
     };
-    
+
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
     const foundElements = res.data;
-  
+
     // Expect foundElements not to be empty
     chai.expect(foundElements.length).to.equal(elemData.length);
-  
+
     // Convert foundElements to JMI type 2 for easier lookup
     const jmi2Elements = jmi.convertJMI(1, 2, foundElements, 'id');
     // Loop through each element data object
     elemData.forEach((elemObj) => {
       const foundElement = jmi2Elements[elemObj.id];
-    
+
       // Verify elements created properly
       chai.expect(foundElement.id).to.equal(elemObj.id);
       chai.expect(foundElement.name).to.equal(elemObj.name);
       chai.expect(foundElement.custom || {}).to.deep.equal(elemObj.custom);
       chai.expect(foundElement.project).to.equal(projID);
-    
+
       // If documentation was provided, verify it
       if (elemObj.hasOwnProperty('documentation')) {
         chai.expect(foundElement.documentation).to.equal(elemObj.documentation);
@@ -501,14 +503,14 @@ async function getElements() {
       if (elemObj.hasOwnProperty('parent')) {
         chai.expect(foundElement.parent).to.equal(elemObj.parent);
       }
-    
+
       // Verify additional properties
       chai.expect(foundElement.createdBy).to.equal(adminUser._id);
       chai.expect(foundElement.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundElement.createdOn).to.not.equal(null);
       chai.expect(foundElement.updatedOn).to.not.equal(null);
       chai.expect(foundElement.archived).to.equal(false);
-    
+
       // Verify specific fields not returned
       chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
@@ -535,25 +537,25 @@ async function searchElement() {
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/master/elements/search?q="${elemData.name}"`,
       headers: testUtils.getHeaders()
     };
-    
+
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
     const resp = res.data;
-  
+
     // Expect resp array to contains 1 element
     chai.expect(resp.length).to.equal(1);
     const foundElement = resp[0];
-  
+
     // Verify element created properly
     chai.expect(foundElement.id).to.equal(elemData.id);
     chai.expect(foundElement.name).to.equal(elemData.name);
     chai.expect(foundElement.custom || {}).to.deep.equal(elemData.custom);
     chai.expect(foundElement.project).to.equal(projID);
-  
+
     // If documentation was provided, verify it
     if (elemData.hasOwnProperty('documentation')) {
       chai.expect(foundElement.documentation).to.equal(elemData.documentation);
@@ -570,14 +572,14 @@ async function searchElement() {
     if (elemData.hasOwnProperty('parent')) {
       chai.expect(foundElement.parent).to.equal(elemData.parent);
     }
-  
+
     // Verify additional properties
     chai.expect(foundElement.createdBy).to.equal(adminUser._id);
     chai.expect(foundElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundElement.createdOn).to.not.equal(null);
     chai.expect(foundElement.updatedOn).to.not.equal(null);
     chai.expect(foundElement.archived).to.equal(false);
-  
+
     // Verify specific fields not returned
     chai.expect(foundElement).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
@@ -608,21 +610,21 @@ async function patchElement() {
       headers: testUtils.getHeaders(),
       data: updateObj
     };
-    
+
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
     const updatedElement = res.data;
-  
+
     // Verify element updated properly
     chai.expect(updatedElement.id).to.equal(elemData.id);
     chai.expect(updatedElement.name).to.equal(updateObj.name);
     chai.expect(updatedElement.custom || {}).to.deep.equal(elemData.custom);
     chai.expect(updatedElement.project).to.equal(projID);
-  
+
     // If documentation was provided, verify it
     if (elemData.hasOwnProperty('documentation')) {
       chai.expect(updatedElement.documentation).to.equal(elemData.documentation);
@@ -639,14 +641,14 @@ async function patchElement() {
     if (elemData.hasOwnProperty('parent')) {
       chai.expect(updatedElement.parent).to.equal(elemData.parent);
     }
-  
+
     // Verify additional properties
     chai.expect(updatedElement.createdBy).to.equal(adminUser._id);
     chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(updatedElement.createdOn).to.not.equal(null);
     chai.expect(updatedElement.updatedOn).to.not.equal(null);
     chai.expect(updatedElement.archived).to.equal(false);
-  
+
     // Verify specific fields not returned
     chai.expect(updatedElement).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
@@ -682,30 +684,30 @@ async function patchElements() {
       headers: testUtils.getHeaders(),
       data: updateObj
     };
-    
+
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
     const updatedElements = res.data;
-  
+
     // Expect updatedElements not to be empty
     chai.expect(updatedElements.length).to.equal(elemData.length);
-  
+
     // Convert updatedElements to JMI type 2 for easier lookup
     const jmi2Elements = jmi.convertJMI(1, 2, updatedElements, 'id');
     // Loop through each element data object
     elemData.forEach((elemObj) => {
       const updatedElement = jmi2Elements[elemObj.id];
-    
+
       // Verify elements created properly
       chai.expect(updatedElement.id).to.equal(elemObj.id);
       chai.expect(updatedElement.name).to.equal(`${elemObj.name}_edit`);
       chai.expect(updatedElement.custom || {}).to.deep.equal(elemObj.custom);
       chai.expect(updatedElement.project).to.equal(projID);
-    
+
       // If documentation was provided, verify it
       if (elemObj.hasOwnProperty('documentation')) {
         chai.expect(updatedElement.documentation).to.equal(elemObj.documentation);
@@ -722,14 +724,14 @@ async function patchElements() {
       if (elemObj.hasOwnProperty('parent')) {
         chai.expect(updatedElement.parent).to.equal(elemObj.parent);
       }
-    
+
       // Verify additional properties
       chai.expect(updatedElement.createdBy).to.equal(adminUser._id);
       chai.expect(updatedElement.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(updatedElement.createdOn).to.not.equal(null);
       chai.expect(updatedElement.updatedOn).to.not.equal(null);
       chai.expect(updatedElement.archived).to.equal(false);
-    
+
       // Verify specific fields not returned
       chai.expect(updatedElement).to.not.have.any.keys('archivedOn',
         'archivedBy', '__v', '_id');
@@ -756,15 +758,15 @@ async function deleteElement() {
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/master/elements/${elemData.id}`,
       headers: testUtils.getHeaders()
     };
-    
+
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
     const deleteElementID = res.data;
-  
+
     // Verify correct element deleted
     chai.expect(deleteElementID).to.equal(elemData.id);
   }
@@ -789,7 +791,7 @@ async function deleteElements() {
       testData.elements[5],
       testData.elements[6]
     ];
-  
+
     const elemIDs = elemData.map(e => e.id);
     const ids = elemIDs.join(',');
     const options = {
@@ -797,17 +799,16 @@ async function deleteElements() {
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/master/elements?ids=${ids}`,
       headers: testUtils.getHeaders()
     };
-    
+
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
-  
+
     // Verify response body
     const deletedElementIDs = res.data;
     chai.expect(deletedElementIDs).to.have.members(elemIDs);
-    done();
   }
   catch (error) {
     M.log.error(error);
