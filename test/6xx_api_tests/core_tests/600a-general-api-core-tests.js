@@ -19,11 +19,9 @@
 // NPM modules
 const chai = require('chai');
 const axios = require('axios');
-const request = require('request');
 
 // MBEE modules
 const test = M.config.test;
-const testUtils = M.require('lib.test-utils');
 
 /* --------------------( Main )-------------------- */
 /**
@@ -47,11 +45,11 @@ async function upTest() {
     const options = {
       method: 'get',
       url: `${test.url}/api/test`
-    }
-  
-    // Make an API GET request
+    };
+
+    // Make an API request
     const res = await axios(options);
-    
+
     // Expect status 200 OK
     chai.expect(res.status).to.equal(200);
     // Expect body to be an empty string
@@ -73,13 +71,14 @@ async function swaggerJSONTest() {
     const options = {
       method: 'get',
       url: `${test.url}/api/doc/swagger.json`
-    }
-    
-    // Make an API GET request
+    };
+
+    // Make an API request
     const res = await axios(options);
 
     // Expect status 200 OK
     chai.expect(res.status).to.equal(200);
+
     // Expect body is valid JSON
     chai.expect(res.data).to.be.an('object');
   }
