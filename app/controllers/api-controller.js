@@ -6149,6 +6149,7 @@ async function postWebhooks(req, res, next) {
     next();
   }
   catch (error) {
+    console.log(error)
     // If an error was thrown, return it and its status
     return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
   }

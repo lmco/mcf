@@ -208,7 +208,9 @@ async function getWebhooks(){
       method: 'get',
       url: `${test.url}/api/webhooks`,
       headers: testUtils.getHeaders(),
-      params: webhookData.map(w => w.id).toString()
+      params: {
+        ids: webhookData.map(w => w.id).toString()
+      }
     };
     
     // Make an API request
@@ -501,29 +503,26 @@ async function deleteWebhooks(){
 
 /**
  * @description Verifies POST /api/webhooks/trigger/:base64id can trigger a webhook.
-
  */
 async function triggerWebhook(){
-  // Get data for an incoming webhook
-  const webhookData = testData.webhooks[1];
-  delete webhookData.id;
+  try {
+    // Get data for an incoming webhook
+    const webhookData = testData.webhooks[1];
+    delete webhookData.id;
+    const body = {
+      test: {
+        token: Buffer.from(`${adminUser._id}:test token`).toString('base64')
+      }
+    };
   
-  const body = {
-    test: {
-      token: Buffer.from(`${adminUser._id}:test token`).toString('base64')
-    }
-  };
-
-  // Note: registering a listener here would not work because the event occurs on a
-  // separately running server. All we can test here is that we get a 200 response.
-
-  WebhookController.create(adminUser, webhookData)
-  .then((webhooks) => {
+    // Note: registering a listener here would not work because the event occurs on a
+    // separately running server. All we can test here is that we get a 200 response.
+    const webhooks = await WebhookController.create(adminUser, webhookData)
     const webhook = webhooks[0];
     // Get the base64 encoding of the webhook id
     const triggerID = webhook._id;
     const encodedID = Buffer.from(triggerID).toString('base64');
-
+  
     // Save the id to be deleted later
     webhookIDs.push(triggerID);
     const options = {
@@ -535,12 +534,13 @@ async function triggerWebhook(){
   
     // Make an API request
     const res = await axios(options);
-
+  
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
-  })
-  .catch((error) => {
+  }
+  catch (error) {
     M.log.error(error);
+    // Expect no error
     chai.expect(error).to.equal(null);
-  });
+  }
 }
