@@ -5812,7 +5812,9 @@ async function postBlob(req, res, next) {
       const error = new M.ServerError('Artifact upload failed.', 'warn');
       return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
     }
-
+    //console.log(req)
+    console.log('req.body ', req.body)
+    console.log('req.file ', req.file)
     // Sanity Check: file is required
     if (!req.file) {
       const error = new M.DataFormatError('Artifact Blob file must be defined.', 'warn');
@@ -6149,7 +6151,6 @@ async function postWebhooks(req, res, next) {
     next();
   }
   catch (error) {
-    console.log(error)
     // If an error was thrown, return it and its status
     return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
   }
