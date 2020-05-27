@@ -359,102 +359,102 @@ async function getArtifacts() {
  * /api/orgs/:orgid/projects/:projectid/artifacts/blob
  * to post an artifact blob.
  */
-async function postBlob() {
-  try {
-    const artData = testData.artifacts[0];
-    artData.project = projID;
-
-    const artifactPath = path.join(
-      M.root, artData.location, artData.filename
-    );
-
-    let blob = fs.readFileSync(artifactPath);
-    const FormData = require('form-data');
-    let formData = new FormData();
-
-    //Read the file from disc
-    let dataInBuffer = new Buffer.from( [0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80, 0x90, 0xA0, 0xB0, 0xC0, 0xD0, 0xE0, 0xF0, 0xFF] );
-    formData.append ('buffer',dataInBuffer)
-    //formData.append ('file',fs.createReadStream(artifactPath))
-    //formData.append ('file',"file string");
-    //formData.append("location", artData.location);
-    //formData.append("filename", artData.filename);
-    
-    //let header = testUtils.getHeaders(formData.getHeaders()["content-type"])
-    //let header = testUtils.getHeaders('multipart/form-data')
-    // 'application/x-www-form-urlencoded'
-    let header = Object.assign(formData.getHeaders(), testUtils.getHeaders('multipart/form-data'));
-    console.log('header: ', header);
-
-    const options = {
-      method: 'post',
-      url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/blob`,
-      headers: header,
-      data: formData
-    };
-
-    console.log('options.url: ', options.url);
-    console.log('formData.getBuffer(): ', formData.getBuffer());
-    console.log('options: ', options);
-
-    // Make an API request
-   //const res = await axios.post(options.url, formData.getBuffer(), options);
-    const res = await axios(options);
-
-    // Expect response status: 200 OK
-    chai.expect(res.status).to.equal(200);
-    // Verify response body
-    const postedBlob = res.data;
-    // Verify artifact created properly
-    chai.expect(postedBlob.project).to.equal(projID);
-    chai.expect(postedBlob.location).to.equal(artData.location);
-    chai.expect(postedBlob.filename).to.equal(artData.filename);
-  }
-  catch (error) {
-    M.log.error(error);
-    // Expect no error
-    chai.expect(error).to.equal(null);
-  }
-}
-
-// function postBlob(done) {
-//   const artData = testData.artifacts[0];
-//   artData.project = projID;
+// async function postBlob() {
+//   try {
+//     const artData = testData.artifacts[0];
+//     artData.project = projID;
 //
-//   const artifactPath = path.join(
-//     M.root, artData.location, artData.filename
-//   );
+//     const artifactPath = path.join(
+//       M.root, artData.location, artData.filename
+//     );
 //
-//   const options = {
-//     method: 'POST',
-//     url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/blob`,
-//     headers: testUtils.getHeaders('multipart/form-data'),
-//     formData: {
-//       location: artData.location,
-//       filename: artData.filename,
-//       file: {
-//         value: fs.createReadStream(artifactPath),
-//         options: {
-//           filename: artifactPath
-//         }
-//       }
-//     }
-//   };
+//     let blob = fs.readFileSync(artifactPath);
+//     const FormData = require('form-data');
+//     let formData = new FormData();
 //
-//   request(options, (err, response, body) => {
-//     // Expect no error
-//     chai.expect(err).to.equal(null);
+//     //Read the file from disc
+//     let dataInBuffer = new Buffer.from( [0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80, 0x90, 0xA0, 0xB0, 0xC0, 0xD0, 0xE0, 0xF0, 0xFF] );
+//     formData.append ('buffer',dataInBuffer)
+//     //formData.append ('file',fs.createReadStream(artifactPath))
+//     //formData.append ('file',"file string");
+//     //formData.append("location", artData.location);
+//     //formData.append("filename", artData.filename);
+//
+//     //let header = testUtils.getHeaders(formData.getHeaders()["content-type"])
+//     //let header = testUtils.getHeaders('multipart/form-data')
+//     // 'application/x-www-form-urlencoded'
+//     let header = Object.assign(formData.getHeaders(), testUtils.getHeaders('multipart/form-data'));
+//     console.log('header: ', header);
+//
+//     const options = {
+//       method: 'post',
+//       url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/blob`,
+//       headers: header,
+//       data: formData
+//     };
+//
+//     console.log('options.url: ', options.url);
+//     console.log('formData.getBuffer(): ', formData.getBuffer());
+//     console.log('options: ', options);
+//
+//     // Make an API request
+//    //const res = await axios.post(options.url, formData.getBuffer(), options);
+//     const res = await axios(options);
+//
 //     // Expect response status: 200 OK
-//     chai.expect(response.statusCode).to.equal(200);
+//     chai.expect(res.status).to.equal(200);
 //     // Verify response body
-//     const postedBlob = JSON.parse(body);
+//     const postedBlob = res.data;
 //     // Verify artifact created properly
 //     chai.expect(postedBlob.project).to.equal(projID);
 //     chai.expect(postedBlob.location).to.equal(artData.location);
 //     chai.expect(postedBlob.filename).to.equal(artData.filename);
-//     done();
-//   });
+//   }
+//   catch (error) {
+//     M.log.error(error);
+//     // Expect no error
+//     chai.expect(error).to.equal(null);
+//   }
 // }
+
+function postBlob(done) {
+  const artData = testData.artifacts[0];
+  artData.project = projID;
+
+  const artifactPath = path.join(
+    M.root, artData.location, artData.filename
+  );
+
+  const options = {
+    method: 'POST',
+    url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/blob`,
+    headers: testUtils.getHeaders('multipart/form-data'),
+    formData: {
+      location: artData.location,
+      filename: artData.filename,
+      file: {
+        value: fs.createReadStream(artifactPath),
+        options: {
+          filename: artifactPath
+        }
+      }
+    }
+  };
+
+  request(options, (err, response, body) => {
+    // Expect no error
+    chai.expect(err).to.equal(null);
+    // Expect response status: 200 OK
+    chai.expect(response.statusCode).to.equal(200);
+    // Verify response body
+    const postedBlob = JSON.parse(body);
+    // Verify artifact created properly
+    chai.expect(postedBlob.project).to.equal(projID);
+    chai.expect(postedBlob.location).to.equal(artData.location);
+    chai.expect(postedBlob.filename).to.equal(artData.filename);
+    done();
+  });
+}
 
 /**
  * @description Verifies GET request
