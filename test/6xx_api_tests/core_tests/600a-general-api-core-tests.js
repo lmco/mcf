@@ -10,6 +10,7 @@
  * @owner Connor Doyle
  *
  * @author Josh Kaplan
+ * @author Phillip Lee
  *
  * @description Tests the API functionality. Confirms API and swagger API
  * documentation is up. Testing these endpoints also confirms that server has

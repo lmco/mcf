@@ -10,6 +10,7 @@
  * @owner Connor Doyle
  *
  * @author Leah De Laurell
+ * @author Phillip Lee
  *
  * @description This tests the branch API controller functionality:
  * GET, POST, PATCH, and DELETE of a branch.

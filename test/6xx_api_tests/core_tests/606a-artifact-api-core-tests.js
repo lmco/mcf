@@ -17,7 +17,7 @@
 
 // NPM modules
 const chai = require('chai'); // Test framework
-const axios = require('axios')
+const axios = require('axios');
 const request = require('request');
 
 // Node modules
@@ -94,14 +94,14 @@ describe(M.getModuleName(module.filename), () => {
   it('should GET an artifact', getArtifact);
   it('should GET multiple artifacts', getArtifacts);
   it('should POST an artifact blob', postBlob);
-  // it('should GET an artifact blob', getBlob);
-  // it('should GET a list of artifact blobs', listBlobs);
-  // it('should GET an artifact blob by ID', getBlobById);
-  // it('should DELETE an artifact', deleteBlob);
-  // it('should PATCH an artifact', patchArtifact);
-  // it('should PATCH multiple artifacts', patchArtifacts);
-  // it('should DELETE an artifact', deleteArtifact);
-  // it('should DELETE multiple artifacts', deleteArtifacts);
+  it('should GET an artifact blob', getBlob);
+  it('should GET a list of artifact blobs', listBlobs);
+  it('should GET an artifact blob by ID', getBlobById);
+  it('should DELETE an artifact', deleteBlob);
+  it('should PATCH an artifact', patchArtifact);
+  it('should PATCH multiple artifacts', patchArtifacts);
+  it('should DELETE an artifact', deleteArtifact);
+  it('should DELETE multiple artifacts', deleteArtifacts);
 });
 
 /* --------------------( Tests )-------------------- */
@@ -122,12 +122,12 @@ async function postArtifact() {
 
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
     const createdArtifact = res.data;
-  
+
     // Verify artifact created properly
     chai.expect(createdArtifact.id).to.equal(artData.id);
     chai.expect(createdArtifact.branch).to.equal(branchID);
@@ -138,14 +138,14 @@ async function postArtifact() {
     chai.expect(createdArtifact.filename).to.equal(artData.filename);
     chai.expect(createdArtifact.strategy).to.equal(M.config.artifact.strategy);
     chai.expect(createdArtifact.size).to.equal(artData.size);
-  
+
     // Verify additional properties
     chai.expect(createdArtifact.createdBy).to.equal(adminUser._id);
     chai.expect(createdArtifact.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(createdArtifact.createdOn).to.not.equal(null);
     chai.expect(createdArtifact.updatedOn).to.not.equal(null);
     chai.expect(createdArtifact.archived).to.equal(false);
-  
+
     // Verify specific fields not returned
     chai.expect(createdArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
@@ -178,24 +178,24 @@ async function postArtifacts() {
 
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
-  
+
     // Verify response body
     const createdArtifacts = res.data;
-  
+
     // Expect createdArtifacts not to be empty
     chai.expect(createdArtifacts.length).to.equal(artData.length);
-  
+
     // Convert to JMI type 2 for easier lookup
     const jmi2Artifacts = jmi.convertJMI(1, 2, createdArtifacts, 'id');
-  
+
     // Loop through each artifact data object
     artData.forEach((artObj) => {
       const artifactID = utils.createID(artObj.id);
       const createdArtifact = jmi2Artifacts[artifactID];
-    
+
       // Verify artifact created properly
       chai.expect(createdArtifact.id).to.equal(artObj.id);
       chai.expect(createdArtifact.branch).to.equal(branchID);
@@ -206,14 +206,14 @@ async function postArtifacts() {
       chai.expect(createdArtifact.filename).to.equal(artObj.filename);
       chai.expect(createdArtifact.strategy).to.equal(M.config.artifact.strategy);
       chai.expect(createdArtifact.size).to.equal(artObj.size);
-    
+
       // Verify additional properties
       chai.expect(createdArtifact.createdBy).to.equal(adminUser._id);
       chai.expect(createdArtifact.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(createdArtifact.createdOn).to.not.equal(null);
       chai.expect(createdArtifact.updatedOn).to.not.equal(null);
       chai.expect(createdArtifact.archived).to.equal(false);
-    
+
       // Verify specific fields not returned
       chai.expect(createdArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
@@ -242,12 +242,12 @@ async function getArtifact() {
 
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
     const foundArtifact = res.data;
-  
+
     // Verify artifact found
     chai.expect(foundArtifact.id).to.equal(artData.id);
     chai.expect(foundArtifact.branch).to.equal(branchID);
@@ -259,14 +259,14 @@ async function getArtifact() {
     chai.expect(foundArtifact.strategy).to.equal(M.config.artifact.strategy);
     chai.expect(foundArtifact.custom).to.deep.equal(artData.custom);
     chai.expect(foundArtifact.size).to.equal(artData.size);
-  
+
     // Verify additional properties
     chai.expect(foundArtifact.createdBy).to.equal(adminUser._id);
     chai.expect(foundArtifact.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(foundArtifact.createdOn).to.not.equal(null);
     chai.expect(foundArtifact.updatedOn).to.not.equal(null);
     chai.expect(foundArtifact.archived).to.equal(false);
-  
+
     // Verify specific fields not returned
     chai.expect(foundArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
@@ -305,24 +305,24 @@ async function getArtifacts() {
 
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
     const foundArtifacts = res.data;
-  
+
     // Verify expected number of documents
-  
+
     chai.expect(foundArtifacts.length).to.equal(artData.length);
-  
+
     // Convert to JMI type 2 for easier lookup
     const jmi2Artifacts = jmi.convertJMI(1, 2, foundArtifacts, 'id');
-  
+
     // Loop through each artifact data object
     artData.forEach((artObj) => {
       const artifactID = utils.createID(artObj.id);
       const foundArtifact = jmi2Artifacts[artifactID];
-    
+
       // Verify artifact
       chai.expect(foundArtifact.id).to.equal(artObj.id);
       chai.expect(foundArtifact.branch).to.equal(branchID);
@@ -334,14 +334,14 @@ async function getArtifacts() {
       chai.expect(foundArtifact.strategy).to.equal(M.config.artifact.strategy);
       chai.expect(foundArtifact.custom).to.deep.equal(artObj.custom);
       chai.expect(foundArtifact.size).to.equal(artObj.size);
-    
+
       // Verify additional properties
       chai.expect(foundArtifact.createdBy).to.equal(adminUser._id);
       chai.expect(foundArtifact.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(foundArtifact.createdOn).to.not.equal(null);
       chai.expect(foundArtifact.updatedOn).to.not.equal(null);
       chai.expect(foundArtifact.archived).to.equal(false);
-    
+
       // Verify specific fields not returned
       chai.expect(foundArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
@@ -358,65 +358,9 @@ async function getArtifacts() {
  * @description Verifies POST request
  * /api/orgs/:orgid/projects/:projectid/artifacts/blob
  * to post an artifact blob.
+ *
+ * @param {Function} done - The mocha callback.
  */
-// async function postBlob() {
-//   try {
-//     const artData = testData.artifacts[0];
-//     artData.project = projID;
-//
-//     const artifactPath = path.join(
-//       M.root, artData.location, artData.filename
-//     );
-//
-//     let blob = fs.readFileSync(artifactPath);
-//     const FormData = require('form-data');
-//     let formData = new FormData();
-//
-//     //Read the file from disc
-//     let dataInBuffer = new Buffer.from( [0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80, 0x90, 0xA0, 0xB0, 0xC0, 0xD0, 0xE0, 0xF0, 0xFF] );
-//     formData.append ('buffer',dataInBuffer)
-//     //formData.append ('file',fs.createReadStream(artifactPath))
-//     //formData.append ('file',"file string");
-//     //formData.append("location", artData.location);
-//     //formData.append("filename", artData.filename);
-//
-//     //let header = testUtils.getHeaders(formData.getHeaders()["content-type"])
-//     //let header = testUtils.getHeaders('multipart/form-data')
-//     // 'application/x-www-form-urlencoded'
-//     let header = Object.assign(formData.getHeaders(), testUtils.getHeaders('multipart/form-data'));
-//     console.log('header: ', header);
-//
-//     const options = {
-//       method: 'post',
-//       url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/blob`,
-//       headers: header,
-//       data: formData
-//     };
-//
-//     console.log('options.url: ', options.url);
-//     console.log('formData.getBuffer(): ', formData.getBuffer());
-//     console.log('options: ', options);
-//
-//     // Make an API request
-//    //const res = await axios.post(options.url, formData.getBuffer(), options);
-//     const res = await axios(options);
-//
-//     // Expect response status: 200 OK
-//     chai.expect(res.status).to.equal(200);
-//     // Verify response body
-//     const postedBlob = res.data;
-//     // Verify artifact created properly
-//     chai.expect(postedBlob.project).to.equal(projID);
-//     chai.expect(postedBlob.location).to.equal(artData.location);
-//     chai.expect(postedBlob.filename).to.equal(artData.filename);
-//   }
-//   catch (error) {
-//     M.log.error(error);
-//     // Expect no error
-//     chai.expect(error).to.equal(null);
-//   }
-// }
-
 function postBlob(done) {
   const artData = testData.artifacts[0];
   artData.project = projID;
@@ -466,7 +410,7 @@ async function getBlob() {
     const artData = testData.artifacts[0];
     artData.project = projID;
     artData.branch = branchID;
-  
+
     const queryParams = {
       location: artData.location,
       filename: artData.filename
@@ -474,26 +418,29 @@ async function getBlob() {
     const options = {
       method: 'get',
       url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/blob`,
-      qs: queryParams,
+      params: queryParams,
       headers: testUtils.getHeaders(),
-      encoding: null
+      responseType: 'arraybuffer'
     };
 
     // Make an API request
     const res = await axios(options);
 
-    /// Expect response status: 200 OK
+    // / Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
-  
+
+    // Convert data to buffer
+    const resFile = Buffer.from(res.data, 'binary');
+
     // Check return artifact is of buffer type
-    chai.expect(Buffer.isBuffer(body)).to.equal(true);
-  
+    chai.expect(Buffer.isBuffer(resFile)).to.equal(true);
+
     // Get the file
     const artifactPath = path.join(M.root, artData.location, artData.filename);
     const fileData = fs.readFileSync(artifactPath);
-  
+
     // Deep compare both binaries
-    chai.expect(body).to.deep.equal(fileData);
+    chai.expect(resFile).to.deep.equal(fileData);
   }
   catch (error) {
     M.log.error(error);
@@ -517,10 +464,10 @@ async function listBlobs() {
 
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
-  
+
     // Verify response body
     const blobList = res.data;
     chai.expect(blobList[0].location).to.equal(testData.artifacts[0].location);
@@ -543,24 +490,27 @@ async function getBlobById() {
       method: 'get',
       url: `${test.url}/api/orgs/${orgID}/projects/${projID}/branches/${branchID}/artifacts/${artData.id}/blob`,
       headers: testUtils.getHeaders(),
-      encoding: null
+      responseType: 'arraybuffer'
     };
 
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
-  
+
+    // Convert data to buffer
+    const resFile = Buffer.from(res.data, 'binary');
+
     // Check return artifact is of buffer type
-    chai.expect(Buffer.isBuffer(body)).to.equal(true);
-  
+    chai.expect(Buffer.isBuffer(resFile)).to.equal(true);
+
     // Get the file
     const artifactPath = path.join(M.root, artData.location, artData.filename);
     const fileData = fs.readFileSync(artifactPath);
-  
+
     // Deep compare both binaries
-    chai.expect(body).to.deep.equal(fileData);
+    chai.expect(resFile).to.deep.equal(fileData);
   }
   catch (error) {
     M.log.error(error);
@@ -586,16 +536,16 @@ async function deleteBlob() {
       method: 'delete',
       url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/blob`,
       headers: testUtils.getHeaders(),
-      qs: query
+      params: query
     };
 
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-  
+
     const deletedBlob = res.data;
     // Verify artifact created properly
     chai.expect(deletedBlob.project).to.equal(projID);
@@ -631,12 +581,12 @@ async function patchArtifact() {
 
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
     const patchedArtifact = res.data;
-  
+
     // Verify artifact created properly
     chai.expect(patchedArtifact.id).to.equal(artData.id);
     chai.expect(patchedArtifact.branch).to.equal(branchID);
@@ -648,14 +598,14 @@ async function patchArtifact() {
     chai.expect(patchedArtifact.strategy).to.equal(M.config.artifact.strategy);
     chai.expect(patchedArtifact.custom).to.deep.equal(artData.custom);
     chai.expect(patchedArtifact.size).to.equal(artData.size);
-  
+
     // Verify additional properties
     chai.expect(patchedArtifact.createdBy).to.equal(adminUser._id);
     chai.expect(patchedArtifact.lastModifiedBy).to.equal(adminUser._id);
     chai.expect(patchedArtifact.createdOn).to.not.equal(null);
     chai.expect(patchedArtifact.updatedOn).to.not.equal(null);
     chai.expect(patchedArtifact.archived).to.equal(false);
-  
+
     // Verify specific fields not returned
     chai.expect(patchedArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
       '__v', '_id');
@@ -692,23 +642,23 @@ async function patchArtifacts() {
 
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
     const patchedArtifacts = res.data;
-  
+
     // Verify expected number of documents
     chai.expect(patchedArtifacts.length).to.equal(artData.length);
-  
+
     // Convert to JMI type 2 for easier lookup
     const jmi2Artifacts = jmi.convertJMI(1, 2, patchedArtifacts, 'id');
-  
+
     // Loop through each artifact data object
     artData.forEach((artObj) => {
       const artifactID = utils.createID(artObj.id);
       const patchedArtifact = jmi2Artifacts[artifactID];
-    
+
       // Verify artifact updated properly
       chai.expect(patchedArtifact.id).to.equal(artObj.id);
       chai.expect(patchedArtifact.branch).to.equal(branchID);
@@ -720,14 +670,14 @@ async function patchArtifacts() {
       chai.expect(patchedArtifact.strategy).to.equal(M.config.artifact.strategy);
       chai.expect(patchedArtifact.custom).to.deep.equal(artObj.custom);
       chai.expect(patchedArtifact.size).to.equal(artObj.size);
-    
+
       // Verify additional properties
       chai.expect(patchedArtifact.createdBy).to.equal(adminUser._id);
       chai.expect(patchedArtifact.lastModifiedBy).to.equal(adminUser._id);
       chai.expect(patchedArtifact.createdOn).to.not.equal(null);
       chai.expect(patchedArtifact.updatedOn).to.not.equal(null);
       chai.expect(patchedArtifact.archived).to.equal(false);
-    
+
       // Verify specific fields not returned
       chai.expect(patchedArtifact).to.not.have.any.keys('archivedOn', 'archivedBy',
         '__v', '_id');
@@ -758,7 +708,7 @@ async function deleteArtifact() {
 
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
@@ -794,13 +744,13 @@ async function deleteArtifacts() {
 
     // Make an API request
     const res = await axios(options);
-  
+
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
-  
+
     // Verify response body
     const deletedArtifactIDs = res.data;
-  
+
     chai.expect(deletedArtifactIDs).to.have.members(artIDs);
   }
   catch (error) {

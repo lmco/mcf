@@ -10,6 +10,7 @@
  * @owner Connor Doyle
  *
  * @author Austin Bieber
+ * @author Phillip Lee
  *
  * @description This tests the element API controller functionality:
  * GET, POST, PATCH, and DELETE of an element.

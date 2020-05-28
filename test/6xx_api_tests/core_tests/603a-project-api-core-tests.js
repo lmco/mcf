@@ -11,6 +11,7 @@
  *
  * @author Leah De Laurell
  * @author Austin Bieber
+ * @author Phillip Lee
  *
  * @description This tests the project API controller functionality:
  * GET, POST, PATCH, and DELETE of a project.
