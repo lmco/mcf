@@ -33,7 +33,8 @@ Test MCF:
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
-  dependencies: []
+  dependencies: 
+    - Build MCF
   before_script:
     - export HTTP_PROXY=http://proxy3.lmco.com:80
     - export HTTPS_PROXY=http://proxy3.lmco.com:80
@@ -42,7 +43,7 @@ Test MCF:
     - yarn config set proxy http://proxy3.lmco.com:80
     - yarn config set https-proxy http://proxy3.lmco.com:80
     - yarn config set no_proxy 127.0.0.1,localhost
-    - NOPREINSTALL=1 yarn install
+    # - NOPREINSTALL=1 yarn install
     - node mbee migrate -y
   script:
     - node mbee lint
