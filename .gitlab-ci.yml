@@ -35,7 +35,6 @@ Build MCF:
     # - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci:latest
     - yarn install
     - node mbee lint
-    - node mbee migrate -y
 
 Test MCF:
   stage: Test
@@ -56,7 +55,7 @@ Test MCF:
     - yarn config set https-proxy http://proxy3.lmco.com:80
     - yarn config set no_proxy 127.0.0.1,localhost
     # - NOPREINSTALL=1 yarn install
-    # - node mbee migrate -y
+    - node mbee migrate -y
   script:
     # - node mbee lint
     # - sleep 5
