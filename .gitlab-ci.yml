@@ -55,6 +55,7 @@ Test MCF:
     - yarn config set https-proxy http://proxy3.lmco.com:80
     - yarn config set no_proxy 127.0.0.1,localhost
     # - NOPREINSTALL=1 yarn install
+    - yarn build
     - node mbee migrate -y
   script:
     # - node mbee lint
