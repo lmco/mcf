@@ -17,7 +17,7 @@ Build MCF:
   dependencies: []
   artifacts:
     paths:
-    - node_modules
+    - node_modules/
     expire_in: 1h
   script:
     - docker build -t mcf-ci -f ./config/gitlab.Dockerfile .
