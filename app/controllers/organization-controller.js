@@ -152,7 +152,6 @@ async function find(requestingUser, orgs, options) {
     }
 
     // If not system admin, add permissions check
-    // TODO: Rewrite using Permissions library
     if (!reqUser.admin) {
       searchQuery[`permissions.${reqUser._id}`] = { $all: ['read'] };
     }

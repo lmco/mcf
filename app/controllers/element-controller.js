@@ -992,7 +992,6 @@ async function update(requestingUser, organizationID, projectID, branchID, eleme
           }
         }
 
-        // TODO: After database abstraction, look at using the element validator instead
         // If updating the source or target
         if (key === 'source' || key === 'target') {
           // If the source/target is the element id, throw error
