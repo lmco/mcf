@@ -8,6 +8,7 @@ variables:
 stages:
   - Build
   - Test
+  - Test Plugins
 
 Build MCF:
   stage: Build
@@ -51,6 +52,6 @@ Test MCF:
     - node mbee test --all
 
 Plugin Tests:
-  stage: Test
+  stage: Test Plugins
   trigger:
     include: pipepline/config/plugins.yml
