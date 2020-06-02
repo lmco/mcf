@@ -13,17 +13,29 @@ stages:
 Build MCF:
   stage: Build
   tags:
-    - shell
+    - docker
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
   dependencies: []
   artifacts:
     paths:
-    - node_modules/
+    - node_modules
     expire_in: 1h
+  before_script:
+    - export HTTP_PROXY=http://proxy3.lmco.com:80
+    - export HTTPS_PROXY=http://proxy3.lmco.com:80
+    - export NO_PROXY=127.0.0.1,localhost
+    - yarn config set strict-ssl false
+    - yarn config set proxy http://proxy3.lmco.com:80
+    - yarn config set https-proxy http://proxy3.lmco.com:80
+    - yarn config set no_proxy 127.0.0.1,localhost
   script:
-    - docker build -t mcf-ci -f ./config/gitlab.Dockerfile .
-    - docker tag mcf-ci registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci
-    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
-    - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci:latest
+    # - docker build -t mcf-ci -f ./config/gitlab.Dockerfile .
+    # - docker tag mcf-ci registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci
+    # - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
+    # - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci:latest
+    - yarn install
+    - node mbee lint
+    - node mbee migrate -y
 
 Test MCF:
   stage: Test
@@ -44,10 +56,10 @@ Test MCF:
     - yarn config set https-proxy http://proxy3.lmco.com:80
     - yarn config set no_proxy 127.0.0.1,localhost
     # - NOPREINSTALL=1 yarn install
-    - node mbee migrate -y
+    # - node mbee migrate -y
   script:
-    - node mbee lint
-    - sleep 5
+    # - node mbee lint
+    # - sleep 5
     - nohup node mbee start &
     - sleep 20
     - node mbee test --all
