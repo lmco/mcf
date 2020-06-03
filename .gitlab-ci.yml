@@ -16,10 +16,10 @@ Build MCF:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
   dependencies: []
-  artifacts:
-    paths:
-    - node_modules
-    expire_in: 1h
+  # artifacts:
+  #   paths:
+  #   - node_modules
+  #   expire_in: 1h
   before_script:
     - export HTTP_PROXY=http://proxy3.lmco.com:80
     - export HTTPS_PROXY=http://proxy3.lmco.com:80
@@ -44,8 +44,6 @@ Test MCF:
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
-  dependencies: 
-    - Build MCF
   before_script:
     - export HTTP_PROXY=http://proxy3.lmco.com:80
     - export HTTPS_PROXY=http://proxy3.lmco.com:80
@@ -54,7 +52,7 @@ Test MCF:
     - yarn config set proxy http://proxy3.lmco.com:80
     - yarn config set https-proxy http://proxy3.lmco.com:80
     - yarn config set no_proxy 127.0.0.1,localhost
-    # - NOPREINSTALL=1 yarn install
+    - NOPREINSTALL=1 yarn install
     # - yarn build
     - node mbee migrate -y
   script:
@@ -66,5 +64,29 @@ Test MCF:
 
 Plugin Tests:
   stage: Test Plugins
-  trigger:
-    include: pipepline/config/plugins.yml
+  # trigger:
+  #   include: pipepline/config/plugins.yml
+  tags:
+    - docker
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
+  dependencies: 
+    - Build MCF
+  services:
+    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+      alias: mongodb
+  before_script:
+    - export HTTP_PROXY=http://proxy3.lmco.com:80
+    - export HTTPS_PROXY=http://proxy3.lmco.com:80
+    - export NO_PROXY=127.0.0.1,localhost
+    - yarn config set strict-ssl false
+    - yarn config set proxy http://proxy3.lmco.com:80
+    - yarn config set https-proxy http://proxy3.lmco.com:80
+    - yarn config set no_proxy 127.0.0.1,localhost
+  script:
+    # - node mbee lint
+    # - sleep 5
+    # - nohup node mbee start &
+    # - sleep 20
+    # - node mbee test --all
+    - ls
+    - echo "Running script for testing plugins"
