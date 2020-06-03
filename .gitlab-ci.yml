@@ -46,8 +46,8 @@ Import Plugins:
     - export HTTPS_PROXY=http://proxy3.lmco.com:80
     - export NO_PROXY=127.0.0.1,localhost
   script:
-    - git config --global http.sslVerify false
-    - git clone https://deploy-token-781:mcf@gitlab.us.lmco.com/mbx/mbee/plugins/model-import-export.git
+    # - git config --global http.sslVerify false
+    - git clone https://deploy-token-781:Txwv217Rd5tMbcVcQ-nm@gitlab.us.lmco.com/mbx/mbee/plugins/model-import-export.git
 
 Test MCF:
   stage: Test
