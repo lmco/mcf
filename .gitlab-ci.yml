@@ -47,7 +47,7 @@ Import Plugins:
     - export NO_PROXY=127.0.0.1,localhost
   script:
     # - git config --global http.sslVerify false
-    - git clone https://deploy-token-781:Txwv217Rd5tMbcVcQ-nm@gitlab.us.lmco.com/mbx/mbee/plugins/model-import-export.git
+    - git clone https://gitlab+deploy-token-781:Txwv217Rd5tMbcVcQ-nm@gitlab.us.lmco.com/mbx/mbee/plugins/model-import-export.git
 
 Test MCF:
   stage: Test
