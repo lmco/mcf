@@ -257,7 +257,7 @@ async function providerNotString() {
   catch (error) {
     M.log.error(error);
     // There should be no error
-    should.exist(error);
+    should.not.exist(error);
   }
 }
 
