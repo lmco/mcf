@@ -69,7 +69,7 @@ Test Plugins:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
   dependencies: 
-    - Test MCF
+    - Build MCF
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
