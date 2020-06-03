@@ -35,6 +35,17 @@ Build MCF:
     - NOPREINSTALL=1 yarn install
     - node mbee lint
 
+Import Plugins:
+  stage: Build
+  tags:
+    - shell
+  before_script:
+    - export HTTP_PROXY=http://proxy3.lmco.com:80
+    - export HTTPS_PROXY=http://proxy3.lmco.com:80
+    - export NO_PROXY=127.0.0.1,localhost
+  script:
+    - git clone https://deploy-token-781:mcf@gitlab.us.lmco.com/mbx/mbee/plugins/model-import-export.git
+
 Test MCF:
   stage: Test
   tags:
