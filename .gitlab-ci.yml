@@ -51,14 +51,14 @@ Test MCF:
     - yarn config set proxy http://proxy3.lmco.com:80
     - yarn config set https-proxy http://proxy3.lmco.com:80
     - yarn config set no_proxy 127.0.0.1,localhost
-    - NOPREINSTALL=1 yarn install
-    # - yarn build
-    - node mbee migrate -y
+    # - NOPREINSTALL=1 yarn install
+    # - node mbee migrate -y
   script:
     # - node mbee lint
     # - sleep 5
-    - git config --global http.sslVerify false
-    - git clone https://mcf:deploy-token-781@gitlab.us.lmco.com/mbx/mbee/plugins/model-import-export.git
+    # - git config --global http.sslVerify false
+    - git config --system http.sslCAPath certs/LockheedMartinCertificateAuthority.pem
+    - git clone https://deploy-token-781:mcf@gitlab.us.lmco.com/mbx/mbee/plugins/model-import-export.git
     - nohup node mbee start &
     - sleep 20
     - node mbee test --all
