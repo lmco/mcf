@@ -58,8 +58,7 @@ Test MCF:
     # - node mbee lint
     # - sleep 5
     - git config --global http.sslVerify false
-    # - git clone https://deploy-token-781:mcf@gitlab.us.lmco.com/mbx/mbee/plugins/model-import-export.git
-    - git clone https://gitlab.us.lmco.com/mbx/mbee/plugins/model-import-export.git
+    - git clone https://mcf:deploy-token-781@gitlab.us.lmco.com/mbx/mbee/plugins/model-import-export.git
     - nohup node mbee start &
     - sleep 20
     - node mbee test --all
