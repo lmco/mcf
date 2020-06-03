@@ -4,6 +4,8 @@ variables:
   http_proxy: http://proxy3.lmco.com:80
   https_proxy: http://proxy3.lmco.com:80
   NO_PROXY: 127.0.0.1,localhost
+  GIT_SSL_NO_VERIFY: "true"
+  GIT_STRATEGY: clone
 
 stages:
   - Build
