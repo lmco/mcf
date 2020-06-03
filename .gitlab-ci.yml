@@ -61,7 +61,7 @@ Test MCF:
     - sleep 20
     - node mbee test --all
 
-Plugin Tests:
+Test Plugins:
   stage: Test
   # trigger:
   #   include: pipepline/config/plugins.yml
@@ -69,7 +69,7 @@ Plugin Tests:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
   dependencies: 
-    - Build MCF
+    - Test MCF
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
