@@ -61,6 +61,7 @@ RUN mkdir logs \
     && mkdir -p public \
     && mkdir -p app \
     && mkdir -p /lm/mbee/data/db/log
+    && mkdir -p node_modules
 
 # Copy Project
 COPY ./config config
@@ -70,6 +71,7 @@ COPY ./plugins plugins
 COPY ./app  app
 COPY ./README.md README.md
 COPY ./package.json package.json
+COPY ./yarn.lock
 COPY ./node_modules node_modules
 
 # Make entrypoint.sh an executable
