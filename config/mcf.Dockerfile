@@ -83,6 +83,8 @@ VOLUME data
 
 # Expose ports
 EXPOSE 9080
+EXPOSE 9443
+EXPOSE 27017
 
 # Run server
 ENTRYPOINT /lm/mbee/config/entrypoint.sh
