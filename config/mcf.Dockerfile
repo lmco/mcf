@@ -58,6 +58,7 @@ RUN mkdir logs \
     && mkdir -p config \
     && mkdir -p scripts \
     && mkdir -p plugins \
+    && mkdir -p all_plugins \
     && mkdir -p build \
     && mkdir -p public \
     && mkdir -p app \
@@ -68,13 +69,13 @@ RUN mkdir logs \
 COPY ./config config
 COPY ./scripts scripts
 COPY ./mbee.js mbee.js
-COPY ./plugins plugins
 COPY ./app  app
 COPY ./README.md README.md
 COPY ./package.json package.json
 COPY ./yarn.lock yarn.lock
 COPY ./build build
 COPY ./node_modules node_modules
+COPY ./plugins all_plugins
 
 # Make entrypoint.sh an executable
 RUN chmod +x /lm/mbee/config/entrypoint.sh
