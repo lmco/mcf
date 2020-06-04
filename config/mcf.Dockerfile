@@ -45,7 +45,7 @@ RUN yarn config set proxy http://proxy-lmi.global.lmco.com:80 \
   && yarn config set http-proxy "http://proxy-lmi.global.lmco.com" \
   && yarn config set https-proxy "http://proxy-lmi.global.lmco.com"
 
-RUN yarn install
+# RUN yarn install
 
 # Install modules using yarn from the package.json
 #RUN git config --global url."https://github.com".insteadOf "git://github.com"
