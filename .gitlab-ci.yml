@@ -4,23 +4,17 @@ variables:
   http_proxy: http://proxy3.lmco.com:80
   https_proxy: http://proxy3.lmco.com:80
   NO_PROXY: 127.0.0.1,localhost
-  GIT_SSL_NO_VERIFY: "true"
-  GIT_STRATEGY: clone
 
 stages:
   - Build
   - Test
+  - Docker
 
 Build MCF:
   stage: Build
   tags:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
-  dependencies: []
-  # artifacts:
-  #   paths:
-  #   - node_modules
-  #   expire_in: 1h
   before_script:
     - export HTTP_PROXY=http://proxy3.lmco.com:80
     - export HTTPS_PROXY=http://proxy3.lmco.com:80
@@ -30,25 +24,10 @@ Build MCF:
     - yarn config set https-proxy http://proxy3.lmco.com:80
     - yarn config set no_proxy 127.0.0.1,localhost
   script:
-    # - docker build -t mcf-ci -f ./config/gitlab.Dockerfile .
-    # - docker tag mcf-ci registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci
-    # - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
-    # - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-ci:latest
     - NOPREINSTALL=1 yarn install
     - node mbee lint
 
-Import Plugins:
-  stage: Build
-  tags:
-    - shell
-  before_script:
-    - export HTTP_PROXY=http://proxy3.lmco.com:80
-    - export HTTPS_PROXY=http://proxy3.lmco.com:80
-    - export NO_PROXY=127.0.0.1,localhost
-  script:
-    - git clone https://gitlab+deploy-token-781:Txwv217Rd5tMbcVcQ-nm@gitlab.us.lmco.com/mbx/mbee/plugins/model-import-export.git
-
-Test MCF:
+Test MCF & Plugins:
   stage: Test
   tags:
     - docker
@@ -67,27 +46,16 @@ Test MCF:
     - NOPREINSTALL=1 yarn install
     - node mbee migrate -y
   script:
-    # - node mbee lint
-    # - sleep 5
-    # - git config --global http.sslVerify false
-    # - git config --system http.sslCAPath certs/LockheedMartinCertificateAuthority.pem
-    # - git clone https://deploy-token-781:mcf@gitlab.us.lmco.com/mbx/mbee/plugins/model-import-export.git
     - nohup node mbee start &
     - sleep 20
     - node mbee test --all
 
-Test Plugins:
-  stage: Test
-  # trigger:
-  #   include: pipepline/config/plugins.yml
+Docker Build:
+  stage: Docker
   tags:
-    - docker
-  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
+    - shell
   dependencies: 
-    - Build MCF
-  services:
-    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
-      alias: mongodb
+    - Test MCF & Plugins
   before_script:
     - export HTTP_PROXY=http://proxy3.lmco.com:80
     - export HTTPS_PROXY=http://proxy3.lmco.com:80
@@ -97,10 +65,8 @@ Test Plugins:
     - yarn config set https-proxy http://proxy3.lmco.com:80
     - yarn config set no_proxy 127.0.0.1,localhost
   script:
-    # - node mbee lint
-    # - sleep 5
-    # - nohup node mbee start &
-    # - sleep 20
-    # - node mbee test --all
-    - ls
-    - echo "Running script for testing plugins"
+    - docker build -t mcf-docker -f ./config/mcf.Dockerfile .
+    - docker tag mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker
+    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
+    - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
+

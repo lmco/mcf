@@ -69,6 +69,7 @@ COPY ./mbee.js mbee.js
 COPY ./plugins plugins
 COPY ./app  app
 COPY ./README.md README.md
+COPY ./package.json package.json
 
 # Make entrypoint.sh an executable
 RUN chmod +x /lm/mbee/config/entrypoint.sh
