@@ -29,6 +29,11 @@ Build MCF:
 
 Test MCF & Plugins:
   stage: Test
+  artifacts:
+    paths:
+    - node_modules
+    - yarn.lock
+    expire_in: 1h
   tags:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
