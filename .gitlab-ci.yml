@@ -30,7 +30,7 @@ Build MCF:
     - NOPREINSTALL=1 yarn install
     - node mbee lint
 
-Test MCF & Plugins:
+Test MCF:
   stage: Test
   artifacts:
     paths:
@@ -59,12 +59,34 @@ Test MCF & Plugins:
     - sleep 20
     - node mbee test --all
 
+Test Plugins:
+  stage: Test
+  tags:
+    - docker
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
+  services:
+    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+      alias: mongodb
+  before_script:
+    - export HTTP_PROXY=http://proxy3.lmco.com:80
+    - export HTTPS_PROXY=http://proxy3.lmco.com:80
+    - export NO_PROXY=127.0.0.1,localhost
+    - yarn config set strict-ssl false
+    - yarn config set proxy http://proxy3.lmco.com:80
+    - yarn config set https-proxy http://proxy3.lmco.com:80
+    - yarn config set no_proxy 127.0.0.1,localhost
+    - NOPREINSTALL=1 yarn install
+    - node mbee migrate -y
+  script:
+    - nohup node mbee start &
+    - sleep 60 # sleeping for 60 seconds allows all plugins to be loaded and tested 
+
 Docker Build:
   stage: Docker
   tags:
     - shell
   dependencies: 
-    - Test MCF & Plugins
+    - Test MCF
   script:
     - docker build -t mcf-docker -f ./config/mcf.Dockerfile .
     - docker tag mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker
