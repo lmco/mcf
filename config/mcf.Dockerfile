@@ -72,6 +72,7 @@ COPY ./app  app
 COPY ./README.md README.md
 COPY ./package.json package.json
 COPY ./yarn.lock yarn.lock
+COPY ./build build
 COPY ./node_modules node_modules
 
 # Make entrypoint.sh an executable
