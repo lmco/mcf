@@ -1,7 +1,0 @@
-stages:
-  - model-import-export
-
-Model Import Export:
-  stage: model-import-export
-  script:
-    - echo "I am here"
