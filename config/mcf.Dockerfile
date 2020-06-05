@@ -76,7 +76,7 @@ COPY ./yarn.lock yarn.lock
 COPY ./build build
 COPY ./node_modules node_modules
 COPY ./plugins plugins
-COPY ./all_plugins all_plugins
+COPY ./plugins all_plugins
 
 # Make entrypoint.sh an executable
 RUN chmod +x /lm/mbee/config/entrypoint.sh
