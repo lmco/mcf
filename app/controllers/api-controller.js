@@ -22,7 +22,6 @@
 /* eslint-disable jsdoc/require-description-complete-sentence */
 // Disabling these rules due to the use of headers for api endpoints
 
-
 // Node modules
 const fs = require('fs');
 const path = require('path');
@@ -5799,10 +5798,13 @@ async function getBlob(req, res, next) {
  * @returns {object} Posted Artifact object.
  */
 async function postBlob(req, res, next) {
+  console.log('res.statusCode : ', res.statusCode );
   // Skip controller code if a plugin pre-hook threw an error
   if (res.statusCode !== 200) return next();
-
+  
   await upload(req, res, async function(err) {
+    console.log('req.body: ', req.body);
+    console.log('req.file: ', req.file);
     // Sanity Check: there should always be a user in the request
     if (!req.user) return noUserError(req, res, next);
 

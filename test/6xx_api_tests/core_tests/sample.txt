@@ -1,0 +1,8 @@
+{
+'Content-Type': 'text/html',
+Accepts: 'application/pdf',
+body: '<html><head><title>MMS3 Adapter Test Document</title><style type="text/css">/*------------------------------------------------------------------\n' +
+        '            </div><!-- end ngRepeat: view in views track by view.id -->\n' +
+    '        </div></body></html>',
+name: 'MMS3 Adapter Test Document'
+}
