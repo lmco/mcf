@@ -7,6 +7,7 @@ variables:
   GIT_SSL_NO_VERIFY: "true"
   GIT_STRATEGY: clone
 
+
 stages:
   - Build
   - Test
