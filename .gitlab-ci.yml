@@ -98,7 +98,7 @@ Docker Build:
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
     - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
 
-Deploy MCF:
+Deploy MCF DEV:
   stage: Build
   tags:
     - docker
@@ -106,4 +106,5 @@ Deploy MCF:
   # dependencies: 
   #   - Docker Build
   script:
-    - kubectl get secrets
+    - export VERSION=`cat version.txt`
+    - ./deploy-dev.sh $CI_PROJECT_DIR $VERSION

@@ -1,0 +1,50 @@
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcf-service
+  labels:
+    app: mcf
+spec:
+  ports:
+  - name: mcf
+    port: 9080
+    targetPort: 9080
+    protocol: TCP
+  selector:
+    app: mcf
+
+---
+
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcf-deployment
+  labels:
+    app: mcf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcf
+  template:
+    metadata:
+      labels:
+        app: mcf
+    spec:
+      imagePullSecrets:
+      - name: mcf-repo
+      containers:
+        - name: mcf
+          imagePullPolicy: IfNotPresent
+          image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
+          ports:
+            - containerPort: 9080
+          # volumeMounts:
+          #   - name: mcf-data-volume
+          #     mountPath: /var/lib/mcf
+      # volumes:
+      #   - name: mcf-data-volume
+      #     persistentVolumeClaim:
+      #       claimName: mcf-pv-claim
