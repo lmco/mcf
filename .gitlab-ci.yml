@@ -12,6 +12,7 @@ stages:
   - Build
   - Test
   - Docker
+  # - Deploy
 
 Build MCF:
   stage: Build
@@ -86,6 +87,9 @@ Docker Build:
   stage: Docker
   tags:
     - shell
+  # only:
+  #   - develop
+  #   - master
   dependencies: 
     - Test MCF
   script:
@@ -94,3 +98,12 @@ Docker Build:
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
     - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
 
+Deploy MCF:
+  stage: Build
+  tags:
+    - docker
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
+  # dependencies: 
+  #   - Docker Build
+  script:
+    - kubectl get secrets
