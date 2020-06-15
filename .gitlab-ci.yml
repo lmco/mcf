@@ -12,7 +12,7 @@ stages:
   - Build
   - Test
   - Docker
-  # - Deploy
+  - Deploy
 
 Build MCF:
   stage: Build
@@ -99,12 +99,12 @@ Docker Build:
     - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
 
 Deploy MCF DEV:
-  stage: Build
+  stage: Deploy
   tags:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
-  # dependencies: 
-  #   - Docker Build
+  dependencies: 
+    - Docker Build
   script:
     - export VERSION=`cat version.txt`
     - chmod +x ./config/deploy-dev.sh
