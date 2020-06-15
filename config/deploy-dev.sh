@@ -14,3 +14,5 @@ kubectl create secret docker-registry mcf-repo --namespace=dev --docker-server=r
 # Create the mcf deployment
 echo 'Creating the mcf deployment'
 kubectl create -f $ProjectDirectory/kubernetes/mcf/mcf-deployment.yaml -n dev
+
+exit 0
