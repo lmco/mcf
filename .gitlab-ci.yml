@@ -107,4 +107,4 @@ Deploy MCF DEV:
   #   - Docker Build
   script:
     - export VERSION=`cat version.txt`
-    - ./deploy-dev.sh $CI_PROJECT_DIR $VERSION
+    - ./config/deploy-dev.sh $CI_PROJECT_DIR $VERSION
