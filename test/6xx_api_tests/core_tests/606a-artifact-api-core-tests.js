@@ -369,28 +369,52 @@ async function postBlob() {
     const url = "http://localhost:6233/api/orgs/default/projects/PROJECT-7ef5ab30-597f-4564-b455-b3c1c3a14439/artifacts/blob";
   
     let formData = new FormData();
+  
     
     formData.append('file', fs.createReadStream(filePath));
+    //formData.append('file', fs.createReadStream(filePath));
     formData.append('location', '/test');
     formData.append('filename', 'paper_mario_with_map.jpg');
-    
+  
+    // const header =
+    //   testUtils.getHeaders(`multipart/form-data; boundary=${formData._boundary}`);
     const header = {
       Authorization: "Basic YWRtaW46QWRtaW4xMjM0NSE=",
+      'User-Agent': 'axios/0.19.2',
+      'Content-Type': 'application/x-www-form-urlencoded'
+      //'content-type': 'multipart/form-data'
     }
     
-    console.log('formData: ', formData);
+    // --------------//
+  
+    await axios.post(url, formData, {
+        headers: Object.assign(formData.getHeaders(), header),
+        //headers: header
+      })
+      .then(res => { // then print response status
+        console.log(res)
+      })
+      .catch(e => {console.log(e)});
     
-    const options = {
-      method: 'post',
-      url: url,
-      data: formData,
-      headers: Object.assign(formData.getHeaders(), header),
-
-    }
-    //console.log('options: ', options);
-    const res = await axios(options);
-    //console.log('header:', Object.assign(formData.getHeaders(), header));
-    //console.log(res);
+    
+    
+    
+    // -------------//
+    // console.log('formData: ', formData);
+    //
+    // const options = {
+    //   method: 'post',
+    //   url: url,
+    //   data: formData,
+    //   headers: Object.assign(formData.getHeaders(), header),
+    //   processData: false,
+    //   contentType: false,
+    //
+    // }
+    // //console.log('options: ', options);
+    // const res = await axios(options);
+    // //console.log('header:', Object.assign(formData.getHeaders(), header));
+    // //console.log(res);
   }
   catch (e) {
     console.log('e: ', e);
