@@ -37,7 +37,7 @@ spec:
       - name: mcf-repo
       containers:
         - name: mcf
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
           ports:
             - containerPort: 9080
