@@ -18,7 +18,8 @@
 // NPM modules
 const chai = require('chai'); // Test framework
 const axios = require('axios');
-const request = require('request'); // TODO: Remove after resolve of MBX-2202
+const http = require('axios/lib/adapters/http');
+const FormData = require('form-data');
 
 // Node modules
 const fs = require('fs');     // Access the filesystem
@@ -358,46 +359,54 @@ async function getArtifacts() {
  * @description Verifies POST request
  * /api/orgs/:orgid/projects/:projectid/artifacts/blob
  * to post an artifact blob.
- *
- * @param {Function} done - The mocha callback.
  */
-function postBlob(done) {
-  const artData = testData.artifacts[0];
-  artData.project = projID;
+async function postBlob() {
+  try {
+    const artData = testData.artifacts[0];
+    artData.project = projID;
 
-  const artifactPath = path.join(
-    M.root, artData.location, artData.filename
-  );
+    const artifactPath = path.join(
+      M.root, artData.location, artData.filename
+    );
 
-  const options = {
-    method: 'POST',
-    url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/blob`,
-    headers: testUtils.getHeaders('multipart/form-data'),
-    formData: {
-      location: artData.location,
-      filename: artData.filename,
-      file: {
-        value: fs.createReadStream(artifactPath),
-        options: {
-          filename: artifactPath
-        }
-      }
-    }
-  };
+    // Create form data
+    const formData = new FormData();
 
-  request(options, (err, response, body) => {
-    // Expect no error
-    chai.expect(err).to.equal(null);
+    // Read the file from disc
+    formData.append('file', fs.createReadStream(artifactPath));
+    formData.append('location', artData.location);
+    formData.append('filename', artData.filename);
+
+    const header = Object.assign(formData.getHeaders(),
+      { authorization: testUtils.getHeaders().authorization });
+
+    const options = {
+      method: 'post',
+      url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/blob`,
+      data: formData,
+      headers: header,
+      adapter: http
+    };
+
+    // Post Blob
+    const res = await axios(options);
+
     // Expect response status: 200 OK
-    chai.expect(response.statusCode).to.equal(200);
+    chai.expect(res.status).to.equal(200);
+
     // Verify response body
-    const postedBlob = JSON.parse(body);
+    const postedBlob = res.data;
+
     // Verify artifact created properly
     chai.expect(postedBlob.project).to.equal(projID);
     chai.expect(postedBlob.location).to.equal(artData.location);
     chai.expect(postedBlob.filename).to.equal(artData.filename);
-    done();
-  });
+  }
+  catch (error) {
+    M.log.error(error);
+    // Expect no error
+    chai.expect(error).to.equal(null);
+  }
 }
 
 /**
