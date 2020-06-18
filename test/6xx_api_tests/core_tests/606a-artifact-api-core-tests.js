@@ -18,7 +18,7 @@
 // NPM modules
 const chai = require('chai'); // Test framework
 const axios = require('axios');
-const FormData = require('form-data');
+const request = require('request'); // TODO: Remove after resolve of MBX-2202
 
 // Node modules
 const fs = require('fs');     // Access the filesystem
@@ -362,14 +362,13 @@ async function getArtifacts() {
  * @param {Function} done - The mocha callback.
  */
 function postBlob(done) {
-  const request = require('request'); // TODO: Remove after resolve of MBX-2202
   const artData = testData.artifacts[0];
   artData.project = projID;
-  
+
   const artifactPath = path.join(
     M.root, artData.location, artData.filename
   );
-  
+
   const options = {
     method: 'POST',
     url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/blob`,
@@ -385,7 +384,7 @@ function postBlob(done) {
       }
     }
   };
-  
+
   request(options, (err, response, body) => {
     // Expect no error
     chai.expect(err).to.equal(null);
