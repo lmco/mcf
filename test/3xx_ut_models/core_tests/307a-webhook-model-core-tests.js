@@ -20,7 +20,6 @@
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const uuidv4 = require('uuid/v4');
-const request = require('request');
 const axios = require('axios');
 
 // Use async chai
@@ -259,15 +258,15 @@ async function validPopulateFields() {
 async function sendRequest() {
   // First check that the api is up
   const res = await axios({
-      method: 'get',
-      url: `${M.config.test.url}/api/test`
-  })
-  
+    method: 'get',
+    url: `${M.config.test.url}/api/test`
+  });
+
   let isApiUp = false;
   if (res && res.status === 200) {
     isApiUp = true;
   }
-  
+
   // Skip the test if the api isn't up
   if (!isApiUp) this.skip();
 
@@ -276,9 +275,7 @@ async function sendRequest() {
     const webhook = {
       type: 'Outgoing',
       url: `${M.config.test.url}/api/test`,
-      response: {
-        method: 'GET'
-      }
+      method: 'GET'
     };
 
     // Test the sendRequest function with no data

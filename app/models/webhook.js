@@ -64,7 +64,7 @@
  */
 
 // NPM modules
-const request = require('request');
+const axios = require('axios');
 
 // MBEE modules
 const db = M.require('db');
@@ -179,19 +179,22 @@ WebhookSchema.plugin(extensions);
  * @description Send the requests stored in the webhook.
  * @memberOf WebhookSchema
  */
-WebhookSchema.static('sendRequest', function(webhook, data) {
+WebhookSchema.static('sendRequest', async function(webhook, data) {
   const options = {
     url: webhook.url,
     headers: { 'Content-Type': 'application/json' },
-    method: 'POST',
-    body: data || undefined
+    method: webhook.method || 'post',
+    data: data || undefined
   };
-  if (options.body) options.json = true;
+
+  if (options.data) options.json = true;
   if (webhook.token) options.token = webhook.token;
-  // Send an HTTP request to given URL
-  // request(options, (err) => {
-  //   if (err) M.log.warn(`Webhook ${webhook._id} request error: ${err.message}`);
-  // });
+  try {
+    await axios(options);
+  }
+  catch (err) {
+    M.log.warn(`Webhook ${webhook._id} request error: ${err.message}`);
+  }
 });
 
 /**
