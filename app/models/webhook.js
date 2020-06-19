@@ -189,9 +189,9 @@ WebhookSchema.static('sendRequest', function(webhook, data) {
   if (options.body) options.json = true;
   if (webhook.token) options.token = webhook.token;
   // Send an HTTP request to given URL
-  request(options, (err) => {
-    if (err) M.log.warn(`Webhook ${webhook._id} request error: ${err.message}`);
-  });
+  // request(options, (err) => {
+  //   if (err) M.log.warn(`Webhook ${webhook._id} request error: ${err.message}`);
+  // });
 });
 
 /**
