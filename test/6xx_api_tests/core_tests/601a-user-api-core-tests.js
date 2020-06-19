@@ -178,7 +178,6 @@ async function postUsers() {
       url: `${test.url}/api/users/`,
       headers: testUtils.getHeaders(),
       data: userData
-
     };
 
     // Make an API request
