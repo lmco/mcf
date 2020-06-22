@@ -87,9 +87,9 @@ Docker Build:
   stage: Docker
   tags:
     - shell
-  only:
-    - develop
-    - master
+  # only:
+  #   - develop
+  #   - master
   dependencies: 
     - Test MCF
   script:
@@ -98,7 +98,7 @@ Docker Build:
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
     - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
 
-Deploy MCF DEV:
+Deploy MCF Dev:
   stage: Deploy
   tags:
     - docker
