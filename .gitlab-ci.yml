@@ -111,7 +111,7 @@ Deploy MCF Dev:
   script:
     - export VERSION=`cat version.txt`
     - chmod +x ./scripts/deployment/deploy-dev.sh
-    - ./config/deploy-dev.sh $CI_PROJECT_DIR $VERSION
+    - ./scripts/deployment/deploy-dev.sh $CI_PROJECT_DIR $VERSION
 
 Deploy MCF Test:
   stage: Deploy
@@ -126,7 +126,7 @@ Deploy MCF Test:
   script:
     - export VERSION=`cat version.txt`
     - chmod +x ./scripts/deployment/deploy-test.sh
-    - ./config/deploy-test.sh $CI_PROJECT_DIR $VERSION
+    - ./scripts/deployment/deploy-test.sh $CI_PROJECT_DIR $VERSION
   
 Deploy MCF Prod:
   stage: Deploy
@@ -141,4 +141,4 @@ Deploy MCF Prod:
   script:
     - export VERSION=`cat version.txt`
     - chmod +x ./scripts/deployment/deploy-prod.sh
-    - ./config/deploy-prod.sh $CI_PROJECT_DIR $VERSION
+    - ./scripts/deployment/deploy-prod.sh $CI_PROJECT_DIR $VERSION
