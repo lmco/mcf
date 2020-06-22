@@ -41,10 +41,10 @@ spec:
           image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
           ports:
             - containerPort: 9080
-          # volumeMounts:
-          #   - name: mcf-data-volume
-          #     mountPath: /var/lib/mcf
-      # volumes:
-      #   - name: mcf-data-volume
-      #     persistentVolumeClaim:
-      #       claimName: mcf-pv-claim
+          volumeMounts:
+            - name: mongo-data-volume
+              mountPath: /lm/mbee/data/db
+      volumes:
+        - name: mongo-data-volume
+          persistentVolumeClaim:
+            claimName: mcf-dev-data-pv

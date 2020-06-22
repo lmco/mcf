@@ -1,0 +1,28 @@
+# PersistentVolumeClaim for DEV
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mcf-dev-data-pv
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
+
+---
+
+# Persistent Volume for DEV
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: mcf-dev-data-pv
+spec:
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Recycle
+  nfs:
+    server: 156.82.50.147
+    path: "/mnt/mbee/mbee-dev"

@@ -103,12 +103,42 @@ Deploy MCF DEV:
   tags:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
-  only:
-    - develop
-    - master
+  # only:
+  #   - develop
+  #   - master
   dependencies: 
     - Docker Build
   script:
     - export VERSION=`cat version.txt`
-    - chmod +x ./config/deploy-dev.sh
+    - chmod +x ./scripts/deployment/deploy-dev.sh
     - ./config/deploy-dev.sh $CI_PROJECT_DIR $VERSION
+
+Deploy MCF Test:
+  stage: Deploy
+  tags:
+    - docker
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
+  # only:
+  #   - develop
+  #   - master
+  dependencies: 
+    - Docker Build
+  script:
+    - export VERSION=`cat version.txt`
+    - chmod +x ./scripts/deployment/deploy-test.sh
+    - ./config/deploy-test.sh $CI_PROJECT_DIR $VERSION
+  
+Deploy MCF Prod:
+  stage: Deploy
+  tags:
+    - docker
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
+  # only:
+  #   - develop
+  #   - master
+  dependencies: 
+    - Docker Build
+  script:
+    - export VERSION=`cat version.txt`
+    - chmod +x ./scripts/deployment/deploy-prod.sh
+    - ./config/deploy-prod.sh $CI_PROJECT_DIR $VERSION
