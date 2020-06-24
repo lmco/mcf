@@ -8,7 +8,7 @@ metadata:
 spec:
   ports:
   - name: mcf
-    port: 9080
+    port: 80
     targetPort: 9080
     protocol: TCP
   selector:
@@ -33,6 +33,8 @@ spec:
       labels:
         app: mcf
     spec:
+      nodeName: dev-dev # attaches the pod to the dev-dev node
+      dnsPolicy: Default # pod inherits dns name of the node
       imagePullSecrets:
       - name: mcf-repo
       containers:
