@@ -23,7 +23,7 @@ const path = require('path');
 const Mocha = require('mocha');
 require('@babel/register')();        // Transpile react tests to javascript
 require('@babel/polyfill');          // Transpile async await for javascript
-// require(path.join(M.root, 'test', '7xx_ui_tests', 'setup.js'));
+require(path.join(M.root, 'test', '7xx_ui_tests', 'setup.js'));
 
 
 // If the application is run directly from node, notify the user and fail
@@ -66,7 +66,7 @@ function test(_args) {
   // Add default grep command to define which tests to run
   if (!_args.includes('--grep') && !_args.includes('--all')) {
     _args.push('--grep');
-    _args.push('^[1-5]');
+    _args.push('^[1-57]');
   }
 
   // Test everything if --all was specified
