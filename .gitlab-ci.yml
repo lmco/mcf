@@ -87,9 +87,9 @@ Docker Build:
   stage: Docker
   tags:
     - shell
-  # only:
-  #   - develop
-  #   - master
+  only:
+    - develop
+    - master
   dependencies: 
     - Test MCF
   script:
@@ -103,9 +103,9 @@ Deploy MCF Dev:
   tags:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
-  # only:
-  #   - develop
-  #   - master
+  only:
+    - develop
+    - master
   dependencies: 
     - Docker Build
   script:
@@ -118,9 +118,9 @@ Deploy MCF Test:
   tags:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
-  # only:
-  #   - develop
-  #   - master
+  only:
+    - develop
+    - master
   dependencies: 
     - Docker Build
   script:
@@ -133,9 +133,9 @@ Deploy MCF Prod:
   tags:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
-  # only:
-  #   - develop
-  #   - master
+  only:
+    - develop
+    - master
   dependencies: 
     - Docker Build
   script:

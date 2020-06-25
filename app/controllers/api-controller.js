@@ -22,7 +22,6 @@
 /* eslint-disable jsdoc/require-description-complete-sentence */
 // Disabling these rules due to the use of headers for api endpoints
 
-
 // Node modules
 const fs = require('fs');
 const path = require('path');
