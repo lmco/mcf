@@ -20,86 +20,126 @@
 /* eslint-disable no-unused-vars */
 
 // React modules
-import React, { Component } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 
 /* eslint-enable no-unused-vars */
 
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
+
 // Define component
-class ElementSubtree extends Component {
+export default function ElementSubtree(props) {
+  const [state, setState] = useState({
+    id: props.id,
+    isOpen: !!(props.id === 'model' || props.expand),
+    data: props.data,
+    children: null,
+    elementWindow: false,
+    isSelected: true,
+    error: null
+  });
+  const [isOpen, setIsOpen] = useState(!!(props.id === 'model' || props.expand));
+  const [data, setData] = useState(props.data);
+  const [children, setChildren] = useState(null);
+  // const [elementWindow, setElementWindow] = useState(false);
+  const [error, setError] = useState(null);
 
-  constructor(props) {
-    // Initialize parent props
-    super(props);
+  const prevData = usePrevious(props.data);
+  const prevExpand = usePrevious(props.expand);
+  const prevCollapse = usePrevious(props.collapse);
 
-    // Initialize state props
-    this.state = {
-      id: props.id,
-      isOpen: false,
-      data: props.data,
-      children: null,
-      elementWindow: false,
-      isSelected: true,
-      error: null
-    };
-
-    if (props.id === 'model') {
-      this.state.isOpen = true;
-    }
-    else if (props.expand) {
-      this.state.isOpen = true;
-    }
-    else if (props.collapse) {
-      this.state.isOpen = false;
-    }
-
-    // Bind functions
-    this.toggleCollapse = this.toggleCollapse.bind(this);
-    this.handleElementToggle = this.handleElementToggle.bind(this);
-    this.handleClick = this.handleClick.bind(this);
-    this.refresh = this.refresh.bind(this);
-  }
+  // /**
+  //  * @description Toggle the element sub tree.
+  //  */
+  // const handleElementToggle = () => {
+  //   setElementWindow((currentState) => !currentState);
+  // };
 
   /**
-   * @description Toggle the element sub tree.
+   * @description Toggle the element to display it's children.
    */
-  handleElementToggle() {
-    this.setState({ elementWindow: !this.state.elementWindow });
-  }
+  const toggleCollapse = () => {
+    if (props.unsetCheckbox) {
+      props.unsetCheckbox();
+    }
+    setIsOpen((currentState) => !currentState);
+  };
 
-  componentDidMount() {
+  /**
+   * @description When an element is clicked, parses the ID and call the passed in
+   * click handler function.
+   */
+  const handleClick = () => {
+    const elementId = props.id.replace('tree-', '');
+    props.clickHandler(elementId);
+  };
+
+  /**
+   * @description When an element is deleted, created, or updates the parent
+   * the elements will be updated.
+   */
+  const refresh = () => {
+    // Build URL to get element data
+    const base = props.url;
+    const url = `${base}/elements/${state.id}?minified=true&includeArchived=true`;
+
+    // Get element data
+    $.ajax({
+      method: 'GET',
+      url: url,
+      statusCode: {
+        200: (newData) => {
+          // Set the element data
+          setData(newData);
+        },
+        401: (err) => {
+          // Set error
+          setError(err.responseText);
+
+          // Refresh when session expires
+          window.location.reload();
+        },
+        404: (err) => {
+          // Set error
+          setError(err.responseText);
+        }
+      }
+    });
+  };
+
+  const initialize = () => {
     // Verify setRefreshFunction is not null
-    if (this.props.setRefreshFunctions) {
+    if (props.setRefreshFunctions) {
       // Provide refresh function to top parent component
-      this.props.setRefreshFunctions(this.state.id, this.refresh);
+      props.setRefreshFunctions(state.id, refresh);
     }
 
     // Build URL to get element data
-    const contains = this.state.data.contains;
-    const parent = this.state.data.id;
+    const contains = data.contains;
+    const parent = data.id;
     // Verify element does not have children
     if (contains === null || contains.length === 0) {
       // Skip ajax call for children
       return;
     }
-    const elements = contains.join(',');
-    const base = this.props.url;
-    let url = `${base}/elements?ids=${elements}&fields=id,name,contains,archived,type&minified=true&includeArchived=true`;
-    // Provide different url
-    // If length is too long
-    if (url.length > 2047) {
-      url = `${base}/elements?parent=${parent}&fields=id,name,contains,archived,type&minified=true&includeArchived=true`;
-    }
+    const base = props.url;
+    const url = `${base}/elements?parent=${parent}&fields=id,name,contains,archived,type&minified=true&includeArchived=true`;
 
     // Get children
     $.ajax({
       method: 'GET',
       url: url,
       statusCode: {
-        200: (data) => {
+        200: (newData) => {
           // Sort data by name or special cases
-          const result = data.sort((a, b) => {
+          const result = newData.sort((a, b) => {
             if (!a.name) {
               return 1;
             }
@@ -123,327 +163,276 @@ class ElementSubtree extends Component {
           });
 
           // Set the sorted data as children
-          this.setState({ children: result });
+          setChildren(result);
         },
         401: (err) => {
           // Unset children and display error
-          this.setState({ children: null });
-          this.setState({ error: err.responseText });
+          setChildren(null);
+          setError(err.responseText);
 
           // Refresh when session expires
           window.location.reload();
         },
         403: (err) => {
           // Display error
-          this.setState({ error: err.responseText });
+          setError(err.responseText);
         },
         404: (err) => {
           // Display error
-          this.setState({ error: err.responseText });
+          setError(err.responseText);
         }
       }
     });
-  }
+  };
 
-  /**
-   * @description Toggle the element to display it's children.
-   */
-  toggleCollapse() {
-    if (this.props.unsetCheckbox) {
-      this.props.unsetCheckbox();
-    }
-    this.setState((prevState) => ({ isOpen: !prevState.isOpen }));
-  }
 
-  componentDidUpdate(prevProps, prevStates) {
+  // Run on mount
+  // useEffect(() => {
+  //   console.log('initializing on mount')
+  //   initialize();
+  // }, []);
+
+  // on update of data
+  useEffect(() => {
     // Verify if component needs to re-render
     // Due to the update from state props of data
-    if (this.state.data !== prevStates.data) {
-      this.componentDidMount();
+    if (data !== prevData) {
+      initialize();
     }
-    if (this.props.data.contains.length !== prevProps.data.contains.length) {
-      this.setState({ data: this.props.data });
-      this.componentDidMount();
+    else if (props.data.contains.length !== prevData.contains.length) {
+      setData(props.data);
+      initialize();
     }
 
-    if ((this.props.expand !== prevProps.expand) && !!(this.props.expand)) {
-      this.setState({ isOpen: true });
+    if ((props.expand !== prevExpand) && !!(props.expand)) {
+      setIsOpen(true);
     }
-    if ((this.props.collapse !== prevProps.collapse) && !!(this.props.collapse)) {
-      if (this.props.id !== 'model') {
-        this.setState({ isOpen: false });
+    if ((props.collapse !== prevCollapse) && !!(props.collapse)) {
+      if (props.id !== 'model') {
+        setIsOpen(false);
+      }
+    }
+  }, [props]);
+
+
+  // Initialize variables
+  let elementLink;
+  const initColor = (data.archived) ? '#c0c0c0' : '#333';
+  let elementIcon = (
+    <i className={'fas fa-cube'}
+       style={{ color: initColor }}/>
+  );
+  let expandIcon = 'fa-caret-right transparent';
+  const subtree = [];
+
+  // If the element contains other elements, handle the subtree
+  if (Array.isArray(data.contains) && data.contains.length >= 1) {
+    // Icon should be caret to show subtree is collapsible
+    expandIcon = (isOpen) ? 'fa-caret-down' : 'fa-caret-right';
+
+    // Create Subtrees
+    if (children !== null) {
+      for (let i = 0; i < children.length; i++) {
+        subtree.push(
+          <ElementSubtree key={`tree-${children[i].id}`}
+                          id={`${children[i].id}`}
+                          data={children[i]}
+                          project={props.project}
+                          parent={true}
+                          archived={props.archived}
+                          displayIds={props.displayIds}
+                          expand={props.expand}
+                          collapse={props.collapse}
+                          setRefreshFunctions={props.setRefreshFunctions}
+                          parentRefresh={refresh}
+                          linkElements={props.linkElements}
+                          clickHandler={props.clickHandler}
+                          unsetCheckbox={props.unsetCheckbox}
+                          isOpen={isOpen}
+                          url={props.url}/>
+        );
       }
     }
   }
 
-  /**
-   * @description When an element is deleted, created, or updates the parent
-   * the elements will be updated.
-   */
-  refresh() {
-    // Build URL to get element data
-    const base = this.props.url;
-    const url = `${base}/elements/${this.state.id}?minified=true&includeArchived=true`;
-
-    // Get element data
-    $.ajax({
-      method: 'GET',
-      url: url,
-      statusCode: {
-        200: (data) => {
-          // Set the element data
-          this.setState({ data: data });
-        },
-        401: (err) => {
-          // Set error
-          this.setState({ error: err.responseText });
-
-          // Refresh when session expires
-          window.location.reload();
-        },
-        404: (err) => {
-          // Set error
-          this.setState({ error: err.responseText });
-        }
-      }
-    });
-  }
-
-  /**
-   * @description When an element is clicked, parses the ID and call the passed in
-   * click handler function.
-   */
-  handleClick() {
-    const elementId = this.props.id.replace('tree-', '');
-    this.props.clickHandler(elementId);
-  }
-
-  render() {
-    // Initialize variables
-    let elementLink;
-    const initColor = (this.state.data.archived) ? '#c0c0c0' : '#333';
-    let elementIcon = (
-      <i className={'fas fa-cube'}
-         style={{ color: initColor }}/>
-    );
-    let expandIcon = 'fa-caret-right transparent';
-    const subtree = [];
-
-    const isOpen = this.state.isOpen;
-
-    // If the element contains other elements, handle the subtree
-    if (Array.isArray(this.state.data.contains) && this.state.data.contains.length >= 1) {
-      // Icon should be caret to show subtree is collapsible
-      expandIcon = (isOpen) ? 'fa-caret-down' : 'fa-caret-right';
-
-      // Create Subtrees
-      if (this.state.children !== null) {
-        for (let i = 0; i < this.state.children.length; i++) {
-          subtree.push(
-            <ElementSubtree key={`tree-${this.state.children[i].id}`}
-                            id={`${this.state.children[i].id}`}
-                            data={this.state.children[i]}
-                            project={this.props.project}
-                            parent={this.state}
-                            archived={this.props.archived}
-                            displayIds={this.props.displayIds}
-                            expand={this.props.expand}
-                            collapse={this.props.collapse}
-                            setRefreshFunctions={this.props.setRefreshFunctions}
-                            parentRefresh={this.refresh}
-                            linkElements={this.props.linkElements}
-                            clickHandler={this.props.clickHandler}
-                            unsetCheckbox={this.props.unsetCheckbox}
-                            isOpen={isOpen}
-                            url={this.props.url}/>
-          );
-        }
-      }
-    }
-
-    // Build the rendered element item
-    let element = '';
-    // Verify data available
-    if (this.state.data !== null) {
-      // Verify if archived
-      if (!this.state.data.archived) {
-        // Element should be rendered as the ID initially
+  // Build the rendered element item
+  let element = '';
+  // Verify data available
+  if (data !== null) {
+    // Verify if archived
+    if (!data.archived) {
+      // Element should be rendered as the ID initially
+      element = (
+        <span className={'element-id'}>
+         {data.id}
+      </span>
+      );
+      // If the name is not blank, render the name
+      if (data.name !== '' && props.displayIds) {
         element = (
-          <span className={'element-id'}>
-           {this.state.data.id}
+          <span>
+          {data.name}
+            <span className={'element-id'}>({data.id})</span>
         </span>
         );
-        // If the name is not blank, render the name
-        if (this.state.data.name !== '' && this.props.displayIds) {
-          element = (
-            <span>
-            {this.state.data.name}
-              <span className={'element-id'}>({this.state.data.id})</span>
-          </span>
-          );
-        }
-        // If the name is not blank and has displayId to false
-        else if (this.state.data.name !== '' && !this.props.displayIds) {
-          element = (
-            <span>
-            {this.state.data.name}
-            </span>
-          );
-        }
       }
-      // If the element is archived and archived toggle is true
-      else if (this.props.archived && this.state.data.archived) {
-        // Element should be rendered as the ID initially
+      // If the name is not blank and has displayId to false
+      else if (data.name !== '' && !props.displayIds) {
         element = (
-          <span className='element-id'>
-           {this.state.data.id}
+          <span>
+          {data.name}
           </span>
         );
-        // If the name is not blank, render the name
-        if (this.state.data.name !== '' && this.props.displayIds) {
-          element = (
-            <span className='grayed-out'>
-              {this.state.data.name}
-              <span className='element-id'>({this.state.data.id})</span>
-            </span>
-          );
-        }
-        // If the name is not blank and has displayIds to false
-        else if (this.state.data.name !== '' && !this.props.displayIds) {
-          element = (
-            <span className='grayed-out'>
-            {this.state.data.name}
-            </span>
-          );
-        }
       }
     }
-
-    const iconMappings = {
-      Package: {
-        icon: (isOpen) ? 'folder-open' : 'folder',
-        color: 'lightblue'
-      },
-      package: {
-        icon: (isOpen) ? 'folder-open' : 'folder',
-        color: 'lightblue'
-      },
-      'uml:Package': {
-        icon: (isOpen) ? 'folder-open' : 'folder',
-        color: 'lightblue'
-      },
-      Diagram: {
-        icon: 'sitemap',
-        color: 'lightgreen'
-      },
-      diagram: {
-        icon: 'sitemap',
-        color: 'lightgreen'
-      },
-      association: {
-        icon: 'arrows-alt-h',
-        color: '#333333'
-      },
-      Association: {
-        icon: 'arrows-alt-h',
-        color: '#333333'
-      },
-      relationship: {
-        icon: 'arrows-alt-h',
-        color: '#333333'
-      },
-      Relationship: {
-        icon: 'arrows-alt-h',
-        color: '#333333'
-      },
-      Edge: {
-        icon: 'arrows-alt-h',
-        color: '#333333'
-      },
-      edge: {
-        icon: 'arrows-alt-h',
-        color: '#333333'
-      },
-      'uml:Diagram': {
-        icon: 'sitemap',
-        color: 'lightgreen'
-      },
-      'uml:Association': {
-        icon: 'arrows-alt-h',
-        color: '#333333'
-      },
-      'uml:Slot': {
-        icon: 'circle',
-        color: 'MediumPurple'
-      },
-      'uml:Property': {
-        icon: 'circle',
-        color: 'Gold'
-      },
-      Document: {
-        icon: 'file-alt',
-        color: '#465faf'
-      },
-      View: {
-        icon: 'align-center',
-        color: '#b0f2c8'
-      }
-    };
-
-    // Verify data available and type in mapping
-    if (this.state.data !== null
-      && iconMappings.hasOwnProperty(this.state.data.type)) {
-      // Set the icon to a new icon and color
-      const icon = iconMappings[this.state.data.type].icon;
-      const color = (this.state.data.archived) ? '#c0c0c0' : iconMappings[this.state.data.type].color;
-      elementIcon = (
-        <i className={`fas fa-${icon}`}
-           style={{ color: color }}/>
+    // If the element is archived and archived toggle is true
+    else if (props.archived && data.archived) {
+      // Element should be rendered as the ID initially
+      element = (
+        <span className='element-id'>
+         {data.id}
+        </span>
       );
-    }
-
-    // Verify if it is linked element
-    if (this.props.linkElements) {
-      elementLink = (
-        <Link to={`#${this.props.id}`}
-              onClick={this.handleClick}
-              className='element-link'>
-            <span className='element-name'>
-              {elementIcon}
-              {element}
-            </span>
-        </Link>);
-    }
-    else {
-      elementLink = (
-        <span onClick={this.handleClick}
-             className='element-link'>
-          <span className='element-name'>
-              {elementIcon}
-            {element}
+      // If the name is not blank, render the name
+      if (data.name !== '' && props.displayIds) {
+        element = (
+          <span className='grayed-out'>
+            {data.name}
+            <span className='element-id'>({data.id})</span>
           </span>
-        </span>);
-    }
-
-    // Verify data is not archived and
-    // toggle archived is false
-    if (this.state.data.archived && !this.props.archived) {
-      return null;
-    }
-    else {
-      return (
-        <div id={`tree-${this.props.id}`}
-             className={(this.props.parent) ? 'element-tree' : 'element-tree element-tree-root'}>
-          <i className={`fas ${expandIcon}`}
-             onClick={this.toggleCollapse}>
-          </i>
-          {elementLink}
-          {(isOpen) ? (<div>{subtree}</div>) : ''}
-        </div>);
+        );
+      }
+      // If the name is not blank and has displayIds to false
+      else if (data.name !== '' && !props.displayIds) {
+        element = (
+          <span className='grayed-out'>
+          {data.name}
+          </span>
+        );
+      }
     }
   }
 
-}
+  const iconMappings = {
+    Package: {
+      icon: (isOpen) ? 'folder-open' : 'folder',
+      color: 'lightblue'
+    },
+    package: {
+      icon: (isOpen) ? 'folder-open' : 'folder',
+      color: 'lightblue'
+    },
+    'uml:Package': {
+      icon: (isOpen) ? 'folder-open' : 'folder',
+      color: 'lightblue'
+    },
+    Diagram: {
+      icon: 'sitemap',
+      color: 'lightgreen'
+    },
+    diagram: {
+      icon: 'sitemap',
+      color: 'lightgreen'
+    },
+    association: {
+      icon: 'arrows-alt-h',
+      color: '#333333'
+    },
+    Association: {
+      icon: 'arrows-alt-h',
+      color: '#333333'
+    },
+    relationship: {
+      icon: 'arrows-alt-h',
+      color: '#333333'
+    },
+    Relationship: {
+      icon: 'arrows-alt-h',
+      color: '#333333'
+    },
+    Edge: {
+      icon: 'arrows-alt-h',
+      color: '#333333'
+    },
+    edge: {
+      icon: 'arrows-alt-h',
+      color: '#333333'
+    },
+    'uml:Diagram': {
+      icon: 'sitemap',
+      color: 'lightgreen'
+    },
+    'uml:Association': {
+      icon: 'arrows-alt-h',
+      color: '#333333'
+    },
+    'uml:Slot': {
+      icon: 'circle',
+      color: 'MediumPurple'
+    },
+    'uml:Property': {
+      icon: 'circle',
+      color: 'Gold'
+    },
+    Document: {
+      icon: 'file-alt',
+      color: '#465faf'
+    },
+    View: {
+      icon: 'align-center',
+      color: '#b0f2c8'
+    }
+  };
 
-// Export component
-export default ElementSubtree;
+  // Verify data available and type in mapping
+  if (data !== null
+    && iconMappings.hasOwnProperty(data.type)) {
+    // Set the icon to a new icon and color
+    const icon = iconMappings[data.type].icon;
+    const color = (data.archived) ? '#c0c0c0' : iconMappings[data.type].color;
+    elementIcon = (
+      <i className={`fas fa-${icon}`}
+         style={{ color: color }}/>
+    );
+  }
+
+  // Verify if it is linked element
+  if (props.linkElements) {
+    elementLink = (
+      <Link to={`#${props.id}`}
+            onClick={handleClick}
+            className='element-link'>
+          <span className='element-name'>
+            {elementIcon}
+            {element}
+          </span>
+      </Link>);
+  }
+  else {
+    elementLink = (
+      <span onClick={handleClick}
+           className='element-link'>
+        <span className='element-name'>
+            {elementIcon}
+          {element}
+        </span>
+      </span>);
+  }
+
+  // Verify data is not archived and
+  // toggle archived is false
+  if (data.archived && !props.archived) {
+    return null;
+  }
+  else {
+    return (
+      <div id={`tree-${props.id}`}
+           className={(props.parent) ? 'element-tree' : 'element-tree element-tree-root'}>
+        <i className={`fas ${expandIcon}`}
+           onClick={toggleCollapse}>
+        </i>
+        {elementLink}
+        {(isOpen) ? (<div>{subtree}</div>) : ''}
+      </div>);
+  }
+}

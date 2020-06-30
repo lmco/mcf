@@ -32,6 +32,7 @@ import ProjectElements from '../project-views/elements/project-elements.jsx';
 import ProjectArtifacts from '../project-views/artifacts/project-artifacts.jsx';
 import Search from '../project-views/search/search.jsx';
 import BranchesTags from '../project-views/branches/branches-tags.jsx';
+import { ElementProvider } from './elements/ElementContext.js';
 
 // Define component
 class ProjectHome extends Component {
@@ -242,14 +243,16 @@ class ProjectHome extends Component {
                 <Switch>
                   { /* Route to element page */ }
                   <Route path={`${this.props.match.url}/branches/:branchid/elements`}
-                         render={ (props) => <ProjectElements {...props}
-                                                              permissions={this.state.permissions}
-                                                              project={this.state.project}/> } />
+                         render={ (props) => <ElementProvider {...props}>
+                                               <ProjectElements {...props}
+                                                                permissions={this.state.permissions}
+                                                                project={this.state.project}/>
+                                             </ElementProvider>} />
                   { /* Route to artifacts page */ }
                   <Route exact path={`${this.props.match.url}/branches/:branchid/artifacts`}
                          render={ (props) => <ProjectArtifacts {...props}
-                                                           permissions={this.state.permissions}
-                                                           project={this.state.project} /> } />
+                                                               permissions={this.state.permissions}
+                                                               project={this.state.project} /> } />
                   <Route path={`${this.props.match.url}/branches/:branchid/search`}
                          render={ (props) => <Search {...props}
                                                      project={this.state.project} /> } />
