@@ -6,7 +6,7 @@ variables:
   NO_PROXY: 127.0.0.1,localhost
   GIT_SSL_NO_VERIFY: "true"
   GIT_STRATEGY: clone
-
+  MBEE_ENV: pipeline
 
 stages:
   - Build
@@ -73,15 +73,18 @@ Test Plugins:
     - export HTTP_PROXY=http://proxy3.lmco.com:80
     - export HTTPS_PROXY=http://proxy3.lmco.com:80
     - export NO_PROXY=127.0.0.1,localhost
+    - export MBEE_ENV=pipeline
     - yarn config set strict-ssl false
     - yarn config set proxy http://proxy3.lmco.com:80
     - yarn config set https-proxy http://proxy3.lmco.com:80
     - yarn config set no_proxy 127.0.0.1,localhost
     - NOPREINSTALL=1 yarn install
     - node mbee migrate -y
+    - 
   script:
-    - nohup node mbee start &
-    - sleep 60 # sleeping for 60 seconds allows all plugins to be loaded and tested 
+    - node mbee test --plugins
+    # - nohup node mbee start &
+    # - sleep 60 # sleeping for 60 seconds allows all plugins to be loaded and tested
 
 Docker Build:
   stage: Docker
@@ -104,8 +107,8 @@ Deploy MCF Dev:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
   only:
-    - develop
-    - master
+    # - develop
+    # - master
   dependencies: 
     - Docker Build
   script:
@@ -119,8 +122,8 @@ Deploy MCF Test:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
   only:
-    - develop
-    - master
+    # - develop
+    # - master
   dependencies: 
     - Docker Build
   script:
@@ -134,8 +137,8 @@ Deploy MCF Prod:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
   only:
-    - develop
-    - master
+    # - develop
+    # - master
   dependencies: 
     - Docker Build
   script:
