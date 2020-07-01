@@ -80,7 +80,6 @@ Test Plugins:
     - yarn config set no_proxy 127.0.0.1,localhost
     - NOPREINSTALL=1 yarn install
     - node mbee migrate -y
-    - 
   script:
     - node mbee test --plugins
     # - nohup node mbee start &
