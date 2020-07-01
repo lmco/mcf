@@ -169,19 +169,6 @@ export default function Element(props) {
     if (elementID) getElement();
   }, [elementID]);
 
-  // componentDidUpdate(prevProps) {
-  //   // Typical usage (don't forget to compare props):
-  //   if (this.props.id !== prevProps.id) {
-  //     this.getElement();
-  //   }
-  // }
-  //
-  // componentWillUnmount() {
-  //   // Set mounted variable
-  //   this.mounted = false;
-  // }
-
-
   let orgid;
   let projid;
   let name;
