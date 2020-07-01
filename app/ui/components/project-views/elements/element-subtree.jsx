@@ -26,6 +26,13 @@ import { Link } from 'react-router-dom';
 
 /* eslint-enable no-unused-vars */
 
+/**
+ * @description A helper function to allow the use of a value that persists between renders
+ * while lagging behind the value of state by one render.
+ *
+ * @param {*} value - The value to store.
+ * @returns {*} The current value of the ref that was created for the input variable.
+ */
 function usePrevious(value) {
   const ref = useRef();
   useEffect(() => {
@@ -34,33 +41,21 @@ function usePrevious(value) {
   return ref.current;
 }
 
-// Define component
+/**
+ * @description The Element Subtree component.
+ *
+ * @param {object} props - React props.
+ * @returns {Function} - Returns JSX.
+ */
 export default function ElementSubtree(props) {
-  const [state, setState] = useState({
-    id: props.id,
-    isOpen: !!(props.id === 'model' || props.expand),
-    data: props.data,
-    children: null,
-    elementWindow: false,
-    isSelected: true,
-    error: null
-  });
   const [isOpen, setIsOpen] = useState(!!(props.id === 'model' || props.expand));
   const [data, setData] = useState(props.data);
   const [children, setChildren] = useState(null);
-  // const [elementWindow, setElementWindow] = useState(false);
   const [error, setError] = useState(null);
 
   const prevData = usePrevious(props.data);
   const prevExpand = usePrevious(props.expand);
   const prevCollapse = usePrevious(props.collapse);
-
-  // /**
-  //  * @description Toggle the element sub tree.
-  //  */
-  // const handleElementToggle = () => {
-  //   setElementWindow((currentState) => !currentState);
-  // };
 
   /**
    * @description Toggle the element to display it's children.
@@ -88,7 +83,7 @@ export default function ElementSubtree(props) {
   const refresh = () => {
     // Build URL to get element data
     const base = props.url;
-    const url = `${base}/elements/${state.id}?minified=true&includeArchived=true`;
+    const url = `${base}/elements/${props.id}?minified=true&includeArchived=true`;
 
     // Get element data
     $.ajax({
@@ -118,7 +113,7 @@ export default function ElementSubtree(props) {
     // Verify setRefreshFunction is not null
     if (props.setRefreshFunctions) {
       // Provide refresh function to top parent component
-      props.setRefreshFunctions(state.id, refresh);
+      props.setRefreshFunctions(props.id, refresh);
     }
 
     // Build URL to get element data
@@ -184,13 +179,6 @@ export default function ElementSubtree(props) {
       }
     });
   };
-
-
-  // Run on mount
-  // useEffect(() => {
-  //   console.log('initializing on mount')
-  //   initialize();
-  // }, []);
 
   // on update of data
   useEffect(() => {

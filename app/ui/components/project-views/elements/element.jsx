@@ -34,7 +34,12 @@ import { useElementContext } from './ElementContext.js';
 
 /* eslint-enable no-unused-vars */
 
-// Define component
+/**
+ * @description The Element component.
+ *
+ * @param {object} props - React props.
+ * @returns {Function} - Returns JSX.
+ */
 export default function Element(props) {
   const [element, setElement] = useState(null);
   const [modalDelete, setModalDelete] = useState(null);
@@ -42,6 +47,7 @@ export default function Element(props) {
 
   const { elementID } = useElementContext();
 
+  // eslint-disable-next-line arrow-body-style
   const handleCrossRefs = (_element) => {
     return new Promise((resolve, reject) => {
       // Match/find all cross references

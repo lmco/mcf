@@ -33,7 +33,12 @@ import { useElementContext } from './ElementContext.js';
 
 /* eslint-enable no-unused-vars */
 
-// Define component
+/**
+ * @description The Project Elements component.
+ *
+ * @param {object} props - React props.
+ * @returns {Function} - Returns JSX.
+ */
 export default function ProjectElements(props) {
   const [state, setState] = useState({
     refreshFunction: {},
@@ -43,7 +48,7 @@ export default function ProjectElements(props) {
     expand: false,
     collapse: false,
     error: null,
-    modalOpen: false,
+    modalOpen: false
   });
   const [sidePanel, setSidePanel] = useState(false);
 

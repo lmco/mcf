@@ -28,16 +28,15 @@ import React, { useState, useEffect } from 'react';
 import ElementSubtree from './element-subtree.jsx';
 /* eslint-enable no-unused-vars */
 
-// Define component
+/**
+ * @description The Element Tree component.
+ *
+ * @param {object} props - React props.
+ * @returns {Function} - Returns JSX.
+ */
 export default function ElementTree(props) {
   const [treeRoot, setTreeRoot] = useState(null);
   const [error, setError] = useState(null);
-  // const [state, setState] = useState({
-  //   url: '',
-  //   id: null,
-  //   treeRoot: null,
-  //   error: null
-  // });
 
   const orgId = props.project.org;
   const projId = props.project.id;
