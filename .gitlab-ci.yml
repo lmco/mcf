@@ -121,8 +121,8 @@ Deploy MCF Test:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
   only:
-    - develop
-    - master
+    # - develop
+    # - master
   dependencies: 
     - Docker Build
   script:
@@ -135,9 +135,9 @@ Deploy MCF Prod:
   tags:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
-  only:
-    - develop
-    - master
+  # only:
+  #   - develop
+  #   - master
   dependencies: 
     - Docker Build
   script:
