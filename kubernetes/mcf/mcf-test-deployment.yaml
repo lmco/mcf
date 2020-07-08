@@ -43,3 +43,21 @@ spec:
           image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
           ports:
             - containerPort: 9080
+          volumeMounts:
+            - name: cert
+              mountPath: /lm/mbee/certs/mcf.cer
+            - name: key
+              mountPath: /lm/mbee/certs/mcf.key
+            - name: ca-pemstore
+              mountPath: /etc/ssl/certs/test.mcf.us.lmco.com.pem
+              subPath: test.mcf.us.lmco.com.pem
+      volumes:
+        - name: cert
+          hostPath:
+            path: "/mnt/mbee/mbee-test/certs/test.mcf.us.lmco.com.cer"
+        - name: key
+          hostPath:
+            path: "/mnt/mbee/mbee-test/certs/test.mcf.us.lmco.com.key"
+        - name: ca-pemstore
+          configMap:
+            name: ca-pemstore

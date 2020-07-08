@@ -47,9 +47,13 @@ spec:
             - name: mongo-data-volume
               mountPath: /lm/mbee/data/db
             - name: cert
-              mountPath: /lm/mbee/certs/dev.mcf.us.lmco.com.cer
+              mountPath: /lm/mbee/certs/mcf.cer
             - name: key
-              mountPath: /lm/mbee/certs/dev.mcf.us.lmco.com.key
+              mountPath: /lm/mbee/certs/mcf.key
+            - name: ca-pemstore
+              mountPath: /etc/ssl/certs/dev.mcf.us.lmco.com.pem
+              subPath: dev.mcf.us.lmco.com.pem
+              readOnly: false
       volumes:
         - name: mongo-data-volume
           persistentVolumeClaim:
@@ -60,3 +64,6 @@ spec:
         - name: key
           hostPath:
             path: "/mnt/mbee/mbee-dev/certs/dev.mcf.us.lmco.com.key"
+        - name: ca-pemstore
+          configMap:
+            name: ca-pemstore
