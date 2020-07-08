@@ -27,8 +27,8 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
 
 # Install certs - If you have certs in a certs directory, uncomment the following lines
 RUN mkdir -p certs
-COPY ./certs certs
-RUN chmod 400 certs/*
+# COPY ./certs certs
+# RUN chmod 400 certs/*
 
 # Prerequisites for MongoDB install
 RUN apt-get install curl
