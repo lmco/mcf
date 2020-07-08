@@ -87,9 +87,9 @@ Docker Build:
   stage: Docker
   tags:
     - shell
-  # only:
-  #   - develop
-  #   - master
+  only:
+    - develop
+    - master
   dependencies: 
     - Test MCF
   script:
