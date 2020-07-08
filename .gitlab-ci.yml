@@ -82,8 +82,6 @@ Test Plugins:
     - node mbee migrate -y
   script:
     - node mbee test --plugins
-    # - nohup node mbee start &
-    # - sleep 60 # sleeping for 60 seconds allows all plugins to be loaded and tested
 
 Docker Build:
   stage: Docker
@@ -106,8 +104,8 @@ Deploy MCF Dev:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
   only:
-    # - develop
-    # - master
+    - develop
+    - master
   dependencies: 
     - Docker Build
   script:
@@ -121,8 +119,8 @@ Deploy MCF Test:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
   only:
-    # - develop
-    # - master
+    - develop
+    - master
   dependencies: 
     - Docker Build
   script:
@@ -135,9 +133,9 @@ Deploy MCF Prod:
   tags:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
-  # only:
-  #   - develop
-  #   - master
+  only:
+    - develop
+    - master
   dependencies: 
     - Docker Build
   script:
