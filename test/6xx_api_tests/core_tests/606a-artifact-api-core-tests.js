@@ -127,7 +127,7 @@ async function postArtifact() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const createdArtifact = res.data;
+    const createdArtifact = res.data[0];
 
     // Verify artifact created properly
     chai.expect(createdArtifact.id).to.equal(artData.id);
@@ -247,7 +247,7 @@ async function getArtifact() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const foundArtifact = res.data;
+    const foundArtifact = res.data[0];
 
     // Verify artifact found
     chai.expect(foundArtifact.id).to.equal(artData.id);
@@ -594,7 +594,7 @@ async function patchArtifact() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const patchedArtifact = res.data;
+    const patchedArtifact = res.data[0];
 
     // Verify artifact created properly
     chai.expect(patchedArtifact.id).to.equal(artData.id);
@@ -721,7 +721,7 @@ async function deleteArtifact() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const deletedArtifact = res.data;
+    const deletedArtifact = res.data[0];
     // Verify artifact created properly
     chai.expect(deletedArtifact).to.equal(artData.id);
   }

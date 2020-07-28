@@ -136,7 +136,7 @@ async function postUser() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const createdUser = res.data;
+    const createdUser = res.data[0];
 
     // Verify expected response
     chai.expect(createdUser.username).to.equal(userData.username);
@@ -241,7 +241,7 @@ async function putUser() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const replacedUser = res.data;
+    const replacedUser = res.data[0];
 
     // Verify expected response
     chai.expect(replacedUser.username).to.equal(userData.username);
@@ -348,7 +348,7 @@ async function getUser() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const foundUser = res.data;
+    const foundUser = res.data[0];
 
     // Verify expected response
     chai.expect(foundUser.username).to.equal(userData.username);
@@ -596,7 +596,7 @@ async function patchUser() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const updatedUser = res.data;
+    const updatedUser = res.data[0];
 
     // Verify expected response
     chai.expect(updatedUser.username).to.equal(userData.username);
@@ -761,7 +761,7 @@ async function deleteUser() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const deletedUsername = res.data;
+    const deletedUsername = res.data[0];
 
     // Verify expected response
     chai.expect(deletedUsername).to.equal(userData.username);
