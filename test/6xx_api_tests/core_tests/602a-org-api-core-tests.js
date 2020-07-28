@@ -103,7 +103,7 @@ async function postOrg() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const postedOrg = res.data;
+    const postedOrg = res.data[0];
     chai.expect(postedOrg.id).to.equal(orgData.id);
     chai.expect(postedOrg.name).to.equal(orgData.name);
     chai.expect(postedOrg.custom).to.deep.equal(orgData.custom || {});
@@ -203,7 +203,7 @@ async function putOrg() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const replacedOrg = res.data;
+    const replacedOrg = res.data[0];
     chai.expect(replacedOrg.id).to.equal(orgData.id);
     chai.expect(replacedOrg.name).to.equal(orgData.name);
     chai.expect(replacedOrg.custom).to.deep.equal(orgData.custom || {});
@@ -302,7 +302,7 @@ async function getOrg() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const foundOrg = res.data;
+    const foundOrg = res.data[0];
     chai.expect(foundOrg.id).to.equal(testData.orgs[0].id);
     chai.expect(foundOrg.name).to.equal(testData.orgs[0].name);
     chai.expect(foundOrg.custom).to.deep.equal(testData.orgs[0].custom || {});
@@ -475,7 +475,7 @@ async function patchOrg() {
     chai.expect(res.status).to.equal(200);
 
     // Verify response body
-    const patchedOrg = res.data;
+    const patchedOrg = res.data[0];
     chai.expect(patchedOrg.id).to.equal(testData.orgs[0].id);
     chai.expect(patchedOrg.name).to.equal('Edited Name');
     chai.expect(patchedOrg.custom).to.deep.equal(testData.orgs[0].custom || {});
@@ -579,7 +579,7 @@ async function deleteOrg() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const deletedID = res.data;
+    const deletedID = res.data[0];
 
     // Verify correct orgs deleted
     chai.expect(deletedID).to.equal(orgData.id);

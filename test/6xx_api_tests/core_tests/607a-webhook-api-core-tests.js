@@ -174,7 +174,7 @@ async function getWebhook() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const foundWebhook = res.data;
+    const foundWebhook = res.data[0];
     chai.expect(foundWebhook.name).to.equal(webhookData.name);
     chai.expect(foundWebhook.triggers).to.deep.equal(webhookData.triggers);
     chai.expect(foundWebhook.url).to.equal(webhookData.url);
@@ -348,7 +348,7 @@ async function patchWebhook() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const updatedWebhook = res.data;
+    const updatedWebhook = res.data[0];
     chai.expect(updatedWebhook.name).to.equal('test update');
     chai.expect(updatedWebhook.triggers).to.deep.equal(webhookData.triggers);
     chai.expect(updatedWebhook.url).to.equal(webhookData.url);
