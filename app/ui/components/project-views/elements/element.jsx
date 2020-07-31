@@ -159,7 +159,7 @@ class Element extends Component {
               const pid = elements[id].project;
               const bid = elements[id].branch;
               const link = `/orgs/${oid}/projects/${pid}/branches/${bid}/elements#${id}`;
-              doc = doc.replace(re, `<Link class='cross-ref' to=${link} target='_blank'>${elements[id].name}</Link>`);
+              doc = doc.replace(re, `<Link class='cross-ref' to='${link}' target='_blank'>${elements[id].name}</Link>`);
             }
 
             // Resolve the element
