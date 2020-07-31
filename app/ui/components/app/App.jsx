@@ -27,7 +27,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import Navbar from '../general/nav-bar.jsx';
 import AuthenticatedApp from './AuthenticatedApp.jsx';
 import UnauthenticatedApp from './UnauthenticatedApp.jsx';
-
+import Banner from '../general/Banner.jsx';
 
 export default function App(props) {
   const [authenticated, setAuthenticated] = useState(Boolean(window.sessionStorage.getItem('mbee-user')));
@@ -49,11 +49,13 @@ export default function App(props) {
 
   return (
     <Router>
-      <Navbar authenticated={authenticated} setAuthenticated={setAuthenticated}/>
-      { (authenticated)
-        ? <AuthenticatedApp/>
-        : <UnauthenticatedApp setAuthenticated={setAuthenticated}/>
-      }
+      <Banner>
+        <Navbar authenticated={authenticated} setAuthenticated={setAuthenticated}/>
+        { (authenticated)
+          ? <AuthenticatedApp/>
+          : <UnauthenticatedApp setAuthenticated={setAuthenticated}/>
+        }
+      </Banner>
     </Router>
   );
 }

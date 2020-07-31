@@ -142,7 +142,7 @@ function build(_args) {
   fs.writeFileSync(path.join(validatorsDir, 'validators.json'), JSON.stringify(_validators), 'utf8');
 
   // Store UI Login Modal
-  fs.writeFileSync(path.join(validatorsDir, 'loginModal.json'), JSON.stringify(M.config.server.ui.loginModal), 'utf8');
+  fs.writeFileSync(path.join(validatorsDir, 'uiConfig.json'), JSON.stringify(M.config.server.ui), 'utf8');
 
 
   // Compile Sass into CSS

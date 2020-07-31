@@ -22,7 +22,8 @@
 import React, { useState } from 'react';
 
 // Dynamically load Login Modal Message
-import loginModal from '../../../../build/json/loginModal.json';
+import uiConfig from '../../../../build/json/uiConfig.json';
+const loginModal = uiConfig.loginModal;
 
 export default function LoginPage(props) {
   const [username, setUsername] = useState('');
