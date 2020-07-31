@@ -30,6 +30,7 @@ import ProjectHome from '../project-views/project-home.jsx';
 import Profile from '../profile-views/profile-home.jsx';
 import AdminConsoleHome from '../admin-console-views/admin-console-home.jsx';
 import About from '../general/About.jsx';
+import NotFound from '../shared-views/NotFound.jsx';
 
 export default function AuthenticatedApp(props) {
   return (
@@ -42,7 +43,7 @@ export default function AuthenticatedApp(props) {
       <Route path={'/admin'} component={AdminConsoleHome}/>
       <Route path={'/about'} component={About}/>
       <Route path={'/'} exact component={Home}/>
-      {/* TODO: <Route path={'/'} component={NotFound}/> */}
+      <Route path={'/'} component={NotFound}/>
     </Switch>
   );
 }
