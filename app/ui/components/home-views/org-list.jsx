@@ -154,7 +154,7 @@ class OrgList extends Component {
           <div className='org-icon' onClick={this.handleShowProjsToggle}>
             <i className={icon}/>
           </div>
-          <OrgListItem className='org-info' org={this.props.org} href={`/orgs/${orgId}`} divider={true}/>
+          <OrgListItem className='org-info' org={this.props.org} link={`/orgs/${orgId}`} divider={true}/>
           {((this.props.admin) || (this.props.write))
             ? (<div className='controls-container'>
                 <UncontrolledTooltip placement='top' target={`newproj-${orgId}`}>

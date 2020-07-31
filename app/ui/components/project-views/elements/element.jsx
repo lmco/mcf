@@ -20,6 +20,7 @@
 
 // React modules
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 
 // MBEE modules
 import {
@@ -68,7 +69,8 @@ class Element extends Component {
         method: 'GET',
         url: url,
         statusCode: {
-          200: (element) => {
+          200: (elements) => {
+            const element = elements[0];
             this.handleCrossRefs(element)
             .then(elementChanged => {
               this.setState({ element: elementChanged });
@@ -128,7 +130,7 @@ class Element extends Component {
       ].join('&');
       $.ajax({
         method: 'GET',
-        url: `${this.props.url}/elements/?${opts}`,
+        url: `${this.props.url}/elements?${opts}`,
         statusCode: {
           200: (elements) => {
             // Keep track of documentation fields
@@ -157,7 +159,7 @@ class Element extends Component {
               const pid = elements[id].project;
               const bid = elements[id].branch;
               const link = `/orgs/${oid}/projects/${pid}/branches/${bid}/elements#${id}`;
-              doc = doc.replace(re, `<a class='cross-ref' href='${link}' target='_blank'>${elements[id].name}</a>`);
+              doc = doc.replace(re, `<Link class='cross-ref' to=${link} target='_blank'>${elements[id].name}</Link>`);
             }
 
             // Resolve the element
@@ -216,14 +218,14 @@ class Element extends Component {
       if (element.targetNamespace) {
         const nameSpace = element.targetNamespace;
         target = (
-          <a href={`/orgs/${nameSpace.org}/projects/${nameSpace.project}/branches/${nameSpace.branch}/elements#${element.target}`}>
+          <Link to={`/orgs/${nameSpace.org}/projects/${nameSpace.project}/branches/${nameSpace.branch}/elements#${element.target}`}>
             <UncontrolledTooltip placement='top' target='target-elem'>
               {`${nameSpace.org} > ${nameSpace.project} > ${nameSpace.branch}`}
             </UncontrolledTooltip>
             <span id='target-elem'>
               {element.target}
             </span>
-          </a>);
+          </Link>);
       }
       else {
         target = (<span>{element.target}</span>);
@@ -232,14 +234,14 @@ class Element extends Component {
       if (element.sourceNamespace) {
         const nameSpace = element.sourceNamespace;
         source = (
-          <a href={`/orgs/${nameSpace.org}/projects/${nameSpace.project}/branches/${nameSpace.branch}/elements#${element.source}`}>
+          <Link to={`/orgs/${nameSpace.org}/projects/${nameSpace.project}/branches/${nameSpace.branch}/elements#${element.source}`}>
             <UncontrolledTooltip placement='top' target='source-elem'>
               {`${nameSpace.org} > ${nameSpace.project} > ${nameSpace.branch}`}
             </UncontrolledTooltip>
             <span id='source-elem'>
               {element.source}
             </span>
-          </a>);
+          </Link>);
       }
       else {
         source = (<span>{element.source}</span>);
@@ -332,11 +334,11 @@ class Element extends Component {
                   </tr>
                   <tr>
                     <th>Org ID:</th>
-                    <td><a href={`/orgs/${orgid}`}>{orgid}</a></td>
+                    <td><Link to={`/orgs/${orgid}`}>{orgid}</Link></td>
                   </tr>
                   <tr>
                     <th>Project ID:</th>
-                    <td><a href={`/orgs/${orgid}/projects/${projid}/branches/master/elements`}>{projid}</a></td>
+                    <td><Link to={`/orgs/${orgid}/projects/${projid}/branches/master/elements`}>{projid}</Link></td>
                   </tr>
                   <tr>
                     <th>Last Modified By:</th>

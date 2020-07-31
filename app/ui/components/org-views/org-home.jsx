@@ -73,9 +73,9 @@ class OrgHome extends Component {
           method: 'GET',
           url: `/api/orgs/${this.props.match.params.orgid}?${opt}`,
           statusCode: {
-            200: (org) => {
+            200: (orgs) => {
               // Set states
-              this.setMountedComponentStates(data, org);
+              this.setMountedComponentStates(data, orgs[0]);
             },
             401: (error) => {
               // Throw error and set state
@@ -150,53 +150,51 @@ class OrgHome extends Component {
 
     // Return organization page
     return (
-      <Router>
-        <div id='container'>
-          { /* Create the sidebar with sidebar links */ }
-          <Sidebar title={title}>
-            <SidebarLink id='Home'
-                         title='Home'
-                         icon='fas fa-home'
-                         routerLink={`${this.props.match.url}`} />
-            <SidebarLink id='Projects'
-                         title='Projects'
-                         icon='fas fa-boxes'
-                         routerLink={`${this.props.match.url}/projects`} />
-            <SidebarLink id='Members'
-                         title='Members'
-                         icon='fas fa-users'
-                         routerLink={`${this.props.match.url}/users`} />
-          </Sidebar>
-          { /* Verify organization data exists */ }
-          {(!this.state.org)
-            // Display loading page or error page if org is loading or failed to load
-            ? <div id='view' className="loading"> {this.state.error || 'Loading your organization...'} </div>
-            // Display page based on route on clients side
-            : (
-              <Switch>
-                { /* Route to org home page */ }
-                <Route exact path={`${this.props.match.url}`}
-                       render={ (props) => <InformationPage {...props}
-                                                            permissions={this.state.permissions}
-                                                            org={this.state.org} /> } />
-                { /* Route to projects page */ }
-                <Route path={`${this.props.match.url}/projects`}
-                       render={ (props) => <OrgProjects {...props}
-                                                        user={this.state.user}
-                                                        org={this.state.org}
-                                                        write={this.state.write}
-                                                        modal={this.state.modal}
-                                                        handleToggle={this.handleToggle}/> } />
-                { /* Route to members page */ }
-                <Route path={`${this.props.match.url}/users`}
-                       render={ (props) => <MembersPage {...props}
-                                                        org={this.state.org}
-                                                        admin={this.state.admin}/> } />
-              </Switch>
-            )
-          }
-        </div>
-      </Router>
+      <div id='container'>
+        { /* Create the sidebar with sidebar links */ }
+        <Sidebar title={title}>
+          <SidebarLink id='Home'
+                       title='Home'
+                       icon='fas fa-home'
+                       routerLink={`${this.props.match.url}`} />
+          <SidebarLink id='Projects'
+                       title='Projects'
+                       icon='fas fa-boxes'
+                       routerLink={`${this.props.match.url}/projects`} />
+          <SidebarLink id='Members'
+                       title='Members'
+                       icon='fas fa-users'
+                       routerLink={`${this.props.match.url}/users`} />
+        </Sidebar>
+        { /* Verify organization data exists */ }
+        {(!this.state.org)
+          // Display loading page or error page if org is loading or failed to load
+          ? <div id='view' className="loading"> {this.state.error || 'Loading your organization...'} </div>
+          // Display page based on route on clients side
+          : (
+            <Switch>
+              { /* Route to org home page */ }
+              <Route exact path={`${this.props.match.url}`}
+                     render={ (props) => <InformationPage {...props}
+                                                          permissions={this.state.permissions}
+                                                          org={this.state.org} /> } />
+              { /* Route to projects page */ }
+              <Route path={`${this.props.match.url}/projects`}
+                     render={ (props) => <OrgProjects {...props}
+                                                      user={this.state.user}
+                                                      org={this.state.org}
+                                                      write={this.state.write}
+                                                      modal={this.state.modal}
+                                                      handleToggle={this.handleToggle}/> } />
+              { /* Route to members page */ }
+              <Route path={`${this.props.match.url}/users`}
+                     render={ (props) => <MembersPage {...props}
+                                                      org={this.state.org}
+                                                      admin={this.state.admin}/> } />
+            </Switch>
+          )
+        }
+      </div>
     );
   }
 

@@ -269,7 +269,8 @@ class ElementEditForm extends Component {
       method: 'GET',
       url: url,
       statusCode: {
-        200: (element) => {
+        200: (elements) => {
+          const element = elements[0];
           // eslint-disable-next-line max-len
           const { name, type, documentation, custom, org, project, archived, lastModifiedBy, updatedOn, parent, source,
             target, targetNamespace, sourceNamespace } = element;

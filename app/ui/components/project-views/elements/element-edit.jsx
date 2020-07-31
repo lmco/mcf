@@ -87,7 +87,8 @@ class ElementEdit extends Component {
       method: 'GET',
       url: url,
       statusCode: {
-        200: (element) => {
+        200: (elements) => {
+          const element = elements[0];
           this.setState({
             element: element,
             name: element.name,

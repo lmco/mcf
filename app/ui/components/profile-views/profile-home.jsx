@@ -59,9 +59,9 @@ class ProfileHome extends Component {
             method: 'GET',
             url: `${url}?minified=true&includeArchived=true`,
             statusCode: {
-              200: (otherUser) => {
+              200: (otherUsers) => {
                 // Set states
-                this.setState({ otherUser: otherUser });
+                this.setState({ otherUser: otherUsers[0] });
               },
               401: (error) => {
                 // Throw error and set state

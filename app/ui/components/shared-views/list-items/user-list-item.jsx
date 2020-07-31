@@ -19,6 +19,7 @@
 
 // React modules
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 
 // MBEE modules
 import StatsList from '../../general/stats/stats-list.jsx';
@@ -69,9 +70,9 @@ class UserListItem extends Component {
         method: 'GET',
         url: `${url}?minified=true&includeArchived=true`,
         statusCode: {
-          200: (userInfo) => {
+          200: (users) => {
             // Set states
-            this.setState({ user: userInfo });
+            this.setState({ user: users[0] });
           },
           401: (error) => {
             // Throw error and set state
@@ -221,11 +222,14 @@ class UserListItem extends Component {
     return (
       <div className={`stats-list-item ${this.props.className}`} ref={this.ref}>
         <div id='user-list-items' className={classNames}>
-          <a href={this.props.href}>
-            <span className={archivedClass}>
-              {name}
-            </span>
-          </a>
+          { this.props.link
+            ? (<Link to={this.props.link}>
+                <span className={archivedClass}>
+                  {name}
+                </span>
+              </Link>)
+            : <span className={archivedClass}>{name}</span>
+          }
           <div className={archivedClass}>
             <span>{user.username}</span>
           </div>

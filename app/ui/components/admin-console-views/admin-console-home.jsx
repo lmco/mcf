@@ -62,7 +62,6 @@ class AdminConsoleHome extends Component {
       (this.state.error)
         ? (<div id='view' className="loading"> {this.state.error} </div>)
         : (
-          <Router>
             <div id='container'>
               { /* Create the sidebar with sidebar links */ }
               <Sidebar title='Admin Console'>
@@ -95,7 +94,6 @@ class AdminConsoleHome extends Component {
                 </Switch>
               }
             </div>
-          </Router>
         )
     );
   }

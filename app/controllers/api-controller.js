@@ -55,6 +55,7 @@ const utils = M.require('lib.utils');
 module.exports = {
   swaggerJSON,
   login,
+  logout,
   test,
   version,
   getLogs,
@@ -183,6 +184,31 @@ function login(req, res, next) {
   const json = formatJSON({ token: req.session.token });
   res.locals = {
     message: json,
+    statusCode: 200
+  };
+  next();
+}
+
+/**
+ * POST /api/logout
+ *
+ * @description Logs the user out by unsetting the req.user and req.session.token objects.
+ *
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function.
+ */
+function logout(req, res, next) {
+  // Sanity check: confirm req.user exists
+  if (!req.user) {
+    M.log.critical('/logout executed with invalid req.user object');
+  }
+  // Destroy the session
+  req.user = null;
+  req.session.destroy();
+
+  res.locals = {
+    message: 'Successfully logged out',
     statusCode: 200
   };
   next();

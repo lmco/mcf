@@ -75,7 +75,8 @@ class ProjectHome extends Component {
           method: 'GET',
           url: `${url}?${opt}`,
           statusCode: {
-            200: (project) => {
+            200: (projects) => {
+              const project = projects[0];
               // Initialize variables
               const username = data.username;
               const perm = project.permissions[username];
@@ -189,7 +190,7 @@ class ProjectHome extends Component {
                                     title={plugin.title}
                                     icon={`fas fa-${icon}`}
                                     openNewTab={newTab}
-                                    href={`${plugin.url}`}/>);
+                                    link={`${plugin.url}`}/>);
         });
       }
     }

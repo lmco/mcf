@@ -40,6 +40,7 @@ const Project = M.require('models.project');
 const ServerData = M.require('models.server-data');
 const User = M.require('models.user');
 const Webhook = M.require('models.webhook');
+const UIController = M.require('controllers.ui-controller');
 
 // Initialize express app and export the object
 const app = express();
@@ -127,7 +128,15 @@ function initApp() {
 
     // Load the UI/other routes
     if (M.config.server.ui.enabled) {
-      app.use('/', M.require('routes'));
+      app.get('/doc/api',
+        middleware.logRoute,
+        UIController.swaggerDoc);
+      app.get('/doc/flight-manual',
+        middleware.logRoute,
+        UIController.flightManual);
+      app.use('/', middleware.logRoute, (req, res) => {
+        res.sendFile(path.join(M.root, 'build', 'public', 'index.html'));
+      });
     }
     return resolve();
   });
