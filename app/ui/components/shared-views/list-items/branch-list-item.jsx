@@ -66,7 +66,7 @@ class BranchListItem extends Component {
                 ? (<Link id={archivedClass} className='branch-link' to={this.props.link}>
                     {branch.id}
                   </Link>)
-                : ''
+                : branch.id
               }
             </span>
           </div>
