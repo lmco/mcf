@@ -19,7 +19,7 @@
 
 // React modules
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import validators from '../../../../build/json/validators.json';
 
 // MBEE modules
@@ -197,86 +197,84 @@ class ProjectHome extends Component {
 
     // Return project page
     return (
-      <Router>
-        <div id='container'>
-          { /* Create the sidebar with sidebar links */ }
-          <Sidebar title={title}>
-            {(displayPlugins)
-              ? (<SidebarHeader title='Dashboard'/>)
-              : ''
-            }
-            <SidebarLink id='Elements'
-                         title='Model'
-                         icon='fas fa-sitemap'
-                         routerLink={`${this.props.match.url}/branches/${branch}/elements`}/>
-            <SidebarLink id='Branches'
-                         title='Branches/Tags'
-                         icon='fas fa-code-branch'
-                         routerLink={`${this.props.match.url}/branches`}/>
-            <SidebarLink id='Artifacts'
-                         title='Artifacts'
-                         icon='fas fa-archive'
-                         routerLink={`${this.props.match.url}/branches/${branch}/artifacts`}/>
-            <SidebarLink id='Search'
-                         title='Search'
-                         icon='fas fa-search'
-                         routerLink={`${this.props.match.url}/branches/${branch}/search`}/>
-            <SidebarLink id='Members'
-                         title='Members'
-                         icon='fas fa-users'
-                         routerLink={`${this.props.match.url}/users`}/>
-            <SidebarLink id='Information'
-                         title='Information'
-                         icon='fas fa-info'
-                         routerLink={`${this.props.match.url}/info`}/>
-            {/* Verify plugins provided, display route in sidebar */}
-            {(!displayPlugins)
-              ? ''
-              : (plugins)
-            }
-          </Sidebar>
-          { /* Verify project and element data exists */ }
-          { // Display loading page or error page if project is loading or failed to load
-            (!this.state.project)
-              ? <div id='view' className="loading"> {this.state.error || 'Loading your project...'} </div>
-              : (
-                <Switch>
-                  { /* Route to element page */ }
-                  <Route path={`${this.props.match.url}/branches/:branchid/elements`}
-                         render={ (props) => <ProjectElements {...props}
-                                                              permissions={this.state.permissions}
-                                                              project={this.state.project}/> } />
-                  { /* Route to artifacts page */ }
-                  <Route exact path={`${this.props.match.url}/branches/:branchid/artifacts`}
-                         render={ (props) => <ProjectArtifacts {...props}
-                                                           permissions={this.state.permissions}
-                                                           project={this.state.project} /> } />
-                  <Route path={`${this.props.match.url}/branches/:branchid/search`}
-                         render={ (props) => <Search {...props}
-                                                     project={this.state.project} /> } />
-                  <Route path={`${this.props.match.url}/branches/:branchid`}
-                         render={ (props) => <InformationPage {...props}
-                                                              url={url}
-                                                              branch={true}/> } />
-                  <Route exact path={`${this.props.match.url}/branches`}
-                         render={ (props) => <BranchesTags {...props}
-                                                           permissions={this.state.permissions}
-                                                           project={this.state.project} /> } />
-                  { /* Route to members page */ }
-                  <Route exact path={`${this.props.match.url}/users`}
-                         render={ (props) => <MembersPage {...props}
-                                                          project={this.state.project}
-                                                          admin={this.state.admin}/> } />
-                  { /* Route to project home page */ }
-                  <Route exact path={`${this.props.match.url}/info`}
-                         render={ (props) => <InformationPage {...props}
-                                                              permissions={this.state.permissions}
-                                                              project={this.state.project} /> } />
-                </Switch>
-              )
+      <div id='container'>
+        { /* Create the sidebar with sidebar links */ }
+        <Sidebar title={title}>
+          {(displayPlugins)
+            ? (<SidebarHeader title='Dashboard'/>)
+            : ''
           }
-        </div>
-      </Router>
+          <SidebarLink id='Elements'
+                       title='Model'
+                       icon='fas fa-sitemap'
+                       routerLink={`${this.props.match.url}/branches/${branch}/elements`}/>
+          <SidebarLink id='Branches'
+                       title='Branches/Tags'
+                       icon='fas fa-code-branch'
+                       routerLink={`${this.props.match.url}/branches`}/>
+          <SidebarLink id='Artifacts'
+                       title='Artifacts'
+                       icon='fas fa-archive'
+                       routerLink={`${this.props.match.url}/branches/${branch}/artifacts`}/>
+          <SidebarLink id='Search'
+                       title='Search'
+                       icon='fas fa-search'
+                       routerLink={`${this.props.match.url}/branches/${branch}/search`}/>
+          <SidebarLink id='Members'
+                       title='Members'
+                       icon='fas fa-users'
+                       routerLink={`${this.props.match.url}/users`}/>
+          <SidebarLink id='Information'
+                       title='Information'
+                       icon='fas fa-info'
+                       routerLink={`${this.props.match.url}/info`}/>
+          {/* Verify plugins provided, display route in sidebar */}
+          {(!displayPlugins)
+            ? ''
+            : (plugins)
+          }
+        </Sidebar>
+        { /* Verify project and element data exists */ }
+        { // Display loading page or error page if project is loading or failed to load
+          (!this.state.project)
+            ? <div id='view' className="loading"> {this.state.error || 'Loading your project...'} </div>
+            : (
+              <Switch>
+                { /* Route to element page */ }
+                <Route path={`${this.props.match.url}/branches/:branchid/elements`}
+                       render={ (props) => <ProjectElements {...props}
+                                                            permissions={this.state.permissions}
+                                                            project={this.state.project}/> } />
+                { /* Route to artifacts page */ }
+                <Route exact path={`${this.props.match.url}/branches/:branchid/artifacts`}
+                       render={ (props) => <ProjectArtifacts {...props}
+                                                         permissions={this.state.permissions}
+                                                         project={this.state.project} /> } />
+                <Route path={`${this.props.match.url}/branches/:branchid/search`}
+                       render={ (props) => <Search {...props}
+                                                   project={this.state.project} /> } />
+                <Route path={`${this.props.match.url}/branches/:branchid`}
+                       render={ (props) => <InformationPage {...props}
+                                                            url={url}
+                                                            branch={true}/> } />
+                <Route exact path={`${this.props.match.url}/branches`}
+                       render={ (props) => <BranchesTags {...props}
+                                                         permissions={this.state.permissions}
+                                                         project={this.state.project} /> } />
+                { /* Route to members page */ }
+                <Route exact path={`${this.props.match.url}/users`}
+                       render={ (props) => <MembersPage {...props}
+                                                        project={this.state.project}
+                                                        admin={this.state.admin}/> } />
+                { /* Route to project home page */ }
+                <Route exact path={`${this.props.match.url}/info`}
+                       render={ (props) => <InformationPage {...props}
+                                                            permissions={this.state.permissions}
+                                                            project={this.state.project} /> } />
+              </Switch>
+            )
+        }
+      </div>
     );
   }
 
