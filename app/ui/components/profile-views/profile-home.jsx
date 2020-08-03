@@ -19,7 +19,7 @@
 
 // React modules
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 
 // MBEE modules
 import Sidebar from '../general/sidebar/sidebar.jsx';
@@ -59,9 +59,9 @@ class ProfileHome extends Component {
             method: 'GET',
             url: `${url}?minified=true&includeArchived=true`,
             statusCode: {
-              200: (otherUser) => {
+              200: (otherUsers) => {
                 // Set states
-                this.setState({ otherUser: otherUser });
+                this.setState({ otherUser: otherUsers[0] });
               },
               401: (error) => {
                 // Throw error and set state
@@ -107,38 +107,36 @@ class ProfileHome extends Component {
 
     // Return user page
     return (
-      <Router>
-        <div id='container'>
-          { /* Create the sidebar with sidebar links */ }
-          <Sidebar title={title}>
-            <SidebarLink id='Information'
-                         title='Information'
-                         icon='fas fa-info'
-                         routerLink={routerLink} />
-          </Sidebar>
-          { /* Verify user data exists */ }
-          { // Display loading page or error page if user data is loading or failed to load
-            (!user)
-              ? <div id='view' className="loading"> {this.state.error || 'Loading information...'}</div>
-              : (
-                <Switch>
-                  {/* Verify if user is view their own profile, then return their info  */}
-                  {(otherUser === null)
-                    ? (<Route exact path="/profile" render={(props) => <Profile {...props}
-                                                                  admin={true}
-                                                                  user={this.state.user} /> } />)
-                    : (<Route path={`/profile/${this.props.match.params.username}`}
-                              render={(props) => <Profile {...props}
-                                                          admin={user.admin}
-                                                          viewingUser={user}
-                                                          user={otherUser} /> } />)
+      <div id='container'>
+        { /* Create the sidebar with sidebar links */ }
+        <Sidebar title={title}>
+          <SidebarLink id='Information'
+                       title='Information'
+                       icon='fas fa-info'
+                       routerLink={routerLink} />
+        </Sidebar>
+        { /* Verify user data exists */ }
+        { // Display loading page or error page if user data is loading or failed to load
+          (!user)
+            ? <div id='view' className="loading"> {this.state.error || 'Loading information...'}</div>
+            : (
+              <Switch>
+                {/* Verify if user is view their own profile, then return their info  */}
+                {(otherUser === null)
+                  ? (<Route exact path="/profile" render={(props) => <Profile {...props}
+                                                                admin={true}
+                                                                user={this.state.user} /> } />)
+                  : (<Route path={`/profile/${this.props.match.params.username}`}
+                            render={(props) => <Profile {...props}
+                                                        admin={user.admin}
+                                                        viewingUser={user}
+                                                        user={otherUser} /> } />)
 
-                  }
-                </Switch>
-              )
-          }
-        </div>
-      </Router>
+                }
+              </Switch>
+            )
+        }
+      </div>
     );
   }
 

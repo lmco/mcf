@@ -20,6 +20,7 @@
 
 // React modules
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Collapse,
   Navbar,
@@ -74,6 +75,25 @@ class MbeeNav extends Component {
     this.setComponentSize();
   }
 
+  componentWillReceiveProps(nextProps, nextContext) {
+    if (this.props.authenticated !== nextProps.authenticated) {
+      if (nextProps.authenticated === true) {
+        // eslint-disable-next-line no-undef
+        mbeeWhoAmI((err, data) => {
+          if (err) {
+            this.setState({ user: null, error: err.responseText });
+          }
+          else {
+            this.setState({ user: data });
+          }
+        });
+      }
+      else {
+        this.setState({ user: null });
+      }
+    }
+  }
+
   componentWillUnmount() {
     // Remove event listener on window
     window.removeEventListener('resize', this.setComponentSize);
@@ -99,6 +119,8 @@ class MbeeNav extends Component {
   /* eslint-disable class-methods-use-this */
   sessionDestroy() {
     window.sessionStorage.removeItem('mbee-user');
+    this.props.setAuthenticated(false);
+    fetch('/api/logout');
   }
   /* eslint-enable class-methods-use-this */
 
@@ -134,7 +156,7 @@ class MbeeNav extends Component {
                     Flight Manual
                   </DropdownItem>
                   <DropdownItem divider />
-                  <DropdownItem href='/doc/developers'>
+                  <DropdownItem href='/doc/index.html'>
                     JSDoc Documentation
                   </DropdownItem>
                   <DropdownItem href='/doc/api'>
@@ -151,18 +173,24 @@ class MbeeNav extends Component {
                         <i className='fas fa-user-circle'/>
                       </DropdownToggle>
                       <DropdownMenu right>
-                        <DropdownItem href='/'>Home</DropdownItem>
-                        <DropdownItem href='/profile'>Profile</DropdownItem>
-                        <DropdownItem href='/about'>About</DropdownItem>
+                        <Link to='/'>
+                          <DropdownItem>Home</DropdownItem>
+                        </Link>
+                        <Link to='/profile'>
+                          <DropdownItem>Profile</DropdownItem>
+                        </Link>
+                        <Link to='/about'>
+                          <DropdownItem>About</DropdownItem>
+                        </Link>
                         <DropdownItem divider />
                         {(!this.state.user.admin)
                           ? ''
                           : (<React.Fragment>
-                            <DropdownItem href='/admin'> Admin Console</DropdownItem>
+                            <Link to='/admin'><DropdownItem>Admin Console</DropdownItem></Link>
                             <DropdownItem divider />
                           </React.Fragment>)
                         }
-                        <DropdownItem href='/logout' onClick={this.sessionDestroy}>Log Out</DropdownItem>
+                        <DropdownItem onClick={this.sessionDestroy}>Log Out</DropdownItem>
                       </DropdownMenu>
                     </UncontrolledDropdown>
                   )

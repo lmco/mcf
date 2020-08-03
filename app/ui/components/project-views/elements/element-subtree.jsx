@@ -83,14 +83,8 @@ class ElementSubtree extends Component {
       // Skip ajax call for children
       return;
     }
-    const elements = contains.join(',');
     const base = this.props.url;
-    let url = `${base}/elements?ids=${elements}&fields=id,name,contains,archived,type&minified=true&includeArchived=true`;
-    // Provide different url
-    // If length is too long
-    if (url.length > 2047) {
-      url = `${base}/elements?parent=${parent}&fields=id,name,contains,archived,type&minified=true&includeArchived=true`;
-    }
+    const url = `${base}/elements?parent=${parent}&fields=id,name,contains,archived,type&minified=true&includeArchived=true`;
 
     // Get children
     $.ajax({
@@ -190,9 +184,9 @@ class ElementSubtree extends Component {
       method: 'GET',
       url: url,
       statusCode: {
-        200: (data) => {
+        200: (elements) => {
           // Set the element data
-          this.setState({ data: data });
+          this.setState({ data: elements[0] });
         },
         401: (err) => {
           // Set error

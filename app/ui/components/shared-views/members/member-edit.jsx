@@ -192,12 +192,13 @@ class MemberEdit extends Component {
             }
           }
         })
-        .done(data => {
+        .done(users => {
+          const user = users[0];
           const userOpt = (
-            <div className='members-dropdown-item' key={`user-${data.username}`}
-                 onClick={() => this.selectUser(data.username)}>
-              <span>{data.fname} {data.lname}</span>
-              <span className='member-username'>@{data.username}</span>
+            <div className='members-dropdown-item' key={`user-${user.username}`}
+                 onClick={() => this.selectUser(user.username)}>
+              <span>{user.fname} {user.lname}</span>
+              <span className='member-username'>@{user.username}</span>
             </div>
           );
 

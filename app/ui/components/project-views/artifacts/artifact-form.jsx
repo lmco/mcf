@@ -170,15 +170,16 @@ class ArtifactForm extends Component {
       url: url,
       contentType: 'application/json'
     })
-    .done(data => {
+    .done(artifacts => {
+      const artifact = artifacts[0];
       this.setState({
-        id: data.id,
-        description: data.description,
-        filename: data.filename,
-        filesize: data.size,
-        location: data.location,
-        custom: JSON.stringify(data.custom, null, 2),
-        archived: data.archived
+        id: artifact.id,
+        description: artifact.description,
+        filename: artifact.filename,
+        filesize: artifact.size,
+        location: artifact.location,
+        custom: JSON.stringify(artifact.custom, null, 2),
+        archived: artifact.archived
       });
     })
     .fail(res => {

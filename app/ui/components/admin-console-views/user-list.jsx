@@ -174,7 +174,7 @@ class UserList extends Component {
                           user={user}
                           adminLabel={true}
                           _key={`user-${user.username}`}
-                          href={`/profile/${user.username}`}/>
+                          link={`/profile/${user.username}`}/>
             <div className='controls-container'>
               <UncontrolledTooltip placement='top' target={`edit-user-${user.username}`}>
                 Edit

@@ -19,6 +19,7 @@
 
 // React modules
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 
 /* eslint-enable no-unused-vars */
 
@@ -61,10 +62,12 @@ class BranchListItem extends Component {
         <div id='branch-list-items' className={classNames}>
           <div className={archivedClass} style={{ overflow: 'hidden' }}>
             <span>
-              <a id={archivedClass} className='branch-link'
-                 href={this.props.href}>
-                {branch.id}
-              </a>
+              { this.props.link
+                ? (<Link id={archivedClass} className='branch-link' to={this.props.link}>
+                    {branch.id}
+                  </Link>)
+                : branch.id
+              }
             </span>
           </div>
           <span className={archivedClass} style={{ overflow: 'hidden' }}>

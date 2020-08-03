@@ -72,7 +72,7 @@ class ProjList extends Component {
                            divider={true}
                            archiveProj={this.props.archiveProj}
                            project={project}
-                           href={`/orgs/${orgId}/projects/${project.id}/branches/master/elements`}/>
+                           link={`/orgs/${orgId}/projects/${project.id}/branches/master/elements`}/>
           {(!this.props.admin)
             ? ''
             : (<div className='controls-container'>

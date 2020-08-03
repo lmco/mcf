@@ -20,6 +20,7 @@
 
 // React modules
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import { Button, Modal, ModalBody, Badge } from 'reactstrap';
 
 // MBEE modules
@@ -62,7 +63,7 @@ class InformationPage extends Component {
         url: url,
         statusCode: {
           200: (data) => {
-            this.setState({ data: data });
+            this.setState({ data: data[0] });
           },
           401: () => {
             this.setState({ data: null });
@@ -195,7 +196,7 @@ class InformationPage extends Component {
                 {(this.props.project || this.props.branch)
                   ? (<tr>
                       <th>Org ID:</th>
-                      <td><a href={`/orgs/${orgid}`}>{orgid}</a></td>
+                      <td><Link to={`/orgs/${orgid}`}>{orgid}</Link></td>
                      </tr>)
                   : <tr/>
                 }
@@ -215,9 +216,9 @@ class InformationPage extends Component {
                       <tr>
                         <th>Project ID:</th>
                         <td>
-                          <a href={`/orgs/${orgid}/projects/${projid}/branches/master/elements`}>
+                          <Link to={`/orgs/${orgid}/projects/${projid}/branches/master/elements`}>
                             {projid}
-                          </a>
+                          </Link>
                         </td>
                       </tr>
                       <tr>
@@ -227,9 +228,9 @@ class InformationPage extends Component {
                       <tr>
                         <th>Source Branch:</th>
                         <td>
-                          <a href={`/orgs/${orgid}/projects/${projid}/branches/${sourceid}`}>
+                          <Link to={`/orgs/${orgid}/projects/${projid}/branches/${sourceid}`}>
                             {sourceid}
-                          </a>
+                          </Link>
                         </td>
                       </tr>
                     </React.Fragment>

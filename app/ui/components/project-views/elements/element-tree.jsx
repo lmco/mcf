@@ -66,7 +66,7 @@ class ElementTree extends Component {
       method: 'GET',
       url: url,
       statusCode: {
-        200: (data) => { this.setState({ treeRoot: data }); },
+        200: (elements) => { this.setState({ treeRoot: elements[0] }); },
         401: () => {
           this.setState({ treeRoot: null });
 

@@ -118,6 +118,33 @@ api.route('/login')
 
 /**
  * @swagger
+ * /api/logout:
+ *   post:
+ *     tags:
+ *       - general
+ *     description: Logs the user out of the application.
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to logout user.
+ *       400:
+ *         description: Bad Request, Failed due to invalid credentials.
+ *       500:
+ *         description: Internal Server Error, Failed to due to a server side issue.
+ */
+api.route('/logout')
+.get(
+  AuthController.authenticate,
+  Middleware.logSecurityRoute,
+  Middleware.logRoute,
+  APIController.logout,
+  Middleware.logSecurityResponse,
+  Middleware.logResponse,
+  Middleware.respond
+);
+
+
+/**
+ * @swagger
  * /api/version:
  *   get:
  *     tags:

@@ -19,6 +19,7 @@
 
 // React modules
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import { Button, Modal, ModalBody } from 'reactstrap';
 
 // MBEE modules
@@ -154,7 +155,7 @@ class ProjectList extends Component {
                                                                     archiveProj={archiveProj}
                                                                     key={`proj-key-${project.id}`}
                                                                     project={project}
-                                                                    href={`/orgs/${orgId}/projects/${project.id}/branches/master/elements`}/>));
+                                                                    link={`/orgs/${orgId}/projects/${project.id}/branches/master/elements`}/>));
 
       // Verify if projects
       if (permProjects.length > 0) {
@@ -164,14 +165,14 @@ class ProjectList extends Component {
 
       // Return the list of the orgs with project-views
       return (
-        <React.Fragment>
-            <ListItem key={`org-key-${org.id}`} className='proj-org-header'>
-                <a href={`/orgs/${orgId}`} className={className}>{org.name}</a>
+        <ListItem key={`org-key-${org.id}`}>
+            <ListItem className='proj-org-header'>
+                <Link to={`/orgs/${orgId}`} className={className}>{org.name}</Link>
             </ListItem>
             <List key={`org-list-key-${org.id}`}>
                 {permProjects}
             </List>
-        </React.Fragment>
+        </ListItem>
       );
     });
 
