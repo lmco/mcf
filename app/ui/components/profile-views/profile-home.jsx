@@ -25,6 +25,7 @@ import { Route, Switch } from 'react-router-dom';
 import Sidebar from '../general/sidebar/sidebar.jsx';
 import SidebarLink from '../general/sidebar/sidebar-link.jsx';
 import Profile from '../profile-views/profile.jsx';
+import { userRequest } from '../app/api-client.js';
 
 // Define component
 class ProfileHome extends Component {
@@ -41,40 +42,53 @@ class ProfileHome extends Component {
       otherUser: null,
       error: null
     };
+
+    this.refreshUser = this.refreshUser.bind(this);
+    this.refreshOtherUser = this.refreshOtherUser.bind(this);
   }
 
-  componentDidMount() {
-    // eslint-disable-next-line no-undef
-    mbeeWhoAmI((err, data) => {
-      if (err) {
-        this.setState({ error: err.responseText });
-      }
-      else {
-        this.setState({ user: data });
+  async componentDidMount() {
+    const user = await this.refreshUser();
 
-        const username = this.props.match.params.username;
-        if (username && (username !== 'projects') && (username !== 'orgs')) {
-          const url = `/api/users/${username}`;
-          $.ajax({
-            method: 'GET',
-            url: `${url}?minified=true&includeArchived=true`,
-            statusCode: {
-              200: (otherUsers) => {
-                // Set states
-                this.setState({ otherUser: otherUsers[0] });
-              },
-              401: (error) => {
-                // Throw error and set state
-                this.setState({ error: error.responseText });
-              },
-              404: (error) => {
-                this.setState({ error: error.responseText });
-              }
-            }
-          });
-        }
-      }
-    });
+    if (this.props.match && this.props.match.params) {
+      const username = this.props.match.params.username;
+      if (username && username !== user.username) this.refreshOtherUser();
+    }
+  }
+
+  async refreshUser() {
+    // Initialize options for request
+    const options = {
+      method: 'GET',
+      whoami: true,
+      minified: true
+    };
+    const setError = (error) => this.setState({ error: error });
+
+    // Get the user data
+    const user = await userRequest(options, setError);
+
+    // Set the user
+    if (user) this.setState({ user: user });
+
+    return user;
+  }
+
+  async refreshOtherUser() {
+    // Initialize options for request
+    const options = {
+      method: 'GET',
+      usernames: this.props.match.params.username,
+      minified: true,
+      includeArchived: true
+    };
+    const setError = (error) => this.setState({ error: error });
+
+    // Get the user data
+    const users = await userRequest(options, setError);
+
+    // Set the other user
+    if (users) this.setState({ otherUser: users[0] });
   }
 
   render() {
@@ -104,6 +118,7 @@ class ProfileHome extends Component {
     else if (user) {
       title = `${user.username}'s Profile`;
     }
+    console.log(user);
 
     // Return user page
     return (
@@ -121,18 +136,17 @@ class ProfileHome extends Component {
             ? <div id='view' className="loading"> {this.state.error || 'Loading information...'}</div>
             : (
               <Switch>
-                {/* Verify if user is view their own profile, then return their info  */}
-                {(otherUser === null)
-                  ? (<Route exact path="/profile" render={(props) => <Profile {...props}
-                                                                admin={true}
-                                                                user={this.state.user} /> } />)
-                  : (<Route path={`/profile/${this.props.match.params.username}`}
-                            render={(props) => <Profile {...props}
-                                                        admin={user.admin}
-                                                        viewingUser={user}
-                                                        user={otherUser} /> } />)
-
-                }
+                  <Route exact path="/profile"
+                         render={(props) => <Profile {...props}
+                                                     admin={true}
+                                                     user={this.state.user}
+                                                     refreshUsers={this.refreshUser}/>}/>
+                  <Route path={`/profile/${this.props.match.params.username}`}
+                         render={(props) => <Profile {...props}
+                                                     admin={user.admin}
+                                                     viewingUser={user}
+                                                     user={otherUser || user}
+                                                     refreshUsers={this.refreshOtherUser}/>}/>
               </Switch>
             )
         }

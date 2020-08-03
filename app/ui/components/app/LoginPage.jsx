@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.LoginPage
+ * @module ui.components.app.LoginPage
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -20,6 +20,8 @@
 
 // React modules
 import React, { useState } from 'react';
+
+import { login } from './api-client.js';
 
 // Dynamically load Login Modal Message
 import uiConfig from '../../../../build/json/uiConfig.json';
@@ -53,33 +55,9 @@ export default function LoginPage(props) {
       next: next
     };
 
-    // Create options for fetch request
-    const headers = new Headers();
-    headers.append('Content-Type', 'application/json');
-    const options = {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify(form)
-    };
+    login(form, setError, setAuthenticated);
 
-    // Make request to sign in
-    window.fetch('/api/login', options)
-    .then((response) => {
-      // Set error if bad response
-      if (response.status >= 300) {
-        response.text()
-        .then((message) => {
-          setError(message);
-        });
-      }
-      // Set authenticated status if good response
-      else {
-        response.json()
-        .then((data) => {
-          if (data.token) setAuthenticated(true);
-        });
-      }
-    });
+
   };
 
   // Open the modal if enabled; otherwise login

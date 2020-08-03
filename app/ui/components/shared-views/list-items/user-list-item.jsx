@@ -24,6 +24,7 @@ import { Link } from 'react-router-dom';
 // MBEE modules
 import StatsList from '../../general/stats/stats-list.jsx';
 import Stat from '../../general/stats/stat.jsx';
+import { userRequest } from '../../app/api-client.js';
 
 /* eslint-enable no-unused-vars */
 
@@ -54,7 +55,7 @@ class UserListItem extends Component {
     this.setState({ width: this.ref.current.clientWidth });
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     const user = this.props.user;
     // Create event listener to resize window
     window.addEventListener('resize', this.handleResize);
@@ -63,29 +64,20 @@ class UserListItem extends Component {
     this.handleResize();
 
     if ((typeof user !== 'object') && !this.props.label) {
-      const url = `/api/users/${this.props.user}`;
-
-      // Get project data
-      $.ajax({
+      // set options for request
+      const options = {
         method: 'GET',
-        url: `${url}?minified=true&includeArchived=true`,
-        statusCode: {
-          200: (users) => {
-            // Set states
-            this.setState({ user: users[0] });
-          },
-          401: (error) => {
-            // Throw error and set state
-            this.setState({ error: error.responseText });
+        ids: this.props.user,
+        minified: true,
+        includeArchived: true
+      };
+      const setError = (error) => this.setState({ error: error });
 
-            // Refresh when session expires
-            window.location.reload();
-          },
-          404: (error) => {
-            this.setState({ error: error.responseText });
-          }
-        }
-      });
+      // Get user data
+      const users = await userRequest(options, setError);
+
+      // Set user
+      if (users) this.setState({ user: users[0] });
     }
   }
 
@@ -94,6 +86,11 @@ class UserListItem extends Component {
     window.removeEventListener('resize', this.handleResize);
   }
 
+  componentWillReceiveProps(nextProps, nextContext) {
+    if (this.props.user !== nextProps.user && typeof nextProps.user === 'object') {
+      this.setState({ user: nextProps.user });
+    }
+  }
 
   render() {
     // Initialize variables

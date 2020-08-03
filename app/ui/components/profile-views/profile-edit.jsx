@@ -19,6 +19,7 @@
 
 // React modules
 import React, { Component } from 'react';
+import { Redirect } from 'react-router-dom';
 import {
   Form,
   FormGroup,
@@ -31,6 +32,7 @@ import {
 
 // MBEE modules
 import validators from '../../../../build/json/validators.json';
+import { userRequest } from '../app/api-client.js';
 
 /* eslint-enable no-unused-vars */
 
@@ -43,6 +45,7 @@ class ProfileEdit extends Component {
 
     // Initialize state props
     this.state = {
+      username: this.props.user.username,
       fname: this.props.user.fname,
       lname: this.props.user.lname,
       preferred: this.props.user.preferredName,
@@ -76,11 +79,9 @@ class ProfileEdit extends Component {
   }
 
   // Define the submit function
-  onSubmit() {
-    const url = `/api/users/${this.props.user.username}`;
-    let reroute = '/profile';
-
+  async onSubmit() {
     const data = {
+      username: this.state.username,
       fname: this.state.fname,
       lname: this.state.lname,
       preferredName: this.state.preferred,
@@ -93,37 +94,21 @@ class ProfileEdit extends Component {
       data.email = this.state.email;
     }
 
-    if (this.props.onAdminPage) {
-      reroute = '/admin';
-    }
-    else if (this.props.viewingUser) {
-      reroute = `/profile/${this.props.user.username}`;
-    }
-
-    // Send a patch request to update user data
-    $.ajax({
+    // Define options for request
+    const options = {
       method: 'PATCH',
-      url: `${url}?minified=true`,
-      contentType: 'application/json',
-      data: JSON.stringify(data),
-      statusCode: {
-        200: () => {
-          window.location.replace(reroute);
-        },
-        401: (err) => {
-          this.setState({ error: err.responseText });
+      minified: true
+    };
+    const setError = (error) => this.setState({ error: error });
 
-          // Refresh when session expires
-          window.location.reload();
-        },
-        403: (err) => {
-          this.setState({ error: err.responseText });
-        },
-        404: (err) => {
-          this.setState({ error: err.responseText });
-        }
-      }
-    });
+    // Send request
+    const status = await userRequest(options, setError, data);
+
+    if (status && this.props.refreshUsers) {
+      this.props.refreshUsers();
+    }
+    // Toggle the modal
+    this.props.toggle(this.props.user);
   }
 
   render() {

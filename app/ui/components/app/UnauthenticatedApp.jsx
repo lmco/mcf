@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.UnauthenticatedApp
+ * @module ui.components.app.UnauthenticatedApp
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

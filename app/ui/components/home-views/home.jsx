@@ -27,6 +27,7 @@ import OrgList from '../home-views/org-list.jsx';
 import Create from '../shared-views/create.jsx';
 import Delete from '../shared-views/delete.jsx';
 import { InputGroup } from 'reactstrap';
+import { orgRequest } from '../app/api-client.js';
 
 // Define HomePage Component
 class Home extends Component {
@@ -66,32 +67,22 @@ class Home extends Component {
 
   componentDidMount() {
     // eslint-disable-next-line no-undef
-    mbeeWhoAmI((err, data) => {
+    mbeeWhoAmI(async (err, data) => {
       if (err) {
         this.setState({ error: err.responseText });
       }
       else {
         this.setState({ user: data });
-        // Get project data
-        $.ajax({
-          method: 'GET',
-          url: '/api/orgs?populate=projects&minified=true&includeArchived=true',
-          statusCode: {
-            200: (orgs) => {
-              this.setMountedComponentStates(data, orgs);
-            },
-            401: (error) => {
-              // Throw error and set state
-              this.setState({ error: error.responseText });
 
-              // Refresh when session expires
-              window.location.reload();
-            },
-            404: (error) => {
-              this.setState({ error: error.responseText });
-            }
-          }
-        });
+        const options = {
+          method: 'GET',
+          populate: 'projects',
+          minified: true,
+          includeArchived: true
+        };
+        const setError = (error) => this.setState({ error: error });
+        const orgs = await orgRequest(options, setError);
+        this.setMountedComponentStates(data, orgs);
       }
     });
   }

@@ -32,6 +32,7 @@ import CreateUser from './create-user.jsx';
 import DeleteUser from './delete-user.jsx';
 import EditUser from '../profile-views/profile-edit.jsx';
 import PasswordEdit from '../profile-views/password-edit.jsx';
+import { userRequest } from '../app/api-client.js';
 
 // Define component
 class UserList extends Component {
@@ -62,6 +63,7 @@ class UserList extends Component {
     this.handleCreateToggle = this.handleCreateToggle.bind(this);
     this.handleDeleteToggle = this.handleDeleteToggle.bind(this);
     this.togglePasswordModal = this.togglePasswordModal.bind(this);
+    this.refreshUsers = this.refreshUsers.bind(this);
   }
 
   handleDeleteToggle(username) {
@@ -77,11 +79,11 @@ class UserList extends Component {
     this.setState((prevState) => ({ modalDelete: !prevState.modalDelete }));
   }
 
-  handleEditToggle(username) {
+  handleEditToggle(user) {
     // Verify username provided
-    if (typeof username === 'object') {
+    if (typeof user === 'object') {
       // Set selected user state
-      this.setState({ selectedUser: username });
+      this.setState({ selectedUser: user });
     }
     else {
       // Set selected user to null
@@ -97,53 +99,12 @@ class UserList extends Component {
   }
 
   componentDidMount() {
-    const url = '/api/users';
+    this.refreshUsers();
 
-    // Get project data
-    $.ajax({
-      method: 'GET',
-      url: `${url}?minified=true&includeArchived=true`,
-      statusCode: {
-        200: (users) => {
-          const result = users.sort((a, b) => {
-            if (!a.username) {
-              return 1;
-            }
-            else if (!b.username) {
-              return -1;
-            }
-            else {
-              const first = a.username;
-              const second = b.username;
-
-              if (first > second) {
-                return 1;
-              }
-              else {
-                return -1;
-              }
-            }
-          });
-          // Set states
-          this.setState({ users: result });
-
-          // Create event listener for window resizing
-          window.addEventListener('resize', this.handleResize);
-          // Handle initial size of window
-          this.handleResize();
-        },
-        401: (error) => {
-          // Throw error and set state
-          this.setState({ error: error.responseText });
-
-          // Refresh when session expires
-          window.location.reload();
-        },
-        404: (error) => {
-          this.setState({ error: error.responseText });
-        }
-      }
-    });
+    // Create event listener for window resizing
+    window.addEventListener('resize', this.handleResize);
+    // Handle initial size of window
+    this.handleResize();
   }
 
   componentWillUnmount() {
@@ -162,6 +123,39 @@ class UserList extends Component {
     this.setState((prevState) => ({ editPasswordModal: !prevState.editPasswordModal }));
   }
 
+  async refreshUsers() {
+    // set options for request
+    const options = {
+      method: 'GET',
+      minified: true,
+      includeArchived: true
+    };
+    const setError = (error) => this.setState({ error: error });
+
+    // Make request for users
+    const users = await userRequest(options, setError);
+    const result = users.sort((a, b) => {
+      if (!a.username) {
+        return 1;
+      }
+      else if (!b.username) {
+        return -1;
+      }
+      else {
+        const first = a.username;
+        const second = b.username;
+
+        if (first > second) {
+          return 1;
+        }
+        else {
+          return -1;
+        }
+      }
+    });
+    // Set state
+    this.setState({ users: result });
+  }
 
   render() {
     let users;
@@ -212,10 +206,10 @@ class UserList extends Component {
         <Modal isOpen={this.state.modalEdit} toggle={this.handleEditToggle}>
           <ModalBody>
             <EditUser user={this.state.selectedUser}
-                      onAdminPage={true}
                       viewingUser={{ admin: true }}
                       togglePasswordModal={this.togglePasswordModal}
-                      toggle={this.handleEditToggle}/>
+                      toggle={this.handleEditToggle}
+                      refreshUsers={this.refreshUsers}/>
           </ModalBody>
         </Modal>
         <Modal isOpen={this.state.editPasswordModal} toggle={this.togglePasswordModal}>

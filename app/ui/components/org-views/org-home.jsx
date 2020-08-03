@@ -28,6 +28,7 @@ import SidebarLink from '../general/sidebar/sidebar-link.jsx';
 import InformationPage from '../shared-views/information-page.jsx';
 import MembersPage from '../shared-views/members/members-page.jsx';
 import OrgProjects from '../org-views/organization-projects.jsx';
+import { orgRequest } from '../app/api-client.js';
 
 // Define component
 class OrgHome extends Component {
@@ -56,7 +57,7 @@ class OrgHome extends Component {
 
   componentDidMount() {
     // eslint-disable-next-line no-undef
-    mbeeWhoAmI((err, data) => {
+    mbeeWhoAmI(async (err, data) => {
       // Verify if error returned
       if (err) {
         // Set error state
@@ -66,33 +67,18 @@ class OrgHome extends Component {
         // Set user data
         this.setState({ user: data });
         // Initialize options
-        const opt = 'populate=projects&minified=true&includeArchived=true';
-
-        // Get org data
-        $.ajax({
+        const options = {
           method: 'GET',
-          url: `/api/orgs/${this.props.match.params.orgid}?${opt}`,
-          statusCode: {
-            200: (orgs) => {
-              // Set states
-              this.setMountedComponentStates(data, orgs[0]);
-            },
-            401: (error) => {
-              // Throw error and set state
-              this.setState({ error: error.responseText });
-
-              // Refresh when session expires
-              window.location.reload();
-            },
-            403: () => {
-              // Throw error and set state
-              this.setState({ error: 'Organization not found.' });
-            },
-            404: (error) => {
-              this.setState({ error: error.responseText });
-            }
-          }
-        });
+          ids: this.props.match.params.orgid,
+          populate: 'projects',
+          minified: true,
+          includeArchived: true
+        };
+        const setError = (error) => this.setState({ error: error });
+        // Get orgs
+        const orgs = await orgRequest(options, setError);
+        // Set states
+        this.setMountedComponentStates(data, orgs[0]);
       }
     });
   }
