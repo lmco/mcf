@@ -164,26 +164,26 @@ function pluginPre(endpoint) {
     // eslint-disable-next-line global-require
     const { pluginFunctions } = require(path.join(M.root, 'plugins', 'routes.js'));
 
-    return async function(req, res, next) {
-      try {
-        for (let i = 0; i < pluginFunctions[endpoint].pre.length; i++) {
-          // eslint-disable-next-line no-await-in-loop
-          await pluginFunctions[endpoint].pre[i](req, res);
+    if (pluginFunctions[endpoint]) {
+      return async function(req, res, next) {
+        try {
+          for (let i = 0; i < pluginFunctions[endpoint].pre.length; i++) {
+            // eslint-disable-next-line no-await-in-loop
+            await pluginFunctions[endpoint].pre[i](req, res);
+          }
+          next();
         }
-        next();
-      }
-      catch (error) {
-        M.log.warn(error);
-        const statusCode = errors.getStatusCode(error);
-        utils.formatResponse(req, res, error.message, statusCode, next);
-      }
-    };
+        catch (error) {
+          M.log.warn(error);
+          const statusCode = errors.getStatusCode(error);
+          utils.formatResponse(req, res, error.message, statusCode, next);
+        }
+      };
+    }
   }
-  else {
-    return function(req, res, next) {
-      next();
-    };
-  }
+  return function(req, res, next) {
+    next();
+  };
 }
 
 /**
