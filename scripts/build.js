@@ -196,7 +196,7 @@ function build(_args) {
       webpack({
         mode: mode,
         entry: {
-          main: path.join(M.root, 'app', 'ui', 'components', 'index.jsx')
+          main: path.join(M.root, 'app', 'ui', 'components', 'Index.jsx')
         },
         output: {
           path: path.join(M.root, 'build', 'public', 'js'),

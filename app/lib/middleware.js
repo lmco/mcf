@@ -162,7 +162,7 @@ function disableUserPatchPassword(req, res, next) { // eslint-disable-line consi
 function pluginPre(endpoint) {
   if (M.config.server.plugins.enabled) {
     // eslint-disable-next-line global-require
-    const {pluginFunctions} = require(path.join(M.root, 'plugins', 'routes.js'));
+    const { pluginFunctions } = require(path.join(M.root, 'plugins', 'routes.js'));
 
     if (pluginFunctions[endpoint]) {
       return async function(req, res, next) {
