@@ -28,32 +28,42 @@ import Navbar from '../general/nav-bar.jsx';
 import AuthenticatedApp from './AuthenticatedApp.jsx';
 import UnauthenticatedApp from './UnauthenticatedApp.jsx';
 import Banner from '../general/Banner.jsx';
+import { useAuth } from '../context/AuthProvider.js';
+import { useApiClient } from '../context/ApiClientProvider.js';
+
 
 export default function App(props) {
-  const [authenticated, setAuthenticated] = useState(Boolean(window.sessionStorage.getItem('mbee-user')));
+  const { auth, setAuth } = useAuth();
+  const { userService } = useApiClient();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // eslint-disable-next-line no-undef
-    mbeeWhoAmI((err, data) => {
-      if (err) {
-        setAuthenticated(false);
-      }
-      else if (data) {
-        setAuthenticated(true);
-      }
-      else {
-        setAuthenticated(false);
-      }
-    });
+    if (auth) {
+      userService.whoami()
+      .then(([err, me]) => {
+        if (err || !me) {
+          setAuth(false);
+        }
+        setLoading(false);
+      });
+    }
+    else {
+      setLoading(false);
+    }
   }, []);
 
   return (
     <Router>
       <Banner>
-        <Navbar authenticated={authenticated} setAuthenticated={setAuthenticated}/>
-        { (authenticated)
-          ? <AuthenticatedApp/>
-          : <UnauthenticatedApp setAuthenticated={setAuthenticated}/>
+        { (loading)
+          ? 'Loading...'
+          : (<>
+              <Navbar/>
+              { (auth)
+                ? <AuthenticatedApp/>
+                : <UnauthenticatedApp/>
+              }
+          </>)
         }
       </Banner>
     </Router>

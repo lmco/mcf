@@ -23,15 +23,19 @@ import React, { useState } from 'react';
 
 import { login } from './api-client.js';
 
+// MBEE modules
+import { useAuth } from '../context/AuthProvider.js';
+
 // Dynamically load Login Modal Message
 import uiConfig from '../../../../build/json/uiConfig.json';
 const loginModal = uiConfig.loginModal;
 
 export default function LoginPage(props) {
+  const { setAuth } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
-  const { setAuthenticated, next } = props;
+  const { next } = props;
 
   const handleUserChange = (e) => {
     setUsername(e.target.value);
@@ -55,9 +59,7 @@ export default function LoginPage(props) {
       next: next
     };
 
-    login(form, setError, setAuthenticated);
-
-
+    login(form, setError, setAuth);
   };
 
   // Open the modal if enabled; otherwise login

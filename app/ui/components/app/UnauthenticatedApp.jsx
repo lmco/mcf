@@ -28,10 +28,9 @@ import LoginPage from './LoginPage.jsx';
 
 
 export default function UnauthenticatedApp(props) {
-  const { setAuthenticated } = props;
   return (
     <React.Fragment>
-      <Route path={'/login'} render={() => <LoginPage setAuthenticated={setAuthenticated}/>}/>
+      <Route path={'/login'} render={() => <LoginPage/>}/>
       <Route path={'/'} component={() => <Redirect to={'/login'}/>}/>
     </React.Fragment>
   );

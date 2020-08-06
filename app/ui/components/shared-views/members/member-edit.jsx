@@ -29,6 +29,9 @@ import {
   UncontrolledAlert
 } from 'reactstrap';
 
+// MBEE modules
+import { orgRequest, projectRequest } from '../../app/api-client.js';
+
 /* eslint-enable no-unused-vars */
 
 // Define component
@@ -90,48 +93,37 @@ class MemberEdit extends Component {
 
   // Define the submit function
   onSubmit() {
-    // Initialize variables
-    const url = (this.props.org)
-      ? `/api/orgs/${this.props.org.id}`
-      : `/api/orgs/${this.props.project.org}/projects/${this.props.project.id}`;
+    // Clear the error state
+    if (this.state.error) {
+      this.setState({ error: null });
+    }
 
+    // Set data to submit
     const data = {
       permissions: {
         [this.state.username]: this.state.permissions
       }
     };
 
-    if (this.state.error) {
-      this.setState({ error: null });
-    }
-
-    // Send a patch request to update data
-    $.ajax({
+    // Initialize options for request
+    let apiCall;
+    const options = {
       method: 'PATCH',
-      url: `${url}?minified=true`,
-      data: JSON.stringify(data),
-      contentType: 'application/json',
-      statusCode: {
-        200: () => {
-          // Update the page to reload to user page
-          window.location.reload();
-        },
-        400: (err) => {
-          this.setState({ error: err.responseText });
-        },
-        401: (err) => {
-          this.setState({ error: err.responseText });
+      minified: true
+    };
+    if (this.props.org) {
+      apiCall = orgRequest;
+      options.ids = this.props.org.id;
+    }
+    else {
+      apiCall = (o, e, d) => projectRequest(this.props.project.org, o, e, d);
+      options.ids = this.props.project.id;
+    }
+    const setError = (error) => this.setState({ error: error });
+    const status = apiCall(options, setError, data);
 
-          // Refresh when session expires
-          window.location.reload();
-        },
-        403: (err) => {
-          this.setState({ error: err.responseText });
-        }
-      }
-    });
+    if (status) this.refresh();
   }
-
 
   doSearch(e) {
     // Pre-search state resets

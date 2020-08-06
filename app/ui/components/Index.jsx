@@ -25,6 +25,15 @@ import ReactDOM from 'react-dom';
 
 // MBEE modules
 import App from './app/App.jsx';
+import { AuthProvider } from './context/AuthProvider.js';
+import { ApiClientProvider } from './context/ApiClientProvider';
 
 
-ReactDOM.render(<App />, document.getElementById('main'));
+ReactDOM.render(
+  <AuthProvider>
+    <ApiClientProvider>
+      <App/>
+    </ApiClientProvider>
+  </AuthProvider>,
+  document.getElementById('main')
+);
