@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.api-client.userService
+ * @module ui.components.api-client.UserService
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *

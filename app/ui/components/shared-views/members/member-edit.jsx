@@ -29,9 +29,6 @@ import {
   UncontrolledAlert
 } from 'reactstrap';
 
-// MBEE modules
-import { orgRequest, projectRequest } from '../../app/api-client.js';
-
 /* eslint-enable no-unused-vars */
 
 // Define component
@@ -106,23 +103,24 @@ class MemberEdit extends Component {
     };
 
     // Initialize options for request
-    let apiCall;
+    let url;
     const options = {
       method: 'PATCH',
-      minified: true
+      minified: true,
+      body: JSON.stringify(data)
     };
     if (this.props.org) {
-      apiCall = orgRequest;
+      url = '/api/orgs';
       options.ids = this.props.org.id;
     }
     else {
-      apiCall = (o, e, d) => projectRequest(this.props.project.org, o, e, d);
+      url = `/api/orgs/${this.props.project.org}/projects`;
       options.ids = this.props.project.id;
     }
-    const setError = (error) => this.setState({ error: error });
-    const status = apiCall(options, setError, data);
-
-    if (status) this.refresh();
+    window.fetch(url, options)
+    .then((response) => response.json())
+    .then(() => this.refresh())
+    .catch((err) => this.setState({ error: err }));
   }
 
   doSearch(e) {

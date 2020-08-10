@@ -22,7 +22,10 @@
 import React, { createContext, useContext } from 'react';
 
 // MBEE modules
+import AuthService from '../api-client/AuthService.js';
 import UserService from '../api-client/UserService.js';
+import OrgService from '../api-client/OrgService.js';
+import ProjectService from '../api-client/ProjectService.js';
 import { useAuth } from './AuthProvider.js';
 
 
@@ -30,9 +33,15 @@ const apiClientContext = createContext();
 
 export function ApiClientProvider(props) {
   const authContext = useAuth();
+  const authService = new AuthService(authContext);
   const userService = new UserService(authContext);
+  const orgService = new OrgService(authContext);
+  const projectService = new ProjectService(authContext);
   const value = {
-    userService
+    authService,
+    userService,
+    orgService,
+    projectService
   };
   return <apiClientContext.Provider value={value} {...props}/>;
 }

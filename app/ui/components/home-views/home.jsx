@@ -27,7 +27,6 @@ import OrgList from '../home-views/org-list.jsx';
 import Create from '../shared-views/create.jsx';
 import Delete from '../shared-views/delete.jsx';
 import { InputGroup } from 'reactstrap';
-import { orgRequest } from '../app/api-client.js';
 
 // Define HomePage Component
 class Home extends Component {
@@ -75,14 +74,13 @@ class Home extends Component {
         this.setState({ user: data });
 
         const options = {
-          method: 'GET',
-          populate: 'projects',
-          minified: true,
-          includeArchived: true
+          method: 'GET'
         };
-        const setError = (error) => this.setState({ error: error });
-        const orgs = await orgRequest(options, setError);
-        this.setMountedComponentStates(data, orgs);
+
+        window.fetch('/api/orgs?populate=projects&includeArchived=true&minified=true', options)
+        .then((response) => response.json())
+        .then((orgs) => this.setMountedComponentStates(data, orgs))
+        .catch((error) => this.setState({ error: error }));
       }
     });
   }

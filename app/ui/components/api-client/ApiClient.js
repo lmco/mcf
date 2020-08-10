@@ -71,8 +71,20 @@ export default class ApiClient {
     const error = await this.checkError(response);
 
     // Return either the error or the data
-    if (error) return [error, null];
-    else return [null, await response.json()];
+    if (error) {
+      return [error, null];
+    }
+    else {
+      let result;
+      const text = await response.text();
+      try {
+        result = JSON.parse(text);
+      }
+      catch (e) {
+        result = text;
+      }
+      return [null, result];
+    }
   }
 
   static buildUrl(base, options) {

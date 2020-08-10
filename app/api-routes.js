@@ -132,7 +132,7 @@ api.route('/login')
  *         description: Internal Server Error, Failed to due to a server side issue.
  */
 api.route('/logout')
-.get(
+.post(
   AuthController.authenticate,
   Middleware.logSecurityRoute,
   Middleware.logRoute,

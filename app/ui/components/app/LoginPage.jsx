@@ -21,17 +21,16 @@
 // React modules
 import React, { useState } from 'react';
 
-import { login } from './api-client.js';
-
 // MBEE modules
-import { useAuth } from '../context/AuthProvider.js';
+import { useApiClient } from '../context/ApiClientProvider.js';
 
 // Dynamically load Login Modal Message
 import uiConfig from '../../../../build/json/uiConfig.json';
 const loginModal = uiConfig.loginModal;
 
+
 export default function LoginPage(props) {
-  const { setAuth } = useAuth();
+  const { authService } = useApiClient();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
@@ -45,7 +44,7 @@ export default function LoginPage(props) {
     setPassword(e.target.value);
   };
 
-  const doLogin = (e) => {
+  const doLogin = async () => {
     // Remove any left over sessions
     window.sessionStorage.removeItem('mbee-user');
 
@@ -59,7 +58,8 @@ export default function LoginPage(props) {
       next: next
     };
 
-    login(form, setError, setAuth);
+    const [err] = await authService.login(form);
+    if (err) setError(err);
   };
 
   // Open the modal if enabled; otherwise login

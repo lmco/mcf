@@ -16,6 +16,7 @@
 
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
+/* eslint-disable jsdoc/require-jsdoc */
 
 // React modules
 import React, { useState, useEffect, useRef } from 'react';
@@ -34,6 +35,7 @@ function UserListItem(props) {
   const listItemRef = useRef();
   const [user, setUser] = useState(props.user);
   const [width, setWidth] = useState(0);
+  // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState(null);
 
   const handleResize = () => {
@@ -43,7 +45,6 @@ function UserListItem(props) {
   const populateUserData = async () => {
     if (!props.label) {
       if (typeof user !== 'object') {
-
         // Set options for request
         const options = {
           usernames: user,

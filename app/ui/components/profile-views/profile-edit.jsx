@@ -54,20 +54,16 @@ function ProfileEdit(props) {
 
   const handleChange = (e) => {
     if (e.target.name === 'admin' || e.target.name === 'archived') {
-      setState((prevState) => {
-        return {
-          ...prevState,
-          [e.target.name]: !prevState[e.target.name]
-        };
-      });
+      setState((prevState) => ({
+        ...prevState,
+        [e.target.name]: !prevState[e.target.name]
+      }));
     }
     else {
-      setState((prevState) => {
-        return {
-          ...prevState,
-          [e.target.name]: e.target.value
-        };
-      });
+      setState((prevState) => ({
+        ...prevState,
+        [e.target.name]: e.target.value
+      }));
     }
     // This is needed for successions of events within an input html element for some reason
     e.persist();

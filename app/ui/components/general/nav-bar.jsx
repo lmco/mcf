@@ -37,10 +37,12 @@ import {
 
 // MBEE modules
 import { useAuth } from '../context/AuthProvider.js';
+import { useApiClient } from '../context/ApiClientProvider.js';
 
 // Define component
 function MbeeNavbar(props) {
-  const { auth, setAuth } = useAuth();
+  const { auth } = useAuth();
+  const { authService } = useApiClient();
   const navRef = useRef();
   const [user, setUser] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -58,10 +60,8 @@ function MbeeNavbar(props) {
     setHeight(navRef.current.clientHeight);
   };
 
-  const sessionDestroy = () => {
-    window.sessionStorage.removeItem('mbee-user');
-    setAuth(false);
-    fetch('/api/logout');
+  const sessionDestroy = async () => {
+    await authService.logout();
   };
 
   // Set the window resize listener

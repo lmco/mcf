@@ -16,6 +16,7 @@
 
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
+/* eslint-disable jsdoc/require-jsdoc */
 
 // React modules
 import React, { useState, useEffect } from 'react';
@@ -53,20 +54,16 @@ function CreateUser(props) {
 
   const handleChange = (e) => {
     if (e.target.name === 'admin') {
-      setState((prevState) => {
-        return {
-          ...prevState,
-          admin: !prevState.admin
-        };
-      });
+      setState((prevState) => ({
+        ...prevState,
+        admin: !prevState.admin
+      }));
     }
     else {
-      setState((prevState) => {
-        return {
-          ...prevState,
-          [e.target.name]: e.target.value
-        };
-      });
+      setState((prevState) => ({
+        ...prevState,
+        [e.target.name]: e.target.value
+      }));
     }
     if (e.target.name === 'password') {
       const pass = e.target.value;

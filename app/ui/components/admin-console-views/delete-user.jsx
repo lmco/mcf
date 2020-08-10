@@ -16,6 +16,8 @@
 
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
+/* eslint-disable jsdoc/require-jsdoc */
+
 
 // React modules
 import React, { useState, useEffect } from 'react';
@@ -39,7 +41,6 @@ import { useApiClient } from '../context/ApiClientProvider.js';
 
 function DeleteUser(props) {
   const { userService } = useApiClient();
-  const [users, setUsers] = useState([]);
   const [username, setUsername] = useState(props.selectedUser || '');
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);

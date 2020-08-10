@@ -28,7 +28,6 @@ import SidebarLink from '../general/sidebar/sidebar-link.jsx';
 import InformationPage from '../shared-views/information-page.jsx';
 import MembersPage from '../shared-views/members/members-page.jsx';
 import OrgProjects from '../org-views/organization-projects.jsx';
-import { orgRequest } from '../app/api-client.js';
 
 // Define component
 class OrgHome extends Component {
@@ -68,17 +67,14 @@ class OrgHome extends Component {
         this.setState({ user: data });
         // Initialize options
         const options = {
-          method: 'GET',
-          ids: this.props.match.params.orgid,
-          populate: 'projects',
-          minified: true,
-          includeArchived: true
+          method: 'GET'
         };
-        const setError = (error) => this.setState({ error: error });
-        // Get orgs
-        const orgs = await orgRequest(options, setError);
-        // Set states
-        this.setMountedComponentStates(data, orgs[0]);
+        const id = this.props.match.params.orgid;
+
+        window.fetch(`/api/orgs?ids=${id}&populate=projects&includeArchived=true&minified=true`, options)
+        .then((response) => response.json())
+        .then((orgs) => this.setMountedComponentStates(data, orgs[0]))
+        .catch((error) => this.setState({ error: error }));
       }
     });
   }
