@@ -179,10 +179,10 @@ function ProfileEdit(props) {
             </FormGroup>
             {/* Form section for user's preferred name */}
             <FormGroup>
-              <Label for="preferred">User's Preferred Name</Label>
-              <Input type="preferred"
-                     name="preferred"
-                     id="preferred"
+              <Label for="preferredName">User's Preferred Name</Label>
+              <Input type="preferredName"
+                     name="preferredName"
+                     id="preferredName"
                      placeholder="User's preferred name"
                      value={state.preferredName}
                      invalid={preferredInvalid}
@@ -275,7 +275,7 @@ function ProfileEdit(props) {
 }
 
 ProfileEdit.propTypes = {
-  user: PropTypes.object,
+  user: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   viewingUser: PropTypes.object,
   togglePasswordModal: PropTypes.func,
   toggle: PropTypes.func,

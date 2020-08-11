@@ -46,8 +46,11 @@ function DeleteUser(props) {
   const [error, setError] = useState(null);
 
   const onSubmit = async () => {
+    const options = {
+      ids: username
+    };
     // Make the request to delete user
-    const [err, result] = await userService.delete(username);
+    const [err, result] = await userService.delete(null, options);
 
     // Set the state
     if (err) {
@@ -183,7 +186,7 @@ function DeleteUser(props) {
 }
 
 DeleteUser.propTypes = {
-  selectedUser: PropTypes.object,
+  selectedUser: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   toggle: PropTypes.func,
   refreshUsers: PropTypes.func
 };
