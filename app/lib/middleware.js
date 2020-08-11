@@ -258,10 +258,12 @@ function respond(req, res) {
 function expiredPassword(req, res, next) { // eslint-disable-line consistent-return
   // If the user needs to change their password
   if (req.user.changePassword) {
-    // If it is NOT an API request
-    if (!req.originalUrl.startsWith('/api')) {
+    // If it is a request to login, authenticate the user
+    if (req.originalUrl.includes('login')) {
       // Redirect user to their profile page
-      return res.redirect('/profile');
+      res.locals.message = 'User\'s password has expired.';
+      res.status(403);
+      next();
     }
     // API request, return a 401 error
     else {

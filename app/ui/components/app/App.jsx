@@ -25,6 +25,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 
 // MBEE modules
 import Navbar from '../general/nav-bar.jsx';
+import PasswordRedirect from './PasswordRedirect.jsx';
 import AuthenticatedApp from './AuthenticatedApp.jsx';
 import UnauthenticatedApp from './UnauthenticatedApp.jsx';
 import Banner from '../general/Banner.jsx';
@@ -36,6 +37,7 @@ export default function App(props) {
   const { auth, setAuth } = useAuth();
   const { userService } = useApiClient();
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState({});
 
   useEffect(() => {
     if (auth) {
@@ -44,27 +46,46 @@ export default function App(props) {
         if (err || !me) {
           setAuth(false);
         }
+        if (me) {
+          setUser(me);
+        }
         setLoading(false);
       });
     }
     else {
       setLoading(false);
     }
-  }, []);
+  }, [auth]);
+
+
+  let app;
+  if (loading) {
+    app = 'Loading...';
+  }
+  else {
+    let content;
+    if (auth && user.changePassword) {
+      content = <PasswordRedirect/>;
+    }
+    else if (auth) {
+      content = <AuthenticatedApp/>;
+    }
+    else {
+      content = <UnauthenticatedApp/>;
+    }
+
+    app = (
+      <>
+        <Navbar/>
+        {content}
+      </>
+    );
+  }
 
   return (
     <Router>
       <Banner>
-        { (loading)
-          ? 'Loading...'
-          : (<>
-              <Navbar/>
-              { (auth)
-                ? <AuthenticatedApp/>
-                : <UnauthenticatedApp/>
-              }
-          </>)
-        }
+        { app }
       </Banner>
     </Router>
   );

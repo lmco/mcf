@@ -16,9 +16,10 @@
 
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
+/* eslint-disable jsdoc/require-jsdoc */
 
 // React modules
-import React, { Component } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Form,
   FormGroup,
@@ -29,106 +30,83 @@ import {
   UncontrolledAlert
 } from 'reactstrap';
 
+// MBEE modules
+import { useApiClient } from '../../context/ApiClientProvider';
+
 /* eslint-enable no-unused-vars */
 
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
+
 // Define component
-class MemberEdit extends Component {
+function MemberEdit(props) {
+  const { orgService, projectService, userService } = useApiClient();
+  const [username, setUsername] = useState(props.selectedUser ? props.selectedUser.username : '');
+  const [permissions, setPermissions] = useState(props.selectedUser ? props.selectedUser.perm : '');
+  const [results, setResults] = useState(null);
+  const [error, setError] = useState(null);
 
-  constructor(props) {
-    // Initialize parent props
-    super(props);
+  const prevSelectedUser = usePrevious(props.selectedUser);
+  const prevResults = usePrevious(props.results);
 
-    // Initialize state props
-    this.state = {
-      users: null,
-      username: '',
-      permissions: '',
-      results: null,
-      error: null
-    };
+  const handleChange = (e) => {
+    setPermissions(e.target.value);
+  };
 
-    // Bind component functions
-    this.handleChange = this.handleChange.bind(this);
-    this.userChange = this.userChange.bind(this);
-    this.selectUser = this.selectUser.bind(this);
-    this.onSubmit = this.onSubmit.bind(this);
-    this.doSearch = this.doSearch.bind(this);
-    this.resetForm = this.resetForm.bind(this);
-  }
+  const selectUser = (name) => {
+    setUsername(name);
+    setResults(null);
 
-  // Define handle change function
-  handleChange(event) {
-    // Change the state with new value
-    this.setState({ [event.target.name]: event.target.value });
-  }
-
-  userChange(event) {
-    this.setState({ username: event.target.value });
-    this.doSearch(event.target.value);
-
-    if (event.target.value.length === 0) {
-      this.resetForm();
-    }
-  }
-
-  selectUser(username) {
-    this.setState({ username: username, results: null });
-
-    // Verify if org provided
-    if (this.props.org) {
-      if (this.props.org.permissions.hasOwnProperty(username)) {
-        this.setState({ permissions: this.props.org.permissions[username] });
+    if (props.org) {
+      if (props.org.permissions.hasOwnProperty(name)) {
+        setPermissions(props.org.permissions[name]);
       }
     }
-    else if (this.props.project.permissions.hasOwnProperty(username)) {
-      this.setState({ permissions: this.props.project.permissions[username] });
+    else if (props.project.permissions.hasOwnProperty(name)) {
+      setPermissions(props.project.permissions[username]);
     }
     else {
-      this.setState({ permissions: '' });
+      setPermissions('');
     }
-  }
+  };
 
-  // Define the submit function
-  onSubmit() {
-    // Clear the error state
-    if (this.state.error) {
-      this.setState({ error: null });
-    }
+  const onSubmit = async () => {
+    if (error) setError(null);
 
     // Set data to submit
     const data = {
       permissions: {
-        [this.state.username]: this.state.permissions
+        [username]: permissions
       }
     };
 
     // Initialize options for request
-    let url;
-    const options = {
-      method: 'PATCH',
-      minified: true,
-      body: JSON.stringify(data)
-    };
-    if (this.props.org) {
-      url = '/api/orgs';
-      options.ids = this.props.org.id;
+    let service;
+    const options = {};
+    if (props.org) {
+      service = orgService;
+      options.ids = props.org.id;
     }
     else {
-      url = `/api/orgs/${this.props.project.org}/projects`;
-      options.ids = this.props.project.id;
+      service = (d, o) => projectService(props.project.org, d, o);
+      options.ids = props.project.id;
     }
-    window.fetch(url, options)
-    .then((response) => response.json())
-    .then(() => this.refresh())
-    .catch((err) => this.setState({ error: err }));
-  }
 
-  doSearch(e) {
-    // Pre-search state resets
-    this.setState({
-      message: '',
-      results: []
-    });
+    // Make the request
+    const [err, result] = await service.patch(data, options);
+
+    // Set the state
+    if (err) setError(err);
+    else if (result) props.refresh();
+  };
+
+  const doSearch = async (e) => {
+    setResults([]);
 
     let query;
 
@@ -140,160 +118,137 @@ class MemberEdit extends Component {
       query = e;
     }
 
-    // Build query URL
-    const url = '/api/users/search';
-    // Do ajax request
-    $.ajax({
-      method: 'GET',
-      url: `${url}?q=${query}&limit=5&minified=true`,
-      statusCode: {
-        401: () => {
-          // Refresh when session expires
-          window.location.reload();
-        }
+    const options = {
+      limit: 5
+    };
+
+    // Make the search request
+    const [err, searchData] = await userService.search(query, options);
+
+    // Set the state
+    if (err === 'No users found.') {
+      // Try the username endpoint
+      const options2 = {
+        usernames: query
+      };
+      const [err2, findData] = await userService.get(options2);
+
+      // Set the state
+      if (err2) {
+        setResults([]);
       }
-    })
-    .done(data => {
-      // Loop through users
-      const userOpts = data.map((user) => (
+      else if (findData) {
+        const user = findData[0];
+        const userOpt = (
+          <div className='members-dropdown-item' key={`user-${user.username}`}
+               onClick={() => selectUser(user.username)}>
+            <span>{user.fname} {user.lname}</span>
+            <span className='member-username'>@{user.username}</span>
+          </div>
+        );
+        setResults(userOpt);
+      }
+    }
+    else if (searchData) {
+      const userOpts = searchData.map((user) => (
         <div className='members-dropdown-item' key={`user-${user.username}`}
-             onClick={() => this.selectUser(user.username)}>
+             onClick={() => selectUser(user.username)}>
           <span>{user.fname} {user.lname}</span>
           <span className='member-username'>@{user.username}</span>
         </div>));
 
-      this.setState({
-        results: userOpts
-      });
-    })
-    .fail(res => {
-      if (res.status === 400) {
-        this.setState({ results: [] });
-      }
-      else if (res.status === 404) {
-        // Try username search endpoint
-        $.ajax({
-          method: 'GET',
-          url: `/api/users/${query}`,
-          statusCode: {
-            401: () => {
-              // Refresh when session expires
-              window.location.reload();
-            }
-          }
-        })
-        .done(users => {
-          const user = users[0];
-          const userOpt = (
-            <div className='members-dropdown-item' key={`user-${user.username}`}
-                 onClick={() => this.selectUser(user.username)}>
-              <span>{user.fname} {user.lname}</span>
-              <span className='member-username'>@{user.username}</span>
-            </div>
-          );
-
-          this.setState({ results: [userOpt] });
-        })
-        .fail(response => {
-          if (response.status === 404 || response.status === 400) {
-            this.setState({ results: [] });
-          }
-        });
-      }
-    });
-  }
-
-  resetForm() {
-    this.setState({ username: '', permissions: '', results: null });
-  }
-
-  componentDidMount() {
-    if (this.props.selectedUser) {
-      const username = this.props.selectedUser.username;
-      const permission = this.props.selectedUser.perm;
-      this.setState({ username: username, permissions: permission });
+      setResults(userOpts);
     }
-  }
+  };
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.props.selectedUser !== prevProps.selectedUser) {
-      this.componentDidMount();
+  const resetForm = () => {
+    setUsername('');
+    setPermissions('');
+    setResults(null);
+  };
+
+  const userChange = (e) => {
+    setUsername(e.target.value);
+    doSearch(e.target.value);
+    if (e.target.value.length === 0) resetForm();
+  };
+
+  // on update
+  useEffect(() => {
+    if (props.selectedUser !== prevSelectedUser && props.selectedUser !== null) {
+      setUsername(props.selectedUser);
+      setPermissions(props.selectedUser.perm);
     }
-    if ((this.state.results !== prevState.results) && (this.state.username.length === 0)) {
-      this.setState({ results: null });
+    if ((results !== prevResults) && (username.length === 0)) {
+      setResults(null);
     }
-  }
+  }, [props]);
 
-  render() {
-    const org = this.props.org;
-    const project = this.props.project;
-    const user = this.state.username;
-    const results = this.state.results;
-    const title = (org) ? org.name : project.name;
 
-    // Check if user is a member of the Org or Project
-    const orgMember = (org && org.permissions.hasOwnProperty(user));
-    const projMember = (project && project.permissions.hasOwnProperty(user));
+  const org = props.org;
+  const project = props.project;
+  const title = (org) ? org.name : project.name;
 
-    const btnTitle = (orgMember || projMember) ? 'Save' : 'Add';
-    const header = (orgMember || projMember) ? 'Modify User' : 'Add user';
+  // Check if user is a member of the Org or Project
+  const orgMember = (org && org.permissions.hasOwnProperty(username));
+  const projMember = (project && project.permissions.hasOwnProperty(username));
 
-    // Display error if permission is invalid or User not found
-    const notFound = (results && results.length === 0 && user !== '') ? 'User not found.' : '';
-    const error = (this.state.error) ? this.state.error : '';
+  const btnTitle = (orgMember || projMember) ? 'Save' : 'Add';
+  const header = (orgMember || projMember) ? 'Modify User' : 'Add user';
 
-    const searchResults = (Array.isArray(results) && results.length > 0)
-      ? (<div className='members-dropdown'>
-           {results}
-          </div>)
-      : '';
+  // Display error if permission is invalid or User not found
+  const notFound = (results && results.length === 0 && username !== '') ? 'User not found.' : '';
 
-    return (
-      <div className='extra-padding'>
-        <h2>{header}</h2>
-        <hr/>
-        <React.Fragment>
-          <h3> {title} </h3>
-          { (!error) ? '' : (<UncontrolledAlert color="danger">{error}</UncontrolledAlert>) }
-          {/* Create form to update user roles */}
-          <FormGroup style={{ margin: '0' }}>
-            <Input type='search'
-                   name='username'
-                   id='username'
-                   autoComplete='off'
-                   placeholder='Search User...'
-                   value={this.state.username || ''}
-                   invalid={notFound.length > 0}
-                   onChange={this.userChange}/>
-            { searchResults }
-            <FormFeedback>
-              { notFound }
-            </FormFeedback>
+  const searchResults = (Array.isArray(results) && results.length > 0)
+    ? (<div className='members-dropdown'>
+      {results}
+    </div>)
+    : '';
+
+  return (
+    <div className='extra-padding'>
+      <h2>{header}</h2>
+      <hr/>
+      <React.Fragment>
+        <h3> {title} </h3>
+        { (!error) ? '' : (<UncontrolledAlert color="danger">{error}</UncontrolledAlert>) }
+        {/* Create form to update user roles */}
+        <FormGroup style={{ margin: '0' }}>
+          <Input type='search'
+                 name='username'
+                 id='username'
+                 autoComplete='off'
+                 placeholder='Search User...'
+                 value={username || ''}
+                 invalid={notFound.length > 0}
+                 onChange={userChange}/>
+          { searchResults }
+          <FormFeedback>
+            { notFound }
+          </FormFeedback>
+        </FormGroup>
+        <Form style={{ paddingTop: '10px' }}>
+          {/* Permissions user updates with */}
+          <FormGroup>
+            <Label for='permissions'>Permissions</Label>
+            <Input type='select'
+                   name='permissions'
+                   id='permissions'
+                   value={permissions}
+                   onChange={handleChange}>
+              <option>Choose one...</option>
+              <option>read</option>
+              <option>write</option>
+              <option>admin</option>
+              <option>REMOVE_ALL</option>
+            </Input>
           </FormGroup>
-          <Form style={{ paddingTop: '10px' }}>
-            {/* Permissions user updates with */}
-            <FormGroup>
-              <Label for='permissions'>Permissions</Label>
-              <Input type='select'
-                     name='permissions'
-                     id='permissions'
-                     value={this.state.permissions}
-                     onChange={this.handleChange}>
-                  <option>Choose one...</option>
-                  <option>read</option>
-                  <option>write</option>
-                  <option>admin</option>
-                  <option>REMOVE_ALL</option>
-              </Input>
-            </FormGroup>
-          </Form>
-          {/* Button to submit changes */}
-          <Button onClick={this.onSubmit} disabled={notFound.length > 0}>{btnTitle}</Button>
-        </React.Fragment>
-      </div>
-    );
-  }
-
+        </Form>
+        {/* Button to submit changes */}
+        <Button onClick={onSubmit} disabled={notFound.length > 0}>{btnTitle}</Button>
+      </React.Fragment>
+    </div>
+  );
 }
 
 // Export component

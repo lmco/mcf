@@ -36,9 +36,9 @@ class UserService extends ApiClient {
     return [err, me];
   }
 
-  async search(data, options = {}) {
+  async search(query, options = {}) {
     const baseUrl = '/api/users/search';
-    return super.search(data, options, baseUrl);
+    return super.search(query, options, baseUrl);
   }
 
   async password(data, username, options = {}) {
@@ -51,8 +51,7 @@ class UserService extends ApiClient {
     // Destroy the session if the user changed their own password
     const sessionUser = window.sessionStorage.getItem('mbee-user');
     if (sessionUser.username === username) {
-      const { setAuth } = this.authContext;
-      setAuth(false);
+      this.authContext.setAuth(false);
       window.sessionStorage.removeItem('mbee-user');
     }
 

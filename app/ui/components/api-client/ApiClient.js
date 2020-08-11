@@ -49,9 +49,10 @@ export default class ApiClient {
     return this.makeRequest(data, options, url);
   }
 
-  async search(data, options = {}, url = this.url) {
+  async search(query, options = {}, url = this.url) {
     options.method = 'GET';
-    return this.makeRequest(data, options, url);
+    options.q = query;
+    return this.makeRequest(null, options, url);
   }
 
   async makeRequest(data, options, baseUrl) {
@@ -129,10 +130,9 @@ export default class ApiClient {
       return;
     }
     else if (response.status === 401) {
-      const { setAuth } = this.authContext;
       // break the auth state
       window.sessionStorage.removeItem('mbee-user');
-      setAuth(false);
+      this.authContext.setAuth(false);
     }
     return response.text();
   }
