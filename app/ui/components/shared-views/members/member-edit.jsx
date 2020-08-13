@@ -86,19 +86,19 @@ function MemberEdit(props) {
     };
 
     // Initialize options for request
-    let service;
+    let patch;
     const options = {};
     if (props.org) {
-      service = orgService;
-      options.ids = props.org.id;
+      patch = orgService.patch;
+      data.id = props.org.id;
     }
     else {
-      service = (d, o) => projectService(props.project.org, d, o);
-      options.ids = props.project.id;
+      patch = (d, o) => projectService.patch(props.project.org, d, o);
+      data.id = props.project.id;
     }
 
     // Make the request
-    const [err, result] = await service.patch(data, options);
+    const [err, result] = await patch(data, options);
 
     // Set the state
     if (err) setError(err);
