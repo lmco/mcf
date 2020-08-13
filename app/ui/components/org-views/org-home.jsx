@@ -17,9 +17,10 @@
 
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
+/* eslint-disable jsdoc/require-jsdoc */
 
 // React modules
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 // MBEE modules
@@ -28,158 +29,149 @@ import SidebarLink from '../general/sidebar/sidebar-link.jsx';
 import InformationPage from '../shared-views/information-page.jsx';
 import MembersPage from '../shared-views/members/members-page.jsx';
 import OrgProjects from '../org-views/organization-projects.jsx';
+import { useApiClient } from '../context/ApiClientProvider.js';
 
-// Define component
-class OrgHome extends Component {
+/* eslint-enable no-unused-vars */
 
-  /* eslint-enable no-unused-vars */
+function OrgHome(props) {
+  const { orgService } = useApiClient();
+  const [org, setOrg] = useState(null);
+  const [user, setUser] = useState(null);
+  const [admin, setAdmin] = useState(false);
+  const [write, setWrite] = useState(false);
+  const [modal, setModal] = useState(false);
+  const [permissions, setPermissions] = useState(null);
+  const [error, setError] = useState(null);
 
-  constructor(props) {
-    // Initialize parent props
-    super(props);
+  const handleToggle = () => {
+    setModal((currentState) => !currentState);
+  };
 
-    // Initialize state props
-    this.state = {
-      org: null,
-      error: null,
-      user: null,
-      admin: false,
-      write: false,
-      modal: false,
-      permissions: null
-    };
+  const setMountedComponentStates = (userData, orgData) => {
+    // Initialize variables
+    const username = userData.username;
+    const perm = orgData.permissions[username];
 
-    // Bind component functions
-    this.handleToggle = this.handleToggle.bind(this);
-    this.setMountedComponentStates = this.setMountedComponentStates.bind(this);
-  }
+    // Verify if user is admin
+    if ((userData.admin) || (perm === 'admin')) {
+      // Set the admin state
+      setAdmin(true);
+      setPermissions('admin');
+    }
+    else {
+      setPermissions(perm);
+    }
 
-  componentDidMount() {
+    // Verify is user has write permissions
+    if (userData.admin || (perm === 'admin') || (perm === 'write')) {
+      setWrite(true);
+    }
+
+    // Verify the user has admin permissions on org if it is archived
+    if (orgData.archived && ((perm === 'write') || (perm === 'read'))) {
+      // Do not display the org information for non-perm user
+      setOrg(null);
+      setError(`Organization [${orgData.id}] not found.`);
+    }
+    else {
+      // Set the org state
+      setOrg(orgData);
+    }
+  };
+
+  const refresh = () => {
     // eslint-disable-next-line no-undef
     mbeeWhoAmI(async (err, data) => {
       // Verify if error returned
       if (err) {
         // Set error state
-        this.setState({ error: err.responseText });
+        setError(err.responseText);
       }
       else {
         // Set user data
-        this.setState({ user: data });
-        // Initialize options
-        const options = {
-          method: 'GET'
-        };
-        const id = this.props.match.params.orgid;
+        setUser(data);
 
-        window.fetch(`/api/orgs?ids=${id}&populate=projects&includeArchived=true&minified=true`, options)
-        .then((response) => response.json())
-        .then((orgs) => this.setMountedComponentStates(data, orgs[0]))
-        .catch((error) => this.setState({ error: error }));
+        // Initialize options for org request
+        const options = {
+          ids: props.match.params.orgid,
+          populate: 'projects',
+          includeArchived: true
+        };
+
+        // Get the org data
+        const [orgErr, orgData] = await orgService.get(options);
+
+        // Set the state
+        if (orgErr) setError(orgErr);
+        else if (orgData) setMountedComponentStates(data, orgData[0]);
       }
     });
+  };
+
+  // on mount
+  useEffect(() => {
+    refresh();
+  }, []);
+
+
+  // Initialize variables
+  let title;
+
+  // Verify org exists
+  if (org) {
+    // Set the title for sidebar
+    title = <h2> {org.name}</h2>;
   }
 
-  setMountedComponentStates(user, org) {
-    // Initialize variables
-    const username = user.username;
-    const perm = org.permissions[username];
-    const admin = user.admin;
-
-    // Set user state
-    this.setState({ user: user });
-
-    // Verify if user is admin
-    if ((admin) || (perm === 'admin')) {
-      // Set the admin state
-      this.setState({ admin: true });
-      this.setState({ permissions: 'admin' });
-    }
-    else {
-      this.setState({ permissions: perm });
-    }
-
-    // Verify is user has write permissions
-    if (admin || (perm === 'admin') || (perm === 'write')) {
-      this.setState({ write: true });
-    }
-
-    // Verify the user has admin permissions on org if it is archived
-    if (org.archived && ((perm === 'write') || (perm === 'read'))) {
-      // Do not display the org information for non-perm user
-      this.setState({ org: null });
-      this.setState({ error: `Organization [${org.id}] not found.` });
-    }
-    else {
-      // Set the org state
-      this.setState({ org: org });
-    }
-  }
-
-  // Define handle toggle
-  handleToggle() {
-    this.setState({ modal: !this.state.modal });
-  }
-
-  render() {
-    // Initialize variables
-    let title;
-
-    // Verify org exists
-    if (this.state.org) {
-      // Set the title for sidebar
-      title = <h2> {this.state.org.name}</h2>;
-    }
-
-    // Return organization page
-    return (
-      <div id='container'>
-        { /* Create the sidebar with sidebar links */ }
-        <Sidebar title={title}>
-          <SidebarLink id='Home'
-                       title='Home'
-                       icon='fas fa-home'
-                       routerLink={`${this.props.match.url}`} />
-          <SidebarLink id='Projects'
-                       title='Projects'
-                       icon='fas fa-boxes'
-                       routerLink={`${this.props.match.url}/projects`} />
-          <SidebarLink id='Members'
-                       title='Members'
-                       icon='fas fa-users'
-                       routerLink={`${this.props.match.url}/users`} />
-        </Sidebar>
-        { /* Verify organization data exists */ }
-        {(!this.state.org)
-          // Display loading page or error page if org is loading or failed to load
-          ? <div id='view' className="loading"> {this.state.error || 'Loading your organization...'} </div>
-          // Display page based on route on clients side
-          : (
-            <Switch>
-              { /* Route to org home page */ }
-              <Route exact path={`${this.props.match.url}`}
-                     render={ (props) => <InformationPage {...props}
-                                                          permissions={this.state.permissions}
-                                                          org={this.state.org} /> } />
-              { /* Route to projects page */ }
-              <Route path={`${this.props.match.url}/projects`}
-                     render={ (props) => <OrgProjects {...props}
-                                                      user={this.state.user}
-                                                      org={this.state.org}
-                                                      write={this.state.write}
-                                                      modal={this.state.modal}
-                                                      handleToggle={this.handleToggle}/> } />
-              { /* Route to members page */ }
-              <Route path={`${this.props.match.url}/users`}
-                     render={ (props) => <MembersPage {...props}
-                                                      org={this.state.org}
-                                                      admin={this.state.admin}/> } />
-            </Switch>
-          )
-        }
-      </div>
-    );
-  }
-
+  // Return organization page
+  return (
+    <div id='container'>
+      { /* Create the sidebar with sidebar links */ }
+      <Sidebar title={title}>
+        <SidebarLink id='Home'
+                     title='Home'
+                     icon='fas fa-home'
+                     routerLink={`${props.match.url}`} />
+        <SidebarLink id='Projects'
+                     title='Projects'
+                     icon='fas fa-boxes'
+                     routerLink={`${props.match.url}/projects`} />
+        <SidebarLink id='Members'
+                     title='Members'
+                     icon='fas fa-users'
+                     routerLink={`${props.match.url}/users`} />
+      </Sidebar>
+      { /* Verify organization data exists */ }
+      {(!org)
+        // Display loading page or error page if org is loading or failed to load
+        ? <div id='view' className="loading"> {error || 'Loading your organization...'} </div>
+        // Display page based on route on clients side
+        : (
+          <Switch>
+            { /* Route to org home page */ }
+            <Route exact path={`${props.match.url}`}
+                   render={ (renderProps) => <InformationPage {...renderProps}
+                                                              permissions={permissions}
+                                                              org={org} /> } />
+            { /* Route to projects page */ }
+            <Route path={`${props.match.url}/projects`}
+                   render={ (renderProps) => <OrgProjects {...renderProps}
+                                                          user={user}
+                                                          org={org}
+                                                          write={write}
+                                                          modal={modal}
+                                                          handleToggle={handleToggle}/> } />
+            { /* Route to members page */ }
+            <Route path={`${props.match.url}/users`}
+                   render={ (renderProps) => <MembersPage {...renderProps}
+                                                          org={org}
+                                                          admin={admin}
+                                                          refresh={refresh}/> } />
+          </Switch>
+        )
+      }
+    </div>
+  );
 }
 
 export default OrgHome;

@@ -100,7 +100,7 @@ function PasswordEdit(props) {
     if (err) {
       setError(err);
     }
-    else if (result) {
+    else if (result && sessionUser.username !== props.user.username) {
       props.toggle();
     }
   };

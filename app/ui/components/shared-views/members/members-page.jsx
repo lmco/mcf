@@ -111,9 +111,11 @@ class MembersPage extends Component {
             <div className='roles-box'>
               {(this.props.project && !this.props.org)
                 ? (<MemberEdit project={this.props.project}
-                               selectedUser={this.state.selectedUser}/>)
+                               selectedUser={this.state.selectedUser}
+                               refresh={this.props.refresh}/>)
                 : (<MemberEdit org={this.props.org}
-                               selectedUser={this.state.selectedUser}/>)
+                               selectedUser={this.state.selectedUser}
+                               refresh={this.props.refresh}/>)
               }
             </div>
             <List className='members-box'>

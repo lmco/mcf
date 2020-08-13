@@ -39,7 +39,7 @@ function usePrevious(value) {
   const ref = useRef();
   useEffect(() => {
     ref.current = value;
-  });
+  }, []);
   return ref.current;
 }
 
@@ -89,7 +89,7 @@ function MemberEdit(props) {
     let patch;
     const options = {};
     if (props.org) {
-      patch = orgService.patch;
+      patch = (d, o) => orgService.patch(d, o);
       data.id = props.org.id;
     }
     else {
@@ -176,7 +176,7 @@ function MemberEdit(props) {
   // on update
   useEffect(() => {
     if (props.selectedUser !== prevSelectedUser && props.selectedUser !== null) {
-      setUsername(props.selectedUser);
+      setUsername(props.selectedUser.username);
       setPermissions(props.selectedUser.perm);
     }
     if ((results !== prevResults) && (username.length === 0)) {

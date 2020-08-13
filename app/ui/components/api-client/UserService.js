@@ -49,10 +49,12 @@ class UserService extends ApiClient {
     const [err, result] = await super.makeRequest(data, options, baseUrl);
 
     // Destroy the session if the user changed their own password
-    const sessionUser = window.sessionStorage.getItem('mbee-user');
-    if (sessionUser.username === username) {
-      this.authContext.setAuth(false);
-      window.sessionStorage.removeItem('mbee-user');
+    if (result) {
+      const sessionUser = JSON.parse(window.sessionStorage.getItem('mbee-user'));
+      if (sessionUser.username === username) {
+        this.authContext.setAuth(false);
+        window.sessionStorage.removeItem('mbee-user');
+      }
     }
 
     return [err, result];
