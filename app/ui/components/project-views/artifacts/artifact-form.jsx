@@ -211,10 +211,10 @@ class ArtifactForm extends Component {
 
     // Only validate if ID has been entered
     if (artifactId !== 0) {
-      const validatorsArtifactId = validators.artifact.id.split(validators.ID_DELIMITER).pop();
+      const validatorsArtifactId = `^${validators.artifact.id.split(validators.ID_DELIMITER).pop()}`;
       const maxLength = validators.artifact.idLength - validators.branch.idLength - 1;
       const validLength = (artifactId.length <= maxLength);
-      idInvalid = (!validLength) && (!RegExp(validatorsArtifactId).test(artifactId));
+      idInvalid = (!validLength) || (!RegExp(validatorsArtifactId).test(artifactId));
     }
 
     const { location, file, filename } = this.state;

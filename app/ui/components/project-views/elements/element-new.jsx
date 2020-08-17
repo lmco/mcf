@@ -195,7 +195,7 @@ class ElementNew extends Component {
     let disableSubmit;
 
     // Verify element id is valid
-    const validatorsElementId = validators.element.id.split(validators.ID_DELIMITER).pop();
+    const validatorsElementId = `^${validators.element.id.split(validators.ID_DELIMITER).pop()}`;
     const validLen = validators.element.idLength - validators.branch.idLength - 1;
     if (!RegExp(validatorsElementId).test(this.state.id) || validLen < this.state.id.length) {
       // Set invalid fields

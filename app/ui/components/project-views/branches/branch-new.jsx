@@ -165,7 +165,7 @@ class CreateBranch extends Component {
 
     // Verify if id is valid
     const { id } = this.state;
-    const validatorsBranchId = validators.branch.id.split(validators.ID_DELIMITER).pop();
+    const validatorsBranchId = `^${validators.branch.id.split(validators.ID_DELIMITER).pop()}`;
     const maxLength = validators.branch.idLength - validators.project.idLength - 1;
 
     if (id.length !== 0) {

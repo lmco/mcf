@@ -143,7 +143,7 @@ class ProjectHome extends Component {
       const urlBranch = branchSubString.split('/')[2];
 
       // Validate id
-      const validatorsBranchId = validators.branch.id.split(validators.ID_DELIMITER).pop();
+      const validatorsBranchId = `^${validators.branch.id.split(validators.ID_DELIMITER).pop()}`;
       const maxLength = validators.branch.idLength - validators.project.idLength - 1;
       const branchLength = urlBranch.length;
       const validLen = (branchLength > 0 && branchLength <= maxLength);
