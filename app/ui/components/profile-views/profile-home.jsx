@@ -49,7 +49,7 @@ function ProfileHome(props) {
   const refreshOtherUser = async () => {
     // Initialize options for request
     const options = {
-      usernames: this.props.match.params.username,
+      usernames: props.match.params.username,
       includeArchived: true
     };
 
@@ -88,7 +88,7 @@ function ProfileHome(props) {
       title = `${otherUser.fname}'s Profile`;
     }
     else {
-      title = `${this.state.user.username}'s Profile`;
+      title = `${user.username}'s Profile`;
     }
   }
   else if (user && user.preferredName) {

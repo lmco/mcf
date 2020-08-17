@@ -62,7 +62,7 @@ function OrgHome(props) {
       setPermissions(perm);
     }
 
-    // Verify is user has write permissions
+    // Verify if user has write permissions
     if (userData.admin || (perm === 'admin') || (perm === 'write')) {
       setWrite(true);
     }

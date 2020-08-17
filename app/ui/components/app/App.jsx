@@ -53,6 +53,7 @@ export default function App(props) {
       });
     }
     else {
+      setUser({});
       setLoading(false);
     }
   }, [auth]);

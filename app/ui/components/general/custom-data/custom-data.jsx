@@ -47,7 +47,7 @@ class CustomData extends Component {
 
   render() {
     // Initialize variables
-    const customData = this.state.custom;
+    const customData = typeof this.state.custom === 'string' ? JSON.parse(this.state.custom) : this.state.custom;
     const keys = [];
 
     // Verify if custom data exists

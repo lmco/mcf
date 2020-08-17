@@ -147,7 +147,7 @@ function UserListItem(props) {
               noToolTip={true}
               key={`write-${user.username}`}
               _key={`write-${user.username}`}/>,
-        <Stat title=''
+        <Stat title='Admin'
               icon='fas fa-window-minimize'
               className={minimizeClass}
               label={props.label}
@@ -166,14 +166,14 @@ function UserListItem(props) {
               noToolTip={true}
               key={`read-${user.username}`}
               _key={`read-${user.username}`}/>,
-        <Stat title=''
+        <Stat title='Write'
               icon='fas fa-window-minimize'
               className={minimizeClass}
               label={props.label}
               noToolTip={true}
               key={`write-${user.username}`}
               _key={`write-${user.username}`}/>,
-        <Stat title=''
+        <Stat title='Admin'
               icon='fas fa-window-minimize'
               className={minimizeClass}
               label={props.label}
@@ -198,7 +198,7 @@ function UserListItem(props) {
     archivedClass = 'grayed-out';
   }
 
-  // Render the organization stat list items
+  // Render the user stat list items
   return (
     <div className={`stats-list-item ${props.className}`} ref={listItemRef}>
       <div id='user-list-items' className={classNames}>
