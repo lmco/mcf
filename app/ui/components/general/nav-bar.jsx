@@ -121,9 +121,8 @@ function MbeeNavbar(props) {
               </DropdownMenu>
             </UncontrolledDropdown>
             { // Create link to login or logout
-              (user === null)
-                ? <NavLink href='/login'>Login</NavLink>
-                : (
+              (auth && user)
+                ? (
                   <UncontrolledDropdown nav inNavbar>
                     <DropdownToggle nav caret>
                       <i className='fas fa-user-circle'/>
@@ -148,8 +147,8 @@ function MbeeNavbar(props) {
                       }
                       <DropdownItem onClick={sessionDestroy}>Log Out</DropdownItem>
                     </DropdownMenu>
-                  </UncontrolledDropdown>
-                )
+                  </UncontrolledDropdown>)
+                : <NavLink href='/login'>Login</NavLink>
             }
             <NavItem>
             </NavItem>
