@@ -89,7 +89,6 @@ Docker Build:
     - shell
   only:
     - develop
-    - master
   dependencies: 
     - Test MCF
   script:
@@ -105,7 +104,6 @@ Deploy MCF Dev:
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
   only:
     - develop
-    - master
   dependencies: 
     - Docker Build
   script:
@@ -119,8 +117,7 @@ Deploy MCF Test:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
   only:
-    - develop
-    - master
+    - /^release\/.*$/
   dependencies: 
     - Docker Build
   script:
@@ -134,7 +131,7 @@ Deploy MCF Prod:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
   only:
-    - develop
+    - /^prc\/.*$/
     - master
   dependencies: 
     - Docker Build
