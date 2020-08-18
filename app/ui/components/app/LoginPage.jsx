@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.LoginPage
+ * @module ui.components.app.LoginPage
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -21,15 +21,20 @@
 // React modules
 import React, { useState } from 'react';
 
+// MBEE modules
+import { useApiClient } from '../context/ApiClientProvider.js';
+
 // Dynamically load Login Modal Message
 import uiConfig from '../../../../build/json/uiConfig.json';
 const loginModal = uiConfig.loginModal;
 
+
 export default function LoginPage(props) {
+  const { authService } = useApiClient();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
-  const { setAuthenticated, next } = props;
+  const { next } = props;
 
   const handleUserChange = (e) => {
     setUsername(e.target.value);
@@ -39,7 +44,7 @@ export default function LoginPage(props) {
     setPassword(e.target.value);
   };
 
-  const doLogin = (e) => {
+  const doLogin = async () => {
     // Remove any left over sessions
     window.sessionStorage.removeItem('mbee-user');
 
@@ -53,33 +58,8 @@ export default function LoginPage(props) {
       next: next
     };
 
-    // Create options for fetch request
-    const headers = new Headers();
-    headers.append('Content-Type', 'application/json');
-    const options = {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify(form)
-    };
-
-    // Make request to sign in
-    window.fetch('/api/login', options)
-    .then((response) => {
-      // Set error if bad response
-      if (response.status >= 300) {
-        response.text()
-        .then((message) => {
-          setError(message);
-        });
-      }
-      // Set authenticated status if good response
-      else {
-        response.json()
-        .then((data) => {
-          if (data.token) setAuthenticated(true);
-        });
-      }
-    });
+    const [err] = await authService.login(form);
+    if (err) setError(err);
   };
 
   // Open the modal if enabled; otherwise login
