@@ -140,7 +140,7 @@ class Create extends Component {
     if (this.props.project) {
       title = (this.props.org) ? `New Project in ${this.props.org.name}` : 'New Project';
       header = 'Project';
-      validatorId = validators.project.id.split(validators.ID_DELIMITER).pop();
+      validatorId = `^${validators.project.id.split(validators.ID_DELIMITER).pop()}`;
       // Calculate project ID sans delimiter
       validLen = validators.project.idLength - validators.org.idLength - 1;
     }
