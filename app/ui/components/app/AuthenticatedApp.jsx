@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.AuthenticatedApp
+ * @module ui.components.app.AuthenticatedApp
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -27,7 +27,7 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import Home from '../home-views/home.jsx';
 import OrgHome from '../org-views/org-home.jsx';
 import ProjectHome from '../project-views/project-home.jsx';
-import Profile from '../profile-views/profile-home.jsx';
+import ProfileHome from '../profile-views/profile-home.jsx';
 import AdminConsoleHome from '../admin-console-views/admin-console-home.jsx';
 import About from '../general/About.jsx';
 import NotFound from '../shared-views/NotFound.jsx';
@@ -38,8 +38,8 @@ export default function AuthenticatedApp(props) {
       <Route path={'/login'} component={() => <Redirect to={'/'}/>}/>
       <Route path={'/orgs/:orgid/projects/:projectid'} component={ProjectHome} />
       <Route path={'/orgs/:orgid'} component={OrgHome} />
-      <Route path={'/profile/:username'} component={Profile}/>
-      <Route path={'/profile'} component={Profile}/>
+      <Route path={'/profile/:username'} component={ProfileHome}/>
+      <Route path={'/profile'} component={ProfileHome}/>
       <Route path={'/admin'} component={AdminConsoleHome}/>
       <Route path={'/about'} component={About}/>
       <Route path={'/'} exact component={Home}/>

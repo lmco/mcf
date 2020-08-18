@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.App
+ * @module ui.components.app.App
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -25,36 +25,68 @@ import { BrowserRouter as Router } from 'react-router-dom';
 
 // MBEE modules
 import Navbar from '../general/nav-bar.jsx';
+import PasswordRedirect from './PasswordRedirect.jsx';
 import AuthenticatedApp from './AuthenticatedApp.jsx';
 import UnauthenticatedApp from './UnauthenticatedApp.jsx';
 import Banner from '../general/Banner.jsx';
+import { useAuth } from '../context/AuthProvider.js';
+import { useApiClient } from '../context/ApiClientProvider.js';
+
 
 export default function App(props) {
-  const [authenticated, setAuthenticated] = useState(Boolean(window.sessionStorage.getItem('mbee-user')));
+  const { auth, setAuth } = useAuth();
+  const { userService } = useApiClient();
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState({});
 
   useEffect(() => {
-    // eslint-disable-next-line no-undef
-    mbeeWhoAmI((err, data) => {
-      if (err) {
-        setAuthenticated(false);
-      }
-      else if (data) {
-        setAuthenticated(true);
-      }
-      else {
-        setAuthenticated(false);
-      }
-    });
-  }, []);
+    if (auth) {
+      userService.whoami()
+      .then(([err, me]) => {
+        if (err || !me) {
+          setAuth(false);
+        }
+        if (me) {
+          setUser(me);
+        }
+        setLoading(false);
+      });
+    }
+    else {
+      setUser({});
+      setLoading(false);
+    }
+  }, [auth]);
+
+
+  let app;
+  if (loading) {
+    app = 'Loading...';
+  }
+  else {
+    let content;
+    if (auth && user.changePassword) {
+      content = <PasswordRedirect/>;
+    }
+    else if (auth) {
+      content = <AuthenticatedApp/>;
+    }
+    else {
+      content = <UnauthenticatedApp/>;
+    }
+
+    app = (
+      <>
+        <Navbar/>
+        {content}
+      </>
+    );
+  }
 
   return (
     <Router>
       <Banner>
-        <Navbar authenticated={authenticated} setAuthenticated={setAuthenticated}/>
-        { (authenticated)
-          ? <AuthenticatedApp/>
-          : <UnauthenticatedApp setAuthenticated={setAuthenticated}/>
-        }
+        { app }
       </Banner>
     </Router>
   );

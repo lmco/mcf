@@ -1,7 +1,7 @@
 /**
  * @classification UNCLASSIFIED
  *
- * @module ui.components.app.UnauthenticatedApp
+ * @module ui.components.app.PasswordRedirect
  *
  * @copyright Copyright (C) 2018, Lockheed Martin Corporation
  *
@@ -11,8 +11,7 @@
  *
  * @author Connor Doyle
  *
- * @description This renders the unauthenticated version of the app. Essentially all it does is
- * redirect to the login page if the user is not already there.
+ * @description
  */
 
 /* Modified ESLint rules for React. */
@@ -24,14 +23,14 @@ import React from 'react';
 import { Route, Redirect } from 'react-router-dom';
 
 // MBEE modules
-import LoginPage from './LoginPage.jsx';
+import ProfileHome from '../profile-views/profile-home.jsx';
 
 
-export default function UnauthenticatedApp(props) {
+export default function PasswordRedirect(props) {
   return (
     <React.Fragment>
-      <Route path={'/login'} component={LoginPage}/>
-      <Route path={'/'} component={() => <Redirect to={'/login'}/>}/>
+      <Route path={'/profile'} component={ProfileHome}/>
+      <Route path={'/'} component={() => <Redirect to={'/profile'}/>}/>
     </React.Fragment>
   );
 }
