@@ -22,108 +22,92 @@
 /* eslint-disable no-unused-vars */
 
 // React modules
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // MBEE modules
 import ElementSubtree from './element-subtree.jsx';
 /* eslint-enable no-unused-vars */
 
-// Define component
-class ElementTree extends Component {
+/**
+ * @description The Element Tree component.
+ *
+ * @param {object} props - React props.
+ * @returns {Function} - Returns JSX.
+ */
+export default function ElementTree(props) {
+  const [treeRoot, setTreeRoot] = useState(null);
+  // eslint-disable-next-line no-unused-vars
+  const [error, setError] = useState(null);
 
-  constructor(props) {
-    // Initialize parent props
-    super(props);
-
-    // Initialize state props
-    this.state = {
-      url: '',
-      id: null,
-      treeRoot: null,
-      branch: props.branch,
-      error: null
-    };
-
-    // Bind functions
-    this.getElement = this.getElement.bind(this);
-  }
+  const orgId = props.project.org;
+  const projId = props.project.id;
+  const branchId = props.branch;
+  const urlBase = `/api/orgs/${orgId}/projects/${projId}/branches/${branchId}`;
 
   /**
    * @description This is also considered the refresh function for root
    * element. When an element is deleted or created the
    * elements will be updated.
    */
-  getElement() {
-    const orgId = this.props.project.org;
-    const projId = this.props.project.id;
-    const branchId = this.state.branch;
-    const base = `/api/orgs/${orgId}/projects/${projId}/branches/${branchId}`;
-    const url = `${base}/elements/model?fields=id,name,contains,type,archived&minified=true&includeArchived=true`;
-
-    this.setState({ url: base });
+  const getElement = () => {
+    const url = `${urlBase}/elements/model?fields=id,name,contains,type,archived&minified=true&includeArchived=true`;
 
     $.ajax({
       method: 'GET',
       url: url,
       statusCode: {
-        200: (elements) => { this.setState({ treeRoot: elements[0] }); },
+        200: (data) => setTreeRoot(data),
         401: () => {
-          this.setState({ treeRoot: null });
+          setTreeRoot(null);
 
           // Refresh when session expires
           window.location.reload();
         },
         403: (err) => {
-          this.setState({ error: err.responseText });
+          setError(err.responseText);
         },
         404: (err) => {
-          this.setState({ error: err.responseText });
+          setError(err.responseText);
         }
       }
     });
+  };
+
+  // Run once, on component mount
+  useEffect(() => {
+    getElement();
+  }, []);
+
+  // Run if the project was changed
+  useEffect(() => {
+    getElement();
+  }, [props.project]);
+
+
+  let tree = null;
+
+  if (treeRoot !== null) {
+    tree = <ElementSubtree id='model'
+                           url={urlBase}
+                           data={treeRoot}
+                           project={props.project}
+                           parent={null}
+                           archived={props.archived}
+                           setRefreshFunctions={props.setRefreshFunctions}
+                           displayIds={props.displayIds}
+                           expand={props.expand}
+                           collapse={props.collapse}
+                           linkElements={props.linkElements}
+                           parentRefresh={getElement}
+                           unsetCheckbox={props.unsetCheckbox}
+                           handleCheck={props.handleCheck}
+                           clickHandler={props.clickHandler}/>;
   }
 
-  componentDidMount() {
-    // Get element information
-    this.getElement();
-  }
-
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    if (prevProps.project !== this.props.project) {
-      this.getElement();
-    }
-  }
-
-  render() {
-    let tree = null;
-
-    if (this.state.treeRoot !== null) {
-      tree = <ElementSubtree id='model'
-                             url={this.state.url}
-                             data={this.state.treeRoot}
-                             project={this.props.project}
-                             parent={null}
-                             archived={this.props.archived}
-                             setRefreshFunctions={this.props.setRefreshFunctions}
-                             displayIds={this.props.displayIds}
-                             expand={this.props.expand}
-                             collapse={this.props.collapse}
-                             linkElements={this.props.linkElements}
-                             parentRefresh={this.getElement}
-                             unsetCheckbox={this.props.unsetCheckbox}
-                             handleCheck={this.props.handleCheck}
-                             clickHandler={this.props.clickHandler}/>;
-    }
-
-    // Return element list
-    return (
-        <div id='element-tree-container'>
-          {tree}
-        </div>
-    );
-  }
-
+  // Return element list
+  return (
+    <div id='element-tree-container'>
+      {tree}
+    </div>
+  );
 }
-
-// Export component
-export default ElementTree;

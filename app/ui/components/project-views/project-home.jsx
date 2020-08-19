@@ -34,6 +34,7 @@ import ProjectArtifacts from '../project-views/artifacts/project-artifacts.jsx';
 import Search from '../project-views/search/search.jsx';
 import BranchesTags from '../project-views/branches/branches-tags.jsx';
 import { useApiClient } from '../context/ApiClientProvider';
+import { ElementProvider } from './elements/ElementContext.js';
 
 /* eslint-enable no-unused-vars */
 
@@ -214,9 +215,11 @@ function ProjectHome(props) {
             <Switch>
               { /* Route to element page */ }
               <Route path={`${props.match.url}/branches/:branchid/elements`}
-                     render={ (renderProps) => <ProjectElements {...renderProps}
-                                                          permissions={permissions}
-                                                          project={project}/> } />
+                     render={ (renderProps) => <ElementProvider {...renderProps}>
+                                                 <ProjectElements {...renderProps}
+                                                                  permissions={permissions}
+                                                                  project={project}/>
+                                               </ElementProvider> } />
               { /* Route to artifacts page */ }
               <Route exact path={`${props.match.url}/branches/:branchid/artifacts`}
                      render={ (renderProps) => <ProjectArtifacts {...renderProps}
