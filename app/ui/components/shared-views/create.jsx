@@ -123,7 +123,7 @@ function Create(props) {
   if (props.project) {
     title = (props.org) ? `New Project in ${props.org.name}` : 'New Project';
     header = 'Project';
-    validatorId = validators.project.id.split(validators.ID_DELIMITER).pop();
+    validatorId = `^${validators.project.id.split(validators.ID_DELIMITER).pop()}`;
     // Calculate project ID sans delimiter
     validLen = validators.project.idLength - validators.org.idLength - 1;
   }
