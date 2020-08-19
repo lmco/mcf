@@ -20,13 +20,13 @@ Build MCF:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
   before_script:
-    - export HTTP_PROXY=http://proxy3.lmco.com:80
-    - export HTTPS_PROXY=http://proxy3.lmco.com:80
-    - export NO_PROXY=127.0.0.1,localhost
+    - export HTTP_PROXY=$HTTP_PROXY
+    - export HTTPS_PROXY=$HTTPS_PROXY
+    - export NO_PROXY=$NO_PROXY
     - yarn config set strict-ssl false
-    - yarn config set proxy http://proxy3.lmco.com:80
-    - yarn config set https-proxy http://proxy3.lmco.com:80
-    - yarn config set no_proxy 127.0.0.1,localhost
+    - yarn config set proxy $HTTP_PROXY
+    - yarn config set https-proxy $HTTPS_PROXY
+    - yarn config set no_proxy $NO_PROXY
   script:
     - NOPREINSTALL=1 yarn install
     - node mbee lint
@@ -47,13 +47,13 @@ Test MCF:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
   before_script:
-    - export HTTP_PROXY=http://proxy3.lmco.com:80
-    - export HTTPS_PROXY=http://proxy3.lmco.com:80
-    - export NO_PROXY=127.0.0.1,localhost
+    - export HTTP_PROXY=$HTTP_PROXY
+    - export HTTPS_PROXY=$HTTPS_PROXY
+    - export NO_PROXY=$NO_PROXY
     - yarn config set strict-ssl false
-    - yarn config set proxy http://proxy3.lmco.com:80
-    - yarn config set https-proxy http://proxy3.lmco.com:80
-    - yarn config set no_proxy 127.0.0.1,localhost
+    - yarn config set proxy $HTTP_PROXY
+    - yarn config set https-proxy $HTTPS_PROXY
+    - yarn config set no_proxy $NO_PROXY
     - NOPREINSTALL=1 yarn install
     - node mbee migrate -y
   script:
@@ -70,14 +70,14 @@ Test Plugins:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
   before_script:
-    - export HTTP_PROXY=http://proxy3.lmco.com:80
-    - export HTTPS_PROXY=http://proxy3.lmco.com:80
-    - export NO_PROXY=127.0.0.1,localhost
-    - export MBEE_ENV=pipeline
+    - export MBEE_ENV=$MBEE_ENV
+    - export HTTP_PROXY=$HTTP_PROXY
+    - export HTTPS_PROXY=$HTTPS_PROXY
+    - export NO_PROXY=$NO_PROXY
     - yarn config set strict-ssl false
-    - yarn config set proxy http://proxy3.lmco.com:80
-    - yarn config set https-proxy http://proxy3.lmco.com:80
-    - yarn config set no_proxy 127.0.0.1,localhost
+    - yarn config set proxy $HTTP_PROXY
+    - yarn config set https-proxy $HTTPS_PROXY
+    - yarn config set no_proxy $NO_PROXY
     - NOPREINSTALL=1 yarn install
     - node mbee migrate -y
   script:
