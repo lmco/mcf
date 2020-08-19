@@ -152,7 +152,8 @@ function OrgHome(props) {
             <Route exact path={`${props.match.url}`}
                    render={ (renderProps) => <InformationPage {...renderProps}
                                                               permissions={permissions}
-                                                              org={org} /> } />
+                                                              org={org}
+                                                              refresh={refresh}/> } />
             { /* Route to projects page */ }
             <Route path={`${props.match.url}/projects`}
                    render={ (renderProps) => <OrgProjects {...renderProps}
