@@ -32,19 +32,18 @@ class BranchListItem extends Component {
 
     // Initialize state props
     this.state = {
-      branch: props.branch,
       error: null
     };
   }
 
   render() {
     // Initialize variables
-    const branch = this.state.branch;
+    const branch = this.props.branch;
     let classNames = 'list-header';
     let archivedClass;
     let date;
 
-    if (this.state.branch.archived) {
+    if (this.props.branch.archived) {
       archivedClass = 'grayed-out';
     }
 

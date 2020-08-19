@@ -64,7 +64,9 @@ class ProjList extends Component {
         {/* Modal for deleting a project */}
         <Modal isOpen={this.state.modalProjDelete} toggle={this.handleDeleteProjToggle}>
           <ModalBody>
-            <Delete project={project} toggle={this.handleDeleteProjToggle}/>
+            <Delete project={project}
+                    toggle={this.handleDeleteProjToggle}
+                    refresh={this.props.refresh}/>
           </ModalBody>
         </Modal>
         <div className='proj-list'>

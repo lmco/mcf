@@ -17,6 +17,7 @@
 
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
+/* eslint-disable jsdoc/require-jsdoc */
 
 // React modules
 import React, { useState, useEffect } from 'react';
@@ -32,10 +33,13 @@ import {
 
 // MBEE modules
 import CustomEdit from '../general/custom-data/custom-edit.jsx';
+import { useApiClient } from '../context/ApiClientProvider';
 
 /* eslint-enable no-unused-vars */
 
 function EditPage(props) {
+  const { orgService, projectService, branchService } = useApiClient();
+
   // Initialize state props
   let _name;
   let _custom;
@@ -47,22 +51,22 @@ function EditPage(props) {
     _archived = props.org.archived;
     _custom = props.org.custom;
   }
-  else if (props.branch) {
-    _name = props.branch.name;
-    _archived = props.branch.archived;
-    _custom = props.branch.custom;
-  }
-  else {
+  else if (props.project) {
     _name = props.project.name;
     _archived = props.project.archived;
     _custom = props.project.custom;
     _visibility = props.project.visibility;
   }
+  else if (props.branch) {
+    _name = props.branch.name;
+    _archived = props.branch.archived;
+    _custom = props.branch.custom;
+  }
 
   const [name, setName] = useState(_name);
   const [visibility, setVisibility] = useState(_visibility);
   const [archived, setArchived] = useState(_archived);
-  const [custom,  setCustom] = useState(JSON.stringify(_custom || {}, null, 2));
+  const [custom, setCustom] = useState(JSON.stringify(_custom || {}, null, 2));
   const [message, setMessage] = useState('');
   const [error, setError] = useState(null);
 
@@ -108,52 +112,47 @@ function EditPage(props) {
     }
   };
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     if (error) {
       setError(null);
     }
 
     // Initialize variables
-    let url;
-    const data = { name: name, custom: JSON.parse(custom) };
+    let patch;
+    const data = {
+      name: name,
+      archived: archived,
+      custom: JSON.parse(custom)
+    };
 
     if (props.org) {
-      url = `/api/orgs/${props.org.id}`;
+      patch = (d, o) => orgService.patch(d, o);
+      data.id = props.org.id;
+    }
+    else if (props.project) {
+      patch = (d, o) => projectService.patch(props.project.org, d, o);
+      data.id = props.project.id;
+      data.visibility = visibility;
     }
     else if (props.branch) {
-      const branch = props.branch;
-      url = `/api/orgs/${branch.org}/projects/${branch.project}/branches/${branch.id}`;
+      patch = (d, o) => branchService.patch(props.branch.org, props.branch.project, d, o);
+      data.id = props.branch.id;
     }
-    else {
-      data.visibility = visibility;
-      url = `/api/orgs/${props.orgid}/projects/${props.project.id}`;
-    }
-
-    data.archived = archived;
 
     // Remove blank key/value pair in custom data
     if (data.custom[''] === '') {
       delete data.custom[''];
     }
 
-    $.ajax({
-      method: 'PATCH',
-      url: `${url}?minified=true`,
-      contentType: 'application/json',
-      data: JSON.stringify(data),
-      statusCode: {
-        200: () => { window.location.reload(); },
-        401: (err) => {
-          this.setState({ error: err.responseText });
+    const [err, response] = await patch(data, {});
 
-          // Refresh when session expires
-          window.location.reload();
-        },
-        403: (err) => {
-          this.setState({ error: err.responseText });
-        }
-      }
-    });
+    if (err) {
+      setError(err);
+    }
+    else if (response) {
+      props.refresh();
+      props.toggle();
+    }
   };
 
 
@@ -233,16 +232,16 @@ function EditPage(props) {
                 <Input type="checkbox"
                        name="archived"
                        id="archived"
-                       checked={this.state.archived}
-                       value={this.state.archived || false}
-                       onChange={this.handleChange} />
+                       checked={archived}
+                       value={archived || false}
+                       onChange={handleChange} />
                 Archive
               </Label>
             </FormGroup>
             {/* Button to submit changes */}
-            <Button color='primary' disabled={disableSubmit} onClick={this.onSubmit}> Submit </Button>
+            <Button color='primary' disabled={disableSubmit} onClick={onSubmit}> Submit </Button>
             {' '}
-            <Button outline onClick={this.props.toggle}> Cancel </Button>
+            <Button outline onClick={props.toggle}> Cancel </Button>
           </Form>
         </div>
       </div>

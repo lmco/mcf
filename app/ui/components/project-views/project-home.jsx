@@ -228,11 +228,12 @@ function ProjectHome(props) {
               <Route path={`${props.match.url}/branches/:branchid`}
                      render={ (renderProps) => <InformationPage {...renderProps}
                                                           url={url}
-                                                          branch={true}/> } />
+                                                          branch={true}
+                                                          refresh={refresh}/> } />
               <Route exact path={`${props.match.url}/branches`}
                      render={ (renderProps) => <BranchesTags {...renderProps}
                                                        permissions={permissions}
-                                                       project={project} /> } />
+                                                       project={project}/> } />
               { /* Route to members page */ }
               <Route exact path={`${props.match.url}/users`}
                      render={ (renderProps) => <MembersPage {...renderProps}
@@ -243,7 +244,8 @@ function ProjectHome(props) {
               <Route exact path={`${props.match.url}/info`}
                      render={ (renderProps) => <InformationPage {...renderProps}
                                                           permissions={permissions}
-                                                          project={project} /> } />
+                                                          project={project}
+                                                          refresh={refresh}/> } />
             </Switch>
           )
       }

@@ -130,7 +130,8 @@ class OrgList extends Component {
                               admin={this.props.admin}
                               key={`proj-key-${project.id}`}
                               orgid={this.props.org.id}
-                              archiveProj={archiveProj}/>)
+                              archiveProj={archiveProj}
+                              refresh={this.props.refresh}/>)
       );
     }
 
@@ -147,7 +148,9 @@ class OrgList extends Component {
         {/* Modal for deleting an org */}
         <Modal isOpen={this.state.modalOrgDelete} toggle={this.handleDeleteOrgToggle}>
           <ModalBody>
-            <Delete org={this.props.org} toggle={this.handleDeleteOrgToggle}/>
+            <Delete org={this.props.org}
+                    toggle={this.handleDeleteOrgToggle}
+                    refresh={this.props.refresh}/>
           </ModalBody>
         </Modal>
         <div className='org-proj-list'>

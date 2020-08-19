@@ -55,11 +55,16 @@ class BranchesTags extends Component {
     this.toggleEditModal = this.toggleEditModal.bind(this);
     this.getBranches = this.getBranches.bind(this);
     this.getTags = this.getTags.bind(this);
+    this.refresh = this.refresh.bind(this);
   }
 
   componentDidMount() {
+    this.refresh();
+  }
+
+  refresh() {
     // Verify search params
-    if (this.props.location.search) {
+    if (this.props && this.props.location.search) {
       // Grab the search parameters and set new page state
       const searchParams = this.props.location.search.replace('?', '').split('&');
 
@@ -366,13 +371,15 @@ class BranchesTags extends Component {
         <Modal isOpen={this.state.modalDelete} toggle={this.toggleDeleteModal}>
           <ModalBody>
             <Delete toggle={this.toggleDeleteModal}
-                    branch={this.state.branchSelected}/>
+                    branch={this.state.branchSelected}
+                    refresh={this.refresh}/>
           </ModalBody>
         </Modal>
         <Modal isOpen={this.state.modalEdit} toggle={this.toggleEditModal}>
           <ModalBody>
             <Edit toggle={this.toggleEditModal}
-                  branch={this.state.branchSelected}/>
+                  branch={this.state.branchSelected}
+                  refresh={this.refresh}/>
           </ModalBody>
         </Modal>
         <div className='workspace-header header-box-depth'>

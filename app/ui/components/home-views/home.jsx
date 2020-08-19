@@ -125,13 +125,7 @@ function Home(props) {
     });
   };
 
-  // on mount
-  useEffect(() => {
-    // Add event listener for window resizing
-    window.addEventListener('resize', handleResize);
-    // Handle initial size of window
-    handleResize();
-
+  const refresh = () => {
     // eslint-disable-next-line no-undef
     mbeeWhoAmI(async (err, data) => {
       if (err) {
@@ -154,6 +148,17 @@ function Home(props) {
         else if (orgData) setMountedComponentStates(data, orgData);
       }
     });
+  };
+
+  // on mount
+  useEffect(() => {
+    // Add event listener for window resizing
+    window.addEventListener('resize', handleResize);
+    // Handle initial size of window
+    handleResize();
+
+    // Perform initial data loading
+    refresh();
 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -179,7 +184,8 @@ function Home(props) {
                              write={write}
                              admin={admin}
                              showProjs={showProj}
-                             onExpandChange={onExpandChange}/>);
+                             onExpandChange={onExpandChange}
+                             refresh={refresh}/>);
         }
         // Verify write permissions and not archived org
         else if (org.permissions[username] === 'write' && !org.archived) {
@@ -188,7 +194,8 @@ function Home(props) {
                              write={write}
                              admin={admin}
                              showProjs={showProj}
-                             onExpandChange={onExpandChange}/>);
+                             onExpandChange={onExpandChange}
+                             refresh={refresh}/>);
         }
         // Verify read permissions and not archived org
         else if (org.permissions[username] === 'read' && !org.archived) {
@@ -196,7 +203,8 @@ function Home(props) {
                              user={user}
                              admin={admin}
                              showProjs={showProj}
-                             onExpandChange={onExpandChange}/>);
+                             onExpandChange={onExpandChange}
+                             refresh={refresh}/>);
         }
       }
       else {
@@ -205,7 +213,8 @@ function Home(props) {
                            write={write}
                            admin={admin}
                            showProjs={showProj}
-                           onExpandChange={onExpandChange}/>);
+                           onExpandChange={onExpandChange}
+                           refresh={refresh}/>);
       }
     });
   }
@@ -228,7 +237,7 @@ function Home(props) {
       { /* Modal for deleting an org */ }
       <Modal isOpen={modalDelete} toggle={handleDeleteToggle}>
         <ModalBody>
-          <Delete orgs={orgs} toggle={handleDeleteToggle}/>
+          <Delete orgs={orgs} toggle={handleDeleteToggle} refresh={refresh}/>
         </ModalBody>
       </Modal>
       { /* Display the list of projects */ }
