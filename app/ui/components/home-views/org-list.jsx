@@ -51,6 +51,7 @@ class OrgList extends Component {
     this.handleShowProjsToggle = this.handleShowProjsToggle.bind(this);
     this.handleDeleteOrgToggle = this.handleDeleteOrgToggle.bind(this);
     this.handleCreateProjToggle = this.handleCreateProjToggle.bind(this);
+    this.refresh = this.refresh.bind(this);
   }
 
   // Define org toggle functionality
@@ -71,7 +72,7 @@ class OrgList extends Component {
     this.setState({ modalProjCreate: !this.state.modalProjCreate });
   }
 
-  componentDidMount() {
+  refresh() {
     const projects = this.props.org.projects;
     const permissionedProjs = [];
 
@@ -81,20 +82,10 @@ class OrgList extends Component {
       projects.forEach(project => {
         const perm = project.permissions[username];
 
-        // Verify if admin
-        if (perm === 'admin') {
-          permissionedProjs.push(project);
-        }
-        // Verify if write perms and not archived
-        else if (perm === 'write' && !project.archived) {
-          permissionedProjs.push(project);
-        }
-        // Verify if read perms and not archived
-        else if (perm === 'read' && !project.archived) {
-          permissionedProjs.push(project);
-        }
-        // Verify if project is internal and not archived
-        else if (project.visibility === 'internal' && !project.archived) {
+        // Verify if user can see project
+        if (perm === 'admin'
+          || (!project.archived
+            && (perm === 'write' || perm === 'read' || project.visibility === 'internal'))) {
           permissionedProjs.push(project);
         }
       });
@@ -102,8 +93,15 @@ class OrgList extends Component {
     else {
       projects.forEach(project => permissionedProjs.push(project));
     }
-
     this.setState({ projects: permissionedProjs });
+  }
+
+  componentDidMount() {
+    this.refresh();
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.props.org.projects !== prevProps.org.projects) this.refresh();
   }
 
   render() {
