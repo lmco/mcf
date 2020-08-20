@@ -11,7 +11,9 @@ spec:
     port: 80
     targetPort: 9080
     protocol: TCP
-    targetPort: 443
+  - name: mcf-https
+    port: 443
+    targetPort: 9443
     protocol: TCP
   selector:
     app: mcf
@@ -44,7 +46,7 @@ spec:
           imagePullPolicy: Always
           image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
           ports:
-            - containerPort: 9080
+            - containerPort: 9443
           volumeMounts:
             - name: mongo-data-volume
               mountPath: /lm/mbee/data/db

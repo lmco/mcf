@@ -118,8 +118,8 @@ Deploy MCF Test:
   tags:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
-  # only:
-  #   - /^release\/.*$/
+  only:
+    - /^release\/.*$/
   dependencies: 
     - Docker Build
   script:
@@ -134,9 +134,9 @@ Deploy MCF Prod:
   tags:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
-  # only:
-  #   - /^prc\/.*$/
-  #   - master
+  only:
+    - /^prc\/.*$/
+    - master
   dependencies: 
     - Docker Build
   script:
