@@ -9,21 +9,10 @@ variables:
   MBEE_ENV: pipeline
 
 stages:
-  - SearchReplace
   - Build
   - Test
   - Docker
   - Deploy
-
-Search and Replace:
-  stage: SearchReplace
-  tags:
-    - shell
-  script:
-    - echo "-------------- NFS SHARE PROTECTED VARIABLE ------------"
-    - echo $NFS_SHARE_URL 
-    - chmod +x ./scripts/pipeline/search-replace.sh
-    - ./scripts/pipeline/search-replace.sh $CI_PROJECT_DIR $NFS_SHARE_URL $DOCKER_PASSWORD
 
 Build MCF:
   stage: Build
@@ -98,8 +87,8 @@ Docker Build:
   stage: Docker
   tags:
     - shell
-  only:
-    - develop
+  # only:
+  #   - develop
   dependencies: 
     - Test MCF
   script:
@@ -113,12 +102,14 @@ Deploy MCF Dev:
   tags:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
-  only:
-    - develop
+  # only:
+  #   - develop
   dependencies: 
     - Docker Build
   script:
     - export VERSION=`cat version.txt`
+    - chmod +x ./scripts/pipeline/search-replace.sh
+    - ./scripts/pipeline/search-replace.sh $CI_PROJECT_DIR $NFS_SHARE_URL $DOCKER_PASSWORD
     - chmod +x ./scripts/deployment/deploy-dev.sh
     - ./scripts/deployment/deploy-dev.sh $CI_PROJECT_DIR $VERSION
 
@@ -127,12 +118,14 @@ Deploy MCF Test:
   tags:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
-  only:
-    - /^release\/.*$/
+  # only:
+  #   - /^release\/.*$/
   dependencies: 
     - Docker Build
   script:
     - export VERSION=`cat version.txt`
+    - chmod +x ./scripts/pipeline/search-replace.sh
+    - ./scripts/pipeline/search-replace.sh $CI_PROJECT_DIR $NFS_SHARE_URL $DOCKER_PASSWORD
     - chmod +x ./scripts/deployment/deploy-test.sh
     - ./scripts/deployment/deploy-test.sh $CI_PROJECT_DIR $VERSION
   
@@ -141,12 +134,14 @@ Deploy MCF Prod:
   tags:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
-  only:
-    - /^prc\/.*$/
-    - master
+  # only:
+  #   - /^prc\/.*$/
+  #   - master
   dependencies: 
     - Docker Build
   script:
     - export VERSION=`cat version.txt`
+    - chmod +x ./scripts/pipeline/search-replace.sh
+    - ./scripts/pipeline/search-replace.sh $CI_PROJECT_DIR $NFS_SHARE_URL $DOCKER_PASSWORD
     - chmod +x ./scripts/deployment/deploy-prod.sh
     - ./scripts/deployment/deploy-prod.sh $CI_PROJECT_DIR $VERSION
