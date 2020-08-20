@@ -21,7 +21,7 @@ Search and Replace:
     - shell
   script:
     - chmod +x ./scripts/pipeline/search-replace.sh
-    - ./scripts/pipeline/search-replace.sh $NFS_SHARE_URL $DOCKER_PASSWORD
+    - ./scripts/pipeline/search-replace.sh $CI_PROJECT_DIR $NFS_SHARE_URL $DOCKER_PASSWORD
 
 Build MCF:
   stage: Build
