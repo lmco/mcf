@@ -20,13 +20,23 @@
 
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
+/* eslint-disable jsdoc/require-jsdoc */
 
 // React modules
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 // MBEE modules
 import ElementSubtree from './element-subtree.jsx';
 /* eslint-enable no-unused-vars */
+
+
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
 
 /**
  * @description The Element Tree component.
@@ -39,10 +49,10 @@ export default function ElementTree(props) {
   // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState(null);
 
-  const orgId = props.project.org;
-  const projId = props.project.id;
-  const branchId = props.branch;
-  const urlBase = `/api/orgs/${orgId}/projects/${projId}/branches/${branchId}`;
+  const urlBase = `/api/orgs/${props.project.org}/projects/${props.project.id}/branches/${props.branchID}`;
+
+  const prevProject = usePrevious(props.project);
+  const prevBranchID = usePrevious(props.branchID);
 
   /**
    * @description This is also considered the refresh function for root
@@ -56,7 +66,7 @@ export default function ElementTree(props) {
       method: 'GET',
       url: url,
       statusCode: {
-        200: (data) => setTreeRoot(data),
+        200: (data) => setTreeRoot(data[0]),
         401: () => {
           setTreeRoot(null);
 
@@ -73,15 +83,12 @@ export default function ElementTree(props) {
     });
   };
 
-  // Run once, on component mount
+  // Run on mount and if the project is changed
   useEffect(() => {
-    getElement();
-  }, []);
-
-  // Run if the project was changed
-  useEffect(() => {
-    getElement();
-  }, [props.project]);
+    if (props.project !== prevProject || props.branchID !== prevBranchID) {
+      getElement();
+    }
+  }, [props.project, props.branchID]);
 
 
   let tree = null;

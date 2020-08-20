@@ -31,7 +31,7 @@ import {
 } from 'reactstrap';
 import Delete from '../../shared-views/delete.jsx';
 import CustomData from '../../general/custom-data/custom-data.jsx';
-import { useElementContext } from './ElementContext.js';
+import { useElementContext } from '../../context/ElementProvider.js';
 
 /* eslint-enable no-unused-vars */
 
@@ -137,7 +137,7 @@ export default function Element(props) {
       url: url,
       statusCode: {
         200: (elem) => {
-          handleCrossRefs(elem)
+          handleCrossRefs(elem[0])
           .then(elementChanged => {
             setElement(elementChanged);
           })

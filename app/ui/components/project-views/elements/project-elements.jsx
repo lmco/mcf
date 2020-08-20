@@ -29,7 +29,7 @@ import ElementNew from './element-new.jsx';
 import SidePanel from '../../general/side-panel.jsx';
 import BranchBar from '../branches/branch-bar.jsx';
 import ElementEditForm from './element-edit-form.jsx';
-import { useElementContext } from './ElementContext.js';
+import { useElementContext } from '../../context/ElementProvider.js';
 
 /* eslint-enable no-unused-vars */
 
@@ -42,7 +42,6 @@ import { useElementContext } from './ElementContext.js';
 export default function ProjectElements(props) {
   const [state, setState] = useState({
     refreshFunction: {},
-    branch: props.match.params.branchid,
     archived: false,
     displayIds: true,
     expand: false,
@@ -56,8 +55,11 @@ export default function ProjectElements(props) {
 
   const setRefreshFunctions = (id, refreshFunction) => {
     setState((currentState) => {
-      currentState.refreshFunction[id] = refreshFunction;
-      return currentState;
+      const newState = {
+        ...currentState
+      };
+      newState.refreshFunction[id] = refreshFunction;
+      return newState;
     });
   };
 
@@ -147,10 +149,10 @@ export default function ProjectElements(props) {
 
   let isButtonDisplayed = false;
   let btnDisClassName = 'workspace-title workspace-title-padding';
-  const orgId = props.project.org;
-  const projId = props.project.id;
-  const branchId = state.branch;
-  const url = `/api/orgs/${orgId}/projects/${projId}/branches/${branchId}`;
+  const orgID = props.project.org;
+  const projID = props.project.id;
+  const branchID = props.match.params.branchid;
+  const url = `/api/orgs/${orgID}/projects/${projID}/branches/${branchID}`;
 
   // Check admin/write permissions
   if (props.permissions === 'admin' || props.permissions === 'write') {
@@ -159,7 +161,7 @@ export default function ProjectElements(props) {
   }
 
   let sidePanelView = <Element project={props.project}
-                               branch={state.branch}
+                               branch={branchID}
                                url={url}
                                permissions={props.permissions}
                                editElementInfo={editElementInfo}
@@ -171,7 +173,7 @@ export default function ProjectElements(props) {
     sidePanelView = <ElementEditForm id={elementID}
                                  url={url}
                                  project={props.project}
-                                 branch={state.branch}
+                                 branch={branchID}
                                  closeSidePanel={closeSidePanel}
                                  selected={state.selected}/>;
   }
@@ -179,7 +181,7 @@ export default function ProjectElements(props) {
   else if (sidePanel === 'addElement') {
     sidePanelView = (<ElementNew id={'new-element'}
                                  parent={elementID}
-                                 branch={state.branch}
+                                 branch={branchID}
                                  project={props.project}
                                  closeSidePanel={closeSidePanel}
                                  url={url}/>);
@@ -197,7 +199,7 @@ export default function ProjectElements(props) {
                            archived={props.project.archived}
                            url={url}
                            project={props.project}
-                           branch={state.branch}
+                           branch={branchID}
                            closeSidePanel={closeSidePanel}>
           </ElementEditForm>
         </ModalBody>
@@ -218,7 +220,7 @@ export default function ProjectElements(props) {
       <div id='workspace-body'>
         <div className='main-workspace'>
           <BranchBar project={props.project}
-                     branchid={state.branch}
+                     branchid={branchID}
                      archived={state.archived}
                      endpoint='/elements'
                      permissions={props.permissions}
@@ -227,7 +229,7 @@ export default function ProjectElements(props) {
                      collapse={state.collapse}
                      handleCheck={handleCheck}/>
           <ElementTree project={props.project}
-                       branch={state.branch}
+                       branchID={branchID}
                        linkElements={true}
                        archived={state.archived}
                        displayIds={state.displayIds}

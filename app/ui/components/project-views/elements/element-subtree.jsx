@@ -54,7 +54,7 @@ export default function ElementSubtree(props) {
   // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState(null);
 
-  const prevData = usePrevious(props.data);
+  const prevData = usePrevious(data);
   const prevExpand = usePrevious(props.expand);
   const prevCollapse = usePrevious(props.collapse);
 
@@ -121,7 +121,7 @@ export default function ElementSubtree(props) {
     const contains = data.contains;
     const parent = data.id;
     // Verify element does not have children
-    if (contains === null || contains.length === 0) {
+    if (!contains || contains.length === 0) {
       // Skip ajax call for children
       return;
     }
