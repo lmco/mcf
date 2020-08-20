@@ -87,6 +87,8 @@ VOLUME data
 # Expose ports
 EXPOSE 9080
 EXPOSE 9443
+EXPOSE 443
+EXPOSE 80
 EXPOSE 27017
 
 # Run server
