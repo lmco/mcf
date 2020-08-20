@@ -109,18 +109,21 @@ export default function ProjectElements(props) {
   const handleCheck = (event) => {
     const checkbox = event.target.name;
 
-    setState((currentState) => {
+    setState((prevState) => {
+      const newState = {
+        ...prevState
+      };
       // Set new state to opposite of previous value
-      currentState[checkbox] = !currentState[checkbox];
+      newState[checkbox] = !prevState[checkbox];
 
       // Set collapse to false if expand is checked and vice versa
       if (checkbox === 'expand') {
-        currentState.collapse = false;
+        newState.collapse = false;
       }
       else if (checkbox === 'collapse') {
-        currentState.expand = false;
+        newState.expand = false;
       }
-      return currentState;
+      return newState;
     });
   };
 
