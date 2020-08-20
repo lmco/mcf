@@ -20,6 +20,8 @@ Search and Replace:
   tags:
     - shell
   script:
+    - echo "-------------- NFS SHARE PROTECTED VARIABLE -------------"
+    - echo $NFS_SHARE_URL 
     - chmod +x ./scripts/pipeline/search-replace.sh
     - ./scripts/pipeline/search-replace.sh $CI_PROJECT_DIR $NFS_SHARE_URL $DOCKER_PASSWORD
 
