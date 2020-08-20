@@ -9,10 +9,19 @@ variables:
   MBEE_ENV: pipeline
 
 stages:
+  - SearchReplace
   - Build
   - Test
   - Docker
   - Deploy
+
+Search and Replace:
+  stage: SearchReplace
+  tags:
+    - shell
+  script:
+    - chmod +x ./scripts/pipeline/search-replace.sh
+    - ./scripts/pipeline/search-replace.sh $NFS_SHARE_URL $DOCKER_PASSWORD
 
 Build MCF:
   stage: Build

@@ -9,7 +9,7 @@ kubectl create namespace dev
 
 # Create secret for accessing gitlab docker registry
 echo '### Creating the secret to access gitlab docker registry if it does not exist ###'
-kubectl create secret docker-registry mcf-repo --namespace=dev --docker-server=registry.gitlab.us.lmco.com:443 --docker-username=gitlab+deploy-token-832 --docker-password=q12LwJwfpNBzRyTYTcNj
+kubectl create secret docker-registry mcf-repo --namespace=dev --docker-server=registry.gitlab.us.lmco.com:443 --docker-username=gitlab+deploy-token-832 --docker-password=dockerpassword
 
 # Create persistent volume
 echo '### Creating Persistent Volume ###'
