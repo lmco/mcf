@@ -48,6 +48,43 @@ class ArtifactService extends ApiClient {
     return super.delete(data, options, url);
   }
 
+  async postBlob(orgID, projID, data) {
+    const url = `${this.url}/${orgID}/projects/${projID}/artifacts/blob`;
+
+    // const options = {
+    //   data: data,
+    //   enctype: 'multipart/form-data',
+    //   processData: false,
+    //   contentType: false
+    // };
+
+    const options = {
+      body: data,
+      method: 'POST',
+      contentType: 'multipart/form-data'
+    };
+
+    const response = await fetch(url, options);
+
+    // Check for errors in response status code
+    const error = await super.checkError(response);
+
+    if (error) {
+      return [error, null];
+    }
+    else {
+      let result;
+      const text = await response.text();
+      try {
+        result = JSON.parse(text);
+      }
+      catch (e) {
+        result = text;
+      }
+      return [null, result];
+    }
+  }
+
 }
 
 export default ArtifactService;
