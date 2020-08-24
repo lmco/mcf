@@ -129,12 +129,12 @@ function start(args) {
   }
 
   // Run HTTP Server
-  if (M.config.server.http.enabled) {
-    httpServer.listen(M.config.server.http.port, () => {
-      const port = M.config.server.http.port;
-      M.log.info(`MBEE server listening on port ${port}!`);
-    });
-  }
+  // if (M.config.server.http.enabled) {
+  //   httpServer.listen(M.config.server.http.port, () => {
+  //     const port = M.config.server.http.port;
+  //     M.log.info(`MBEE server listening on port ${port}!`);
+  //   });
+  // }
 
   // Run HTTP/2 Server
   if (M.config.server.https.enabled) {
