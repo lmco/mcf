@@ -51,13 +51,6 @@ class ArtifactService extends ApiClient {
   async postBlob(orgID, projID, data) {
     const url = `${this.url}/${orgID}/projects/${projID}/artifacts/blob`;
 
-    // const options = {
-    //   data: data,
-    //   enctype: 'multipart/form-data',
-    //   processData: false,
-    //   contentType: false
-    // };
-
     const options = {
       body: data,
       method: 'POST',
