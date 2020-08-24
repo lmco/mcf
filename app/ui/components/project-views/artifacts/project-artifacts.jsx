@@ -21,7 +21,7 @@
 
 // React modules
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, ModalBody, UncontrolledAlert, UncontrolledTooltip } from 'reactstrap';
+import { Button, Modal, ModalBody, Tooltip, UncontrolledAlert, UncontrolledTooltip } from 'reactstrap';
 
 // MBEE modules
 import BoxList from '../../general/box-list.jsx';
@@ -39,6 +39,7 @@ function ProjectArtifacts(props) {
   const [error, setError] = useState(null);
   const [selectedArtifactID, setSelectedArtifactID] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [deleteTooltipOpen, setDeleteTooltipOpen] = useState(false);
 
   const toggleModal = (artifactID) => {
     const id = (typeof artifactID !== 'string') ? null : artifactID;
@@ -170,15 +171,16 @@ function ProjectArtifacts(props) {
             {/* Display button if user has write or admin permissions */}
             {(btnEdit)
               ? <>
-                <UncontrolledTooltip placement='top' target={`delete-${artifact.id}`}>
+                <UncontrolledTooltip placement='top' target={`delete-${idx}`}>
                   Delete
                 </UncontrolledTooltip>
-                <i id={`delete-${artifact.id}`}
+                <i id={`delete-${idx}`}
                    className='fas fa-trash-alt delete-btn'
                    onClick={() => {
                      // eslint-disable-next-line no-alert
                      if (window.confirm('Are you sure you wish to delete this item?')) deleteArtifact(artifact.id);
-                   }}/></>
+                   }}/>
+              </>
               : ''
             }
           </div>
