@@ -34,6 +34,7 @@ import ProjectArtifacts from '../project-views/artifacts/project-artifacts.jsx';
 import Search from '../project-views/search/search.jsx';
 import BranchesTags from '../project-views/branches/branches-tags.jsx';
 import { useApiClient } from '../context/ApiClientProvider';
+import { ElementProvider } from '../context/ElementProvider.js';
 
 /* eslint-enable no-unused-vars */
 
@@ -130,15 +131,11 @@ function ProjectHome(props) {
   let title;
   let displayPlugins = false;
   const plugins = [];
-  let url;
 
   // Verify if project exists
   if (project) {
     // Set the title for sidebar
     title = <h2> {project.name}</h2>;
-    const orgId = project.org;
-    const projId = project.id;
-    url = `/api/orgs/${orgId}/projects/${projId}`;
 
     // Verify if plugins in project
     if (project.custom.integrations) {
@@ -214,9 +211,11 @@ function ProjectHome(props) {
             <Switch>
               { /* Route to element page */ }
               <Route path={`${props.match.url}/branches/:branchid/elements`}
-                     render={ (renderProps) => <ProjectElements {...renderProps}
-                                                          permissions={permissions}
-                                                          project={project}/> } />
+                     render={ (renderProps) => <ElementProvider {...renderProps}>
+                                                 <ProjectElements {...renderProps}
+                                                                  permissions={permissions}
+                                                                  project={project}/>
+                                               </ElementProvider> } />
               { /* Route to artifacts page */ }
               <Route exact path={`${props.match.url}/branches/:branchid/artifacts`}
                      render={ (renderProps) => <ProjectArtifacts {...renderProps}
@@ -227,7 +226,8 @@ function ProjectHome(props) {
                                                  project={project} /> } />
               <Route path={`${props.match.url}/branches/:branchid`}
                      render={ (renderProps) => <InformationPage {...renderProps}
-                                                          url={url}
+                                                          orgID={project.org}
+                                                          projectID={project.id}
                                                           branch={true}
                                                           refresh={refresh}/> } />
               <Route exact path={`${props.match.url}/branches`}
