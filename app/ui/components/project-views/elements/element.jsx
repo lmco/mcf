@@ -32,6 +32,7 @@ import {
 import Delete from '../../shared-views/delete.jsx';
 import CustomData from '../../general/custom-data/custom-data.jsx';
 import { useElementContext } from '../../context/ElementProvider.js';
+import { useApiClient } from '../../context/ApiClientProvider';
 
 /* eslint-enable no-unused-vars */
 
@@ -42,15 +43,20 @@ import { useElementContext } from '../../context/ElementProvider.js';
  * @returns {Function} - Returns JSX.
  */
 export default function Element(props) {
+  const { elementService } = useApiClient();
   const [element, setElement] = useState(null);
   const [modalDelete, setModalDelete] = useState(null);
   const [error, setError] = useState(null);
 
-  const { elementID } = useElementContext();
+  const { elementID, providedElement } = useElementContext();
+
+  const orgID = props.orgID;
+  const projID = props.projectID;
+  const branchID = props.branchID;
 
   // eslint-disable-next-line arrow-body-style
   const handleCrossRefs = (_element) => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       // Match/find all cross references
       const allCrossRefs = _element.documentation.match(/\[cf:[a-zA-Z0-9\-_]*\]/g);
 
@@ -70,93 +76,87 @@ export default function Element(props) {
       const uniqCrossRefsValues = Object.values(uniqCrossRefs);
       const ids = uniqCrossRefsValues.map(xr => xr.id);
 
-      // Make AJAX call to get names of cross-references elements ....
-      const opts = [
-        `ids=${ids}`,
-        'format=jmi2',
-        'fields=id,name,org,project,branch',
-        'minified=true'
-      ].join('&');
-      $.ajax({
-        method: 'GET',
-        url: `${this.props.url}/elements?${opts}`,
-        statusCode: {
-          200: (elements) => {
-            // Keep track of documentation fields
-            // and cross reference text
-            let doc = _element.documentation;
-            const refs = Object.keys(uniqCrossRefs);
+      // Make call to get names of cross-references elements ....
+      const options = {
+        ids: ids,
+        format: 'jmi2',
+        fields: 'id,name,org,project,branch'
+      };
 
-            // Loop over cross refs list and replace each occurrence of that
-            // cross-ref in the documentation fields
-            for (let i = 0; i < refs.length; i++) {
-              // Get the ref, replacing special characters for use in regex
-              const ref = refs[i]
-              .replace('[', '\\[')
-              .replace(']', '\\]')
-              .replace('-', '\\-');
-              // Create the regex for replacement
-              const re = new RegExp(ref, 'g'); // eslint-disable-line security/detect-non-literal-regexp
+      const [err, elements] = await elementService.get(orgID, projID, branchID, options);
 
-              // Capture the element ID and link
-              const id = uniqCrossRefs[refs[i]].id;
-              if (!elements.hasOwnProperty(id)) {
-                doc = doc.replace(re, `<Link class='cross-ref-broken' to='#'>${refs[i]}</Link>`);
-                continue;
-              }
-              const oid = elements[id].org;
-              const pid = elements[id].project;
-              const bid = elements[id].branch;
-              const link = `/orgs/${oid}/projects/${pid}/branches/${bid}/elements#${id}`;
-              doc = doc.replace(re, `<Link class='cross-ref' to='${link}' target='_blank'>${elements[id].name}</Link>`);
-            }
+      if (err === 'No elements found.') {
+        resolve(_element);
+      }
+      else if (err) {
+        reject(err);
+      }
+      else if (elements) {
+        // Keep track of documentation fields
+        // and cross reference text
+        let doc = _element.documentation;
+        const refs = Object.keys(uniqCrossRefs);
 
-            // Resolve the element
-            const elem = _element;
-            elem.documentation = doc;
-            return resolve(elem);
-          },
-          401: (err) => {
-            reject(err.responseText);
-            // Refresh when session expires
-            window.location.reload();
-          },
-          // Even though error occurred, return element. Cross reference does not exist
-          // so return documentation as is
-          404: () => resolve(_element)
+        // Loop over cross refs list and replace each occurrence of that
+        // cross-ref in the documentation fields
+        for (let i = 0; i < refs.length; i++) {
+          // Get the ref, replacing special characters for use in regex
+          const ref = refs[i]
+          .replace('[', '\\[')
+          .replace(']', '\\]')
+          .replace('-', '\\-');
+          // Create the regex for replacement
+          const re = new RegExp(ref, 'g'); // eslint-disable-line security/detect-non-literal-regexp
+
+          // Capture the element ID and link
+          const id = uniqCrossRefs[refs[i]].id;
+          if (!elements.hasOwnProperty(id)) {
+            doc = doc.replace(re, `<Link class='cross-ref-broken' to='#'>${refs[i]}</Link>`);
+            continue;
+          }
+          const oid = elements[id].org;
+          const pid = elements[id].project;
+          const bid = elements[id].branch;
+          const link = `/orgs/${oid}/projects/${pid}/branches/${bid}/elements#${id}`;
+          doc = doc.replace(re, `<Link class='cross-ref' to='${link}' target='_blank'>${elements[id].name}</Link>`);
         }
-      });
+
+        // Resolve the element
+        const elem = _element;
+        elem.documentation = doc;
+        return resolve(elem);
+      }
     });
   };
 
-  const getElement = () => {
-    const url = `${props.url}/elements/${elementID}?minified=true&includeArchived=true`;
-    // Get project data
-    $.ajax({
-      method: 'GET',
-      url: url,
-      statusCode: {
-        200: (elem) => {
-          handleCrossRefs(elem[0])
-          .then(elementChanged => {
-            setElement(elementChanged);
-          })
-          .catch(err => {
-            setError(err);
-          });
-        },
-        401: (err) => {
-          // Throw error and set state
-          setError(err.responseText);
+  const getElement = async () => {
+    const options = {
+      ids: elementID,
+      includeArchived: true
+    };
 
-          // Refresh when session expires
-          window.location.reload();
-        },
-        404: (err) => {
-          setError(err.responseText);
-        }
-      }
-    });
+    // Get element data
+    const [err, elements] = await elementService.get(orgID, projID, branchID, options);
+
+    // Set the state
+    if (err) {
+      setError(err);
+    }
+    else if (elements) {
+      // Get cross references if they exist
+      handleCrossRefs(elements[0])
+      .then(elementChanged => {
+        setElement(elementChanged);
+      })
+      .catch(xrefErr => {
+        setError(xrefErr);
+      });
+    }
+  };
+
+  const useProvidedElement = () => {
+    handleCrossRefs(providedElement)
+    .then((e) => setElement(e));
   };
 
   // Define toggle function
@@ -165,10 +165,12 @@ export default function Element(props) {
     setModalDelete((currentState) => !currentState);
   };
 
-  // Run on initialization
+  // Run on mount and whenever the element of interest changes
   useEffect(() => {
     if (elementID) getElement();
-  }, [elementID]);
+    else if (providedElement) useProvidedElement();
+  }, [elementID, providedElement]);
+
 
   let orgid;
   let projid;

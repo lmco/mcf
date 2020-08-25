@@ -16,6 +16,7 @@
 
 /* Modified ESLint rules for React. */
 /* eslint-disable no-unused-vars */
+/* eslint-disable jsdoc/require-jsdoc */
 
 // React modules
 import React, { useState, useEffect, useRef } from 'react';
@@ -62,8 +63,6 @@ function ElementNew(props) {
   const [targetNamespace, setTargetNamespace] = useState(null);
   const [source, setSource] = useState(null);
   const [sourceNamespace, setSourceNamespace] = useState(null);
-  const [org, setOrg] = useState(null);
-  const [project, setProject] = useState(null);
   const [error, setError] = useState(null);
 
   const prevParent = usePrevious(props.parent);
@@ -93,7 +92,6 @@ function ElementNew(props) {
       type: values.type,
       parent: parent
     };
-
 
     if (source !== null && target !== null) {
       data.source = source;
@@ -206,12 +204,12 @@ function ElementNew(props) {
       }
       <Form>
         <FormGroup row>
-          <Label for="name" sm={2}>ID</Label>
+          <Label for="id" sm={2}>ID</Label>
           <Col sm={10}>
             <Input type="text"
                  name="id"
-                 id="name"
-                 placeholder="Element name"
+                 id="id"
+                 placeholder="Element ID"
                  value={values.id}
                  invalid={idInvalid}
                  onChange={handleChange}/>
@@ -251,8 +249,7 @@ function ElementNew(props) {
               <ElementSelector
                 parent={true}
                 currentSelection={parent}
-                url={props.url}
-                branch={props.branch}
+                branchID={props.branchID}
                 project={props.project}
                 selectedHandler={parentSelectHandler} />
             </div>
@@ -266,8 +263,7 @@ function ElementNew(props) {
             <ElementSelector
               currentSelection={source}
               self={values.id}
-              url={props.url}
-              branch={props.branch}
+              branchID={props.branchID}
               project={props.project}
               selectedHandler={sourceSelectHandler} />
           </Col>
@@ -284,8 +280,7 @@ function ElementNew(props) {
             <ElementSelector
               currentSelection={target}
               self={values.id}
-              branch={props.branch}
-              url={props.url}
+              branchID={props.branchID}
               project={props.project}
               selectedHandler={targetSelectHandler} />
           </Col>
