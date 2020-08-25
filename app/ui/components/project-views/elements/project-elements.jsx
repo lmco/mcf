@@ -184,7 +184,9 @@ export default function ProjectElements(props) {
   else if (sidePanel === 'addElement') {
     sidePanelView = (<ElementNew id={'new-element'}
                                  parent={elementID}
-                                 branch={branchID}
+                                 orgID={orgID}
+                                 projectID={projID}
+                                 branchID={branchID}
                                  project={props.project}
                                  closeSidePanel={closeSidePanel}
                                  url={url}/>);
