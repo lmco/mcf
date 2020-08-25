@@ -220,7 +220,8 @@ function ProjectHome(props) {
               <Route exact path={`${props.match.url}/branches/:branchid/artifacts`}
                      render={ (renderProps) => <ProjectArtifacts {...renderProps}
                                                        permissions={permissions}
-                                                       project={project} /> } />
+                                                       project={project}
+                                                       branchID={branch}/> } />
               <Route path={`${props.match.url}/branches/:branchid/search`}
                      render={ (renderProps) => <Search {...renderProps}
                                                  project={project} /> } />

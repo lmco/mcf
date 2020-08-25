@@ -27,6 +27,7 @@ import UserService from '../api-client/UserService.js';
 import OrgService from '../api-client/OrgService.js';
 import ProjectService from '../api-client/ProjectService.js';
 import BranchService from '../api-client/BranchService.js';
+import ArtifactService from '../api-client/ArtifactService.js';
 import { useAuth } from './AuthProvider.js';
 
 
@@ -39,13 +40,15 @@ export function ApiClientProvider(props) {
   const orgService = new OrgService(authContext);
   const projectService = new ProjectService(authContext);
   const branchService = new BranchService(authContext);
+  const artifactService = new ArtifactService(authContext);
 
   const value = {
     authService,
     userService,
     orgService,
     projectService,
-    branchService
+    branchService,
+    artifactService
   };
   return <apiClientContext.Provider value={value} {...props}/>;
 }
