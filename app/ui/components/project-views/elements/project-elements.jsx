@@ -163,15 +163,6 @@ export default function ProjectElements(props) {
                                closeSidePanel={closeSidePanel}
                                toggle={toggleModal}/>;
 
-  // if (sidePanel === 'elementEdit') {
-  //   // TODO: have this component pull elementID from Provider
-  //   sidePanelView = <ElementEditForm id={elementID}
-  //                                    project={props.project}
-  //                                    branch={branchID}
-  //                                    closeSidePanel={closeSidePanel}
-  //                                    selected={state.selected}/>;
-  // }
-
   if (sidePanel === 'addElement') {
     sidePanelView = (<ElementNew id={'new-element'}
                                  parent={elementID}
@@ -187,8 +178,7 @@ export default function ProjectElements(props) {
     <div id='workspace'>
       <Modal isOpen={modalOpen}>
         <ModalBody>
-          <ElementEditForm id={elementID}
-                           toggle={toggleModal}
+          <ElementEditForm toggle={toggleModal}
                            modal={modalOpen}
                            customData={props.project.custom}
                            archived={props.project.archived}

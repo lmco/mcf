@@ -43,7 +43,7 @@ import { useApiClient } from '../../context/ApiClientProvider';
 /* eslint-enable no-unused-vars */
 
 function ElementEditForm(props) {
-  const { setProvidedElement } = useElementContext();
+  const { elementID, setProvidedElement } = useElementContext();
   const { elementService } = useApiClient();
   const [values, setValues] = useState({
     lastModifiedBy: '',
@@ -123,7 +123,7 @@ function ElementEditForm(props) {
   const getElement = async () => {
     // Get element data
     const options = {
-      ids: props.id,
+      ids: elementID,
       includeArchived: true
     };
     const [err, elements] = await elementService.get(orgID, projID, branchID, options);
@@ -180,7 +180,7 @@ function ElementEditForm(props) {
     // eslint-disable-next-line max-len
     const { name, type, parent, archived, documentation, custom, source, target, targetNamespace, sourceNamespace } = values;
     const data = {
-      id: props.id,
+      id: elementID,
       name: name,
       type: type,
       parent: parent,
@@ -211,8 +211,8 @@ function ElementEditForm(props) {
       setError(err);
     }
     else if (elements) {
-      if (props.refreshFunctions.hasOwnProperty(props.id)) {
-        props.refreshFunctions[props.id]();
+      if (props.refreshFunctions.hasOwnProperty(elementID)) {
+        props.refreshFunctions[elementID]();
         setProvidedElement(elements[0]);
         props.toggle();
       }
