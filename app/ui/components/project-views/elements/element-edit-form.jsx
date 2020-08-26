@@ -211,11 +211,9 @@ function ElementEditForm(props) {
       setError(err);
     }
     else if (elements) {
-      if (props.refreshFunctions.hasOwnProperty(elementID)) {
-        props.refreshFunctions[elementID]();
-        setProvidedElement(elements[0]);
-        props.toggle();
-      }
+      if (props.refreshFunctions.hasOwnProperty(elementID)) props.refreshFunctions[elementID]();
+      setProvidedElement(elements[0]);
+      props.toggle();
     }
   };
 
