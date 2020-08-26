@@ -394,7 +394,7 @@ function ElementEditForm(props) {
   }, []);
 
 
-  const { modal, toggle, id } = props;
+  const { modal, toggle } = props;
   const { archived } = values;
 
   const textareas = renderTextareas(1);
@@ -404,7 +404,7 @@ function ElementEditForm(props) {
   return (
     <Modal isOpen={modal} toggle={toggle} size={'lg'}>
       <form>
-        <ModalHeader>Element: {id}</ModalHeader>
+        <ModalHeader>Element: {elementID}</ModalHeader>
         <ModalBody style={{ maxHeight: 'calc(100vh - 210px)', overflowY: 'auto' }}>
           {(error) ? <UncontrolledAlert color='danger'>{error}</UncontrolledAlert> : ''}
           {renderTextboxes(2)}
