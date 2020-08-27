@@ -55,7 +55,11 @@ Test MCF:
     - yarn config set https-proxy $HTTPS_PROXY
     - yarn config set no_proxy $NO_PROXY
     - NOPREINSTALL=1 yarn install
+    - chmod +x ./scripts/pipeline/pull-cert.sh
+    - ./scripts/pipeline/pull-cert.sh $CI_PROJECT_DIR $LMCertAuthority
     - node mbee migrate -y
+    - chmod +x ./scripts/pipeline/search-replace-config.sh
+    - ./scripts/pipeline/search-replace-config.sh $CI_PROJECT_DIR $DEFAULT_ADMIN_USERNAME $DEFAULT_ADMIN_PASSWORD $LDAP_URL $LDAP_BIND_DN $LDAP_BIND_DN_PASS $DB_URL $DB_USERNAME $DB_PASSWORD
   script:
     - nohup node mbee start &
     - sleep 20
@@ -79,6 +83,10 @@ Test Plugins:
     - yarn config set https-proxy $HTTPS_PROXY
     - yarn config set no_proxy $NO_PROXY
     - NOPREINSTALL=1 yarn install
+    - chmod +x ./scripts/pipeline/search-replace-config.sh
+    - ./scripts/pipeline/search-replace-config.sh $CI_PROJECT_DIR $DEFAULT_ADMIN_USERNAME $DEFAULT_ADMIN_PASSWORD $LDAP_URL $LDAP_BIND_DN $LDAP_BIND_DN_PASS $DB_URL $DB_USERNAME $DB_PASSWORD
+    - chmod +x ./scripts/pipeline/pull-cert.sh
+    - ./scripts/pipeline/pull-cert.sh $CI_PROJECT_DIR $LMCertAuthority
     - node mbee migrate -y
   script:
     - node mbee test --plugins
@@ -92,6 +100,10 @@ Docker Build:
   dependencies: 
     - Test MCF
   script:
+    - chmod +x ./scripts/pipeline/pull-cert.sh
+    - ./scripts/pipeline/pull-cert.sh $CI_PROJECT_DIR $LMCertAuthority
+    - chmod +x ./scripts/pipeline/search-replace-config.sh
+    - ./scripts/pipeline/search-replace-config.sh $CI_PROJECT_DIR $DEFAULT_ADMIN_USERNAME $DEFAULT_ADMIN_PASSWORD $LDAP_URL $LDAP_BIND_DN $LDAP_BIND_DN_PASS $DB_URL $DB_USERNAME $DB_PASSWORD
     - docker build -t mcf-docker -f ./config/mcf.Dockerfile .
     - docker tag mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
@@ -108,8 +120,8 @@ Deploy MCF Dev:
     - Docker Build
   script:
     - export VERSION=`cat version.txt`
-    - chmod +x ./scripts/pipeline/search-replace.sh
-    - ./scripts/pipeline/search-replace.sh $CI_PROJECT_DIR $NFS_SHARE_URL $DOCKER_PASSWORD
+    - chmod +x ./scripts/pipeline/search-replace-deployment.sh
+    - ./scripts/pipeline/search-replace-deployment.sh $CI_PROJECT_DIR $NFS_SHARE_URL $DOCKER_PASSWORD
     - chmod +x ./scripts/deployment/deploy-dev.sh
     - ./scripts/deployment/deploy-dev.sh $CI_PROJECT_DIR $VERSION
 
@@ -124,8 +136,8 @@ Deploy MCF Test:
     - Docker Build
   script:
     - export VERSION=`cat version.txt`
-    - chmod +x ./scripts/pipeline/search-replace.sh
-    - ./scripts/pipeline/search-replace.sh $CI_PROJECT_DIR $NFS_SHARE_URL $DOCKER_PASSWORD
+    - chmod +x ./scripts/pipeline/search-replace-deployment.sh
+    - ./scripts/pipeline/search-replace-deployment.sh $CI_PROJECT_DIR $NFS_SHARE_URL $DOCKER_PASSWORD
     - chmod +x ./scripts/deployment/deploy-test.sh
     - ./scripts/deployment/deploy-test.sh $CI_PROJECT_DIR $VERSION
   
@@ -141,7 +153,7 @@ Deploy MCF Prod:
     - Docker Build
   script:
     - export VERSION=`cat version.txt`
-    - chmod +x ./scripts/pipeline/search-replace.sh
-    - ./scripts/pipeline/search-replace.sh $CI_PROJECT_DIR $NFS_SHARE_URL $DOCKER_PASSWORD
+    - chmod +x ./scripts/pipeline/search-replace-deployment.sh
+    - ./scripts/pipeline/search-replace-deployment.sh $CI_PROJECT_DIR $NFS_SHARE_URL $DOCKER_PASSWORD
     - chmod +x ./scripts/deployment/deploy-prod.sh
     - ./scripts/deployment/deploy-prod.sh $CI_PROJECT_DIR $VERSION
