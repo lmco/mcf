@@ -156,7 +156,8 @@ export default function Element(props) {
 
   const useProvidedElement = () => {
     handleCrossRefs(providedElement)
-    .then((e) => setElement(e));
+    .then((e) => setElement(e))
+    .catch(xrefErr => setError(xrefErr));
   };
 
   // Define toggle function

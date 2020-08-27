@@ -109,7 +109,6 @@ export default function ElementSubtree(props) {
       props.setRefreshFunctions(props.id, refresh);
     }
 
-    // Build URL to get element data
     const contains = data.contains;
     const parent = data.id;
     // Verify element does not have children
@@ -144,14 +143,13 @@ export default function ElementSubtree(props) {
     }
   };
 
-  // on update of data
+  // on update of props or data
   useEffect(() => {
     // Verify if component needs to re-render
-    // Due to the update from state props of data
     if (data !== prevData) {
       initialize();
     }
-    else if (props.data.contains.length !== prevData.contains.length) {
+    else if (props.data !== data) {
       setData(props.data);
       initialize();
     }
@@ -164,7 +162,7 @@ export default function ElementSubtree(props) {
         setIsOpen(false);
       }
     }
-  }, [props, data]);
+  }, [props.data, props.expand, props.collapse, data]);
 
 
   // Initialize variables
@@ -366,7 +364,7 @@ export default function ElementSubtree(props) {
       <span onClick={handleClick}
            className='element-link'>
         <span className='element-name'>
-            {elementIcon}
+          {elementIcon}
           {element}
         </span>
       </span>);

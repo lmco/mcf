@@ -92,10 +92,10 @@ function ProjectHome(props) {
     });
   };
 
-  // on mount
+  // on mount and when the org or project id changes
   useEffect(() => {
     refresh();
-  }, []);
+  }, [props.match.params]);
 
 
   // Define branch, defaults to master

@@ -211,8 +211,11 @@ function ElementEditForm(props) {
       setError(err);
     }
     else if (elements) {
+      // This will refresh the updated element in the element tree.
       if (props.refreshFunctions.hasOwnProperty(elementID)) props.refreshFunctions[elementID]();
+      // This is used to refresh the element data in the Element.jsx component within the sidepanel.
       setProvidedElement(elements[0]);
+      // Closes the edit modal.
       props.toggle();
     }
   };
@@ -340,7 +343,7 @@ function ElementEditForm(props) {
   const renderSelector = (numColumn) => {
     // eslint-disable-next-line no-undef
     const stateNames = dropdownProps.map(propObj => toCamel(propObj.label));
-    const { id, url, project, branch } = props;
+    const { id, url, project } = props;
     const dropdowns = dropdownProps.map(
       (propObj, index) => (
         <ElementTextbox key={`el-text-${index}`}
@@ -355,7 +358,7 @@ function ElementEditForm(props) {
                            self={id}
                            url={url}
                            project={project}
-                           branch={branch}
+                           branchID={branchID}
                            selectedHandler={handlers[`${stateNames[index]}SelectHandler`]}
                            parent={stateNames[index] === 'parent'}
                            differentProject={(stateNames[index] === 'parent') ? null : values[`${stateNames[index]}Namespace`]}/>
