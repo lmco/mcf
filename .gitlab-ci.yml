@@ -58,7 +58,6 @@ Test MCF:
     - NOPREINSTALL=1 yarn install
     - chmod +x ./scripts/pipeline/pull-cert.sh
     - ./scripts/pipeline/pull-cert.sh $CI_PROJECT_DIR $LMCertAuthority
-    - cat $CI_PROJECT_DIR/certs/LockheedMartinCertificateAuthority.pem
     - node mbee migrate -y
     - chmod +x ./scripts/pipeline/search-replace-config.sh
     - ./scripts/pipeline/search-replace-config.sh $CI_PROJECT_DIR $DEFAULT_ADMIN_USERNAME $DEFAULT_ADMIN_PASSWORD $LDAP_URL $LDAP_BIND_DN $LDAP_BIND_DN_PASS $DB_URL $DB_USERNAME $DB_PASSWORD
@@ -106,6 +105,7 @@ Docker Build:
     - ./scripts/pipeline/pull-cert.sh $CI_PROJECT_DIR $LMCertAuthority
     - chmod +x ./scripts/pipeline/search-replace-config.sh
     - ./scripts/pipeline/search-replace-config.sh $CI_PROJECT_DIR $DEFAULT_ADMIN_USERNAME $DEFAULT_ADMIN_PASSWORD $LDAP_URL $LDAP_BIND_DN $LDAP_BIND_DN_PASS $DB_URL $DB_USERNAME $DB_PASSWORD
+    - cat ./certs/LockheedMartinCertificateAuthority.pem
     - docker build -t mcf-docker -f ./config/mcf.Dockerfile .
     - docker tag mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
