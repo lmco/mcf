@@ -114,7 +114,7 @@ async function postElement() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const createdElement = res.data;
+    const createdElement = res.data[0];
 
     // Verify element created properly
     chai.expect(createdElement.id).to.equal(elemData.id);
@@ -257,7 +257,7 @@ async function putElement() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const replacedElem = res.data;
+    const replacedElem = res.data[0];
 
     // Verify element created/replaced properly
     chai.expect(replacedElem.id).to.equal(elemData.id);
@@ -399,7 +399,7 @@ async function getElement() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const foundElement = res.data;
+    const foundElement = res.data[0];
 
     // Verify element created properly
     chai.expect(foundElement.id).to.equal(elemData.id);
@@ -618,7 +618,7 @@ async function patchElement() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const updatedElement = res.data;
+    const updatedElement = res.data[0];
 
     // Verify element updated properly
     chai.expect(updatedElement.id).to.equal(elemData.id);
@@ -766,7 +766,7 @@ async function deleteElement() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const deleteElementID = res.data;
+    const deleteElementID = res.data[0];
 
     // Verify correct element deleted
     chai.expect(deleteElementID).to.equal(elemData.id);

@@ -142,7 +142,7 @@ function postArtifact(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Verify response body
-    const createdArtifact = JSON.parse(_data);
+    const createdArtifact = JSON.parse(_data)[0];
     // Verify artifact created properly
     chai.expect(createdArtifact.id).to.equal(artData.id);
     chai.expect(createdArtifact.description).to.equal(artData.description);
@@ -175,7 +175,7 @@ function postArtifact(done) {
   };
 
   // POST an artifact
-  apiController.postArtifact(req, res, next(req, res));
+  apiController.postArtifacts(req, res, next(req, res));
 }
 
 /**
@@ -286,7 +286,7 @@ function getArtifact(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Verify response body
-    const foundArtifact = JSON.parse(_data);
+    const foundArtifact = JSON.parse(_data)[0];
 
     // Verify artifact created properly
     chai.expect(foundArtifact.id).to.equal(artData.id);
@@ -320,7 +320,7 @@ function getArtifact(done) {
   };
 
   // GET an artifact
-  apiController.getArtifact(req, res, next(req, res));
+  apiController.getArtifacts(req, res, next(req, res));
 }
 
 /**
@@ -671,7 +671,7 @@ function patchArtifact(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Verify response body
-    const updatedArtifact = JSON.parse(_data);
+    const updatedArtifact = JSON.parse(_data)[0];
 
     // Verify artifact created properly
     chai.expect(updatedArtifact.id).to.equal(artData.id);
@@ -705,7 +705,7 @@ function patchArtifact(done) {
   };
 
   // PATCH an artifact
-  apiController.patchArtifact(req, res, next(req, res));
+  apiController.patchArtifacts(req, res, next(req, res));
 }
 
 /**
@@ -823,7 +823,7 @@ function deleteArtifact(done) {
 
   // Verifies the response data
   res.send = function send(_data) {
-    const artifactid = JSON.parse(_data);
+    const artifactid = JSON.parse(_data)[0];
     chai.expect(artifactid).to.equal(artData.id);
 
     // Expect the statusCode to be 200
@@ -833,7 +833,7 @@ function deleteArtifact(done) {
   };
 
   // DELETE an artifact
-  apiController.deleteArtifact(req, res, next(req, res));
+  apiController.deleteArtifacts(req, res, next(req, res));
 }
 
 /**

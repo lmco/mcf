@@ -108,7 +108,7 @@ async function postProject() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const createdProj = res.data;
+    const createdProj = res.data[0];
 
     // Verify project created properly
     chai.expect(createdProj.id).to.equal(projData.id);
@@ -216,7 +216,7 @@ async function putProject() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const replacedProj = res.data;
+    const replacedProj = res.data[0];
 
     // Verify project created/replaced properly
     chai.expect(replacedProj.id).to.equal(projData.id);
@@ -324,7 +324,7 @@ async function getProject() {
     // / Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const foundProj = res.data;
+    const foundProj = res.data[0];
 
     // Verify project created properly
     chai.expect(foundProj.id).to.equal(projData.id);
@@ -562,7 +562,7 @@ async function patchProject() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const updatedProj = res.data;
+    const updatedProj = res.data[0];
 
     // Verify project updated properly
     chai.expect(updatedProj.id).to.equal(projData.id);
@@ -675,7 +675,7 @@ async function deleteProject() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const deletedID = res.data;
+    const deletedID = res.data[0];
 
     // Verify correct project deleted
     chai.expect(deletedID).to.equal(projData.id);

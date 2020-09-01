@@ -106,7 +106,7 @@ async function postBranch() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const createdBranch = res.data;
+    const createdBranch = res.data[0];
 
     // Verify branch created properly
     chai.expect(createdBranch.id).to.equal(branchData.id);
@@ -216,7 +216,7 @@ async function getBranch() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const foundBranch = res.data;
+    const foundBranch = res.data[0];
 
     // Verify branch found properly
     chai.expect(foundBranch.id).to.equal(branchData.id);
@@ -330,7 +330,7 @@ async function patchBranch() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const updatedBranch = res.data;
+    const updatedBranch = res.data[0];
 
     // Verify branch updated properly
     chai.expect(updatedBranch.id).to.equal(branchData.id);
@@ -446,7 +446,7 @@ async function deleteBranch() {
     // Expect response status: 200 OK
     chai.expect(res.status).to.equal(200);
     // Verify response body
-    const deleteBranchID = res.data;
+    const deleteBranchID = res.data[0];
 
     // Verify correct branch deleted
     chai.expect(deleteBranchID).to.equal(branchData.id);
