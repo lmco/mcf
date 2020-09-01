@@ -193,11 +193,10 @@ export default function ProjectElements(props) {
         <h2 className={btnDisClassName}>{props.project.name} Model</h2>
         {(!isButtonDisplayed)
           ? ''
-          : (<div className='workspace-header-button ws-button-group add-elements-btn'>
-            <Button className='bigger-width-btn btn-sm'
+          : (<div className='workspace-header-button'>
+            <Button className='btn'
                     outline color='primary'
                     onClick={createNewElement}>
-              <i className='fas fa-plus'/>
               Add Element
             </Button>
           </div>)}
