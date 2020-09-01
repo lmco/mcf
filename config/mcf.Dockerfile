@@ -33,7 +33,7 @@ RUN chmod 400 certs/*
 # Prerequisites for MongoDB install
 RUN apt-get install curl
 RUN wget https://yum.dockerproject.org/gpg 
-RUN apt-key add gpg
+# RUN apt-key add gpg
 RUN curl --cacert "./certs/LockheedMartinCertificateAuthority.pem"  https://www.mongodb.org/static/pgp/server-4.0.asc | apt-key add -
 RUN echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/4.0 main" | tee /etc/apt/sources.list.d/mongodb-org-4.0.list
 
