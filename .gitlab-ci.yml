@@ -47,6 +47,7 @@ Test MCF:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
   before_script:
+    - export MBEE_ENV=$MBEE_ENV
     - export HTTP_PROXY=$HTTP_PROXY
     - export HTTPS_PROXY=$HTTPS_PROXY
     - export NO_PROXY=$NO_PROXY
