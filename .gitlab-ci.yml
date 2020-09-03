@@ -132,7 +132,7 @@ Deploy MCF Dev:
   # only:
   #   - develop
   dependencies: 
-    - Docker Build
+    - Docker Build MCF
   script:
     - export VERSION=`cat version.txt`
     - chmod +x ./scripts/pipeline/search-replace-deployment.sh
@@ -148,7 +148,7 @@ Deploy MCF Test:
   # only:
   #   - /^release\/.*$/
   dependencies: 
-    - Docker Build
+    - Docker Build MCF
   script:
     - export VERSION=`cat version.txt`
     - chmod +x ./scripts/pipeline/search-replace-deployment.sh
@@ -165,7 +165,7 @@ Deploy MCF Prod:
   #   - /^prc\/.*$/
   #   - master
   dependencies: 
-    - Docker Build
+    - Docker Build MCF
   script:
     - export VERSION=`cat version.txt`
     - chmod +x ./scripts/pipeline/search-replace-deployment.sh
