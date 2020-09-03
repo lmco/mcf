@@ -3,13 +3,29 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mongo-service
-  labels:
-    app: mongo
 spec:
   ports:
   - name: mongo
     port: 27017
     targetPort: 27017
+    protocol: TCP
+  selector:
+    app: mongo
+
+---
+
+# External service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-external-service
+spec:
+  type: NodePort
+  ports:
+  - name: mongo
+    port: 27017
+    targetPort: 27017
+    nodePort: 30036
     protocol: TCP
   selector:
     app: mongo

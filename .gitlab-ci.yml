@@ -98,7 +98,7 @@ Docker Build MCF:
     - shell
   # only:
   #   - develop
-  dependencies: 
+  dependencies:
     - Test MCF
   script:
     - chmod +x ./scripts/pipeline/pull-cert.sh
@@ -135,10 +135,9 @@ Deploy MCF Dev:
     - Docker Build MCF
   script:
     - export VERSION=`cat version.txt`
-    - chmod +x ./scripts/pipeline/search-replace-deployment.sh
-    - ./scripts/pipeline/search-replace-deployment.sh $CI_PROJECT_DIR $NFS_SHARE_URL $DOCKER_PASSWORD
     - chmod +x ./scripts/deployment/deploy-dev.sh
-    - ./scripts/deployment/deploy-dev.sh $CI_PROJECT_DIR $VERSION
+    - cat ./kubernetes/mongo/mongo-dev-pv.yaml
+    - ./scripts/deployment/deploy-dev.sh $CI_PROJECT_DIR $VERSION $NFS_SHARE_URL $DOCKER_PASSWORD
 
 Deploy MCF Test:
   stage: Deploy
@@ -151,10 +150,8 @@ Deploy MCF Test:
     - Docker Build MCF
   script:
     - export VERSION=`cat version.txt`
-    - chmod +x ./scripts/pipeline/search-replace-deployment.sh
-    - ./scripts/pipeline/search-replace-deployment.sh $CI_PROJECT_DIR $NFS_SHARE_URL $DOCKER_PASSWORD
     - chmod +x ./scripts/deployment/deploy-test.sh
-    - ./scripts/deployment/deploy-test.sh $CI_PROJECT_DIR $VERSION
+    - ./scripts/deployment/deploy-test.sh $CI_PROJECT_DIR $VERSION $NFS_SHARE_URL $DOCKER_PASSWORD
   
 Deploy MCF Prod:
   stage: Deploy
@@ -168,7 +165,6 @@ Deploy MCF Prod:
     - Docker Build MCF
   script:
     - export VERSION=`cat version.txt`
-    - chmod +x ./scripts/pipeline/search-replace-deployment.sh
-    - ./scripts/pipeline/search-replace-deployment.sh $CI_PROJECT_DIR $NFS_SHARE_URL $DOCKER_PASSWORD
     - chmod +x ./scripts/deployment/deploy-prod.sh
-    - ./scripts/deployment/deploy-prod.sh $CI_PROJECT_DIR $VERSION
+    - cat ./kubernetes/mongo/mongo-prod-pv.yaml
+    - ./scripts/deployment/deploy-prod.sh $CI_PROJECT_DIR $VERSION $NFS_SHARE_URL $DOCKER_PASSWORD

@@ -2,6 +2,12 @@
 
 ProjectDirectory=$1
 Version=$2
+NfsShareUrl=$3
+DockerPassword=$4
+
+# Finding and replacing values
+sed -i "s/server: nfs_share_address/server: $NfsShareUrl/" $ProjectDirectory/kubernetes/mongo/mongo-dev-pv.yaml
+sed -i "s/--docker-password=dockerpassword/--docker-password=$DockerPassword/" $ProjectDirectory/scripts/deployment/deploy-dev.sh
 
 # Create dev namespace
 echo '### Creating the dev namespace if it does not exist ###'
