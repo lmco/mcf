@@ -19,6 +19,14 @@ kubectl create -f $ProjectDirectory/kubernetes/mcf/mcf-prod-pv.yaml -n prod
 echo '### Scaling the deployment to 0 ###' 
 kubectl scale --replicas=0 deployment mcf-deployment -n prod
 
+# Removing old mongo deployment pod. Scales replicas to 0
+echo '### Scaling the mongo deployment to 0 ###'
+kubectl scale --replicas=0 deployment mongo-prod-deployment -n prod
+
+# Create the mongo deployment
+echo '### Creating the mongo deployment if it does not exists ###'
+kubectl create -f $ProjectDirectory/kubernetes/mcf/mongo-prod-deployment.yaml -n prod
+
 # Create the mcf deployment
 echo '### Creating the mcf deployment if it does not exists ###'
 kubectl create -f $ProjectDirectory/kubernetes/mcf/mcf-prod-deployment.yaml -n prod

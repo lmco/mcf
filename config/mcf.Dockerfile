@@ -11,6 +11,11 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     NODEJS_VERSION=12 \
     CA_CERT="./certs/LockheedMartinCertificateAuthority.pem"
 
+# Install certs - If you have certs in a certs directory, uncomment the following lines
+RUN mkdir -p certs
+COPY ./certs certs
+RUN chmod 400 certs/*
+
 # Create project directory structure
 RUN mkdir logs \
     && mkdir -p config \
@@ -22,7 +27,6 @@ RUN mkdir logs \
     && mkdir -p app \
     && mkdir -p /lm/mbee/data/db/log \
     && mkdir -p node_modules
-
 # Copy Project
 COPY ./config config
 COPY ./scripts scripts

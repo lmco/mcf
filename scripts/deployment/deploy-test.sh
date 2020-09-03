@@ -17,7 +17,7 @@ kubectl scale --replicas=0 deployment mcf-deployment -n test
 
 # Removing old mongo deployment pod. Scales replicas to 0
 echo '### Scaling the mongo deployment to 0 ###'
-kubectl scale --replicas=0 deployment mongo-dev-deployment -n test
+kubectl scale --replicas=0 deployment mongo-test-deployment -n test
 
 # Create the mongo deployment
 echo '### Creating the mongo deployment if it does not exists ###'
