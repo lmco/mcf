@@ -1,0 +1,52 @@
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-service
+  labels:
+    app: mongo
+spec:
+  ports:
+  - name: mongo
+    port: 27017
+    targetPort: 27017
+    protocol: TCP
+  selector:
+    app: mongo
+
+---
+
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-deployment
+  labels:
+    app: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      nodeName: prod-prod # attaches the pod to the prod-prod node
+      dnsPolicy: Default # pod inherits dns name of the node
+      imagePullSecrets:
+      - name: mongo-repo
+      containers:
+        - name: mongo
+          imagePullPolicy: Always
+          image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo-docker:latest
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-data-volume
+              mountPath: /data/db
+      volumes:
+        - name: mongo-data-volume
+          persistentVolumeClaim:
+            claimName: mong-prod-data-pv

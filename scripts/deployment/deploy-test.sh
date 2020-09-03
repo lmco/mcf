@@ -15,12 +15,16 @@ kubectl create secret docker-registry mcf-repo --namespace=test --docker-server=
 echo '### Scaling the deployment to 0 ###' 
 kubectl scale --replicas=0 deployment mcf-deployment -n test
 
-# Create the mcf deployment
-echo '### Creating the mcf deployment if it does not exists ###'
-kubectl create -f $ProjectDirectory/kubernetes/mcf/mcf-test-deployment.yaml -n test
+# Removing old mongo deployment pod. Scales replicas to 0
+echo '### Scaling the mongo deployment to 0 ###'
+kubectl scale --replicas=0 deployment mongo-dev-deployment -n test
+
+# Create the mongo deployment
+echo '### Creating the mongo deployment if it does not exists ###'
+kubectl create -f $ProjectDirectory/kubernetes/mcf/mongo-test-deployment.yaml -n test
 
 # Updating the replicas to 1.
 echo '### Updating the replicas to 1 ###'
-kubectl scale --replicas=1 deployment mcf-deployment -n test
+kubectl scale --replicas=1 deployment mongo-deployment -n test
 
 exit 0

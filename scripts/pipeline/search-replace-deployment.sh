@@ -14,9 +14,3 @@ sed -i "s/server: nfs_share_address/server: $NFS_SHARE_URL/" $CI_PROJECT_DIR/kub
 sed -i "s/--docker-password=dockerpassword/--docker-password=$DOCKER_PASSWORD/" $CI_PROJECT_DIR/scripts/deployment/deploy-dev.sh
 sed -i "s/--docker-password=dockerpassword/--docker-password=$DOCKER_PASSWORD/" $CI_PROJECT_DIR/scripts/deployment/deploy-prod.sh
 sed -i "s/--docker-password=dockerpassword/--docker-password=$DOCKER_PASSWORD/" $CI_PROJECT_DIR/scripts/deployment/deploy-test.sh
-
-cat $CI_PROJECT_DIR/kubernetes/mcf/mcf-dev-pv.yaml
-cat $CI_PROJECT_DIR/kubernetes/mcf/mcf-prod-pv.yaml
-cat $CI_PROJECT_DIR/scripts/deployment/deploy-dev.sh
-cat $CI_PROJECT_DIR/scripts/deployment/deploy-prod.sh
-cat $CI_PROJECT_DIR/scripts/deployment/deploy-test.sh
