@@ -51,7 +51,8 @@ RUN yum install scl-utils rh-nodejs${NODEJS_VERSION} git -y
 RUN source scl_source enable rh-nodejs12 \
     && npm config set cafile $CA_CERT \
     && npm config set http_proxy $HTTP_PROXY \
-    && npm config set https_proxy $HTTPS_PROXY
+    && npm config set https_proxy $HTTPS_PROXY \
+    && npm config set strict-ssl false
 RUN source scl_source enable rh-nodejs12 \
     && npm install -g yarn
 
