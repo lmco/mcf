@@ -36,7 +36,7 @@ spec:
       nodeName: dev-dev # attaches the pod to the dev-dev node
       dnsPolicy: Default # pod inherits dns name of the node
       imagePullSecrets:
-      - name: mongo-repo
+      - name: mcf-repo
       containers:
         - name: mongo
           imagePullPolicy: Always

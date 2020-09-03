@@ -36,7 +36,7 @@ spec:
       nodeName: prod-prod # attaches the pod to the prod-prod node
       dnsPolicy: Default # pod inherits dns name of the node
       imagePullSecrets:
-      - name: mongo-repo
+      - name: mcf-repo
       containers:
         - name: mongo
           imagePullPolicy: Always

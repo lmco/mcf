@@ -44,8 +44,8 @@ spec:
           ports:
             - containerPort: 9080
           volumeMounts:
-            - name: mongo-data-volume
-              mountPath: /lm/mbee/data/db
+            # - name: mongo-data-volume
+            #   mountPath: /lm/mbee/data/db
             - name: cert
               mountPath: /lm/mbee/certs/mcf.cer
             - name: key
@@ -55,9 +55,9 @@ spec:
               subPath: dev.mcf.us.lmco.com.pem
               readOnly: false
       volumes:
-        - name: mongo-data-volume
-          persistentVolumeClaim:
-            claimName: mongo-dev-data-pv
+        # - name: mongo-data-volume
+        #   persistentVolumeClaim:
+        #     claimName: mongo-dev-data-pv
         - name: cert
           hostPath:
             path: "/mnt/mbee/mbee-dev/certs/dev.mcf.us.lmco.com.cer"
