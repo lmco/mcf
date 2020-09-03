@@ -45,9 +45,9 @@ spec:
             - containerPort: 9080
           volumeMounts:
             - name: cert
-              mountPath: /lm/mbee/certs/mcf.cer
+              mountPath: /opt/mcf/certs/mcf.cer
             - name: key
-              mountPath: /lm/mbee/certs/mcf.key
+              mountPath: /opt/mcf/certs/mcf.key
             - name: ca-pemstore
               mountPath: /etc/ssl/certs/test.mcf.us.lmco.com.pem
               subPath: test.mcf.us.lmco.com.pem

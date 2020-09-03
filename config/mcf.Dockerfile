@@ -26,7 +26,7 @@ RUN mkdir logs \
     && mkdir -p build \
     && mkdir -p public \
     && mkdir -p app \
-    && mkdir -p /lm/mbee/data/db/log \
+    && mkdir -p /opt/mcf/data/db/log \
     && mkdir -p node_modules
 # Copy Project
 COPY ./config config

@@ -45,11 +45,11 @@ spec:
             - containerPort: 9080
           volumeMounts:
             # - name: mongo-data-volume
-            #   mountPath: /lm/mbee/data/db
+            #   mountPath: /opt/mcf/data/db
             - name: cert
-              mountPath: /lm/mbee/certs/mcf.cer
+              mountPath: /opt/mcf/certs/mcf.cer
             - name: key
-              mountPath: /lm/mbee/certs/mcf.key
+              mountPath: /opt/mcf/certs/mcf.key
             - name: ca-pemstore
               mountPath: /etc/ssl/certs/prod.mcf.us.lmco.com.pem
               subPath: prod.mcf.us.lmco.com.pem
