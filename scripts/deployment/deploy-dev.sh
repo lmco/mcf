@@ -13,7 +13,7 @@ kubectl create secret docker-registry mcf-repo --namespace=dev --docker-server=r
 
 # Create persistent volume
 echo '### Creating Persistent Volume ###'
-kubectl create -f $ProjectDirectory/kubernetes/mcf/mcf-dev-pv.yaml -n dev
+kubectl create -f $ProjectDirectory/kubernetes/mongo/mongo-dev-pv.yaml -n dev
 
 # Removing old mcf deployment pod. Scales replicas to 0
 echo '### Scaling the deployment to 0 ###' 
@@ -25,7 +25,7 @@ kubectl scale --replicas=0 deployment mongo-dev-deployment -n dev
 
 # Create the mongo deployment
 echo '### Creating the mongo deployment if it does not exists ###'
-kubectl create -f $ProjectDirectory/kubernetes/mcf/mongo-dev-deployment.yaml -n dev
+kubectl create -f $ProjectDirectory/kubernetes/mongo/mongo-dev-deployment.yaml -n dev
 
 # Create the mcf deployment
 echo '### Creating the mcf deployment if it does not exists ###'
