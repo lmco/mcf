@@ -49,4 +49,4 @@ spec:
       volumes:
         - name: mongo-data-volume
           persistentVolumeClaim:
-            claimName: mong-prod-data-pv
+            claimName: mongo-prod-data-pv

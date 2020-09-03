@@ -57,7 +57,7 @@ spec:
       volumes:
         - name: mongo-data-volume
           persistentVolumeClaim:
-            claimName: mcf-dev-data-pv
+            claimName: mongo-dev-data-pv
         - name: cert
           hostPath:
             path: "/mnt/mbee/mbee-dev/certs/dev.mcf.us.lmco.com.cer"

@@ -9,6 +9,7 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     NO_PROXY=127.0.0.1,localhost \
     NODE_ENV=production \
     NODEJS_VERSION=12 \
+    MBEE_ENV=production \
     CA_CERT="./certs/LockheedMartinCertificateAuthority.pem"
 
 # Install certs - If you have certs in a certs directory, uncomment the following lines
