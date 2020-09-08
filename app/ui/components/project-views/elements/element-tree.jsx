@@ -27,14 +27,15 @@ import React, { useState, useEffect, useRef } from 'react';
 
 // MBEE modules
 import ElementSubtree from './element-subtree.jsx';
-/* eslint-enable no-unused-vars */
+import { useApiClient } from '../../context/ApiClientProvider';
 
+/* eslint-enable no-unused-vars */
 
 function usePrevious(value) {
   const ref = useRef();
   useEffect(() => {
     ref.current = value;
-  });
+  }, [value]);
   return ref.current;
 }
 
@@ -45,42 +46,34 @@ function usePrevious(value) {
  * @returns {Function} - Returns JSX.
  */
 export default function ElementTree(props) {
+  const { elementService } = useApiClient();
   const [treeRoot, setTreeRoot] = useState(null);
   // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState(null);
 
-  const urlBase = `/api/orgs/${props.project.org}/projects/${props.project.id}/branches/${props.branchID}`;
-
   const prevProject = usePrevious(props.project);
   const prevBranchID = usePrevious(props.branchID);
+
+  const orgID = props.project.org;
+  const projID = props.project.id;
+  const branchID = props.branchID;
 
   /**
    * @description This is also considered the refresh function for root
    * element. When an element is deleted or created the
    * elements will be updated.
    */
-  const getElement = () => {
-    const url = `${urlBase}/elements/model?fields=id,name,contains,type,archived&minified=true&includeArchived=true`;
+  const getElement = async () => {
+    const options = {
+      ids: 'model',
+      fields: 'id,name,contains,type,archived',
+      includeArchived: true
+    };
 
-    $.ajax({
-      method: 'GET',
-      url: url,
-      statusCode: {
-        200: (data) => setTreeRoot(data[0]),
-        401: () => {
-          setTreeRoot(null);
+    const [err, elements] = await elementService.get(orgID, projID, branchID, options);
 
-          // Refresh when session expires
-          window.location.reload();
-        },
-        403: (err) => {
-          setError(err.responseText);
-        },
-        404: (err) => {
-          setError(err.responseText);
-        }
-      }
-    });
+    if (err) setError(err);
+    else if (elements) setTreeRoot(elements[0]);
   };
 
   // Run on mount and if the project is changed
@@ -95,9 +88,9 @@ export default function ElementTree(props) {
 
   if (treeRoot !== null) {
     tree = <ElementSubtree id='model'
-                           url={urlBase}
                            data={treeRoot}
                            project={props.project}
+                           branchID={props.branchID}
                            parent={null}
                            archived={props.archived}
                            setRefreshFunctions={props.setRefreshFunctions}

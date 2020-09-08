@@ -31,10 +31,13 @@ const elementContext = createContext([null, () => {}]);
  */
 function ElementProvider(props) {
   const [elementID, setElementID] = useState(null);
+  const [providedElement, setProvidedElement] = useState(null);
 
   const value = {
     elementID,
-    setElementID
+    setElementID,
+    providedElement,
+    setProvidedElement
   };
 
   return <elementContext.Provider value={value} {...props}/>;
