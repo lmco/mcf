@@ -16,6 +16,24 @@ spec:
 
 ---
 
+# External service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-external-service
+spec:
+  type: NodePort
+  ports:
+  - name: mongo
+    port: 27017
+    targetPort: 27017
+    nodePort: 30037
+    protocol: TCP
+  selector:
+    app: mongo
+
+---
+
 # Deployment
 apiVersion: apps/v1
 kind: Deployment

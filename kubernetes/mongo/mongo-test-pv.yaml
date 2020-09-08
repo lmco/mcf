@@ -25,4 +25,4 @@ spec:
   persistentVolumeReclaimPolicy: Recycle
   nfs:
     server: nfs_share_address
-    path: "/mnt/mbee/mbee-test"
+    path: "/mnt/mbee/mbee-test/data"

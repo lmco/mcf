@@ -51,6 +51,8 @@ spec:
             - name: ca-pemstore
               mountPath: /etc/ssl/certs/test.mcf.us.lmco.com.pem
               subPath: test.mcf.us.lmco.com.pem
+            - name: mcf-test-config
+              mountPath: /opt/mcf/config/production.cfg
       volumes:
         - name: cert
           hostPath:
@@ -61,3 +63,6 @@ spec:
         - name: ca-pemstore
           configMap:
             name: ca-pemstore
+        - name: mcf-test-config
+          hostPath:
+            path: "/mnt/mbee/mbee-test/production.cfg"

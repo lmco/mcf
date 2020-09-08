@@ -7,7 +7,9 @@ DockerPassword=$4
 
 # Finding and replacing values
 sed -i "s/server: nfs_share_address/server: $NfsShareUrl/" $ProjectDirectory/kubernetes/mongo/mongo-prod-pv.yaml
+cat $ProjectDirectory/kubernetes/mongo/mongo-prod-pv.yaml
 sed -i "s/--docker-password=dockerpassword/--docker-password=$DockerPassword/" $ProjectDirectory/scripts/deployment/deploy-prod.sh
+cat $ProjectDirectory/kubernetes/mongo/mongo-prod-pv.yaml
 
 # Create prod namespace
 echo '### Creating the prod namespace if it does not exist ###'

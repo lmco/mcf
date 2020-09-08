@@ -7,6 +7,7 @@ DockerPassword=$4
 
 # Finding and replacing values
 sed -i "s/--docker-password=dockerpassword/--docker-password=$DockerPassword/" $ProjectDirectory/scripts/deployment/deploy-dev.sh
+cat $ProjectDirectory/kubernetes/mongo/mongo-test-pv.yaml
 
 # Create test namespace
 echo '### Creating the test namespace if it does not exist ###'
