@@ -120,7 +120,7 @@ Docker Build Mongo:
     - Test MCF
   script:
     - docker build -t mcf-mongo -f ./config/mongo.Dockerfile .
-    - docker tag mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-mongo
+    - docker tag mcf-mongo registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-mongo
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
     - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-mongo:latest
 
