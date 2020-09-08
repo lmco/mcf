@@ -54,6 +54,8 @@ spec:
               mountPath: /etc/ssl/certs/dev.mcf.us.lmco.com.pem
               subPath: dev.mcf.us.lmco.com.pem
               readOnly: false
+            - name: mcf-dev-config
+              mountPath: /opt/mcf/config/production.cfg
       volumes:
         # - name: mongo-data-volume
         #   persistentVolumeClaim:
@@ -67,3 +69,6 @@ spec:
         - name: ca-pemstore
           configMap:
             name: ca-pemstore
+        - name: mcf-dev-config
+          hostPath:
+            path: "/mnt/mbee/mbee-dev/production.cfg"
