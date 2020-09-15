@@ -4,6 +4,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: mongo-dev-data-pv
 spec:
+  volumeName: "mongo-dev-data-pv"
   accessModes:
     - ReadWriteMany
   resources:
@@ -22,7 +23,6 @@ spec:
     storage: 20Gi
   accessModes:
     - ReadWriteMany
-  persistentVolumeReclaimPolicy: Recycle
-  nfs:
-    server: nfs_share_address
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
     path: "/mnt/mbee/mbee-dev/data"

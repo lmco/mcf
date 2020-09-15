@@ -2,12 +2,9 @@
 
 ProjectDirectory=$1
 Version=$2
-NfsShareUrl=$3
-DockerPassword=$4
+DockerPassword=$3
 
 # Finding and replacing values
-sed -i "s/server: nfs_share_address/server: $NfsShareUrl/" $ProjectDirectory/kubernetes/mongo/mongo-prod-pv.yaml
-cat $ProjectDirectory/kubernetes/mongo/mongo-prod-pv.yaml
 sed -i "s/--docker-password=dockerpassword/--docker-password=$DockerPassword/" $ProjectDirectory/scripts/deployment/deploy-prod.sh
 cat $ProjectDirectory/kubernetes/mongo/mongo-prod-pv.yaml
 

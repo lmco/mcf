@@ -137,7 +137,7 @@ Deploy MCF Dev:
     - export VERSION=`cat version.txt`
     - chmod +x ./scripts/deployment/deploy-dev.sh
     - cat ./kubernetes/mongo/mongo-dev-pv.yaml
-    - ./scripts/deployment/deploy-dev.sh $CI_PROJECT_DIR $VERSION $NFS_SHARE_URL $DOCKER_PASSWORD
+    - ./scripts/deployment/deploy-dev.sh $CI_PROJECT_DIR $VERSION $DOCKER_PASSWORD
 
 Deploy MCF Test:
   stage: Deploy
@@ -151,7 +151,7 @@ Deploy MCF Test:
   script:
     - export VERSION=`cat version.txt`
     - chmod +x ./scripts/deployment/deploy-test.sh
-    - ./scripts/deployment/deploy-test.sh $CI_PROJECT_DIR $VERSION $NFS_SHARE_URL $DOCKER_PASSWORD
+    - ./scripts/deployment/deploy-test.sh $CI_PROJECT_DIR $VERSION $DOCKER_PASSWORD
   
 Deploy MCF Prod:
   stage: Deploy
@@ -167,4 +167,4 @@ Deploy MCF Prod:
     - export VERSION=`cat version.txt`
     - chmod +x ./scripts/deployment/deploy-prod.sh
     - cat ./kubernetes/mongo/mongo-prod-pv.yaml
-    - ./scripts/deployment/deploy-prod.sh $CI_PROJECT_DIR $VERSION $NFS_SHARE_URL $DOCKER_PASSWORD
+    - ./scripts/deployment/deploy-prod.sh $CI_PROJECT_DIR $VERSION $DOCKER_PASSWORD

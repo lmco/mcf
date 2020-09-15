@@ -51,7 +51,6 @@ spec:
             - name: ca-pemstore
               mountPath: /etc/ssl/certs/dev.mcf.us.lmco.com.pem
               subPath: dev.mcf.us.lmco.com.pem
-              readOnly: false
             - name: mcf-dev-config
               mountPath: /opt/mcf/config/production.cfg
       volumes:
