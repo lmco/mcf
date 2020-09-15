@@ -2,12 +2,10 @@
 
 ProjectDirectory=$1
 Version=$2
-NfsShareUrl=$3
-DockerPassword=$4
+DockerPassword=$3
 
 # Finding and replacing values
-sed -i "s/--docker-password=dockerpassword/--docker-password=$DockerPassword/" $ProjectDirectory/scripts/deployment/deploy-dev.sh
-cat $ProjectDirectory/kubernetes/mongo/mongo-test-pv.yaml
+sed -i "s/--docker-password=dockerpassword/--docker-password=$DockerPassword/" $ProjectDirectory/scripts/deployment/deploy-test.sh
 
 # Create test namespace
 echo '### Creating the test namespace if it does not exist ###'
@@ -33,8 +31,12 @@ kubectl create -f $ProjectDirectory/kubernetes/mcf/mcf-test-deployment.yaml -n t
 echo '### Creating the mongo deployment if it does not exists ###'
 kubectl create -f $ProjectDirectory/kubernetes/mongo/mongo-test-deployment.yaml -n test
 
-# Updating the replicas to 1.
+# Updating the mongo replicas to 1.
 echo '### Updating the replicas to 1 ###'
 kubectl scale --replicas=1 deployment mongo-deployment -n test
+
+# Updating the mcf replicas to 1.
+echo '### Scaling the deployment to 0 ###' 
+kubectl scale --replicas=1 deployment mcf-deployment -n test
 
 exit 0
