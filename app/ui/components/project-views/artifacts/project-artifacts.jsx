@@ -39,7 +39,6 @@ function ProjectArtifacts(props) {
   const [error, setError] = useState(null);
   const [selectedArtifactID, setSelectedArtifactID] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [deleteTooltipOpen, setDeleteTooltipOpen] = useState(false);
 
   const toggleModal = (artifactID) => {
     const id = (typeof artifactID !== 'string') ? null : artifactID;

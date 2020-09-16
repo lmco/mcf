@@ -7199,6 +7199,72 @@ api.route('/webhooks/:webhookid')
   Middleware.respond
 );
 
+/**
+ * @swagger
+ * /api/orgs/{orgid}/projects/{projectid}/branches/{branchid}/metrics:
+ *   post:
+ *     tags:
+ *       - projects
+ *     description: Runs a series of test against the selected model.
+ *       Metrics collected
+ *        Date - Date when metric was run.
+ *        NumOfElems - Number of elements in this model.
+ *        Users - Users who created/modifed this model.
+ *        Type - An array of Element Types triplets [type, numOfElemType, typePercentage]
+ *        LastModifiedDaysAgo - Number of days this model was last modified.
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: orgid
+ *         description: The ID of the organization.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: projectid
+ *         description: The ID of the project.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: branchid
+ *         description: The ID of the branch.
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: minified
+ *         description: If true, the returned JSON is minified. If false, the
+ *                      returned JSON is formatted based on the format specified
+ *                      in the config. The default value is false.
+ *         in: query
+ *         type: boolean
+ *         default: false
+ *     responses:
+ *       200:
+ *         description: OK, Succeeded to run metrics, return metrics
+ *                      data.
+ *       400:
+ *         description: Bad Request, Failed to run metrics due to invalid
+ *                      project data.
+ *       401:
+ *         description: Unauthorized, Failed to run metrics due to not being
+ *                      logged in.
+ *       404:
+ *         description: Not Found, Failed to run metrics due to project not being
+ *                      found.
+ *       500:
+ *         description: Internal Server Error, Failed to run metrics due to a
+ *                      server side issue.
+ */
+api.route('/orgs/:orgid/projects/:projectid/branches/:branchid/metrics')
+.post(
+  AuthController.authenticate,
+  Middleware.logRoute,
+  Middleware.expiredPassword,
+  Middleware.pluginPre('getMetrics'),
+  APIController.getMetrics,
+  Middleware.pluginPost('getMetrics'),
+  Middleware.logResponse,
+  Middleware.respond
+);
 
 // Catches any invalid api route not defined above.
 api.use('*', APIController.invalidRoute, Middleware.respond);
