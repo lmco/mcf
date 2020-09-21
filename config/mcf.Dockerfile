@@ -46,9 +46,15 @@ RUN echo proxy=$HTTP_PROXY >> /etc/yum.conf \
     && echo sslverify=false >> /etc/yum.conf
 
 # Install nodejs 12
-# RUN yum install scl-utils rh-nodejs${NODEJS_VERSION} git -y 
-# RUN yum install -y gcc-c++ make
-RUN curl -sL https://rpm.nodesource.com/setup_12.18.4 | bash -
+# RUN yum install scl-utils rh-nodejs${NODEJS_VERSION} git -y
+RUN yum install -y wget
+# RUN curl -sL https://rpm.nodesource.com/setup_12.18.4 | bash -
+RUN wget https://nodejs.org/dist/v12.18.4/node-v12.18.4-linux-x64.tar.gz --no-check-certificate
+RUN tar --strip-components 1 -xzvf node-v* -C /usr/local
+RUN node -v
+# RUN mv node-v0.12.18-linux-x64/* /usr/local/nodejs
+# RUN yum install -y nodejs
+RUN node -v
 
 # Set npm proxy settings
 # RUN source scl_source enable rh-nodejs12 \
