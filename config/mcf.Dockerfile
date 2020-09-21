@@ -8,7 +8,7 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     https_proxy="http://proxy-lmi.global.lmco.com:80" \
     NO_PROXY=127.0.0.1,localhost \
     NODE_ENV=production \
-    NODEJS_VERSION=12 \
+    # NODEJS_VERSION=12 \
     MBEE_ENV=production \
     CA_CERT="./certs/LockheedMartinCertificateAuthority.pem"
 
@@ -46,20 +46,33 @@ RUN echo proxy=$HTTP_PROXY >> /etc/yum.conf \
     && echo sslverify=false >> /etc/yum.conf
 
 # Install nodejs 12
-RUN yum install scl-utils rh-nodejs${NODEJS_VERSION} git -y 
+# RUN yum install scl-utils rh-nodejs${NODEJS_VERSION} git -y 
+# RUN yum install -y gcc-c++ make
+RUN curl -sL https://rpm.nodesource.com/setup_12.18.4 | bash -
 
 # Set npm proxy settings
-RUN source scl_source enable rh-nodejs12 \
-    && npm config set cafile $CA_CERT \
+# RUN source scl_source enable rh-nodejs12 \
+#     && npm config set cafile $CA_CERT \
+#     && npm config set http_proxy $HTTP_PROXY \
+#     && npm config set https_proxy $HTTPS_PROXY \
+#     && npm config set strict-ssl false
+# RUN source scl_source enable rh-nodejs12 \
+#     && npm install -g yarn
+
+RUN npm config set cafile $CA_CERT \
     && npm config set http_proxy $HTTP_PROXY \
     && npm config set https_proxy $HTTPS_PROXY \
     && npm config set strict-ssl false
-RUN source scl_source enable rh-nodejs12 \
-    && npm install -g yarn
 
-# Set yarn proxy settings
-RUN source scl_source enable rh-nodejs12 \
-    && yarn config set cafile $CA_CERT \
+RUN npm install -g yarn
+
+# # Set yarn proxy settings
+# RUN source scl_source enable rh-nodejs12 \
+#     && yarn config set cafile $CA_CERT \
+#     && yarn config set http_proxy $HTTP_PROXY \
+#     && yarn config set https_proxy $HTTPS_PROXY
+
+RUN yarn config set cafile $CA_CERT \
     && yarn config set http_proxy $HTTP_PROXY \
     && yarn config set https_proxy $HTTPS_PROXY
 
@@ -73,4 +86,5 @@ EXPOSE 27017
 
 # Run server
 ENTRYPOINT ["/bin/bash", "-c"]
-CMD ["source scl_source enable rh-nodejs12 && node mbee start"]
+# CMD ["source scl_source enable rh-nodejs12 && node mbee start"]
+CMD ["npm start"]
