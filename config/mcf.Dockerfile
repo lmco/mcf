@@ -1,5 +1,4 @@
-FROM centos
-# FROM registry.access.redhat.com/ubi7/ubi
+FROM registry.access.redhat.com/ubi7/ubi
 WORKDIR /opt/mcf
 
 # Set proxy environment variables
