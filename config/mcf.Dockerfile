@@ -8,7 +8,6 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     https_proxy="http://proxy-lmi.global.lmco.com:80" \
     NO_PROXY=127.0.0.1,localhost \
     NODE_ENV=production \
-    # NODEJS_VERSION=12 \
     MBEE_ENV=production \
     CA_CERT="./certs/LockheedMartinCertificateAuthority.pem"
 
@@ -28,6 +27,7 @@ RUN mkdir logs \
     && mkdir -p app \
     && mkdir -p /opt/mcf/data/db/log \
     && mkdir -p node_modules
+
 # Copy Project
 COPY ./config config
 COPY ./scripts scripts
@@ -46,43 +46,26 @@ RUN echo proxy=$HTTP_PROXY >> /etc/yum.conf \
     && echo sslverify=false >> /etc/yum.conf
 
 # Install nodejs 12
-# RUN yum install scl-utils rh-nodejs${NODEJS_VERSION} git -y
 RUN yum install -y wget
-# RUN curl -sL https://rpm.nodesource.com/setup_12.18.4 | bash -
 RUN wget https://nodejs.org/dist/v12.18.4/node-v12.18.4-linux-x64.tar.gz --no-check-certificate
 RUN tar --strip-components 1 -xzvf node-v* -C /usr/local
 RUN node -v
-# RUN mv node-v0.12.18-linux-x64/* /usr/local/nodejs
-# RUN yum install -y nodejs
-RUN node -v
 
 # Set npm proxy settings
-# RUN source scl_source enable rh-nodejs12 \
-#     && npm config set cafile $CA_CERT \
-#     && npm config set http_proxy $HTTP_PROXY \
-#     && npm config set https_proxy $HTTPS_PROXY \
-#     && npm config set strict-ssl false
-# RUN source scl_source enable rh-nodejs12 \
-#     && npm install -g yarn
-
 RUN npm config set cafile $CA_CERT \
     && npm config set http_proxy $HTTP_PROXY \
     && npm config set https_proxy $HTTPS_PROXY \
     && npm config set strict-ssl false
 
+# Install yarn globally
 RUN npm install -g yarn
 
-# # Set yarn proxy settings
-# RUN source scl_source enable rh-nodejs12 \
-#     && yarn config set cafile $CA_CERT \
-#     && yarn config set http_proxy $HTTP_PROXY \
-#     && yarn config set https_proxy $HTTPS_PROXY
-
+# Set yarn proxy settings
 RUN yarn config set cafile $CA_CERT \
     && yarn config set http_proxy $HTTP_PROXY \
     && yarn config set https_proxy $HTTPS_PROXY
 
-# # Define a volume
+# Define a volume
 VOLUME data
 
 # Expose ports
@@ -92,5 +75,4 @@ EXPOSE 27017
 
 # Run server
 ENTRYPOINT ["/bin/bash", "-c"]
-# CMD ["source scl_source enable rh-nodejs12 && node mbee start"]
 CMD ["npm start"]
