@@ -33,6 +33,7 @@ import {
 // MBEE modules
 import validators from '../../../../../build/json/validators.json';
 import { useApiClient } from '../../context/ApiClientProvider';
+const uuidv4 = require('uuid/v4');
 
 /* eslint-enable no-unused-vars */
 
@@ -41,7 +42,7 @@ function CreateBranch(props) {
   const [branches, setBranches] = useState([]);
   const [values, setValues] = useState({
     name: '',
-    id: '',
+    id: uuidv4(),
     source: 'master',
     tag: false,
     custom: JSON.stringify({}, null, 2)

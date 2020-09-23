@@ -35,6 +35,7 @@ import {
 import validators from '../../../../../build/json/validators';
 import ElementSelector from './element-selector.jsx';
 import { useApiClient } from '../../context/ApiClientProvider';
+const uuidv4 = require('uuid/v4');
 
 /* eslint-enable no-unused-vars */
 
@@ -48,13 +49,8 @@ function usePrevious(value) {
 
 function ElementNew(props) {
   const { elementService } = useApiClient();
-
-  // Generate a pseudo-UUID
-  const rnd = (n) => Math.random().toString(16).slice(2, 2 + n);
-  const rndID = `${rnd(8)}-${rnd(4)}-${rnd(4)}-${rnd(4)}-${rnd(8)}${rnd(8)}`;
-
   const [values, setValues] = useState({
-    id: rndID,
+    id: uuidv4(),
     name: '',
     type: ''
   });
