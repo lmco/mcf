@@ -88,6 +88,6 @@
     "watch": "./node_modules/.bin/webpack --watch --config scripts/webpack-dev.config.js"
   },
   "engines": {
-    "node": ">=10.15.0"
+    "node": ">=12.18.3"
   }
 }

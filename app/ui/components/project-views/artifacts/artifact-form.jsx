@@ -34,13 +34,13 @@ import {
 // MBEE modules
 import validators from '../../../../../build/json/validators.json';
 import { useApiClient } from '../../context/ApiClientProvider';
+const uuidv4 = require('uuid/v4');
 
 /* eslint-enable no-unused-vars */
-
 function ArtifactForm(props) {
   const { artifactService } = useApiClient();
   const [values, setValues] = useState({
-    id: '',
+    id: uuidv4(),
     filename: '',
     description: '',
     archived: false,
@@ -181,7 +181,6 @@ function ArtifactForm(props) {
     $('textarea[name="custom"]').autoResize();
   }, []);
 
-
   let title = 'Create Artifact';
   let artifactId = values.id;
   let disableUpdate = false;
@@ -189,6 +188,7 @@ function ArtifactForm(props) {
   let idInvalid = false;
   let locationInvalid = false;
   let filenameInvalid = false;
+
 
   // If user is editing an Artifact Document use ID from props
   if (props.artifactId) {

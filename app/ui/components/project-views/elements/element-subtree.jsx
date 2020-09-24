@@ -23,6 +23,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
+// MBEE modules
+import { useApiClient } from '../../context/ApiClientProvider';
+
 
 /* eslint-enable no-unused-vars */
 
@@ -37,7 +40,7 @@ function usePrevious(value) {
   const ref = useRef();
   useEffect(() => {
     ref.current = value;
-  });
+  }, [value]);
   return ref.current;
 }
 
@@ -48,6 +51,7 @@ function usePrevious(value) {
  * @returns {Function} - Returns JSX.
  */
 export default function ElementSubtree(props) {
+  const { elementService } = useApiClient();
   const [isOpen, setIsOpen] = useState(!!(props.id === 'model' || props.expand));
   const [data, setData] = useState(props.data);
   const [children, setChildren] = useState(null);
@@ -58,8 +62,12 @@ export default function ElementSubtree(props) {
   const prevExpand = usePrevious(props.expand);
   const prevCollapse = usePrevious(props.collapse);
 
+  const orgID = props.project.org;
+  const projID = props.project.id;
+  const branchID = props.branchID;
+
   /**
-   * @description Toggle the element to display it's children.
+   * @description Toggle the element to display its children.
    */
   const toggleCollapse = () => {
     if (props.unsetCheckbox) {
@@ -81,43 +89,26 @@ export default function ElementSubtree(props) {
    * @description When an element is deleted, created, or updates the parent
    * the elements will be updated.
    */
-  const refresh = () => {
-    // Build URL to get element data
-    const base = props.url;
-    const url = `${base}/elements/${props.id}?minified=true&includeArchived=true`;
+  const refresh = async () => {
+    const options = {
+      ids: props.id,
+      includeArchived: true
+    };
 
     // Get element data
-    $.ajax({
-      method: 'GET',
-      url: url,
-      statusCode: {
-        200: (newData) => {
-          // Set the element data
-          setData(newData);
-        },
-        401: (err) => {
-          // Set error
-          setError(err.responseText);
+    const [err, elements] = await elementService.get(orgID, projID, branchID, options);
 
-          // Refresh when session expires
-          window.location.reload();
-        },
-        404: (err) => {
-          // Set error
-          setError(err.responseText);
-        }
-      }
-    });
+    if (err) setError(err);
+    else if (elements) setData(elements[0]);
   };
 
-  const initialize = () => {
+  const initialize = async () => {
     // Verify setRefreshFunction is not null
     if (props.setRefreshFunctions) {
       // Provide refresh function to top parent component
       props.setRefreshFunctions(props.id, refresh);
     }
 
-    // Build URL to get element data
     const contains = data.contains;
     const parent = data.id;
     // Verify element does not have children
@@ -126,70 +117,39 @@ export default function ElementSubtree(props) {
       return;
     }
 
-    const base = props.url;
-    const url = `${base}/elements?parent=${parent}&fields=id,name,contains,archived,type&minified=true&includeArchived=true`;
+    // Get child elements
+    const options = {
+      parent: parent,
+      fields: 'id,name,contains,archived,type',
+      sort: 'name',
+      includeArchived: true
+    };
 
-    // Get children
-    $.ajax({
-      method: 'GET',
-      url: url,
-      statusCode: {
-        200: (newData) => {
-          // Sort data by name or special cases
-          const result = newData.sort((a, b) => {
-            if (!a.name) {
-              return 1;
-            }
-            else if (!b.name) {
-              return -1;
-            }
-            else {
-              const first = a.name.toLowerCase();
-              const second = b.name.toLowerCase();
+    const [err2, elements] = await elementService.get(orgID, projID, branchID, options);
 
-              if (first === '__mbee__') {
-                return -1;
-              }
-              else if ((second === '__mbee__') || (first > second)) {
-                return 1;
-              }
-              else {
-                return -1;
-              }
-            }
-          });
-
-          // Set the sorted data as children
-          setChildren(result);
-        },
-        401: (err) => {
-          // Unset children and display error
-          setChildren(null);
-          setError(err.responseText);
-
-          // Refresh when session expires
-          window.location.reload();
-        },
-        403: (err) => {
-          // Display error
-          setError(err.responseText);
-        },
-        404: (err) => {
-          // Display error
-          setError(err.responseText);
-        }
-      }
-    });
+    if (err2) {
+      setError(err2);
+    }
+    else if (elements) {
+      // Sort so that the __mbee__ element is first
+      const list = [];
+      let __mbee__;
+      elements.forEach((element) => {
+        if (element.id === '__mbee__') __mbee__ = element;
+        else list.push(element);
+      });
+      if (__mbee__) list.unshift(__mbee__);
+      setChildren(list);
+    }
   };
 
-  // on update of data
+  // on update of props or data
   useEffect(() => {
     // Verify if component needs to re-render
-    // Due to the update from state props of data
     if (data !== prevData) {
       initialize();
     }
-    else if (props.data.contains.length !== prevData.contains.length) {
+    else if (props.data !== data) {
       setData(props.data);
       initialize();
     }
@@ -202,7 +162,7 @@ export default function ElementSubtree(props) {
         setIsOpen(false);
       }
     }
-  }, [props]);
+  }, [props.data, props.expand, props.collapse, data]);
 
 
   // Initialize variables
@@ -228,6 +188,7 @@ export default function ElementSubtree(props) {
                           id={`${children[i].id}`}
                           data={children[i]}
                           project={props.project}
+                          branchID={props.branchID}
                           parent={true}
                           archived={props.archived}
                           displayIds={props.displayIds}
@@ -403,7 +364,7 @@ export default function ElementSubtree(props) {
       <span onClick={handleClick}
            className='element-link'>
         <span className='element-name'>
-            {elementIcon}
+          {elementIcon}
           {element}
         </span>
       </span>);

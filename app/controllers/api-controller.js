@@ -102,6 +102,7 @@ module.exports = {
   patchWebhooks,
   deleteWebhooks,
   triggerWebhook,
+  getMetrics,
   invalidRoute
 };
 
@@ -4382,6 +4383,190 @@ async function triggerWebhook(req, res, next) {
 
     // Set a mock user object to be used in the response logging middleware
     req.user = { _id: `Trigger of webhook ${webhook._id}` };
+    next();
+  }
+  catch (error) {
+    // If an error was thrown, return it and its status
+    return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
+  }
+}
+
+/**
+ * POST /api/org/:orgid/projects/:projectid/branches/:branchid/metrics
+ *
+ * @description This function runs a series of test to collect metrics
+ * against the selected model.
+ *
+ * @param {object} req - Request express object.
+ * @param {object} res - Response express object.
+ * @param {Function} next - Middleware callback to trigger the next function
+ *
+ * @returns {object} Response object with metrics data.
+ */
+async function getMetrics(req, res, next) {
+  // Skip controller code if a plugin pre-hook threw an error
+  if (res.statusCode !== 200) return next();
+
+  // Define options
+  // Note: Undefined if not set
+  let options;
+  let minified = false;
+
+  // Define valid option and its parsed type
+  const validOptions = {
+    populate: 'array',
+    fields: 'array',
+    minified: 'boolean'
+  };
+
+  // Sanity Check: there should always be a user in the request
+  if (!req.user) return noUserError(req, res, next);
+
+  // Attempt to parse query options
+  try {
+    // Extract options from request query
+    options = utils.parseOptions(req.query, validOptions);
+  }
+  catch (error) {
+    // Error occurred with options, report it
+    return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
+  }
+
+  // Check options for minified
+  if (options.hasOwnProperty('minified')) {
+    minified = options.minified;
+    delete options.minified;
+  }
+
+  try {
+    // Get all elements from this model
+    const allElements = await ElementController.find(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, options);
+
+    // Define list/objects to store temp metric data
+    const dateList = [];
+    const userList = [];
+    const typeList = [];
+    const seenDates = {};
+    const seenUsers = {};
+    const seenTypes = {};
+
+    // Get model size
+    const modelSize = allElements.length;
+
+    // Loop though each element
+    for (let i = 0; i < modelSize; i++) {
+      // Extract element and its id
+      const elem = allElements[i];
+      const elemID = utils.parseID(elem._id).pop();
+
+      // Exclude/Skip the metrics model
+      if (elemID === '__metrics__') continue;
+
+      // Check if user NOT seen
+      if (!(elem.createdBy in seenUsers)) {
+        seenUsers[elem.createdBy] = 1;
+        userList.push(elem.createdBy);
+      }
+      if (!(elem.lastModifiedBy in seenUsers)) {
+        seenUsers[elem.lastModifiedBy] = 1;
+        userList.push(elem.lastModifiedBy);
+      }
+
+      // Check if date NOT seen
+      if (!(elem.createdOn in seenDates)) {
+        seenDates[elem.createdOn] = 1;
+        dateList.push(new Date(elem.createdOn));
+      }
+      if (!(elem.updatedOn in seenDates)) {
+        seenDates[elem.updatedOn] = 1;
+        dateList.push(new Date(elem.updatedOn));
+      }
+
+      // Check if this element type has been seen
+      if (elem.type in seenTypes) {
+        // Found element type, increment type count
+        const count = seenTypes[elem.type][0] + 1;
+        // Save off type count and overall percentage
+        seenTypes[elem.type] = [count, (count / modelSize).toFixed(2)];
+      }
+      else {
+        // New type, set count to 1
+        seenTypes[elem.type] = [1, (1 / modelSize).toFixed(2)];
+      }
+    }
+
+    // Loop through all found element types
+    Object.keys(seenTypes).forEach(function(type) {
+      const count = seenTypes[type][0];
+      const percentage = seenTypes[type][1];
+      // Create a triplet: elemType, numOfElemType, typePercentage
+      typeList.push([type, count, percentage]);
+    });
+
+    // Calculate the number of days since model was modified
+    // eslint-disable-next-line
+    const earliestDate = Math.max(...dateList);
+    const daysAgo = (Date.now() - earliestDate) / (1000 * 3600 * 24);
+
+    // Create the metric element
+    const metrics = {
+      Date: new Date(),                        // Date when metric was run
+      NumOfElems: modelSize,                   // Number of elements in this model
+      Users: userList,                         // Users who created/modifed this model
+      LastModifiedDaysAgo: daysAgo.toFixed(0), // Number of days since this model was last modified
+      Types: typeList                          // Array of ElemType triplets
+    };
+
+    // Find any previously created metrics element
+    let metricsElem = await ElementController.find(req.user, req.params.orgid,
+      req.params.projectid, req.params.branchid, ['__metrics__'], options);
+
+    // Check if a __metrics__ element exists
+    if (metricsElem.length === 0) {
+      // Metrics does NOT exist, create it
+      const createObj = {
+        id: '__metrics__',
+        name: 'Model Metrics',
+        parent: '__mbee__',
+        custom: {
+          metrics: [metrics]
+        }
+      };
+
+      // Create it
+      await ElementController.create(req.user, req.params.orgid,
+        req.params.projectid, req.params.branchid, createObj);
+    }
+    else {
+      // Metrics element already exists, update it
+      const metricsArr = metricsElem[0].custom.metrics;
+
+      // Push new metrics into array
+      metricsArr.push(metrics);
+
+      // Create the object to update element
+      // Update Element Custom Data with metrics
+      const updateObj = {
+        id: '__metrics__',
+        custom: {
+          metrics: metricsArr
+        }
+      };
+
+      // __metrics__ exist, update it
+      metricsElem = await ElementController.update(req.user, req.params.orgid,
+        req.params.projectid, req.params.branchid, updateObj, options);
+    }
+
+    // Format JSON
+    const json = formatJSON(metrics, minified);
+
+    // Sets message to the metric data, status code to 200
+    res.locals = {
+      message: json,
+      statusCode: 200
+    };
     next();
   }
   catch (error) {

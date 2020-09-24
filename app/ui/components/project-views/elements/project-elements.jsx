@@ -41,26 +41,22 @@ import { useElementContext } from '../../context/ElementProvider.js';
  */
 export default function ProjectElements(props) {
   const [state, setState] = useState({
-    refreshFunction: {},
     archived: false,
     displayIds: true,
     expand: false,
-    collapse: false,
-    error: null,
-    modalOpen: false
+    collapse: false
   });
+  const [refreshFunctions, setRefreshFunction] = useState({});
+  const [modalOpen, setModalOpen] = useState(false);
   const [sidePanel, setSidePanel] = useState(false);
 
   const { elementID, setElementID } = useElementContext();
 
   const setRefreshFunctions = (id, refreshFunction) => {
-    setState((currentState) => {
-      const newState = {
-        ...currentState
-      };
-      newState.refreshFunction[id] = refreshFunction;
-      return newState;
-    });
+    setRefreshFunction((prevState) => ({
+      ...prevState,
+      [id]: refreshFunction
+    }));
   };
 
   const createNewElement = () => {
@@ -92,8 +88,8 @@ export default function ProjectElements(props) {
 
     if (refreshIDs) {
       refreshIDs.forEach((id) => {
-        if (state.refreshFunction.hasOwnProperty(id)) {
-          state.refreshFunction[id]();
+        if (refreshFunctions.hasOwnProperty(id)) {
+          refreshFunctions[id]();
         }
       });
     }
@@ -136,10 +132,7 @@ export default function ProjectElements(props) {
   };
 
   const toggleModal = () => {
-    setState((currentState) => {
-      currentState.modalOpen = !currentState.modalOpen;
-      return currentState;
-    });
+    setModalOpen((prevState) => !prevState);
   };
 
   useEffect(() => {
@@ -155,7 +148,6 @@ export default function ProjectElements(props) {
   const orgID = props.project.org;
   const projID = props.project.id;
   const branchID = props.match.params.branchid;
-  const url = `/api/orgs/${orgID}/projects/${projID}/branches/${branchID}`;
 
   // Check admin/write permissions
   if (props.permissions === 'admin' || props.permissions === 'write') {
@@ -163,47 +155,37 @@ export default function ProjectElements(props) {
     btnDisClassName = 'workspace-title';
   }
 
-  let sidePanelView = <Element project={props.project}
-                               branch={branchID}
-                               url={url}
+  let sidePanelView = <Element orgID={orgID}
+                               projectID={projID}
+                               branchID={branchID}
                                permissions={props.permissions}
                                editElementInfo={editElementInfo}
                                closeSidePanel={closeSidePanel}
                                toggle={toggleModal}/>;
 
-  if (sidePanel === 'elementEdit') {
-    // TODO: have this component pull elementID from Provider
-    sidePanelView = <ElementEditForm id={elementID}
-                                 url={url}
-                                 project={props.project}
-                                 branch={branchID}
-                                 closeSidePanel={closeSidePanel}
-                                 selected={state.selected}/>;
-  }
-
-  else if (sidePanel === 'addElement') {
+  if (sidePanel === 'addElement') {
     sidePanelView = (<ElementNew id={'new-element'}
                                  parent={elementID}
-                                 branch={branchID}
+                                 orgID={orgID}
+                                 projectID={projID}
+                                 branchID={branchID}
                                  project={props.project}
-                                 closeSidePanel={closeSidePanel}
-                                 url={url}/>);
+                                 closeSidePanel={closeSidePanel}/>);
   }
 
   // Return element list
   return (
     <div id='workspace'>
-      <Modal isOpen={state.modalOpen}>
+      <Modal isOpen={modalOpen}>
         <ModalBody>
-          <ElementEditForm id={elementID}
-                           toggle={toggleModal}
-                           modal={state.modalOpen}
+          <ElementEditForm toggle={toggleModal}
+                           modal={modalOpen}
                            customData={props.project.custom}
                            archived={props.project.archived}
-                           url={url}
                            project={props.project}
-                           branch={branchID}
-                           closeSidePanel={closeSidePanel}>
+                           branchID={branchID}
+                           closeSidePanel={closeSidePanel}
+                           refreshFunctions={refreshFunctions}>
           </ElementEditForm>
         </ModalBody>
       </Modal>
@@ -211,11 +193,10 @@ export default function ProjectElements(props) {
         <h2 className={btnDisClassName}>{props.project.name} Model</h2>
         {(!isButtonDisplayed)
           ? ''
-          : (<div className='workspace-header-button ws-button-group add-elements-btn'>
-            <Button className='bigger-width-btn btn-sm'
+          : (<div className='workspace-header-button'>
+            <Button className='btn'
                     outline color='primary'
                     onClick={createNewElement}>
-              <i className='fas fa-plus'/>
               Add Element
             </Button>
           </div>)}

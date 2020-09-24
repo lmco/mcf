@@ -34,6 +34,7 @@ import {
 // MBEE modules
 import validators from '../../../../build/json/validators.json';
 import { useApiClient } from '../context/ApiClientProvider';
+const uuidv4 = require('uuid/v4');
 
 /* eslint-enable no-unused-vars */
 
@@ -41,9 +42,9 @@ function Create(props) {
   const { orgService, projectService } = useApiClient();
   const [orgOpt, setOrgOpt] = useState(null);
   const [values, setValues] = useState({
-    org: null,
+    org: uuidv4(),
     name: '',
-    id: '',
+    id: uuidv4(),
     visibility: 'private',
     custom: JSON.stringify({}, null, 2)
   });
@@ -173,7 +174,7 @@ function Create(props) {
                 <Input type="select"
                        name="org"
                        id="org"
-                       value={values.org || ''}
+                       value={values.org}
                        onChange={handleChange}>
                   <option>Choose one...</option>
                   {orgOpt}
@@ -188,7 +189,7 @@ function Create(props) {
                    name="id"
                    id="id"
                    placeholder="ID"
-                   value={values.id || ''}
+                   value={values.id}
                    invalid={idInvalid}
                    onChange={handleChange}/>
             {/* If invalid id, notify user */}
