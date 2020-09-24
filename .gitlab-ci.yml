@@ -135,7 +135,7 @@ Deploy MCF Test:
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
   # only:
   #   - /^release\/.*$/
-  dependencies: 
+  dependencies:
     - Docker Build MCF
   script:
     - export VERSION=`cat version.txt`
