@@ -56,8 +56,6 @@ Test MCF:
     - yarn config set https-proxy $HTTPS_PROXY
     - yarn config set no_proxy $NO_PROXY
     - NOPREINSTALL=1 yarn install
-    - chmod +x ./scripts/pipeline/pull-cert.sh
-    - ./scripts/pipeline/pull-cert.sh $CI_PROJECT_DIR $LMCertAuthority
     - node mbee migrate -y
     - chmod +x ./scripts/pipeline/search-replace-config.sh
     - ./scripts/pipeline/search-replace-config.sh $CI_PROJECT_DIR $DEFAULT_ADMIN_USERNAME $DEFAULT_ADMIN_PASSWORD $LDAP_URL $LDAP_BIND_DN $LDAP_BIND_DN_PASS $DB_URL $DB_USERNAME $DB_PASSWORD
@@ -86,8 +84,6 @@ Test Plugins:
     - NOPREINSTALL=1 yarn install
     - chmod +x ./scripts/pipeline/search-replace-config.sh
     - ./scripts/pipeline/search-replace-config.sh $CI_PROJECT_DIR $DEFAULT_ADMIN_USERNAME $DEFAULT_ADMIN_PASSWORD $LDAP_URL $LDAP_BIND_DN $LDAP_BIND_DN_PASS $DB_URL $DB_USERNAME $DB_PASSWORD
-    - chmod +x ./scripts/pipeline/pull-cert.sh
-    - ./scripts/pipeline/pull-cert.sh $CI_PROJECT_DIR $LMCertAuthority
     - node mbee migrate -y
   script:
     - node mbee test --plugins
@@ -101,8 +97,6 @@ Docker Build MCF:
   dependencies:
     - Test MCF
   script:
-    - chmod +x ./scripts/pipeline/pull-cert.sh
-    - ./scripts/pipeline/pull-cert.sh $CI_PROJECT_DIR $LMCertAuthority
     - chmod +x ./scripts/pipeline/search-replace-config.sh
     - ./scripts/pipeline/search-replace-config.sh $CI_PROJECT_DIR $DEFAULT_ADMIN_USERNAME $DEFAULT_ADMIN_PASSWORD $LDAP_URL $LDAP_BIND_DN $LDAP_BIND_DN_PASS $DB_URL $DB_USERNAME $DB_PASSWORD
     - docker build -t mcf-docker -f ./config/mcf.Dockerfile .

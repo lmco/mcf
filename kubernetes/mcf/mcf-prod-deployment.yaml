@@ -48,6 +48,8 @@ spec:
               mountPath: /opt/mcf/certs/mcf.cer
             - name: key
               mountPath: /opt/mcf/certs/mcf.key
+            - name: lmcert
+              mountPath: /opt/mcf/certs/LockheedMartinCertificateAuthority.pem
             - name: ca-pemstore
               mountPath: /etc/ssl/certs/prod.mcf.us.lmco.com.pem
               subPath: prod.mcf.us.lmco.com.pem
@@ -60,6 +62,9 @@ spec:
         - name: key
           hostPath:
             path: "/mnt/mbee/mbee-prod/certs/prod.mcf.us.lmco.com.key"
+        - name: lmcert
+          hostPath:
+            path: "/mnt/mbee/mbee-prod/certs/LockheedMartinCertificateAuthority.pem"
         - name: ca-pemstore
           configMap:
             name: ca-pemstore
