@@ -1,0 +1,159 @@
+variables:
+  HTTP_PROXY: http://proxy3.lmco.com:80
+  HTTPS_PROXY: http://proxy3.lmco.com:80
+  http_proxy: http://proxy3.lmco.com:80
+  https_proxy: http://proxy3.lmco.com:80
+  NO_PROXY: 127.0.0.1,localhost
+  GIT_SSL_NO_VERIFY: "true"
+  GIT_STRATEGY: clone
+  MBEE_ENV: pipeline
+
+stages:
+  - Build
+  - Test
+  - Docker
+  - Deploy
+
+Build MCF:
+  stage: Build
+  tags:
+    - docker
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
+  before_script:
+    - export HTTP_PROXY=$HTTP_PROXY
+    - export HTTPS_PROXY=$HTTPS_PROXY
+    - export NO_PROXY=$NO_PROXY
+    - yarn config set strict-ssl false
+    - yarn config set proxy $HTTP_PROXY
+    - yarn config set https-proxy $HTTPS_PROXY
+    - yarn config set no_proxy $NO_PROXY
+  script:
+    - NOPREINSTALL=1 yarn install
+    - node mbee lint
+
+Test MCF:
+  stage: Test
+  artifacts:
+    paths:
+    - node_modules
+    - yarn.lock
+    - build
+    - plugins
+    expire_in: 1h
+  tags:
+    - docker
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
+  services:
+    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+      alias: mongodb
+  before_script:
+    - export MBEE_ENV=$MBEE_ENV
+    - export HTTP_PROXY=$HTTP_PROXY
+    - export HTTPS_PROXY=$HTTPS_PROXY
+    - export NO_PROXY=$NO_PROXY
+    - yarn config set strict-ssl false
+    - yarn config set proxy $HTTP_PROXY
+    - yarn config set https-proxy $HTTPS_PROXY
+    - yarn config set no_proxy $NO_PROXY
+    - NOPREINSTALL=1 yarn install
+    - chmod +x ./scripts/pipeline/pull-cert.sh
+    - ./scripts/pipeline/pull-cert.sh $CI_PROJECT_DIR $LMCertAuthority
+    - node mbee migrate -y
+    - chmod +x ./scripts/pipeline/search-replace-config.sh
+    - ./scripts/pipeline/search-replace-config.sh $CI_PROJECT_DIR $DEFAULT_ADMIN_USERNAME $DEFAULT_ADMIN_PASSWORD $LDAP_URL $LDAP_BIND_DN $LDAP_BIND_DN_PASS $DB_URL $DB_USERNAME $DB_PASSWORD
+  script:
+    - nohup node mbee start &
+    - sleep 20
+    - node mbee test --all
+
+Test Plugins:
+  stage: Test
+  tags:
+    - docker
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
+  services:
+    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+      alias: mongodb
+  before_script:
+    - export MBEE_ENV=$MBEE_ENV
+    - export HTTP_PROXY=$HTTP_PROXY
+    - export HTTPS_PROXY=$HTTPS_PROXY
+    - export NO_PROXY=$NO_PROXY
+    - yarn config set strict-ssl false
+    - yarn config set proxy $HTTP_PROXY
+    - yarn config set https-proxy $HTTPS_PROXY
+    - yarn config set no_proxy $NO_PROXY
+    - NOPREINSTALL=1 yarn install
+    - chmod +x ./scripts/pipeline/search-replace-config.sh
+    - ./scripts/pipeline/search-replace-config.sh $CI_PROJECT_DIR $DEFAULT_ADMIN_USERNAME $DEFAULT_ADMIN_PASSWORD $LDAP_URL $LDAP_BIND_DN $LDAP_BIND_DN_PASS $DB_URL $DB_USERNAME $DB_PASSWORD
+    - chmod +x ./scripts/pipeline/pull-cert.sh
+    - ./scripts/pipeline/pull-cert.sh $CI_PROJECT_DIR $LMCertAuthority
+    - node mbee migrate -y
+  script:
+    - node mbee test --plugins
+
+Docker Build MCF:
+  stage: Docker
+  tags:
+    - shell
+  # only:
+  #   - develop
+  dependencies:
+    - Test MCF
+  script:
+    - chmod +x ./scripts/pipeline/pull-cert.sh
+    - ./scripts/pipeline/pull-cert.sh $CI_PROJECT_DIR $LMCertAuthority
+    - chmod +x ./scripts/pipeline/search-replace-config.sh
+    - ./scripts/pipeline/search-replace-config.sh $CI_PROJECT_DIR $DEFAULT_ADMIN_USERNAME $DEFAULT_ADMIN_PASSWORD $LDAP_URL $LDAP_BIND_DN $LDAP_BIND_DN_PASS $DB_URL $DB_USERNAME $DB_PASSWORD
+    - docker build -t mcf-docker -f ./config/mcf.Dockerfile .
+    - docker tag mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker
+    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
+    - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
+    - docker login https://dtr.mbx.us.lmco.com -u e315459 -p $DTR_ACCESS_TOKEN
+    - docker tag mcf-docker dtr.mbx.us.lmco.com/mbee/mcf
+    - docker push dtr.mbx.us.lmco.com/mbee/mcf:latest
+
+Deploy MCF Dev:
+  stage: Deploy
+  tags:
+    - docker
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
+  # only:
+  #   - develop
+  dependencies: 
+    - Docker Build MCF
+  script:
+    - export VERSION=`cat version.txt`
+    - chmod +x ./scripts/deployment/deploy-dev.sh
+    - cat ./kubernetes/mongo/mongo-dev-pv.yaml
+    - ./scripts/deployment/deploy-dev.sh $CI_PROJECT_DIR $VERSION $DOCKER_PASSWORD
+
+Deploy MCF Test:
+  stage: Deploy
+  tags:
+    - docker
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
+  # only:
+  #   - /^release\/.*$/
+  dependencies:
+    - Docker Build MCF
+  script:
+    - export VERSION=`cat version.txt`
+    - chmod +x ./scripts/deployment/deploy-test.sh
+    - ./scripts/deployment/deploy-test.sh $CI_PROJECT_DIR $VERSION $DOCKER_PASSWORD
+  
+Deploy MCF Prod:
+  stage: Deploy
+  tags:
+    - docker
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
+  # only:
+  #   - /^prc\/.*$/
+  #   - master
+  dependencies: 
+    - Docker Build MCF
+  script:
+    - export VERSION=`cat version.txt`
+    - chmod +x ./scripts/deployment/deploy-prod.sh
+    - cat ./kubernetes/mongo/mongo-prod-pv.yaml
+    - ./scripts/deployment/deploy-prod.sh $CI_PROJECT_DIR $VERSION $DOCKER_PASSWORD
