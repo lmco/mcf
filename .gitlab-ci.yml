@@ -39,6 +39,7 @@ Test MCF:
     - yarn.lock
     - build
     - plugins
+    - coverage
     expire_in: 1h
   tags:
     - docker
