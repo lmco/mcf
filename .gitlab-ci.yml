@@ -65,7 +65,7 @@ Test MCF:
   script:
     - nohup node mbee start &
     - sleep 20
-    - node mbee test --all
+    - yarn testall
 
 Test Plugins:
   stage: Test

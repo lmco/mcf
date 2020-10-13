@@ -86,6 +86,7 @@
     "preinstall": "test $NOPREINSTALL || node ./scripts/clean.js --all",
     "start": "node mbee start",
     "test": "nyc --reporter=html --reporter=text node mbee test",
+    "testall": "nyc --reporter=html --reporter=text node mbee test --all",
     "watch": "./node_modules/.bin/webpack --watch --config scripts/webpack-dev.config.js"
   },
   "engines": {
