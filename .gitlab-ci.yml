@@ -40,7 +40,7 @@ Test MCF:
     - build
     - plugins
     - coverage
-    expire_in: 1h
+    expire_in: 2h
   tags:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
