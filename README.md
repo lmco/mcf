@@ -1,6 +1,7 @@
 # Model-Based Engineering Environment
 
 [![pipeline status](https://gitlab.us.lmco.com/mbx/mbee/mcf/badges/feature/code-coverage/pipeline.svg)](https://gitlab.us.lmco.com/mbx/mbee/mcf/-/commits/feature/code-coverage)
+[![coverage report](https://gitlab.us.lmco.com/mbx/mbee/mcf/badges/feature/code-coverage/coverage.svg)](https://gitlab.us.lmco.com/mbx/mbee/mcf/-/commits/feature/code-coverage)
 
 The Model-Based Engineering Environment (MBEE) is a modeling collaboration software
 that integrates system models with multidisciplinary engineering data and tools.
