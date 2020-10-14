@@ -91,5 +91,12 @@
   },
   "engines": {
     "node": ">=12.18.3"
+  },
+  "nyc": {
+    "exclude": [
+      "scripts",
+      "test",
+      "app/ui"
+    ]
   }
 }
