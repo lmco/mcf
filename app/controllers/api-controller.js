@@ -384,6 +384,8 @@ function getLogs(req, res, next) {
  * access to at least this organization.
  */
 async function getOrgs(req, res, next) {
+  console.log('----------------PROTOCOL-----------');
+  console.log(req.protocol);
   // Skip controller code if a plugin pre-hook threw an error
   if (res.statusCode !== 200) return next();
 
