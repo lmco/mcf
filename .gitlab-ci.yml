@@ -97,10 +97,10 @@ Docker Build MCF:
   stage: Docker
   tags:
     - shell
-  only:
-    - develop
-    - /^release\/.*$/
-    - /^prc\/.*$/
+  # only:
+  #   - develop
+  #   - /^release\/.*$/
+  #   - /^prc\/.*$/
   dependencies:
     - Test MCF
   script:
