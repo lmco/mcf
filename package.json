@@ -66,6 +66,7 @@
     "jsdoc": "^3.5.5",
     "jsdom": "^15.1.1",
     "mocha": "^6.2.0",
+    "nyc": "15.1.0",
     "popper.js": "^1.14.7",
     "react": "^16.8.2",
     "react-dom": "^16.8.2",
@@ -84,10 +85,18 @@
     "postinstall": "test $NOPOSTINSTALL || node mbee build",
     "preinstall": "test $NOPREINSTALL || node ./scripts/clean.js --all",
     "start": "node mbee start",
-    "test": "node mbee test",
+    "test": "nyc --reporter=html --reporter=text node mbee test",
+    "testall": "nyc --reporter=html --reporter=text node mbee test --all",
     "watch": "./node_modules/.bin/webpack --watch --config scripts/webpack-dev.config.js"
   },
   "engines": {
     "node": ">=12.18.3"
+  },
+  "nyc": {
+    "exclude": [
+      "scripts",
+      "test",
+      "app/ui"
+    ]
   }
 }
