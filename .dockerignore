@@ -1,0 +1,20 @@
+# Ignore everything
+**
+
+# Specify allowed files and directories
+!./app
+!./build
+!./certs
+!./config/default.cfg
+!./config/dev.cfg
+!./config/example.cfg
+!./config/jsdoc.json
+!./doc
+!./mbee.js
+#!./node_modules
+!./package.json
+!./plugins
+!./*.md
+!./scripts
+!./test
+!./yarn.lock
