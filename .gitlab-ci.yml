@@ -10,7 +10,7 @@ variables:
   DTR_URL: dtr.mbx.us.lmco.com
   DTR_ORG: mbee
   DTR_REPO: mcf
-  DTR_TAG: “latest”
+  DTR_TAG: latest
 
 stages:
   - Build
