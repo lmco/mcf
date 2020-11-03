@@ -12,6 +12,7 @@ COPY . ./
 
 # Update proxy and install auxiliary packages
 RUN echo proxy=$http_proxy >> /etc/yum.conf \
+    && echo sslverify=false >> /etc/yum.conf \
     && yum install -y wget git
 
 # Install NodeJS 12
