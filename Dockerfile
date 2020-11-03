@@ -1,4 +1,4 @@
-FROM dtr.mbx.us.lmco.com/mbee/base
+FROM registry.access.redhat.com/ubi7/ubi
 WORKDIR /opt/mbee/mcf
 
 ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
