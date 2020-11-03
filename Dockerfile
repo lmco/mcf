@@ -1,7 +1,12 @@
 FROM dtr.mbx.us.lmco.com/mbee/base
 WORKDIR /opt/mbee/mcf
 
-ENV MBEE_ENV=dev \
+ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
+    HTTPS_PROXY="http://proxy-lmi.global.lmco.com:80" \
+    http_proxy="http://proxy-lmi.global.lmco.com:80" \
+    https_proxy="http://proxy-lmi.global.lmco.com:80" \
+    NO_PROXY=127.0.0.1,localhost \
+    MBEE_ENV=dev \
     NODE_ENV=production \
     CAFILE_DST="/etc/pki/ca-trust/source/anchors/lm_ca.pem"
 
@@ -12,8 +17,10 @@ COPY . ./
 
 # Update proxy and install auxiliary packages
 RUN echo proxy=$http_proxy >> /etc/yum.conf \
-    && echo sslverify=false >> /etc/yum.conf \
-    && yum install -y wget git
+    && echo sslverify=false >> /etc/yum.conf
+
+RUN yum install -y wget
+RUN yum install -y git
 
 # Install NodeJS 12
 RUN wget https://nodejs.org/dist/v12.18.4/node-v12.18.4-linux-x64.tar.gz --no-check-certificate \
