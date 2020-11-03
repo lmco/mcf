@@ -12,9 +12,9 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
 
 # Create mbee user
 RUN groupadd -r mbee -g 1000 && useradd -u 1000 -r -g mbee -m -d /opt/mbee -s /sbin/nologin -c "MBEE user" mbee && \
-    chmod 755 /opt/mbee
+    chmod 755 -R /opt/mbee
 
-USER root
+USER mbee
 
 # Copy Project
 COPY . ./
@@ -32,18 +32,15 @@ RUN wget https://nodejs.org/dist/v12.18.4/node-v12.18.4-linux-x64.tar.gz --no-ch
 # Set npm proxy settings and perform global yarn install
 RUN npm set cafile $CAFILE_DST \
     && npm config set http_proxy $http_proxy \
-    && npm config set https_proxy $https_proxy \ 
+    && npm config set https_proxy $https_proxy \
     && npm install -g yarn
 
 # Create log and artifact project directories
 RUN mkdir logs \
     && mkdir -p data/artifacts \
-    && mkdir -p all_plugins \
-    && chown -R mbee:mbee /opt/mbee/mcf
+    && mkdir -p all_plugins
 
 COPY ./plugins all_plugins
-
-USER mbee
 
 # Set yarn proxy settings
 RUN yarn config set cafile $CAFILE_DST \
