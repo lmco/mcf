@@ -3,7 +3,7 @@ WORKDIR /opt/mbee/mcf
 
 ENV MBEE_ENV=dev \
     NODE_ENV=production \
-    CAFILE_DST=/etc/pki/ca-trust/source/anchors/lm_ca.pem
+    CAFILE_DST="/etc/pki/ca-trust/source/anchors/lm_ca.pem"
 
 USER root
 
@@ -27,7 +27,10 @@ RUN npm set cafile $CAFILE_DST \
 # Create log and artifact project directories
 RUN mkdir logs \
     && mkdir -p data/artifacts \
+    && mkdir -p all_plugins \
     && chown -R mbee:mbee /opt/mbee/mcf
+
+COPY ./plugins all_plugins
 
 USER mbee
 

@@ -7,12 +7,15 @@ variables:
   GIT_SSL_NO_VERIFY: "true"
   GIT_STRATEGY: clone
   MBEE_ENV: pipeline
+  DTR_URL: dtr.mbx.us.lmco.com
+  DTR_ORG: mbee
+  DTR_REPO: mcf
+  DTR_TAG: “latest”
 
 stages:
   - Build
   - Test
   - Docker
-  - Deploy
 
 Build MCF:
   stage: Build
@@ -96,10 +99,11 @@ Docker Build MCF:
   dependencies:
     - Test MCF
   script:
-    - docker build -t mcf-docker -f ./config/mcf.Dockerfile .
+    - export DTR_URI=$DTR_URL/$DTR_ORG/$DTR_REPO
+    - docker build -t mcf-docker .
     - docker tag mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
     - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
-    - docker login https://dtr.mbx.us.lmco.com -u e315459 -p $DTR_ACCESS_TOKEN
-    - docker tag mcf-docker dtr.mbx.us.lmco.com/mbee/mcf
-    - docker push dtr.mbx.us.lmco.com/mbee/mcf:latest
+    - docker tag mcf-docker $DTR_URI:$DTR_TAG
+    - docker login $DTR_URL -u "$DTR_USER" -p $DTR_API_KEY
+    - docker push $DTR_URI:$DTR_TAG
