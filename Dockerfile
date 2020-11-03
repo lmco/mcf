@@ -1,5 +1,5 @@
 FROM registry.access.redhat.com/ubi7/ubi
-WORKDIR /opt/mbee/mcf
+WORKDIR /opt/mbee
 
 ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     HTTPS_PROXY="http://proxy-lmi.global.lmco.com:80" \
@@ -10,19 +10,21 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     NODE_ENV=production \
     CAFILE_DST="./certs/LockheedMartinCertificateAuthority.pem"
 
-# Create mbee user
-RUN groupadd -r mbee -g 1000 && useradd -u 1000 -r -g mbee -m -d /opt/mbee -s /sbin/nologin -c "MBEE user" mbee && \
-    chmod 755 -R /opt/mbee
-
-USER mbee
-
 # Copy Project
 COPY . ./
+
+# Create log and artifact project directories
+RUN mkdir logs \
+    && mkdir -p data/artifacts \
+    && mkdir -p all_plugins
+
+COPY ./plugins all_plugins
 
 # Update proxy and install auxiliary packages
 RUN echo proxy=$http_proxy >> /etc/yum.conf \
     && echo sslverify=false >> /etc/yum.conf
 
+# Install wget and git
 RUN yum install -y wget git
 
 # Install NodeJS 12
@@ -35,12 +37,13 @@ RUN npm set cafile $CAFILE_DST \
     && npm config set https_proxy $https_proxy \
     && npm install -g yarn
 
-# Create log and artifact project directories
-RUN mkdir logs \
-    && mkdir -p data/artifacts \
-    && mkdir -p all_plugins
+# Create mbee user and run mcf under that context
+RUN groupadd -r mbee -g 1000 \
+     && useradd -u 1000 -r -g mbee -m -d /opt/mbee -s /sbin/nologin -c "MBEE user" mbee \
+     && chmod 755 /opt/mbee \
+     && chown -R mbee:mbee /opt/mbee
 
-COPY ./plugins all_plugins
+USER mbee
 
 # Set yarn proxy settings
 RUN yarn config set cafile $CAFILE_DST \
