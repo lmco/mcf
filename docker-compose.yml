@@ -1,0 +1,32 @@
+version: '3.7'
+
+services:
+    mongodb:
+        image: dtr.mbx.us.lmco.com/mbee/mongo:4.4
+        container_name: mcf_db
+        restart: always
+        ports:
+            - "27017:27017"
+        volumes:
+            - "./data/db:/data/db"
+        networks:
+            - mcf_network
+    mcf: 
+        build: .
+        image: mbee/mcf:latest
+        container_name: mcf
+        restart: always
+        ports:
+            - "9080:9080"
+            - "9443:9443"
+        working_dir: /opt/mbee/mcf
+        volumes:
+            - "./logs:/opt/mbee/mcf/logs"
+            - "./data/artifacts:/opt/mbee/mcf/data/artifacts"
+        depends_on:
+            - mongodb
+        networks:
+            - mcf_network
+networks:
+    mcf_network:
+        driver: bridge
