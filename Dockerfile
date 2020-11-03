@@ -10,6 +10,10 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     NODE_ENV=production \
     CAFILE_DST="./certs/LockheedMartinCertificateAuthority.pem"
 
+# Create mbee user
+RUN groupadd -r mbee -g 1000 && useradd -u 1000 -r -g mbee -m -d /opt/mbee -s /sbin/nologin -c "MBEE user" mbee && \
+    chmod 755 /opt/mbee
+
 USER root
 
 # Copy Project
