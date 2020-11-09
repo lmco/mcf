@@ -27,6 +27,10 @@ const bodyParser = require('body-parser');
 const flash = require('express-flash');
 const compression = require('compression');
 
+const redis = require('redis');
+const redisClient = redis.createClient();
+const RedisStore = require('connect-redis')(session);
+
 // MBEE modules
 const db = M.require('db');
 const utils = M.require('lib.utils');
@@ -58,6 +62,20 @@ db.connect()
 .then(() => initApp())
 .catch(err => {
   M.log.critical(err.stack);
+  process.exit(1);
+});
+
+redisClient.on('connect', () => {
+  M.log.info('Redis successfully connected');
+});
+
+redisClient.on('end', () => {
+  M.log.critical('Redis disconnected');
+  process.exit(1);
+});
+
+redisClient.on('error', (err) => {
+  M.log.critical('Redis error: ', err);
   process.exit(1);
 });
 
@@ -95,7 +113,7 @@ function initApp() {
     app.set('views', path.join(__dirname, 'views'));
     app.use(expressLayouts);
 
-    // Configure sessions
+    // Configure sessions. Uses Redis
     const units = utils.timeConversions[M.config.auth.session.units];
     app.use(session({
       name: 'SESSION_ID',
@@ -103,7 +121,12 @@ function initApp() {
       resave: false,
       saveUninitialized: false,
       cookie: { maxAge: M.config.auth.session.expires * units },
-      store: new db.Store()
+      store: new RedisStore({
+        host: M.config.auth.session.redis_host,
+        port: M.config.auth.session.redis_port,
+        client: redisClient,
+        ttl: 86400
+      })
     }));
 
     // Enable flash messages

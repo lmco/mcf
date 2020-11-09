@@ -262,7 +262,7 @@ async function create(requestingUser, users, options) {
     // Create array of id's for lookup and array of valid keys
     const arrUsernames = [];
     const validUserKeys = ['username', 'password', 'fname', 'lname',
-      'preferredName', 'email', 'admin', 'provider', 'custom', 'archived'];
+      'preferredName', 'email', 'admin', 'provider', 'custom', 'archived', 'integration_keys'];
 
     // Check that each user has a username, and add to arrUsernames
     let index = 1;
@@ -310,6 +310,7 @@ async function create(requestingUser, users, options) {
       u.updatedOn = Date.now();
       u.archivedBy = (u.archived) ? reqUser._id : null;
       u.archivedOn = (u.archived) ? Date.now() : null;
+      u.integration_keys = [];
       User.hashPassword(u);
       return u;
     });

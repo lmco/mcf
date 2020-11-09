@@ -30,6 +30,8 @@ const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 const multer = require('multer');
 const upload = multer().single('file');
+const axios = require('axios');
+const generator = require('generate-password');
 
 // MBEE modules
 const ArtifactController = M.require('controllers.artifact-controller');
@@ -49,7 +51,6 @@ const permissions = M.require('lib.permissions');
 const publicData = M.require('lib.get-public-data');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
-
 
 // Expose `API Controller functions`
 module.exports = {
@@ -178,9 +179,65 @@ function swaggerJSON(req, res, next) {
  * @param {object} res - Response express object.
  * @param {Function} next - Middleware callback to trigger the next function.
  */
-function login(req, res, next) {
+async function login(req, res, next) {
   // Skip controller code if a plugin pre-hook threw an error
   if (res.statusCode !== 200) return next();
+
+  // get user from mcf database
+  const user = await User.findOne({ _id: req.user._id });
+
+  // Get url and port of mcf.
+  const port = M.config.server[req.protocol].port;
+  const baseUrl = `${req.protocol}://${req.hostname}:${port}`;
+
+  // If user logs into MCF for the first time
+  // create sdvc integration key
+  if (!req.user.integration_keys.find(i => i.name === 'sdvc')) {
+    // generate password
+    const sdvcGeneratedPassword = generator.generate({
+      length: 12,
+      numbers: true,
+      strict: true
+    });
+
+    // create sdvc user for the first time
+    await axios({
+      method: 'post',
+      url: `${baseUrl}/plugins/mms3-adapter/alfresco/service/sdvc-user/${req.body.username}`,
+      headers: { Authorization: `Bearer ${req.session.token}` },
+      data: {
+        password: sdvcGeneratedPassword
+      }
+    });
+
+    // encrypt user password
+    const final = {
+      name: 'sdvc',
+      key: User.encryptIntegrationKey({ name: 'sdvc', key: sdvcGeneratedPassword })
+    };
+
+    // store user password as integration key
+    user.integration_keys.push(final);
+    await User.updateOne({ _id: req.user._id }, { integration_keys: [final] });
+  }
+
+  // decrypt sdvc integration key
+  const decryptedkey = User.decryptIntegrationKey({ name: 'sdvc', key: user.integration_keys.find(i => i.name === 'sdvc').key });
+
+  // Check if seesion has sdvc token
+  if (!req.session.sdvc_token) {
+    // Get auth token for sdvc and store in session
+    const sdvcAuthToken = await axios({
+      method: 'post',
+      url: `${baseUrl}/plugins/mms3-adapter/alfresco/service/sdvc-token/${req.body.username}`,
+      headers: { Authorization: `Bearer ${req.session.token}` },
+      data: {
+        password: decryptedkey
+      }
+    });
+    // check if user has sdvc password
+    req.session.sdvc_auth_token = sdvcAuthToken.data.token.token;
+  }
 
   const json = formatJSON({ token: req.session.token });
   res.locals = {
