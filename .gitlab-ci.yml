@@ -50,6 +50,8 @@ Test MCF:
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
+    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
+      alias: redis
   before_script:
     - export MBEE_ENV=$MBEE_ENV
     - export HTTP_PROXY=$HTTP_PROXY
@@ -74,6 +76,8 @@ Test Plugins:
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
+    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
+      alias: redis
   before_script:
     - export MBEE_ENV=$MBEE_ENV
     - export HTTP_PROXY=$HTTP_PROXY
