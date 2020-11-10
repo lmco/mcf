@@ -120,7 +120,12 @@ function initApp() {
       secret: M.config.server.secret,
       resave: false,
       saveUninitialized: false,
-      cookie: { maxAge: M.config.auth.session.expires * units },
+      cookie: {
+        maxAge: M.config.auth.session.expires * units,
+        secure: M.config.auth.session.cookie.secure,
+        httpOnly: M.config.auth.session.cookie.httpOnly,
+        sameSite: M.config.auth.session.cookie.sameSite
+      },
       store: new RedisStore({
         host: M.config.auth.session.redis_host,
         port: M.config.auth.session.redis_port,
