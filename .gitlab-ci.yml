@@ -64,8 +64,6 @@ Test MCF:
     - NOPREINSTALL=1 yarn install
     - node mbee migrate -y
   script:
-    - hostname
-    - echo $MBEE_ENV
     - nohup node mbee start &
     - sleep 20
     - yarn testall

@@ -27,8 +27,11 @@ const bodyParser = require('body-parser');
 const flash = require('express-flash');
 const compression = require('compression');
 
-const redis = require('redis');
-const redisClient = redis.createClient();
+// const redis = require('redis');
+const Redis = require('ioredis');
+const redisClient = new Redis(M.config.auth.session.redis_port, M.config.auth.session.redis_host);
+// const redisClient = redis.createClient();
+
 const RedisStore = require('connect-redis')(session);
 
 // MBEE modules
