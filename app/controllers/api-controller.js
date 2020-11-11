@@ -177,7 +177,7 @@ function swaggerJSON(req, res, next) {
  * @param {object} res - Response express object.
  * @param {Function} next - Middleware callback to trigger the next function.
  */
-async function login(req, res, next) {
+function login(req, res, next) {
   // Skip controller code if a plugin pre-hook threw an error
   if (res.statusCode !== 200) return next();
 

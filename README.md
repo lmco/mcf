@@ -26,8 +26,7 @@ node version 10.15.0 or greater is required.
 See [nodejs.org](https://nodejs.org/en/) for information on Node.js.
 
 #### Redis
-Redis is used as the session manager. It stores the cookie and auth tokens
-for integration services.
+MBEE's second dependency is Redis. Redis is used as the session manager. It stores cookies and auth tokens.
 
 #### Database
 You will also need an instance of a document based database. MongoDB is the
