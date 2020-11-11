@@ -26,13 +26,7 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const flash = require('express-flash');
 const compression = require('compression');
-
-// const redis = require('redis');
 const Redis = require('ioredis');
-const redisClient = new Redis(M.config.auth.session.redis_port, M.config.auth.session.redis_host);
-// const redisClient = redis.createClient();
-
-const RedisStore = require('connect-redis')(session);
 
 // MBEE modules
 const db = M.require('db');
@@ -48,6 +42,10 @@ const ServerData = M.require('models.server-data');
 const User = M.require('models.user');
 const Webhook = M.require('models.webhook');
 const UIController = M.require('controllers.ui-controller');
+
+// Initialize Redis
+const redisClient = new Redis(M.config.auth.session.redis_port, M.config.auth.session.redis_host);
+const RedisStore = require('connect-redis')(session);
 
 // Initialize express app and export the object
 const app = express();
@@ -74,7 +72,7 @@ redisClient.on('connect', () => {
 
 redisClient.on('end', () => {
   M.log.critical('Redis disconnected');
-  process.exit(1);
+  // TODO: if redis gets disconnected, add reconnect logic.
 });
 
 redisClient.on('error', (err) => {
