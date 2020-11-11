@@ -262,7 +262,7 @@ async function create(requestingUser, users, options) {
     // Create array of id's for lookup and array of valid keys
     const arrUsernames = [];
     const validUserKeys = ['username', 'password', 'fname', 'lname',
-      'preferredName', 'email', 'admin', 'provider', 'custom', 'archived', 'integration_keys'];
+      'preferredName', 'email', 'admin', 'provider', 'custom', 'archived'];
 
     // Check that each user has a username, and add to arrUsernames
     let index = 1;
