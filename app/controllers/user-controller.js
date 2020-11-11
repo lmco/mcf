@@ -310,7 +310,6 @@ async function create(requestingUser, users, options) {
       u.updatedOn = Date.now();
       u.archivedBy = (u.archived) ? reqUser._id : null;
       u.archivedOn = (u.archived) ? Date.now() : null;
-      u.integration_keys = [];
       User.hashPassword(u);
       return u;
     });
