@@ -87,11 +87,12 @@ function readUser(user) {}
  * @throws {PermissionError}
  */
 function updateUser(user, userToUpdate) {
-  try {
-    assert.ok(user.admin || user._id === userToUpdate._id, '');
-  }
-  catch (error) {
+  if (!user.admin && user._id !== userToUpdate._id) {
     throw new M.PermissionError('User does not have permission to update other users.', 'warn');
+  }
+
+  if (userToUpdate.provider === 'ldap') {
+    throw new M.PermissionError('LDAP user cannot be updated.', 'warn');
   }
 }
 
