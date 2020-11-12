@@ -239,7 +239,7 @@ function updateProject(user, org, project) {
         `User does not have permission to update projects in the org [${org._id}].`);
       assert.ok(project.permissions.hasOwnProperty(user._id), 'User does not '
         + `have permission to update the project [${utils.parseID(project._id).pop()}].`);
-      assert.ok(project.permissions[user._id].includes('admin'), 'User does not'
+      assert.ok(project.permissions[user._id].includes('admin'), 'User does not '
         + `have permission to update the project [${utils.parseID(project._id).pop()}].`);
     }
   }
