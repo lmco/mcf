@@ -435,13 +435,11 @@ async function update(requestingUser, users, options) {
       else {
         duplicateCheck[user.username] = user.username;
       }
+
       arrUsernames.push(user.username);
       user._id = user.username;
       index++;
     });
-
-    // Ensure user cannot update others, unless sys-admin
-    permissions.updateUser(reqUser, arrUsernames[0]);
 
     // Create searchQuery
     const searchQuery = { _id: { $in: arrUsernames } };
@@ -465,6 +463,9 @@ async function update(requestingUser, users, options) {
 
     // For each found user
     foundUsers.forEach((user) => {
+      // Ensure user cannot update others, unless sys-admin
+      permissions.updateUser(reqUser, user);
+
       const updateUser = jmiType2[user._id];
       // Remove username and _id field from update object
       delete updateUser.username;
