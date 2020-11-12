@@ -112,4 +112,4 @@ Docker Build MCF:
     # - docker push $DTR_URI:$DTR_TAG
     - docker login -u mbee -p $ARTIFACTORY_PASSWORD jfrog.swf.mbx.us.lmco.com
     - docker tag mcf-docker $ARTIFACTORY_URL/ARTIFACTORY_REPO/mcf:$ARTIFACTORY_TAG
-    - docker push $ARTIFACTORY_URL/ARTIFACTORY_REPO/mcf:$ARTIFACTORY_TAG
+    - docker push $ARTIFACTORY_URL/$ARTIFACTORY_REPO/mcf:$ARTIFACTORY_TAG
