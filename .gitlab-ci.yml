@@ -96,10 +96,10 @@ Docker Build MCF:
   stage: Docker
   tags:
     - shell
-  # only:
-  #   - develop
-  #   - /^release\/.*$/
-  #   - /^prc\/.*$/
+  only:
+    - develop
+    - /^release\/.*$/
+    - /^prc\/.*$/
   dependencies:
     - Test MCF
   script:
@@ -108,6 +108,6 @@ Docker Build MCF:
     - docker tag mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
     - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
-    # - docker tag mcf-docker $DTR_URI:$DTR_TAG
-    # - docker login $DTR_URL -u "$DTR_USER" -p $DTR_API_KEY
-    # - docker push $DTR_URI:$DTR_TAG
+    - docker tag mcf-docker $DTR_URI:$DTR_TAG
+    - docker login $DTR_URL -u "$DTR_USER" -p $DTR_API_KEY
+    - docker push $DTR_URI:$DTR_TAG
