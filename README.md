@@ -20,10 +20,13 @@ distributed services.
 ## Prerequisites
 
 #### Node.js
-MBEE's only dependency to get started is Node.js and NPM. NPM comes with
+MBEE's first dependency to get started is Node.js and NPM. NPM comes with
 Node.js; just install packages with NPM to get started. To start up MBEE,
 node version 10.15.0 or greater is required.
 See [nodejs.org](https://nodejs.org/en/) for information on Node.js.
+
+#### Redis
+MBEE's second dependency is Redis. Redis is used as the session manager. It stores cookies and auth tokens.
 
 #### Database
 You will also need an instance of a document based database. MongoDB is the
@@ -39,7 +42,7 @@ visit [the README in app/db](app/db/README.md).
 ## Getting Started
 
 1. Install dependencies and build by running `yarn install` or `npm install`.
-2. Run MBEE by running `node mbee start`. 
+2. Run MBEE by running `node mbee start`.
 
 ## Documentation
 See the Flight Manual (source located at [`./doc`](./doc))
