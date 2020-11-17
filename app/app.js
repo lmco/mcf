@@ -72,12 +72,14 @@ redisClient.on('connect', () => {
 
 redisClient.on('end', () => {
   M.log.critical('Redis disconnected');
-  // TODO: if redis gets disconnected, add reconnect logic.
 });
 
 redisClient.on('error', (err) => {
   M.log.critical('Redis error: ', err);
-  process.exit(1);
+});
+
+redisClient.on('reconnecting', () => {
+  M.log.info('Reconnecting Redis');
 });
 
 /**
