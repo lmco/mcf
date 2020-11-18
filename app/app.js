@@ -26,6 +26,7 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const flash = require('express-flash');
 const compression = require('compression');
+const Redis = require('ioredis');
 
 // MBEE modules
 const db = M.require('db');
@@ -41,6 +42,10 @@ const ServerData = M.require('models.server-data');
 const User = M.require('models.user');
 const Webhook = M.require('models.webhook');
 const UIController = M.require('controllers.ui-controller');
+
+// Initialize Redis
+const redisClient = new Redis(M.config.auth.session.redis_port, M.config.auth.session.redis_host);
+const RedisStore = require('connect-redis')(session);
 
 // Initialize express app and export the object
 const app = express();
@@ -59,6 +64,22 @@ db.connect()
 .catch(err => {
   M.log.critical(err.stack);
   process.exit(1);
+});
+
+redisClient.on('connect', () => {
+  M.log.info('Redis successfully connected');
+});
+
+redisClient.on('end', () => {
+  M.log.critical('Redis disconnected');
+});
+
+redisClient.on('error', (err) => {
+  M.log.critical('Redis error: ', err);
+});
+
+redisClient.on('reconnecting', () => {
+  M.log.info('Reconnecting Redis');
 });
 
 /**
@@ -95,15 +116,25 @@ function initApp() {
     app.set('views', path.join(__dirname, 'views'));
     app.use(expressLayouts);
 
-    // Configure sessions
+    // Configure sessions. Uses Redis
     const units = utils.timeConversions[M.config.auth.session.units];
     app.use(session({
       name: 'SESSION_ID',
       secret: M.config.server.secret,
       resave: false,
       saveUninitialized: false,
-      cookie: { maxAge: M.config.auth.session.expires * units },
-      store: new db.Store()
+      cookie: {
+        maxAge: M.config.auth.session.expires * units,
+        secure: M.config.auth.session.cookie.secure,
+        httpOnly: M.config.auth.session.cookie.httpOnly,
+        sameSite: M.config.auth.session.cookie.sameSite
+      },
+      store: new RedisStore({
+        host: M.config.auth.session.redis_host,
+        port: M.config.auth.session.redis_port,
+        client: redisClient,
+        ttl: 86400
+      })
     }));
 
     // Enable flash messages

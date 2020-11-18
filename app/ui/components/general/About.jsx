@@ -103,7 +103,7 @@ export default function About(props) {
             <p>Donte McDaniel</p>
           </td>
           <td>
-            Software Engineer (Back-End)
+            Software Engineer (Full Stack)
           </td>
         </tr>
         </tbody>
