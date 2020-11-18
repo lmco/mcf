@@ -50,7 +50,6 @@ const publicData = M.require('lib.get-public-data');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 
-
 // Expose `API Controller functions`
 module.exports = {
   swaggerJSON,
