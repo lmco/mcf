@@ -25,6 +25,7 @@
 // Node modules
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 
 // NPM modules
 const swaggerJSDoc = require('swagger-jsdoc');
@@ -49,7 +50,7 @@ const permissions = M.require('lib.permissions');
 const publicData = M.require('lib.get-public-data');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
-
+const mmsConfig = M.config.server.plugins.plugins['mms3-adapter'].sdvc;
 
 // Expose `API Controller functions`
 module.exports = {
@@ -384,8 +385,6 @@ function getLogs(req, res, next) {
  * access to at least this organization.
  */
 async function getOrgs(req, res, next) {
-  console.log('----------------PROTOCOL-----------');
-  console.log(req.protocol);
   // Skip controller code if a plugin pre-hook threw an error
   if (res.statusCode !== 200) return next();
 
@@ -575,6 +574,31 @@ async function postOrgs(req, res, next) {
     // Create organizations from org data
     // NOTE: create() sanitizes orgData
     const orgs = await OrgController.create(req.user, orgData, options);
+
+    if (mmsConfig) {
+      orgs.forEach(org => {
+        const port = M.config.server[req.protocol].port;
+        const requestOptions = {
+          url: `http://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-org`,
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${req.session.token}`
+          },
+          method: 'post',
+          data: org
+        };
+
+        axios(requestOptions).then(function(response) {
+          if (response.status !== 200) {
+            throw new M.ServerError('Issue creating SDVC org');
+          }
+        })
+        .catch(function(error) {
+          return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
+        });
+      });
+    }
+
     // Get the public data of each org
     const orgsPublicData = sani.html(
       orgs.map(o => publicData.getPublicData(req.user, o, 'org', options))
@@ -1173,6 +1197,55 @@ async function postProjects(req, res, next) {
     // NOTE: create() sanitizes req.params.orgid and projectData
     const projects = await ProjectController.create(req.user, req.params.orgid, projectData,
       options);
+
+    if (mmsConfig) {
+      projects.forEach(proj => {
+        const port = M.config.server[req.protocol].port;
+        const projectRequestOptions = {
+          url: `http://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-project`,
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${req.session.token}`
+          },
+          method: 'post',
+          data: proj
+        };
+
+        axios(projectRequestOptions).then(async function() {
+          const elementIds = ['model', 'undefined', 'holding_bin', '__mbee__'];
+          const orgid = req.params.orgid;
+          const projectid = utils.parseID(proj._id)[1];
+
+          // Get all init elements
+          const elements = await ElementController.find(req.user, orgid, projectid, 'master', elementIds);
+
+          // Create the init elements in SDVC
+          elements.forEach(element => {
+            const elementRequestOptions = {
+              url: `http://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-element`,
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${req.session.token}`
+              },
+              method: 'post',
+              data: {
+                projectId: projectid,
+                branchId: 'master',
+                element: element
+              }
+            };
+
+            axios(elementRequestOptions).then(function(resp) {
+              logger.info('Created init Elements in SDVC');
+            });
+          });
+        })
+        .catch(function(error) {
+          return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
+        });
+      });
+    }
+
     const publicProjectData = sani.html(
       projects.map(p => publicData.getPublicData(req.user, p, 'project', options))
     );
@@ -2440,6 +2513,39 @@ async function postElements(req, res, next) {
     // NOTE: create() sanitizes input params
     const elements = await ElementController.create(req.user, req.params.orgid,
       req.params.projectid, req.params.branchid, elementData, options);
+
+    if (mmsConfig) {
+      elements.forEach(element => {
+        const port = M.config.server[req.protocol].port;
+        const split = element.branch.split(':');
+        // const org = split[0];
+        const proj = split[1];
+        const branch = split[2];
+        const requestOptions = {
+          url: `http://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-element`,
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${req.session.token}`
+          },
+          method: 'post',
+          data: {
+            projectId: proj,
+            branchId: branch,
+            element: element
+          }
+        };
+
+        axios(requestOptions).then(function(response) {
+          logger.info('Element in SDVC SUCCESSFULLY created');
+        })
+        .catch(function(error) {
+          // TODO: Log error message
+          logger.error(error);
+          return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
+        });
+      });
+    }
+
     const elementsPublicData = sani.html(
       elements.map(e => publicData.getPublicData(req.user, e, 'element', options))
     );

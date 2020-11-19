@@ -466,6 +466,9 @@ async function create(requestingUser, organizationID, projectID, branches, optio
       // Create the new elements
       const newElements = await Element.insertMany(elementsToCreate);
 
+      console.log('-----------NEW Elements by branch--------------');
+      console.log(newElements);
+
       if (newElements.length !== (newBranches.length * elementsCloning.length)) {
         // Not all elements were created
         throw new M.DatabaseError('Not all elements were cloned from branch.', 'error');
