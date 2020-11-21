@@ -111,3 +111,4 @@ Docker Build MCF:
     # - docker tag mcf-docker $DTR_URI:$DTR_TAG
     # - docker login $DTR_URL -u "$DTR_USER" -p $DTR_API_KEY
     # - docker push $DTR_URI:$DTR_TAG
+
