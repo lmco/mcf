@@ -43,7 +43,7 @@ function OrganizationProjects(props) {
       if (perm === 'admin'
         || (!project.archived && (perm === 'write' || perm === 'read' || project.visibility === 'internal'))) {
         listItems.push(<ListItem key={`proj-key-${project.id}`} className='proj-org-header'>
-                        <Link to={`/orgs/${org.id}/project/${project.id}/branches/master/elements`}>
+                        <Link to={`/orgs/${org.id}/projects/${project.id}/branches/master/elements`}>
                           {project.name}
                         </Link>
                       </ListItem>);

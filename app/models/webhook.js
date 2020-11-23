@@ -32,7 +32,7 @@
  * <p>The triggers field is an array of strings that refer to specific events that can trigger an
  * outgoing webhook or the events an incoming webhook will emit.</p>
  *
- * <h4>Response</h4>
+ * <h4>Url</h4>
  * <p>The response field is an object that contains fields required to send a request: url, method,
  * headers, token, ca, and data. Only outgoing webhooks have a response field. The url is the
  * only required field, while the method defaults to POST and the headers to
@@ -86,13 +86,7 @@ const extensions = M.require('models.plugin.extensions');
  * @property {string} type - The webhook's type, either incoming or outgoing.
  * @property {string} description - An optional field to provide a description for the webhook.
  * @property {string[]} triggers - The events that trigger the webhook or that the webhook emits.
- * @property {object} response - An object containing options for an HTTP request.
- * @property {string} response.url - The url to send a request to.
- * @property {string} response.method - The method of the request. Defaults to POST.
- * @property {string} response.headers - The headers of the request. Defaults to
- * {'Content-Type': 'application/json'}.
- * @property {string} response.token - An optional field for additional verification.
- * @property {object} response.data - An optional field for data to send with the request.
+ * @property {string} url - The url to send a request to.
  * @property {string} token - The token to validate incoming requests against.
  * @property {string} tokenLocation - The location of the token in the external request.
  * @property {string} reference - The _id of the org, project, or branch the webhook is registered
