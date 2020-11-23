@@ -43,18 +43,21 @@ spec:
           image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
           ports:
             - containerPort: 9080
+          env:
+            - name: MBEE_ENV
+              value: "production"
           volumeMounts:
             - name: cert
-              mountPath: /opt/mcf/certs/mcf.cer
+              mountPath: /opt/mbee/certs/mcf.cer
             - name: lmcert
-              mountPath: /opt/mcf/certs/LockheedMartinCertificateAuthority.pem
+              mountPath: /opt/mbee/certs/LockheedMartinCertificateAuthority.pem
             - name: key
-              mountPath: /opt/mcf/certs/mcf.key
+              mountPath: /opt/mbee/certs/mcf.key
             - name: ca-pemstore
               mountPath: /etc/ssl/certs/dev.mcf.us.lmco.com.pem
               subPath: dev.mcf.us.lmco.com.pem
             - name: mcf-dev-config
-              mountPath: /opt/mcf/config/production.cfg
+              mountPath: /opt/mbee/config/production.cfg
       volumes:
         - name: cert
           hostPath:
