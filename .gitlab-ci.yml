@@ -10,7 +10,7 @@ variables:
   DTR_URL: dtr.mbx.us.lmco.com
   DTR_ORG: mbee
   DTR_REPO: mcf
-  DTR_TAG: latest
+  DTR_TAG: 4.0
 
 stages:
   - Build
@@ -108,7 +108,7 @@ Docker Build MCF:
     - docker tag mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
     - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
-    # - docker tag mcf-docker $DTR_URI:$DTR_TAG
-    # - docker login $DTR_URL -u "$DTR_USER" -p $DTR_API_KEY
-    # - docker push $DTR_URI:$DTR_TAG
+    - docker tag mcf-docker $DTR_URI:$DTR_TAG
+    - docker login $DTR_URL -u "$DTR_USER" -p $DTR_API_KEY
+    - docker push $DTR_URI:$DTR_TAG
 

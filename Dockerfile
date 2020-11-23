@@ -52,6 +52,9 @@ RUN yarn config set cafile $CAFILE_DST \
 
 RUN NOPOSTINSTALL=1 NOPREINSTALL=1 yarn install --production
 
+RUN chmod +x ./scripts/install-plugin-modules.sh
+RUN ./scripts/install-plugin-modules.sh
+
 EXPOSE 9080 9443
 
 # Run server
