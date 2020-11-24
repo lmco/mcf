@@ -10,7 +10,7 @@ variables:
   DTR_URL: dtr.mbx.us.lmco.com
   DTR_ORG: mbee
   DTR_REPO: mcf
-  DTR_TAG: "4.0"
+  DTR_TAG: "4.1"
 
 stages:
   - Build
@@ -111,4 +111,3 @@ Docker Build MCF:
     - docker tag mcf-docker $DTR_URI:$DTR_TAG
     - docker login $DTR_URL -u "$DTR_USER" -p $DTR_API_KEY
     - docker push $DTR_URI:$DTR_TAG
-
