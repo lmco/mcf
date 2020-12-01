@@ -37,6 +37,11 @@ RUN npm set cafile $CAFILE_DST \
     && npm config set https_proxy $https_proxy \
     && npm install -g yarn
 
+# Install Prince
+RUN curl -O --insecure --proxy $HTTP_PROXY https://www.princexml.com/download/prince-13.5-1.centos7.x86_64.rpm
+RUN yum install -y ./prince-13.5-1.centos7.x86_64.rpm
+RUN rm prince-13.5-1.centos7.x86_64.rpm
+
 # Create mbee user and run mcf under that context
 RUN groupadd -r mbee -g 1000 \
      && useradd -u 1000 -r -g mbee -m -d /opt/mbee -s /sbin/nologin -c "MBEE user" mbee \
