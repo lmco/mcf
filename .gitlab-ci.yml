@@ -23,12 +23,12 @@ Build MCF:
     - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
   before_script:
-    - export HTTP_PROXY=$HTTP_PROXY
-    - export HTTPS_PROXY=$HTTPS_PROXY
+    - export HTTP_PROXY=http://proxy-lmi.global.lmco.com:80
+    - export HTTPS_PROXY=http://proxy-lmi.global.lmco.com:80
     - export NO_PROXY=$NO_PROXY
     - yarn config set strict-ssl false
-    - yarn config set proxy $HTTP_PROXY
-    - yarn config set https-proxy $HTTPS_PROXY
+    - yarn config set proxy http://proxy-lmi.global.lmco.com:80
+    - yarn config set https-proxy http://proxy-lmi.global.lmco.com:80
     - yarn config set no_proxy $NO_PROXY
   script:
     - NOPREINSTALL=1 yarn install
@@ -54,12 +54,12 @@ Test MCF:
       alias: redis
   before_script:
     - export MBEE_ENV=$MBEE_ENV
-    - export HTTP_PROXY=$HTTP_PROXY
-    - export HTTPS_PROXY=$HTTPS_PROXY
+    - export HTTP_PROXY=http://proxy-lmi.global.lmco.com:80
+    - export HTTPS_PROXY=http://proxy-lmi.global.lmco.com:80
     - export NO_PROXY=$NO_PROXY
     - yarn config set strict-ssl false
-    - yarn config set proxy $HTTP_PROXY
-    - yarn config set https-proxy $HTTPS_PROXY
+    - yarn config set proxy http://proxy-lmi.global.lmco.com:80
+    - yarn config set https-proxy http://proxy-lmi.global.lmco.com:80
     - yarn config set no_proxy $NO_PROXY
     - NOPREINSTALL=1 yarn install
     - node mbee migrate -y
@@ -80,12 +80,12 @@ Test Plugins:
       alias: redis
   before_script:
     - export MBEE_ENV=$MBEE_ENV
-    - export HTTP_PROXY=$HTTP_PROXY
-    - export HTTPS_PROXY=$HTTPS_PROXY
+    - export HTTP_PROXY=http://proxy-lmi.global.lmco.com:80
+    - export HTTPS_PROXY=http://proxy-lmi.global.lmco.com:80
     - export NO_PROXY=$NO_PROXY
     - yarn config set strict-ssl false
-    - yarn config set proxy $HTTP_PROXY
-    - yarn config set https-proxy $HTTPS_PROXY
+    - yarn config set proxy http://proxy-lmi.global.lmco.com:80
+    - yarn config set https-proxy http://proxy-lmi.global.lmco.com:80
     - yarn config set no_proxy $NO_PROXY
     - NOPREINSTALL=1 yarn install
     - node mbee migrate -y
