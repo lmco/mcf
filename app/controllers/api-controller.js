@@ -52,6 +52,9 @@ const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
 const mmsConfig = M.config.server.plugins.plugins['mms3-adapter'].sdvc;
 
+// Publisher
+const publisher = require('../lib/pubsub/publisher');
+
 // Expose `API Controller functions`
 module.exports = {
   swaggerJSON,
@@ -179,9 +182,36 @@ function swaggerJSON(req, res, next) {
  * @param {object} res - Response express object.
  * @param {Function} next - Middleware callback to trigger the next function.
  */
-function login(req, res, next) {
+async function login(req, res, next) {
   // Skip controller code if a plugin pre-hook threw an error
   if (res.statusCode !== 200) return next();
+
+  // Checking to see if user has integration keys in database
+  const user = await User.findOne({ _id: req.user._id });
+
+  // Checking to see if there are any integrated services
+  if (M.config.integratedServices) {
+    M.config.integratedServices.forEach(service => {
+      const integrationKey = user.integration_keys.find(key => key.name === service.name);
+
+      // data the integration service needs for authentication
+      const data = {
+        sessionId: req.sessionID,
+        token: req.session.token,
+        user: req.user._id,
+        name: service.name,
+        exists: false
+      };
+
+      if (integrationKey) {
+        data.exists = true;
+        data.key = integrationKey.key;
+      }
+
+      // sending message to dynamic integration service to handle auth for service
+      publisher.publish('AUTH_INTEGRATION', JSON.stringify(data));
+    });
+  }
 
   const json = formatJSON({ token: req.session.token });
   res.locals = {

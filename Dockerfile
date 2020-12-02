@@ -50,6 +50,9 @@ RUN yarn config set cafile $CAFILE_DST \
     && yarn config set http_proxy $http_proxy \
     && yarn config set https_proxy $https_proxy
 
+RUN chmod +x ./scripts/install-plugin-modules.sh
+RUN ./scripts/install-plugin-modules.sh
+
 RUN NOPOSTINSTALL=1 NOPREINSTALL=1 yarn install --production
 
 EXPOSE 9080 9443
