@@ -40,7 +40,7 @@ spec:
       containers:
         - name: mcf
           imagePullPolicy: Always
-          image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
+          image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:4.0
           ports:
             - containerPort: 9080
           env:

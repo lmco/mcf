@@ -10,7 +10,7 @@ variables:
   DTR_URL: dtr.mbx.us.lmco.com
   DTR_ORG: mbee
   DTR_REPO: mcf
-  DTR_TAG: "4.1"
+  DTR_TAG: latest
 
 stages:
   - Build
@@ -96,10 +96,10 @@ Docker Build MCF:
   stage: Docker
   tags:
     - shell
-  # only:
-  #   - develop
-  #   - /^release\/.*$/
-  #   - /^prc\/.*$/
+  only:
+    - develop
+    - /^release\/.*$/
+    - /^prc\/.*$/
   dependencies:
     - Test MCF
   script:
