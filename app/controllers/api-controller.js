@@ -612,7 +612,8 @@ async function postOrgs(req, res, next) {
           url: `http://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-org`,
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${req.session.token}`
+            Authorization: `Bearer ${req.session.token}`,
+            'SDVC-TOKEN': req.session.sdvc_token
           },
           method: 'post',
           data: org
@@ -1235,7 +1236,8 @@ async function postProjects(req, res, next) {
           url: `http://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-project`,
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${req.session.token}`
+            Authorization: `Bearer ${req.session.token}`,
+            'SDVC-TOKEN': req.session.sdvc_token
           },
           method: 'post',
           data: proj
@@ -1255,7 +1257,8 @@ async function postProjects(req, res, next) {
               url: `http://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-element`,
               headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${req.session.token}`
+                Authorization: `Bearer ${req.session.token}`,
+                'SDVC-TOKEN': req.session.sdvc_token
               },
               method: 'post',
               data: {
