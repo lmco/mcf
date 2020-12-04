@@ -13,26 +13,26 @@ variables:
   DTR_TAG: latest
 
 stages:
-  - Build
+  # - Build
   - Test
   - Docker
 
-Build MCF:
-  stage: Build
-  tags:
-    - docker
-  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
-  before_script:
-    - export HTTP_PROXY=$HTTP_PROXY
-    - export HTTPS_PROXY=$HTTPS_PROXY
-    - export NO_PROXY=$NO_PROXY
-    - yarn config set strict-ssl false
-    - yarn config set proxy $HTTP_PROXY
-    - yarn config set https-proxy $HTTPS_PROXY
-    - yarn config set no_proxy $NO_PROXY
-  script:
-    - NOPREINSTALL=1 yarn install
-    - node mbee lint
+# Build MCF:
+#   stage: Build
+#   tags:
+#     - docker
+#   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
+#   before_script:
+#     - export HTTP_PROXY=$HTTP_PROXY
+#     - export HTTPS_PROXY=$HTTPS_PROXY
+#     - export NO_PROXY=$NO_PROXY
+#     - yarn config set strict-ssl false
+#     - yarn config set proxy $HTTP_PROXY
+#     - yarn config set https-proxy $HTTPS_PROXY
+#     - yarn config set no_proxy $NO_PROXY
+#   script:
+#     - NOPREINSTALL=1 yarn install
+#     - node mbee lint
 
 Test MCF:
   stage: Test
