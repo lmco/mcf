@@ -1268,8 +1268,12 @@ async function postProjects(req, res, next) {
               }
             };
 
-            axios(elementRequestOptions).then(function(resp) {
-              logger.info('Created init Elements in SDVC');
+            axios(elementRequestOptions).then(function() {
+              M.log.info(`Success: created element ${element.name} in SDVC`);
+            })
+            .catch(function(error) {
+              const message = error.message;
+              return utils.formatResponse(req, res, message, errors.getStatusCode(error), next);
             });
           });
         })
@@ -2558,7 +2562,8 @@ async function postElements(req, res, next) {
           url: `http://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-element`,
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${req.session.token}`
+            Authorization: `Bearer ${req.session.token}`,
+            'SDVC-TOKEN': req.session.sdvc_token
           },
           method: 'post',
           data: {
@@ -2569,11 +2574,11 @@ async function postElements(req, res, next) {
         };
 
         axios(requestOptions).then(function(response) {
-          logger.info('Element in SDVC SUCCESSFULLY created');
+          M.log.info(`Success: created element ${element.name} in SDVC`);
         })
         .catch(function(error) {
           // TODO: Log error message
-          logger.error(error);
+          M.log.error(error);
           return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
         });
       });
@@ -3189,6 +3194,68 @@ async function postBranches(req, res, next) {
     const publicBranchData = sani.html(
       branches.map(b => publicData.getPublicData(req.user, b, 'branch', options))
     );
+
+    // Create new branch in SDVC and the initial elements
+    branches.forEach(branch => {
+      const projectid = req.params.projectid;
+      const port = M.config.server[req.protocol].port;
+
+      // Setting up request options
+      const branchRequestOptions = {
+        url: `http://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-branch`,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${req.session.token}`,
+          'SDVC-TOKEN': req.session.sdvc_token
+        },
+        method: 'post',
+        data: {
+          projectId: projectid,
+          branchObj: branch
+        }
+      };
+
+      // Sending request to mms3 adapter to create branch
+      axios(branchRequestOptions).then(async function() {
+        // const elementIds = ['model', 'undefined', 'holding_bin', '__mbee__'];
+        const orgid = req.params.orgid;
+        // const projectid = req.params.projectid;
+        const branchid = utils.parseID(branch._id)[2];
+
+        // Getting all elements in the newly created branch
+        const elements = await ElementController.find(req.user, orgid, projectid, `${branchid}`);
+
+        // Creating the initial 4 elements in SDVC
+        elements.forEach(element => {
+          const elementRequestOptions = {
+            url: `http://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-element`,
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${req.session.token}`,
+              'SDVC-TOKEN': req.session.sdvc_token
+            },
+            method: 'post',
+            data: {
+              projectId: projectid,
+              branchId: branchid,
+              element: element
+            }
+          };
+
+          // Sending request to mms3 adapter to create elements
+          axios(elementRequestOptions).then(function() {
+            M.log.info(`Success: created element ${element.name} in SDVC`);
+          })
+          .catch(function(error) {
+            const message = error.message;
+            return utils.formatResponse(req, res, message, errors.getStatusCode(error), next);
+          });
+        });
+      })
+      .catch(function(error) {
+        return utils.formatResponse(req, res, error.message, errors.getStatusCode(error), next);
+      });
+    });
 
     // Format JSON
     const json = formatJSON(publicBranchData, minified);
