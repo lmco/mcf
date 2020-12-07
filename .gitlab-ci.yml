@@ -8,19 +8,19 @@ variables:
   DTR_TAG: latest
 
 stages:
-  - Setup
+  # - Setup
   - Test
   - Docker
 
-Setup Environment:
-  stage: Setup
-  tags:
-    - shell
-  script:
-    - docker build -t pre-mcf-docker .
-    - docker tag pre-mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker
-    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
-    - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
+# Setup Environment:
+#   stage: Setup
+#   tags:
+#     - shell
+#   script:
+#     - docker build -t pre-mcf-docker .
+#     - docker tag pre-mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker
+#     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
+#     - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
 
 Build Test MCF:
   stage: Test
@@ -49,13 +49,13 @@ Build Test MCF:
     - yarn config set proxy $HTTP_PROXY
     - yarn config set https-proxy $HTTPS_PROXY
     - yarn config set no_proxy $NO_PROXY
-    - NOPREINSTALL=1 yarn install
+    # - NOPREINSTALL=1 yarn install
     - node mbee migrate -y
   script:
     - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
     - docker run -d -p 9080:9080 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
     # - nohup node mbee start &
-    - sleep 15
+    - sleep 20
     - yarn testall
 
 # Test Plugins:
