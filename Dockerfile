@@ -53,7 +53,7 @@ RUN yarn config set cafile $CAFILE_DST \
 RUN chmod +x ./scripts/install-plugin-modules.sh
 RUN ./scripts/install-plugin-modules.sh
 
-RUN cp config/pipeline.cfg ./config/pipeline.cfg
+RUN cp ./config/pipeline.cfg config/pipeline.cfg
 
 RUN NOPOSTINSTALL=1 NOPREINSTALL=1 yarn install --production
 
