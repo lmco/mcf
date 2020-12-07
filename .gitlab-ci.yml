@@ -8,12 +8,12 @@ variables:
   DTR_TAG: latest
 
 stages:
-  - Setup Env
+  - Setup
   - Test
   - Docker
 
 Setup Environment:
-  stage: Setup Env
+  stage: Setup
   tags:
     - shell
   dependencies:
