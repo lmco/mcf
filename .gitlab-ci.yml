@@ -51,7 +51,7 @@ Build Test MCF:
     - yarn config set proxy $HTTP_PROXY
     - yarn config set https-proxy $HTTPS_PROXY
     - yarn config set no_proxy $NO_PROXY
-    # - NOPREINSTALL=1 yarn install
+    - NOPREINSTALL=1 yarn install
     - node mbee migrate -y
   script:
     # - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
