@@ -91,7 +91,7 @@ Docker Build MCF:
     - /^release\/.*$/
     - /^prc\/.*$/
   dependencies:
-    - Test MCF
+    - Build Test MCF
   script:
     - export DTR_URI=$DTR_URL/$DTR_ORG/$DTR_REPO
     - docker build -t mcf-docker .
