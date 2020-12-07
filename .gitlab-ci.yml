@@ -33,7 +33,7 @@ Build Test MCF:
     - coverage
     expire_in: 2h
   tags:
-    - docker
+    - docker-builder
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
