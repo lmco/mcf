@@ -54,7 +54,7 @@ RUN chmod +x ./scripts/install-plugin-modules.sh
 RUN ./scripts/install-plugin-modules.sh
 
 RUN ls config
-COPY ./config/pipeline.cfg config/pipeline.cfg
+COPY ./config/pipeline.cfg ./config/pipeline.cfg
 
 RUN NOPOSTINSTALL=1 NOPREINSTALL=1 yarn install --production
 
