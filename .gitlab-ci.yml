@@ -24,7 +24,7 @@ Setup Environment:
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
     - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
 
-Build & Test MCF:
+Build Test MCF:
   stage: Test
   artifacts:
     paths:
