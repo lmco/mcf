@@ -54,8 +54,8 @@ Build Test MCF:
     # - NOPREINSTALL=1 yarn install
     - node mbee migrate -y
   script:
-    - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
-    - docker run -d -p 9080:9080 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
+    # - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
+    # - docker run -d -p 9080:9080 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
     # - nohup node mbee start &
     - sleep 20
     - yarn testall
