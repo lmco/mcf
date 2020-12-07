@@ -19,7 +19,6 @@ Setup Environment:
   dependencies:
     - Test MCF
   script:
-    - export DTR_URI=$DTR_URL/$DTR_ORG/$DTR_REPO
     - docker build -t pre-mcf-docker .
     - docker tag pre-mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
