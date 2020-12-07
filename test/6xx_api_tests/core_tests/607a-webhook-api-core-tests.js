@@ -19,6 +19,7 @@
 // NPM modules
 const chai = require('chai');
 const axios = require('axios');
+const http = require('axios/lib/adapters/http');
 
 // MBEE modules
 const WebhookController = M.require('controllers.webhook-controller');
@@ -99,7 +100,8 @@ async function postWebhooks() {
       method: 'post',
       url: `${test.url}/api/webhooks`,
       headers: testUtils.getHeaders(),
-      data: webhookData
+      data: webhookData,
+      adapter: http
     };
 
     // Make an API request
@@ -165,7 +167,8 @@ async function getWebhook() {
       method: 'get',
       url: `${test.url}/api/webhooks/${webhookData.id}`,
       headers: testUtils.getHeaders(),
-      data: null
+      data: null,
+      adapter: http
     };
 
     // Make an API request
@@ -211,7 +214,8 @@ async function getWebhooks() {
       headers: testUtils.getHeaders(),
       params: {
         ids: webhookData.map(w => w.id).toString()
-      }
+      },
+      adapter: http
     };
 
     // Make an API request
@@ -273,7 +277,8 @@ async function getAllWebhooks() {
       method: 'get',
       url: `${test.url}/api/webhooks`,
       headers: testUtils.getHeaders(),
-      data: null
+      data: null,
+      adapter: http
     };
 
     // Make an API request
@@ -339,7 +344,8 @@ async function patchWebhook() {
       method: 'patch',
       url: `${test.url}/api/webhooks/${webhookData.id}`,
       headers: testUtils.getHeaders(),
-      data: webhookUpdate
+      data: webhookUpdate,
+      adapter: http
     };
 
     // Make an API request
@@ -390,7 +396,8 @@ async function patchWebhooks() {
       method: 'patch',
       url: `${test.url}/api/webhooks`,
       headers: testUtils.getHeaders(),
-      data: webhookUpdate
+      data: webhookUpdate,
+      adapter: http
     };
 
     // Make an API request
@@ -451,7 +458,8 @@ async function deleteWebhook() {
       method: 'delete',
       url: `${test.url}/api/webhooks/${deleteID}`,
       headers: testUtils.getHeaders(),
-      body: null
+      body: null,
+      adapter: http
     };
 
     // Make an API request
@@ -481,7 +489,8 @@ async function deleteWebhooks() {
     const options = {
       method: 'delete',
       url: `${test.url}/api/webhooks?ids=${ids}`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request
@@ -529,7 +538,8 @@ async function triggerWebhook() {
       method: 'post',
       url: `${test.url}/api/webhooks/trigger/${encodedID}`,
       headers: testUtils.getHeaders(),
-      data: body
+      data: body,
+      adapter: http
     };
 
     // Make an API request

@@ -20,6 +20,7 @@
 // NPM modules
 const chai = require('chai');
 const axios = require('axios');
+const http = require('axios/lib/adapters/http');
 
 // MBEE modules
 const jmi = M.require('lib.jmi-conversions');
@@ -94,7 +95,8 @@ async function postOrg() {
       method: 'post',
       url: `${test.url}/api/orgs/${orgData.id}`,
       headers: testUtils.getHeaders(),
-      data: orgData
+      data: orgData,
+      adapter: http
     };
 
     // Make an API request
@@ -140,7 +142,8 @@ async function postOrgs() {
       method: 'post',
       url: `${test.url}/api/orgs`,
       headers: testUtils.getHeaders(),
-      data: orgData
+      data: orgData,
+      adapter: http
     };
 
     // Make an API request
@@ -194,7 +197,8 @@ async function putOrg() {
       method: 'put',
       url: `${test.url}/api/orgs/${orgData.id}`,
       headers: testUtils.getHeaders(),
-      data: orgData
+      data: orgData,
+      adapter: http
     };
 
     // Make an API request
@@ -241,7 +245,8 @@ async function putOrgs() {
       method: 'put',
       url: `${test.url}/api/orgs`,
       headers: testUtils.getHeaders(),
-      data: orgData
+      data: orgData,
+      adapter: http
     };
 
     // Make an API request
@@ -293,7 +298,8 @@ async function getOrg() {
     const options = {
       method: 'get',
       url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request
@@ -342,7 +348,8 @@ async function getOrgs() {
     const options = {
       method: 'get',
       url: `${test.url}/api/orgs?ids=${orgIDs}`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request
@@ -404,7 +411,8 @@ async function getAllOrgs() {
     const options = {
       method: 'get',
       url: `${test.url}/api/orgs`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request
@@ -465,7 +473,8 @@ async function patchOrg() {
       method: 'patch',
       url: `${test.url}/api/orgs/${testData.orgs[0].id}`,
       headers: testUtils.getHeaders(),
-      data: { name: 'Edited Name' }
+      data: { name: 'Edited Name' },
+      adapter: http
     };
 
     // Make an API request
@@ -518,7 +527,8 @@ async function patchOrgs() {
       method: 'patch',
       url: `${test.url}/api/orgs`,
       headers: testUtils.getHeaders(),
-      data: arrUpdateOrg
+      data: arrUpdateOrg,
+      adapter: http
     };
 
     // Make an API request
@@ -570,7 +580,8 @@ async function deleteOrg() {
     const options = {
       method: 'delete',
       url: `${test.url}/api/orgs/${orgData.id}`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request
@@ -608,7 +619,8 @@ async function deleteOrgs() {
     const options = {
       method: 'delete',
       url: `${test.url}/api/orgs?ids=${ids}`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request

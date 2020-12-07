@@ -20,6 +20,7 @@
 // NPM modules
 const chai = require('chai');
 const axios = require('axios');
+const http = require('axios/lib/adapters/http');
 
 // MBEE modules
 const jmi = M.require('lib.jmi-conversions');
@@ -99,7 +100,8 @@ async function postProject() {
       method: 'post',
       url: `${test.url}/api/orgs/${org._id}/projects/${projData.id}`,
       headers: testUtils.getHeaders(),
-      data: projData
+      data: projData,
+      adapter: http
     };
 
     // Make an API request
@@ -151,7 +153,8 @@ async function postProjects() {
       method: 'post',
       url: `${test.url}/api/orgs/${org._id}/projects`,
       headers: testUtils.getHeaders(),
-      data: projData
+      data: projData,
+      adapter: http
     };
 
     // Make an API request
@@ -207,7 +210,8 @@ async function putProject() {
       method: 'put',
       url: `${test.url}/api/orgs/${org._id}/projects/${projData.id}`,
       headers: testUtils.getHeaders(),
-      data: projData
+      data: projData,
+      adapter: http
     };
 
     // Make an API request
@@ -260,7 +264,8 @@ async function putProjects() {
       method: 'put',
       url: `${test.url}/api/orgs/${org._id}/projects`,
       headers: testUtils.getHeaders(),
-      data: projData
+      data: projData,
+      adapter: http
     };
 
     // Make an API request
@@ -315,7 +320,8 @@ async function getProject() {
     const options = {
       method: 'get',
       url: `${test.url}/api/orgs/${org._id}/projects/${projData.id}`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request
@@ -369,7 +375,8 @@ async function getProjects() {
     const options = {
       method: 'get',
       url: `${test.url}/api/orgs/${org._id}/projects?ids=${projIDs}`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request
@@ -430,7 +437,8 @@ async function getAllProjectsOnOrg() {
     const options = {
       method: 'get',
       url: `${test.url}/api/orgs/${org._id}/projects`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request
@@ -492,7 +500,8 @@ async function getAllProjects() {
     const options = {
       method: 'get',
       url: `${test.url}/api/projects`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request
@@ -553,7 +562,8 @@ async function patchProject() {
       method: 'patch',
       url: `${test.url}/api/orgs/${org._id}/projects/${projData.id}`,
       headers: testUtils.getHeaders(),
-      data: updateObj
+      data: updateObj,
+      adapter: http
     };
 
     // Make an API request
@@ -611,7 +621,8 @@ async function patchProjects() {
       method: 'patch',
       url: `${test.url}/api/orgs/${org._id}/projects`,
       headers: testUtils.getHeaders(),
-      data: updateObj
+      data: updateObj,
+      adapter: http
     };
 
     // Make an API request
@@ -666,7 +677,8 @@ async function deleteProject() {
     const options = {
       method: 'delete',
       url: `${test.url}/api/orgs/${org._id}/projects/${projData.id}`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request
@@ -705,7 +717,8 @@ async function deleteProjects() {
     const options = {
       method: 'delete',
       url: `${test.url}/api/orgs/${org._id}/projects?ids=${ids}`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request

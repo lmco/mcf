@@ -20,6 +20,7 @@
 // NPM modules
 const chai = require('chai');
 const axios = require('axios');
+const http = require('axios/lib/adapters/http');
 
 // MBEE modules
 const test = M.config.test;
@@ -45,7 +46,8 @@ async function upTest() {
   try {
     const options = {
       method: 'get',
-      url: `${test.url}/api/test`
+      url: `${test.url}/api/test`,
+      adapter: http
     };
 
     // Make an API request
@@ -71,7 +73,8 @@ async function swaggerJSONTest() {
   try {
     const options = {
       method: 'get',
-      url: `${test.url}/api/doc/swagger.json`
+      url: `${test.url}/api/doc/swagger.json`,
+      adapter: http
     };
 
     // Make an API request

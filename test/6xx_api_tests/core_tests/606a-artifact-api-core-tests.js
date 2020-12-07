@@ -118,7 +118,8 @@ async function postArtifact() {
       method: 'post',
       url: `${test.url}/api/orgs/${orgID}/projects/${projID}/branches/${branchID}/artifacts/${artData.id}`,
       headers: testUtils.getHeaders(),
-      data: artData
+      data: artData,
+      adapter: http
     };
 
     // Make an API request
@@ -174,7 +175,8 @@ async function postArtifacts() {
       method: 'post',
       url: `${test.url}/api/orgs/${orgID}/projects/${projID}/branches/${branchID}/artifacts`,
       headers: testUtils.getHeaders(),
-      data: artData
+      data: artData,
+      adapter: http
     };
 
     // Make an API request
@@ -238,7 +240,8 @@ async function getArtifact() {
     const options = {
       method: 'get',
       url: `${test.url}/api/orgs/${orgID}/projects/${projID}/branches/${branchID}/artifacts/${artData.id}`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request
@@ -301,7 +304,8 @@ async function getArtifacts() {
       headers: testUtils.getHeaders(),
       params: {
         ids: artIDs.toString()
-      }
+      },
+      adapter: http
     };
 
     // Make an API request
@@ -429,7 +433,8 @@ async function getBlob() {
       url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/blob`,
       params: queryParams,
       headers: testUtils.getHeaders(),
-      responseType: 'arraybuffer'
+      responseType: 'arraybuffer',
+      adapter: http
     };
 
     // Make an API request
@@ -468,7 +473,8 @@ async function listBlobs() {
     const options = {
       method: 'get',
       url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/list`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request
@@ -499,7 +505,8 @@ async function getBlobById() {
       method: 'get',
       url: `${test.url}/api/orgs/${orgID}/projects/${projID}/branches/${branchID}/artifacts/${artData.id}/blob`,
       headers: testUtils.getHeaders(),
-      responseType: 'arraybuffer'
+      responseType: 'arraybuffer',
+      adapter: http
     };
 
     // Make an API request
@@ -545,7 +552,8 @@ async function deleteBlob() {
       method: 'delete',
       url: `${test.url}/api/orgs/${orgID}/projects/${projID}/artifacts/blob`,
       headers: testUtils.getHeaders(),
-      params: query
+      params: query,
+      adapter: http
     };
 
     // Make an API request
@@ -585,7 +593,8 @@ async function patchArtifact() {
       method: 'patch',
       url: `${test.url}/api/orgs/${orgID}/projects/${projID}/branches/${branchID}/artifacts/${artData.id}`,
       headers: testUtils.getHeaders(),
-      data: reqBody
+      data: reqBody,
+      adapter: http
     };
 
     // Make an API request
@@ -646,7 +655,8 @@ async function patchArtifacts() {
       method: 'patch',
       url: `${test.url}/api/orgs/${orgID}/projects/${projID}/branches/${branchID}/artifacts`,
       headers: testUtils.getHeaders(),
-      data: updateObj
+      data: updateObj,
+      adapter: http
     };
 
     // Make an API request
@@ -712,7 +722,8 @@ async function deleteArtifact() {
     const options = {
       method: 'delete',
       url: `${test.url}/api/orgs/${orgID}/projects/${projID}/branches/${branchID}/artifacts/${artData.id}`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request
@@ -748,7 +759,8 @@ async function deleteArtifacts() {
     const options = {
       method: 'delete',
       url: `${test.url}/api/orgs/${orgID}/projects/${projID}/branches/${branchID}/artifacts?ids=${ids}`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request

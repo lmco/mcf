@@ -20,6 +20,7 @@
 // NPM modules
 const chai = require('chai');
 const axios = require('axios');
+const http = require('axios/lib/adapters/http');
 
 // MBEE modules
 const jmi = M.require('lib.jmi-conversions');
@@ -96,7 +97,8 @@ async function whoami() {
     const options = {
       method: 'get',
       url: `${test.url}/api/users/whoami`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API GET request
@@ -127,7 +129,8 @@ async function postUser() {
       method: 'post',
       url: `${test.url}/api/users/${userData.username}`,
       headers: testUtils.getHeaders(),
-      data: JSON.stringify(userData)
+      data: JSON.stringify(userData),
+      adapter: http
     };
 
     // Make an API request
@@ -177,7 +180,8 @@ async function postUsers() {
       method: 'post',
       url: `${test.url}/api/users/`,
       headers: testUtils.getHeaders(),
-      data: userData
+      data: userData,
+      adapter: http
     };
 
     // Make an API request
@@ -232,7 +236,8 @@ async function putUser() {
       method: 'put',
       url: `${test.url}/api/users/${userData.username}`,
       headers: testUtils.getHeaders(),
-      data: userData
+      data: userData,
+      adapter: http
     };
 
     // Make an API request
@@ -283,7 +288,8 @@ async function putUsers() {
       method: 'put',
       url: `${test.url}/api/users/`,
       headers: testUtils.getHeaders(),
-      data: userData
+      data: userData,
+      adapter: http
     };
 
     // Make an API request
@@ -338,8 +344,8 @@ async function getUser() {
     const options = {
       method: 'get',
       url: `${test.url}/api/users/${userData.username}`,
-      headers: testUtils.getHeaders()
-
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request
@@ -392,7 +398,8 @@ async function getUsers() {
       headers: testUtils.getHeaders(),
       params: {
         usernames: userData.map(u => u.username).toString()
-      }
+      },
+      adapter: http
     };
 
     // Make an API request
@@ -455,7 +462,8 @@ async function getAllUsers() {
     const options = {
       method: 'get',
       url: `${test.url}/api/users`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request
@@ -525,7 +533,8 @@ async function searchUsers() {
     const options = {
       method: 'get',
       url: `${test.url}/api/users/search?q=${userData[0].fname}`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request
@@ -587,7 +596,8 @@ async function patchUser() {
       method: 'patch',
       url: `${test.url}/api/users/${userData.username}`,
       headers: testUtils.getHeaders(),
-      data: updateObj
+      data: updateObj,
+      adapter: http
     };
 
     // Make an API request
@@ -642,7 +652,8 @@ async function patchUsers() {
       method: 'patch',
       url: `${test.url}/api/users`,
       headers: testUtils.getHeaders(),
-      data: updateObj
+      data: updateObj,
+      adapter: http
     };
 
     // Make an API request
@@ -705,7 +716,8 @@ async function patchUserPassword() {
       method: 'patch',
       url: `${test.url}/api/users/${userData.username}/password`,
       headers: testUtils.getHeaders('application/json', userData),
-      data: JSON.stringify(updateObj)
+      data: JSON.stringify(updateObj),
+      adapter: http
     };
 
     // Make an API request
@@ -752,7 +764,8 @@ async function deleteUser() {
       method: 'delete',
       url: `${test.url}/api/users/${userData.username}`,
       headers: testUtils.getHeaders(),
-      data: userData
+      data: userData,
+      adapter: http
     };
 
     // Make an API request
@@ -790,7 +803,8 @@ async function deleteUsers() {
     const options = {
       method: 'delete',
       url: `${test.url}/api/users?ids=${ids}`,
-      headers: testUtils.getHeaders()
+      headers: testUtils.getHeaders(),
+      adapter: http
     };
 
     // Make an API request
