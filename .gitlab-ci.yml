@@ -39,11 +39,11 @@ Build Test MCF:
     - coverage
     expire_in: 2h
   image: docker:latest
-  # services:
-  #   - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
-  #     alias: mongodb
-  #   - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
-  #     alias: redis
+  services:
+    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+      alias: mongodb
+    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
+      alias: redis
   #   - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
   #     alias: mcf
   # before_script:
@@ -62,10 +62,11 @@ Build Test MCF:
     # - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
     # - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
     - docker run --help
-    - docker run -d --name redis -p 6379:6379 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9:latest
-    - docker run -d  --name mongo -p 27017:27017 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4:latest
-    - docker run -d --name mcf -p 9080:9080 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
-    # - nohup node mbee start &
+    - docker network create mcf
+    # - docker run -d --name redis -p 6379:6379 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9:latest
+    # - docker run -d  --name mongreo -p 27017:27017 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4:latest
+    # - docker run -d --name mcf -p 9080:9080 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
+    - nohup node mbee start &
     - sleep 20
     - yarn testall
     - docker stop redis mongo mcf
