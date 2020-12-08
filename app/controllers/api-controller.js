@@ -50,7 +50,7 @@ const permissions = M.require('lib.permissions');
 const publicData = M.require('lib.get-public-data');
 const sani = M.require('lib.sanitization');
 const utils = M.require('lib.utils');
-const mmsConfig = M.config.server.plugins.plugins['mms3-adapter'].sdvc;
+const mmsConfig = M.config.server.plugins.plugins['mms3-adapter'].sdvc || null;
 
 // Publisher
 const publisher = require('../lib/pubsub/publisher');

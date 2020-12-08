@@ -8,7 +8,8 @@ variables:
   DTR_TAG: latest
 
 stages:
-  # - Setup
+  - Setup
+  - DeployTest
   - Test
   - Docker
 
@@ -17,15 +18,24 @@ stages:
   tags:
     - docker
 
-# Setup Environment:
-#   stage: Setup
-#   tags:
-#     - shell
-#   script:
-#     - docker build -t pre-mcf-docker .
-#     - docker tag pre-mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker
-#     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
-#     - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
+Setup Environment:
+  stage: Setup
+  tags:
+    - shell
+  script:
+    - docker build -t pre-mcf-docker .
+    - docker tag pre-mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker
+    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
+    - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
+
+Deploy Test MCF:
+  stage: DeployTest
+  tags:
+    - docker
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
+  script:
+    - chmod +x ./scripts/pipeline/deploy-test.sh
+    - ./scripts/pipeline/deploy-test.sh $CI_PROJECT_DIR $DOCKER_PASSWORD
 
 Build Test MCF:
   <<: *dockerbuild
@@ -39,11 +49,11 @@ Build Test MCF:
     - coverage
     expire_in: 2h
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
-  services:
-    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
-      alias: mongodb
-    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
-      alias: redis
+  # services:
+  #   - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+  #     alias: mongodb
+  #   - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
+  #     alias: redis
   #   - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
   #     alias: mcf
   before_script:
@@ -66,8 +76,8 @@ Build Test MCF:
     # - docker run -d --name redis -p 6379:6379 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9:latest
     # - docker run -d  --name mongreo -p 27017:27017 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4:latest
     # - docker run -d --name mcf -p 9080:9080 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
-    - nohup node mbee start &
-    - sleep 20
+    # - nohup node mbee start &
+    # - sleep 20
     - yarn testall
     # - docker stop redis mongo mcf
     # - docker rm redis mongo mcf
