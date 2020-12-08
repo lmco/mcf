@@ -38,7 +38,7 @@ Build Test MCF:
     - plugins
     - coverage
     expire_in: 2h
-  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
+  image: docker:latest
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
@@ -46,21 +46,21 @@ Build Test MCF:
       alias: redis
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
       alias: mcf
-  before_script:
-    - export MBEE_ENV=$MBEE_ENV
-    - export HTTP_PROXY=$HTTP_PROXY
-    - export HTTPS_PROXY=$HTTPS_PROXY
-    - export NO_PROXY=$NO_PROXY
-    - yarn config set strict-ssl false
-    - yarn config set proxy $HTTP_PROXY
-    - yarn config set https-proxy $HTTPS_PROXY
-    - yarn config set no_proxy $NO_PROXY
-    - NOPREINSTALL=1 yarn install
-    - node mbee migrate -y
+  # before_script:
+  #   - export MBEE_ENV=$MBEE_ENV
+  #   - export HTTP_PROXY=$HTTP_PROXY
+  #   - export HTTPS_PROXY=$HTTPS_PROXY
+  #   - export NO_PROXY=$NO_PROXY
+  #   - yarn config set strict-ssl false
+  #   - yarn config set proxy $HTTP_PROXY
+  #   - yarn config set https-proxy $HTTPS_PROXY
+  #   - yarn config set no_proxy $NO_PROXY
+  #   - NOPREINSTALL=1 yarn install
+  #   - node mbee migrate -y
   script:
-    - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
-    - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
-    - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
+    # - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
+    # - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+    # - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
     - docker run --name redis -d -p 6379:6379 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9:latest
     - docker run --name mongo -d -p 27017:27017 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4:latest
     - docker run --name mcf -d -p 9080:9080 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
