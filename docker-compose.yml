@@ -1,14 +1,20 @@
 version: '3.7'
 
 services:
+    redis:
+        image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
+        container_name: redis
+        restart: always
+        ports:
+            - "6379:6379"
+        networks:
+            - mcf_network
     mongodb:
-        image: dtr.mbx.us.lmco.com/mbee/mongo:4.4
-        container_name: mcf_db
+        image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+        container_name: mongodb
         restart: always
         ports:
             - "27017:27017"
-        volumes:
-            - "./data/db:/data/db"
         networks:
             - mcf_network
     mcf: 
@@ -19,12 +25,9 @@ services:
         ports:
             - "9080:9080"
             - "9443:9443"
-        working_dir: /opt/mbee/mcf
-        volumes:
-            - "./logs:/opt/mbee/mcf/logs"
-            - "./data/artifacts:/opt/mbee/mcf/data/artifacts"
         depends_on:
             - mongodb
+            - redis
         networks:
             - mcf_network
 networks:
