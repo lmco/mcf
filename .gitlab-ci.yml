@@ -46,17 +46,17 @@ Build Test MCF:
       alias: redis
   #   - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
   #     alias: mcf
-  # before_script:
-  #   - export MBEE_ENV=$MBEE_ENV
-  #   - export HTTP_PROXY=$HTTP_PROXY
-  #   - export HTTPS_PROXY=$HTTPS_PROXY
-  #   - export NO_PROXY=$NO_PROXY
-  #   - yarn config set strict-ssl false
-  #   - yarn config set proxy $HTTP_PROXY
-  #   - yarn config set https-proxy $HTTPS_PROXY
-  #   - yarn config set no_proxy $NO_PROXY
-  #   - NOPREINSTALL=1 yarn install
-  #   - node mbee migrate -y
+  before_script:
+    - export MBEE_ENV=$MBEE_ENV
+    - export HTTP_PROXY=$HTTP_PROXY
+    - export HTTPS_PROXY=$HTTPS_PROXY
+    - export NO_PROXY=$NO_PROXY
+    - yarn config set strict-ssl false
+    - yarn config set proxy $HTTP_PROXY
+    - yarn config set https-proxy $HTTPS_PROXY
+    - yarn config set no_proxy $NO_PROXY
+    - NOPREINSTALL=1 yarn install
+    - node mbee migrate -y
   script:
     # - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
     # - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
