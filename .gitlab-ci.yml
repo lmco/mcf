@@ -40,14 +40,14 @@ Build Test MCF:
     - plugins
     - coverage
     expire_in: 2h
-  image: registry.gitlab.us.lmco.com:443/docker-images/docker:stable*
+  image: registry.us.lmco.com/lmco-internal/docker-plus:*
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
-      # alias: mongodb
+      alias: mongodb
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
-      # alias: redis
+      alias: redis
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
-      # alias: mcf
+      alias: mcf
   before_script:
     - export MBEE_ENV=$MBEE_ENV
     - export HTTP_PROXY=$HTTP_PROXY
