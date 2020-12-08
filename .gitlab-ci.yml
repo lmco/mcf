@@ -53,6 +53,8 @@ Build Test MCF:
     - export HTTP_PROXY=$HTTP_PROXY
     - export HTTPS_PROXY=$HTTPS_PROXY
     - export NO_PROXY=$NO_PROXY
+    - docker images
+    - node -v
     - yarn config set strict-ssl false
     - yarn config set proxy $HTTP_PROXY
     - yarn config set https-proxy $HTTPS_PROXY
