@@ -31,7 +31,7 @@ Build Test MCF:
   # <<: *dockerbuild
   stage: Test
   tags:
-    - shell
+    - docker-builder
   artifacts:
     paths:
     - node_modules
@@ -43,11 +43,11 @@ Build Test MCF:
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
-      alias: mongodb
+      # alias: mongodb
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
-      alias: redis
+      # alias: redis
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
-      alias: mcf
+      # alias: mcf
   before_script:
     - export MBEE_ENV=$MBEE_ENV
     - export HTTP_PROXY=$HTTP_PROXY
