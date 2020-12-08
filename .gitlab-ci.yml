@@ -12,6 +12,11 @@ stages:
   - Test
   - Docker
 
+# Init docker in docker
+.dockerbuild: &dockerbuild
+  tags:
+    - shell
+
 Setup Environment:
   stage: Setup
   tags:
@@ -23,6 +28,7 @@ Setup Environment:
     - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
 
 Build Test MCF:
+  <<: *dockerbuild
   stage: Test
   artifacts:
     paths:
@@ -32,16 +38,14 @@ Build Test MCF:
     - plugins
     - coverage
     expire_in: 2h
-  tags:
-    - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
-  services:
-    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
-      alias: mongodb
-    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
-      alias: redis
-    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
-      alias: mcf
+  # services:
+  #   - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+  #     alias: mongodb
+  #   - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
+  #     alias: redis
+  #   - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
+  #     alias: mcf
   before_script:
     - export MBEE_ENV=$MBEE_ENV
     - export HTTP_PROXY=$HTTP_PROXY
@@ -54,11 +58,17 @@ Build Test MCF:
     - NOPREINSTALL=1 yarn install
     - node mbee migrate -y
   script:
-    # - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
-    # - docker run -d -p 9080:9080 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
+    - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
+    - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+    - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
+    - docker run --name redis -d -p 6379:6379 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9:latest
+    - docker run --name mongo -d -p 27017:27017 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4:latest
+    - docker run --name mcf -d -p 9080:9080 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
     # - nohup node mbee start &
     - sleep 20
     - yarn testall
+    - docker stop redis mongo mcf
+    - docker rm redis mongo mcf
 
 # Test Plugins:
 #   stage: Test
