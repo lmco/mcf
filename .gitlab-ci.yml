@@ -15,7 +15,7 @@ stages:
 # Init docker in docker
 .dockerbuild: &dockerbuild
   tags:
-    - docker-builder
+    - docker
 
 # Setup Environment:
 #   stage: Setup
@@ -38,7 +38,7 @@ Build Test MCF:
     - plugins
     - coverage
     expire_in: 2h
-  image: docker:latest
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
@@ -61,16 +61,16 @@ Build Test MCF:
     # - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
     # - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
     # - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
-    - docker run --help
-    - docker network create mcf
+    # - docker run --help
+    # - docker network create mcf
     # - docker run -d --name redis -p 6379:6379 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9:latest
     # - docker run -d  --name mongreo -p 27017:27017 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4:latest
     # - docker run -d --name mcf -p 9080:9080 registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
     - nohup node mbee start &
     - sleep 20
     - yarn testall
-    - docker stop redis mongo mcf
-    - docker rm redis mongo mcf
+    # - docker stop redis mongo mcf
+    # - docker rm redis mongo mcf
 
 # Test Plugins:
 #   stage: Test
