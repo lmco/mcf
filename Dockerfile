@@ -7,7 +7,6 @@ ENV HTTP_PROXY="http://proxy-lmi.global.lmco.com:80" \
     https_proxy="http://proxy-lmi.global.lmco.com:80" \
     NO_PROXY=127.0.0.1,localhost \
     MBEE_ENV=pipeline \
-    NODE_ENV=production \
     CAFILE_DST="./certs/LockheedMartinCertificateAuthority.pem"
 
 # Copy Project
@@ -53,7 +52,7 @@ RUN yarn config set cafile $CAFILE_DST \
 RUN chmod +x ./scripts/install-plugin-modules.sh
 RUN ./scripts/install-plugin-modules.sh
 
-RUN NOPREINSTALL=1 yarn install --production
+RUN NOPREINSTALL=1 yarn install
 
 EXPOSE 9080 9443
 
