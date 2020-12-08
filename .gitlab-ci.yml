@@ -15,7 +15,7 @@ stages:
 # Init docker in docker
 .dockerbuild: &dockerbuild
   tags:
-    - shell
+    - docker-builder
 
 # Setup Environment:
 #   stage: Setup
