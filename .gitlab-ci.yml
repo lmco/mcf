@@ -40,7 +40,7 @@ Build Test MCF:
     - plugins
     - coverage
     expire_in: 2h
-  image: registry.us.lmco.com/lmco-internal/docker-plus:*
+  image: registry.gitlab.us.lmco.com:443/docker-images/docker:stable*
   # services:
   #   - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
   #     alias: mongodb
