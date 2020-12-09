@@ -79,8 +79,6 @@ Build Test MCF:
     # - nohup node mbee start &
     # - sleep 20
     - yarn testall
-    # - docker stop redis mongo mcf
-    # - docker rm redis mongo mcf
 
 # Test Plugins:
 #   stage: Test
