@@ -1,3 +1,4 @@
+/* eslint-disable no-case-declarations */
 /**
  * @classification UNCLASSIFIED
  *
@@ -27,6 +28,7 @@ const bodyParser = require('body-parser');
 const flash = require('express-flash');
 const compression = require('compression');
 const Redis = require('ioredis');
+const cors = require('cors');
 
 // MBEE modules
 const db = M.require('db');
@@ -42,6 +44,10 @@ const ServerData = M.require('models.server-data');
 const User = M.require('models.user');
 const Webhook = M.require('models.webhook');
 const UIController = M.require('controllers.ui-controller');
+
+// Publisher
+const publisher = require('./lib/pubsub/publisher');
+const subscriber = require('./lib/pubsub/subscriber');
 
 // Initialize Redis
 const redisClient = new Redis(M.config.auth.session.redis_port, M.config.auth.session.redis_host);
@@ -61,6 +67,7 @@ db.connect()
 .then(() => createDefaultOrganization())
 .then(() => createDefaultAdmin())
 .then(() => initApp())
+.then(() => initIntegratedServices())
 .catch(err => {
   M.log.critical(err.stack);
   process.exit(1);
@@ -100,6 +107,7 @@ function initApp() {
     // for parsing application/json
     app.use(bodyParser.json({ limit: M.config.server.requestSize || '50mb' }));
     app.use(bodyParser.text());
+    app.use(cors());
 
     // for parsing application/xwww-form-urlencoded
     app.use(bodyParser.urlencoded({ limit: M.config.server.requestSize || '50mb',
@@ -285,4 +293,45 @@ async function initModels() {
   await Promise.all([Artifact.init(), Branch.init(), Element.init(),
     Organization.init(), Project.init(), ServerData.init(), User.init(),
     Webhook.init()]);
+}
+
+/**
+ * @description Initializes all integrated services.
+ * @async
+ *
+ * @returns {Promise} Returns an empty promise upon completion.
+ */
+async function initIntegratedServices() {
+  // Get list of integration services
+  const allServices = await publisher.get('INTEGRATED_SERVICES');
+  M.config.integratedServices = JSON.parse(allServices);
+  M.log.info('Integrated services initialized.');
+
+  // Subscribe to Redis channels
+  const channels = ['NEW_AUTH_INTEGRATION_KEY'];
+  subscriber.subscribe(channels, (err, count) => {
+    M.log.info(`Subscribed to ${count} of Redis channels`);
+  });
+
+  // Listen to all messages from all channels
+  subscriber.on('message', async function(channel, message) {
+    const parsedMessage = JSON.parse(message);
+
+    switch (channel) {
+      default:
+      case 'NEW_AUTH_INTEGRATION_KEY':
+        const user = await User.findOne({ _id: parsedMessage.user });
+
+        // integration key
+        const integrationKey = {
+          name: parsedMessage.name,
+          key: parsedMessage.key
+        };
+
+        // store user password as integration key
+        user.integration_keys.push(integrationKey);
+        await User.updateOne({ _id: parsedMessage.user }, { integration_keys: [integrationKey] });
+        break;
+    }
+  });
 }

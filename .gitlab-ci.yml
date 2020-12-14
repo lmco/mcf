@@ -1,9 +1,4 @@
 variables:
-  HTTP_PROXY: http://proxy-lmi.global.lmco.com:80
-  HTTPS_PROXY: http://proxy-lmi.global.lmco.com:80
-  http_proxy: http://proxy-lmi.global.lmco.com:80
-  https_proxy: http://proxy-lmi.global.lmco.com:80
-  NO_PROXY: 127.0.0.1,localhost
   GIT_SSL_NO_VERIFY: "true"
   GIT_STRATEGY: clone
   MBEE_ENV: pipeline
@@ -13,26 +8,8 @@ variables:
   DTR_TAG: latest
 
 stages:
-  - Build
   - Test
   - Docker
-
-Build MCF:
-  stage: Build
-  tags:
-    - docker
-  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
-  before_script:
-    - export HTTP_PROXY=http://proxy-lmi.global.lmco.com:80
-    - export HTTPS_PROXY=http://proxy-lmi.global.lmco.com:80
-    - export NO_PROXY=$NO_PROXY
-    - yarn config set strict-ssl false
-    - yarn config set proxy http://proxy-lmi.global.lmco.com:80
-    - yarn config set https-proxy http://proxy-lmi.global.lmco.com:80
-    - yarn config set no_proxy $NO_PROXY
-  script:
-    - NOPREINSTALL=1 yarn install
-    - node mbee lint
 
 Test MCF:
   stage: Test
@@ -46,7 +23,7 @@ Test MCF:
     expire_in: 2h
   tags:
     - docker
-  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
@@ -62,6 +39,9 @@ Test MCF:
     - yarn config set https-proxy http://proxy-lmi.global.lmco.com:80
     - yarn config set no_proxy $NO_PROXY
     - NOPREINSTALL=1 yarn install
+    - chmod +x ./scripts/install-plugin-modules.sh
+    - ./scripts/install-plugin-modules.sh
+    - node mbee lint
     - node mbee migrate -y
   script:
     - nohup node mbee start &
@@ -72,7 +52,7 @@ Test Plugins:
   stage: Test
   tags:
     - docker
-  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb

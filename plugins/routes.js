@@ -103,23 +103,23 @@ function loadPlugins() {
     const namespace = f.toLowerCase();
     M.log.info(`Loading plugin '${namespace}' ...`);
 
-    // Install the dependencies
-    if (pkg.dependencies) {
-      M.log.verbose('Installing plugin dependencies ...');
-      const command = `cd ${path.join('plugins', namespace)}; yarn install`;
-      const stdout = execSync(command);
-      M.log.debug(stdout.toString());
-      M.log.verbose('Dependencies installed.');
-    }
+    // // Install the dependencies
+    // if (pkg.dependencies) {
+    //   M.log.verbose('Installing plugin dependencies ...');
+    //   const command = `cd ${path.join('plugins', namespace)}; yarn install`;
+    //   const stdout = execSync(command);
+    //   M.log.debug(stdout.toString());
+    //   M.log.verbose('Dependencies installed.');
+    // }
 
-    // Run the build script if specified
-    if (pkg.scripts && pkg.scripts.build) {
-      M.log.verbose('Running yarn build...');
-      const command = 'yarn build';
-      const stdout = execSync(command);
-      M.log.debug(stdout.toString());
-      M.log.verbose('Build completed.');
-    }
+    // // Run the build script if specified
+    // if (pkg.scripts && pkg.scripts.build) {
+    //   M.log.verbose('Running yarn build...');
+    //   const command = 'yarn build';
+    //   const stdout = execSync(command);
+    //   M.log.debug(stdout.toString());
+    //   M.log.verbose('Build completed.');
+    // }
 
     // Try: creates the plug-in path with the plug-in name
     try {
