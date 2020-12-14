@@ -339,7 +339,6 @@ async function getUser() {
       method: 'get',
       url: `${test.url}/api/users/${userData.username}`,
       headers: testUtils.getHeaders()
-
     };
 
     // Make an API request
