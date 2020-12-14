@@ -1,9 +1,4 @@
 variables:
-  HTTP_PROXY: http://proxy3.lmco.com:80
-  HTTPS_PROXY: http://proxy3.lmco.com:80
-  http_proxy: http://proxy3.lmco.com:80
-  https_proxy: http://proxy3.lmco.com:80
-  NO_PROXY: 127.0.0.1,localhost
   GIT_SSL_NO_VERIFY: "true"
   GIT_STRATEGY: clone
   MBEE_ENV: pipeline
@@ -21,7 +16,7 @@ Build MCF:
   stage: Build
   tags:
     - docker
-  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
   before_script:
     - export HTTP_PROXY=$HTTP_PROXY
     - export HTTPS_PROXY=$HTTPS_PROXY
@@ -46,7 +41,7 @@ Test MCF:
     expire_in: 2h
   tags:
     - docker
-  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
@@ -72,7 +67,7 @@ Test Plugins:
   stage: Test
   tags:
     - docker
-  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image:latest
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
   services:
     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
       alias: mongodb
