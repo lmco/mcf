@@ -22,7 +22,6 @@
     "express-flash": "^0.0.2",
     "express-session": "^1.15.6",
     "fs-extra": "8.1.0",
-    "generate-password": "1.5.1",
     "gulp-rename": "^1.4.0",
     "ioredis": "^4.19.2",
     "ldapjs": "^1.0.2",

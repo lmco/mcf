@@ -8,37 +8,10 @@ variables:
   DTR_TAG: latest
 
 stages:
-  - Setup
-  - DeployTest
   - Test
   - Docker
 
-# Init docker in docker
-.dockerbuild: &dockerbuild
-  tags:
-    - docker
-
-Setup Environment:
-  stage: Setup
-  tags:
-    - shell
-  script:
-    - docker build -t pre-mcf-docker .
-    - docker tag pre-mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker
-    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
-    - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
-
-Deploy Test MCF:
-  stage: DeployTest
-  tags:
-    - docker
-  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-kubectl:latest
-  script:
-    - chmod +x ./scripts/pipeline/deploy-test.sh
-    - ./scripts/pipeline/deploy-test.sh $CI_PROJECT_DIR $DOCKER_PASSWORD
-
-Build Test MCF:
-  <<: *dockerbuild
+Test MCF:
   stage: Test
   artifacts:
     paths:
@@ -48,14 +21,43 @@ Build Test MCF:
     - plugins
     - coverage
     expire_in: 2h
+  tags:
+    - docker
   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
-  # services:
-  #   - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
-  #     alias: mongodb
-  #   - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
-  #     alias: redis
-  #   - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
-  #     alias: mcf
+  services:
+    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+      alias: mongodb
+    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
+      alias: redis
+  before_script:
+    - export MBEE_ENV=$MBEE_ENV
+    - export HTTP_PROXY=$HTTP_PROXY
+    - export HTTPS_PROXY=$HTTPS_PROXY
+    - export NO_PROXY=$NO_PROXY
+    - yarn config set strict-ssl false
+    - yarn config set proxy $HTTP_PROXY
+    - yarn config set https-proxy $HTTPS_PROXY
+    - yarn config set no_proxy $NO_PROXY
+    - NOPREINSTALL=1 yarn install
+    - chmod +x ./scripts/install-plugin-modules.sh
+    - ./scripts/install-plugin-modules.sh
+    - node mbee lint
+    - node mbee migrate -y
+  script:
+    - nohup node mbee start &
+    - sleep 20
+    - yarn testall
+
+Test Plugins:
+  stage: Test
+  tags:
+    - docker
+  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
+  services:
+    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+      alias: mongodb
+    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
+      alias: redis
   before_script:
     - export MBEE_ENV=$MBEE_ENV
     - export HTTP_PROXY=$HTTP_PROXY
@@ -68,37 +70,7 @@ Build Test MCF:
     - NOPREINSTALL=1 yarn install
     - node mbee migrate -y
   script:
-    # - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/pre-mcf-docker:latest
-    # - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
-    # - docker pull registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
-    # - docker run --help
-    # - nohup node mbee start &
-    # - sleep 20
-    - yarn testall
-
-# Test Plugins:
-#   stage: Test
-#   tags:
-#     - docker
-#   image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
-#   services:
-#     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
-#       alias: mongodb
-#     - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
-#       alias: redis
-#   before_script:
-#     - export MBEE_ENV=$MBEE_ENV
-#     - export HTTP_PROXY=$HTTP_PROXY
-#     - export HTTPS_PROXY=$HTTPS_PROXY
-#     - export NO_PROXY=$NO_PROXY
-#     - yarn config set strict-ssl false
-#     - yarn config set proxy $HTTP_PROXY
-#     - yarn config set https-proxy $HTTPS_PROXY
-#     - yarn config set no_proxy $NO_PROXY
-#     - NOPREINSTALL=1 yarn install
-#     - node mbee migrate -y
-#   script:
-#     - node mbee test --plugins
+    - node mbee test --plugins
 
 Docker Build MCF:
   stage: Docker
