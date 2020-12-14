@@ -19,7 +19,6 @@
 // NPM modules
 const chai = require('chai');
 const axios = require('axios');
-const http = require('axios/lib/adapters/http');
 
 // MBEE modules
 const utils = M.require('lib.utils');
@@ -98,8 +97,7 @@ async function postBranch() {
       method: 'post',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/${branchData.id}`,
       headers: testUtils.getHeaders(),
-      data: branchData,
-      adapter: http
+      data: branchData
     };
 
     // Make an API request
@@ -152,8 +150,7 @@ async function postBranches() {
       method: 'post',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches`,
       headers: testUtils.getHeaders(),
-      data: branchData,
-      adapter: http
+      data: branchData
     };
 
     // Make an API request
@@ -210,8 +207,7 @@ async function getBranch() {
     const options = {
       method: 'get',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/${branchData.id}`,
-      headers: testUtils.getHeaders(),
-      adapter: http
+      headers: testUtils.getHeaders()
     };
 
     // Make an API request
@@ -263,8 +259,7 @@ async function getBranches() {
       headers: testUtils.getHeaders(),
       params: {
         ids: branchData.map(b => b.id).toString()
-      },
-      adapter: http
+      }
     };
 
     // Make an API request
@@ -326,8 +321,7 @@ async function patchBranch() {
       method: 'patch',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/${branchData.id}`,
       headers: testUtils.getHeaders(),
-      data: updateObj,
-      adapter: http
+      data: updateObj
     };
 
     // Make an API request
@@ -385,8 +379,7 @@ async function patchBranches() {
       method: 'patch',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches`,
       headers: testUtils.getHeaders(),
-      data: updateObj,
-      adapter: http
+      data: updateObj
     };
 
     // Make an API request
@@ -444,8 +437,7 @@ async function deleteBranch() {
       method: 'delete',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/${branchData.id}`,
       headers: testUtils.getHeaders(),
-      ca: testUtils.readCaFile(),
-      adapter: http
+      ca: testUtils.readCaFile()
     };
 
     // Make an API request
@@ -485,8 +477,7 @@ async function deleteBranches() {
     const options = {
       method: 'delete',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches?ids=${ids}`,
-      headers: testUtils.getHeaders(),
-      adapter: http
+      headers: testUtils.getHeaders()
     };
 
     // Make an API request

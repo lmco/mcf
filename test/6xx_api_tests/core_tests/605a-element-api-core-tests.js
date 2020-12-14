@@ -19,7 +19,6 @@
 // NPM modules
 const chai = require('chai');
 const axios = require('axios');
-const http = require('axios/lib/adapters/http');
 
 // MBEE modules
 const utils = M.require('lib.utils');
@@ -106,8 +105,7 @@ async function postElement() {
       method: 'post',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/master/elements/${elemData.id}`,
       headers: testUtils.getHeaders(),
-      data: elemData,
-      adapter: http
+      data: elemData
     };
 
     // Make an API request
@@ -177,8 +175,7 @@ async function postElements() {
       method: 'post',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/master/elements`,
       headers: testUtils.getHeaders(),
-      data: elemData,
-      adapter: http
+      data: elemData
     };
 
     // Make an API request
@@ -251,8 +248,7 @@ async function putElement() {
       method: 'put',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/master/elements/${elemData.id}`,
       headers: testUtils.getHeaders(),
-      data: elemData,
-      adapter: http
+      data: elemData
     };
 
     // Make an API request
@@ -322,8 +318,7 @@ async function putElements() {
       method: 'put',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/master/elements`,
       headers: testUtils.getHeaders(),
-      data: elemData,
-      adapter: http
+      data: elemData
     };
 
     // Make an API request
@@ -395,8 +390,7 @@ async function getElement() {
     const options = {
       method: 'get',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/master/elements/${elemData.id}`,
-      headers: testUtils.getHeaders(),
-      adapter: http
+      headers: testUtils.getHeaders()
     };
 
     // Make an API request
@@ -468,8 +462,7 @@ async function getElements() {
       headers: testUtils.getHeaders(),
       params: {
         ids: elemData.map(e => e.id).toString()
-      },
-      adapter: http
+      }
     };
 
     // Make an API request
@@ -543,8 +536,7 @@ async function searchElement() {
     const options = {
       method: 'get',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/master/elements/search?q="${elemData.name}"`,
-      headers: testUtils.getHeaders(),
-      adapter: http
+      headers: testUtils.getHeaders()
     };
 
     // Make an API request
@@ -617,8 +609,7 @@ async function patchElement() {
       method: 'patch',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/master/elements/${elemData.id}`,
       headers: testUtils.getHeaders(),
-      data: updateObj,
-      adapter: http
+      data: updateObj
     };
 
     // Make an API request
@@ -692,8 +683,7 @@ async function patchElements() {
       method: 'patch',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/master/elements`,
       headers: testUtils.getHeaders(),
-      data: updateObj,
-      adapter: http
+      data: updateObj
     };
 
     // Make an API request
@@ -767,8 +757,7 @@ async function deleteElement() {
     const options = {
       method: 'delete',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/master/elements/${elemData.id}`,
-      headers: testUtils.getHeaders(),
-      adapter: http
+      headers: testUtils.getHeaders()
     };
 
     // Make an API request
@@ -809,8 +798,7 @@ async function deleteElements() {
     const options = {
       method: 'delete',
       url: `${test.url}/api/orgs/${org._id}/projects/${projID}/branches/master/elements?ids=${ids}`,
-      headers: testUtils.getHeaders(),
-      adapter: http
+      headers: testUtils.getHeaders()
     };
 
     // Make an API request
