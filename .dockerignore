@@ -6,7 +6,6 @@
 !./build
 !./certs
 !./config/default.cfg
-!./config/pipeline.cfg
 !./config/dev.cfg
 !./config/example.cfg
 !./config/jsdoc.json
