@@ -251,7 +251,7 @@ async function providerNotString() {
 
     // Expect insertMany() to fail with specific error message
     await User.insertMany(userData).should.eventually.be.rejectedWith('User '
-      + 'validation failed: provider: Cast to string failed for value "{}" at '
+      + 'validation failed: provider: Cast to String failed for value "{}" at '
       + 'path "provider"');
   }
   catch (error) {
