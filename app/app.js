@@ -28,6 +28,7 @@ const bodyParser = require('body-parser');
 const flash = require('express-flash');
 const compression = require('compression');
 const Redis = require('ioredis');
+const cors = require('cors');
 
 // MBEE modules
 const db = M.require('db');
@@ -106,6 +107,7 @@ function initApp() {
     // for parsing application/json
     app.use(bodyParser.json({ limit: M.config.server.requestSize || '50mb' }));
     app.use(bodyParser.text());
+    app.use(cors());
 
     // for parsing application/xwww-form-urlencoded
     app.use(bodyParser.urlencoded({ limit: M.config.server.requestSize || '50mb',
