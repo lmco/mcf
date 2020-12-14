@@ -163,6 +163,10 @@ const UserSchema = new db.Schema({
   changePassword: {
     type: 'Boolean',
     default: true
+  },
+  integration_keys: {
+    type: 'Object',
+    default: []
   }
 });
 
