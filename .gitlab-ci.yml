@@ -78,7 +78,7 @@ Test Plugins:
 Docker Build MCF:
   stage: Docker
   tags:
-    - shell
+    - docker-builder
   # only:
   #   - develop
   #   - /^release\/.*$/
