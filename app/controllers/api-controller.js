@@ -609,7 +609,7 @@ async function postOrgs(req, res, next) {
       orgs.forEach(org => {
         const port = M.config.server[req.protocol].port;
         const requestOptions = {
-          url: `http://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-org`,
+          url: `${req.protocol}://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-org`,
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${req.session.token}`,
@@ -1233,7 +1233,7 @@ async function postProjects(req, res, next) {
       projects.forEach(proj => {
         const port = M.config.server[req.protocol].port;
         const projectRequestOptions = {
-          url: `http://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-project`,
+          url: `${req.protocol}://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-project`,
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${req.session.token}`,
@@ -1254,7 +1254,7 @@ async function postProjects(req, res, next) {
           // Create the init elements in SDVC
           elements.forEach(element => {
             const elementRequestOptions = {
-              url: `http://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-element`,
+              url: `${req.protocol}://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-element`,
               headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${req.session.token}`,
@@ -2559,7 +2559,7 @@ async function postElements(req, res, next) {
         const proj = split[1];
         const branch = split[2];
         const requestOptions = {
-          url: `http://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-element`,
+          url: `${req.protocol}://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-element`,
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${req.session.token}`,
@@ -3203,7 +3203,7 @@ async function postBranches(req, res, next) {
 
         // Setting up request options
         const branchRequestOptions = {
-          url: `http://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-branch`,
+          url: `${req.protocol}://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-branch`,
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${req.session.token}`,
@@ -3229,7 +3229,7 @@ async function postBranches(req, res, next) {
           // Creating the initial 4 elements in SDVC
           elements.forEach(element => {
             const elementRequestOptions = {
-              url: `http://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-element`,
+              url: `${req.protocol}://127.0.0.1:${port}/plugins/mms3-adapter/alfresco/service/sdvc-element`,
               headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${req.session.token}`,
