@@ -1,21 +1,43 @@
 variables:
+  NO_PROXY: 127.0.0.1,localhost
   GIT_SSL_NO_VERIFY: "true"
   GIT_STRATEGY: clone
   MBEE_ENV: pipeline
-  DTR_URL: dtr.mbx.us.lmco.com
-  DTR_ORG: mbee
-  DTR_REPO: mcf
-  DTR_TAG: latest
-  ARTIFACTORY_URL: jfrog.swf.mbx.us.lmco.com
-  ARTIFACTORY_REPO: mbx-docker
-  ARTIFACTORY_TAG: latest
+  MCF_MAJ_VERSION: "4"
+  DOCKER_URL: jfrog.swf.mbx.us.lmco.com
+  DOCKER_ORG: mbx-docker
+  DOCKER_REPO: mcf
+  DOCKER_TAG: latest
+  DB_URL: mongodb
+  DB_PORT: 27017
+  REDIS_URL: redis
+  REDIS_PORT: 6379
 
 stages:
-  - Test
-  - Docker
+  - docker-build
+  - test
+  - docker-push
 
-Test MCF:
-  stage: Test
+docker-build:mcf:
+  stage: docker-build
+  image: registry.gitlab.us.lmco.com:443/docker-images/docker:latest
+  tags:
+    - docker-builder
+  except:
+    - master
+  script:
+    - export MBEE_ENV=$MBEE_ENV
+    - export DOCKER_URI=$DOCKER_URL/$DOCKER_ORG/$DOCKER_REPO
+    - echo $ARTIFACTORY_API_KEY | docker login -u $ARTIFACTORY_USER $DOCKER_URL --password-stdin
+    - docker pull jfrog.swf.mbx.us.lmco.com/mbx-docker/base-node:12
+    - set -x
+      && docker build
+      --tag ${DOCKER_URI}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}
+      --build-arg NODE_ENV=${NODE_ENV} .
+    - docker push ${DOCKER_URI}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}
+
+test:mcf:
+  stage: test
   artifacts:
     paths:
     - node_modules
@@ -24,23 +46,27 @@ Test MCF:
     - plugins
     - coverage
     expire_in: 2h
+  except:
+    - master
   tags:
     - docker
-  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
+  dependencies:
+    - docker-build:mcf
+  image: ${DOCKER_URL}/${DOCKER_ORG}/${DOCKER_REPO}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}
   services:
-    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+    - name: $DOCKER_URL/$DOCKER_ORG/mongo:4.4
       alias: mongodb
-    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
+    - name: $DOCKER_URL/$DOCKER_ORG/redis:6.0.9
       alias: redis
   before_script:
     - export MBEE_ENV=$MBEE_ENV
-    - export HTTP_PROXY=$HTTP_PROXY
-    - export HTTPS_PROXY=$HTTPS_PROXY
-    - export NO_PROXY=$NO_PROXY
+    # - export HTTP_PROXY=$HTTP_PROXY
+    # - export HTTPS_PROXY=$HTTPS_PROXY
+    # - export NO_PROXY=$NO_PROXY
     - yarn config set strict-ssl false
-    - yarn config set proxy $HTTP_PROXY
-    - yarn config set https-proxy $HTTPS_PROXY
-    - yarn config set no_proxy $NO_PROXY
+    # - yarn config set proxy $HTTP_PROXY
+    # - yarn config set https-proxy $HTTPS_PROXY
+    # - yarn config set no_proxy $NO_PROXY
     - NOPREINSTALL=1 yarn install
     - chmod +x ./scripts/install-plugin-modules.sh
     - ./scripts/install-plugin-modules.sh
@@ -51,48 +77,64 @@ Test MCF:
     - sleep 20
     - yarn testall
 
-Test Plugins:
-  stage: Test
+test:plugins:
+  stage: test
+  variables:
+    FF_NETWORK_PER_BUILD: 1
   tags:
     - docker
-  image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/gitlab-docker-build-image2:latest
+  except:
+    - master
+  dependencies:
+    - docker-build:mcf
+  image: ${DOCKER_URL}/${DOCKER_ORG}/${DOCKER_REPO}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}
   services:
-    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mongo:4.0.4
+    - name: $DOCKER_URL/$DOCKER_ORG/mongo:4.4
       alias: mongodb
-    - name: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/redis:6.0.9
+    - name: $DOCKER_URL/$DOCKER_ORG/redis:6.0.9
       alias: redis
   before_script:
     - export MBEE_ENV=$MBEE_ENV
-    - export HTTP_PROXY=$HTTP_PROXY
-    - export HTTPS_PROXY=$HTTPS_PROXY
-    - export NO_PROXY=$NO_PROXY
+    # - export HTTP_PROXY=$HTTP_PROXY
+    # - export HTTPS_PROXY=$HTTPS_PROXY
+    # - export NO_PROXY=$NO_PROXY
     - yarn config set strict-ssl false
-    - yarn config set proxy $HTTP_PROXY
-    - yarn config set https-proxy $HTTPS_PROXY
-    - yarn config set no_proxy $NO_PROXY
+    # - yarn config set proxy $HTTP_PROXY
+    # - yarn config set https-proxy $HTTPS_PROXY
+    # - yarn config set no_proxy $NO_PROXY
     - NOPREINSTALL=1 yarn install
     - node mbee migrate -y
   script:
     - node mbee test --plugins
 
-Docker Build MCF:
-  stage: Docker
+docker-push:publish-mcf:
+  stage: docker-push
+  image: registry.gitlab.us.lmco.com:443/docker-images/docker:latest
   tags:
-    - shell
+    - docker-builder
+  except:
+    - master
   # only:
   #   - develop
   #   - /^release\/.*$/
   #   - /^prc\/.*$/
-  dependencies:
-    - Test MCF
   script:
-    - export DOCKER_URI=$ARTIFACTORY_URL/$ARTIFACTORY_REPO/mcf
-    - echo $ARTIFACTORY_API_KEY | docker login -u $ARTIFACTORY_USER $ARTIFACTORY_URL --password-stdin
-    - docker build -t mcf-docker .
-    - docker tag mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker
-    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
-    - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
-    # - docker login -u mbee -p $ARTIFACTORY_PASSWORD jfrog.swf.mbx.us.lmco.com
-    - echo $ARTIFACTORY_API_KEY | docker login -u $ARTIFACTORY_USER $ARTIFACTORY_URL --password-stdin
-    - docker tag mcf-docker $ARTIFACTORY_URL/$ARTIFACTORY_REPO/mcf:$ARTIFACTORY_TAG
-    - docker push $ARTIFACTORY_URL/$ARTIFACTORY_REPO/mcf:$ARTIFACTORY_TAG
+    export DOCKER_URI=$DOCKER_URL/$DOCKER_ORG/$DOCKER_REPO
+    - echo $ARTIFACTORY_API_KEY | docker login -u $ARTIFACTORY_USER $DOCKER_URL --password-stdin
+    - docker pull ${DOCKER_URI}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}
+    - docker tag  ${DOCKER_URI}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA} ${DOCKER_URI}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}
+    - docker push ${DOCKER_URI}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}
+    - if [[ ! -z "${CI_COMMIT_TAG}" ]]; then
+    - docker tag $DOCKER_URI:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG} $DOCKER_URI:${CI_COMMIT_TAG};
+    - docker push $DOCKER_URI:${CI_COMMIT_TAG};
+    - fi
+    # - export DOCKER_URI=$ARTIFACTORY_URL/$ARTIFACTORY_REPO/mcf
+    # - echo $ARTIFACTORY_API_KEY | docker login -u $ARTIFACTORY_USER $ARTIFACTORY_URL --password-stdin
+    # - docker build -t mcf-docker .
+    # - docker tag mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker
+    # - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
+    # - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
+    # # - docker login -u mbee -p $ARTIFACTORY_PASSWORD jfrog.swf.mbx.us.lmco.com
+    # - echo $ARTIFACTORY_API_KEY | docker login -u $ARTIFACTORY_USER $ARTIFACTORY_URL --password-stdin
+    # - docker tag mcf-docker $ARTIFACTORY_URL/$ARTIFACTORY_REPO/mcf:$ARTIFACTORY_TAG
+    # - docker push $ARTIFACTORY_URL/$ARTIFACTORY_REPO/mcf:$ARTIFACTORY_TAG
