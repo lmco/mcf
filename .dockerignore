@@ -9,6 +9,7 @@
 !./certs
 !./config/default.cfg
 !./config/dev.cfg
+!./config/pipeline.cfg
 !./config/example.cfg
 !./config/jsdoc.json
 !./doc
