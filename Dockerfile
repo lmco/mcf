@@ -2,11 +2,15 @@
 ARG BASE_TAG="12"
 FROM jfrog.swf.mbx.us.lmco.com/mbx-docker/base-node:${BASE_TAG}
 
+# Create mbee user and run mcf under that context
+RUN groupadd -r mcf -g 1020 \
+     && useradd -u 1020 -r -g mcf -m -d /opt/mbee -s /sbin/nologin -c "MCF user" mcf
+
 WORKDIR /opt/mbee
 
-ENV MBEE_ENV=dev \
-    NODE_ENV=production \
-    CAFILE_DST="./certs/LockheedMartinCertificateAuthority.pem"
+ENV MBEE_ENV="pipeline" \
+    CAFILE_DST="./certs/LockheedMartinCertificateAuthority.pem" \
+    NODE_ENV="development"
 
 # Copy Project
 COPY . ./
@@ -24,6 +28,13 @@ RUN curl -kL -o ./prince-13.5-1.centos7.x86_64.rpm \
     && yum install -y ./prince-13.5-1.centos7.x86_64.rpm \
     && rm prince-13.5-1.centos7.x86_64.rpm
 
+USER mcf
+
+RUN git init \
+    && git config user.email "mbee-service.fc-ssc@lmco.com" \
+    && git config user.name "MBEE Container Runtime" \
+    && git add . \
+    && git commit -m "Initialize Container" -q
 
 # Update proxy and install auxiliary packages
 # RUN echo proxy=$http_proxy >> /etc/yum.conf \
@@ -63,15 +74,15 @@ RUN ./scripts/install-plugin-modules.sh
 #     && git commit -m "Initialize Container" -q
 
 
-RUN NOPOSTINSTALL=1 NOPREINSTALL=1 yarn install --production
+RUN NOPOSTINSTALL=1 NOPREINSTALL=1 yarn install
 
 # Create mbee user and run mcf under that context
-RUN groupadd -r mcf -g 1020 \
-    && useradd -u 1020 -r -g mcf -m -d /opt/mbee -s /sbin/nologin -c "MCF user" mcf \
-    && chmod 755 /opt/mbee \
-    && chown -R mcf:mcf /opt/mbee
+# RUN groupadd -r mcf -g 1020 \
+#     && useradd -u 1020 -r -g mcf -m -d /opt/mbee -s /sbin/nologin -c "MCF user" mcf \
+#     && chmod 755 /opt/mbee \
+#     && chown -R mcf:mcf /opt/mbee
 
-USER mcf
+# USER mcf
 
 VOLUME all_plugins
 EXPOSE 9080 9443
