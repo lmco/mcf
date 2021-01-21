@@ -78,7 +78,7 @@ Test Plugins:
 Docker Build MCF:
   stage: Docker
   tags:
-    - shell
+    - docker-builder
   # only:
   #   - develop
   #   - /^release\/.*$/
@@ -87,6 +87,7 @@ Docker Build MCF:
     - Test MCF
   script:
     - export DOCKER_URI=$ARTIFACTORY_URL/$ARTIFACTORY_REPO/mcf
+    - echo $ARTIFACTORY_API_KEY | docker login -u $ARTIFACTORY_USER $ARTIFACTORY_URL --password-stdin
     - docker build -t mcf-docker .
     - docker tag mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
