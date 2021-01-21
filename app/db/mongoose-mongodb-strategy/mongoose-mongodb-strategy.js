@@ -35,6 +35,7 @@ async function connect() {
   const dbName = M.config.db.name;
   const url = M.config.db.url;
   const dbPort = M.config.db.port;
+  const dbSeedList = M.config.db.seedList;
   const dbUsername = M.config.db.username;
   const dbPassword = M.config.db.password;
   let connectURL = 'mongodb://';
@@ -44,7 +45,21 @@ async function connect() {
     // Append username/password to connection URL
     connectURL = `${connectURL + dbUsername}:${dbPassword}@`;
   }
-  connectURL = `${connectURL + url}:${dbPort}/${dbName}`;
+
+  if (typeof dbSeedList !== 'undefined' && dbSeedList) {
+    for (let i = 0; i < dbSeedList.length; i++) {
+      if (i === 0) {
+        connectURL = `${connectURL + dbSeedList[i]}`;
+      }
+      else {
+        connectURL = `${connectURL},${dbSeedList[i]}`;
+      }
+    }
+    connectURL = `${connectURL}/${dbName}`;
+  }
+  else {
+    connectURL = `${connectURL + url}:${dbPort}/${dbName}`;
+  }
 
   const options = {
     auto_reconnect: true
@@ -54,7 +69,8 @@ async function connect() {
   if (M.config.db.ssl) {
     connectURL += '?ssl=true';
     // Retrieve CA file
-    const caPath = path.join(M.root, M.config.db.ca);
+    const caPath = path.isAbsolute(M.config.db.ca)
+      ? M.config.db.ca : path.join(M.root, M.config.db.ca);
     options.sslCA = fs.readFileSync(caPath, 'utf8');
   }
 

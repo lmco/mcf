@@ -60,15 +60,8 @@ test:mcf:
       alias: redis
   before_script:
     - export MBEE_ENV=$MBEE_ENV
-    # - export HTTP_PROXY=$HTTP_PROXY
-    # - export HTTPS_PROXY=$HTTPS_PROXY
-    # - export NO_PROXY=$NO_PROXY
     - yarn config set strict-ssl false
-    # - yarn config set proxy $HTTP_PROXY
-    # - yarn config set https-proxy $HTTPS_PROXY
-    # - yarn config set no_proxy $NO_PROXY
     - NOPREINSTALL=1 yarn install
-    # - chmod +x ./scripts/install-plugin-modules.sh
     - ./scripts/install-plugin-modules.sh
     - node mbee lint
     - node mbee migrate -y
@@ -95,13 +88,7 @@ test:plugins:
       alias: redis
   before_script:
     - export MBEE_ENV=$MBEE_ENV
-    # - export HTTP_PROXY=$HTTP_PROXY
-    # - export HTTPS_PROXY=$HTTPS_PROXY
-    # - export NO_PROXY=$NO_PROXY
     - yarn config set strict-ssl false
-    # - yarn config set proxy $HTTP_PROXY
-    # - yarn config set https-proxy $HTTPS_PROXY
-    # - yarn config set no_proxy $NO_PROXY
     - NOPREINSTALL=1 yarn install
     - node mbee migrate -y
   script:
@@ -128,13 +115,3 @@ docker-push:publish-mcf:
     - docker tag $DOCKER_URI:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG} $DOCKER_URI:${CI_COMMIT_TAG};
     - docker push $DOCKER_URI:${CI_COMMIT_TAG};
     - fi
-    # - export DOCKER_URI=$ARTIFACTORY_URL/$ARTIFACTORY_REPO/mcf
-    # - echo $ARTIFACTORY_API_KEY | docker login -u $ARTIFACTORY_USER $ARTIFACTORY_URL --password-stdin
-    # - docker build -t mcf-docker .
-    # - docker tag mcf-docker registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker
-    # - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN registry.gitlab.us.lmco.com:443
-    # - docker push registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker:latest
-    # # - docker login -u mbee -p $ARTIFACTORY_PASSWORD jfrog.swf.mbx.us.lmco.com
-    # - echo $ARTIFACTORY_API_KEY | docker login -u $ARTIFACTORY_USER $ARTIFACTORY_URL --password-stdin
-    # - docker tag mcf-docker $ARTIFACTORY_URL/$ARTIFACTORY_REPO/mcf:$ARTIFACTORY_TAG
-    # - docker push $ARTIFACTORY_URL/$ARTIFACTORY_REPO/mcf:$ARTIFACTORY_TAG
