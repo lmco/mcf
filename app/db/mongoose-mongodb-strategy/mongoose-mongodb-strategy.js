@@ -46,7 +46,9 @@ async function connect() {
   }
   connectURL = `${connectURL + url}:${dbPort}/${dbName}`;
 
-  const options = {};
+  const options = {
+    auto_reconnect: true
+  };
 
   // Configure an SSL connection
   if (M.config.db.ssl) {
@@ -70,6 +72,39 @@ async function connect() {
 
   // Connect to database
   try {
+    // Set up mongo events
+    mongoose.connection.on('error', async function(e) {
+      M.log.info(`DB: mongodb error ${e}`);
+      // reconnecting
+      await mongoose.connect(connectURL, options);
+    });
+
+    mongoose.connection.on('connected', function(e) {
+      M.log.info('DB: mongodb is connected');
+    });
+
+    mongoose.connection.on('disconnecting', function() {
+      M.log.info('DB: mongodb is disconnecting');
+    });
+
+    mongoose.connection.on('disconnected', function() {
+      M.log.info('DB: mongodb is disconnected');
+    });
+
+    mongoose.connection.on('reconnected', function() {
+      M.log.info('DB: mongodb is reconnected');
+    });
+
+    mongoose.connection.on('timeout', async function(e) {
+      M.log.info(`DB: mongodb timeout ${e}`);
+      // reconnecting
+      await mongoose.connect(connectURL, options);
+    });
+
+    mongoose.connection.on('close', function() {
+      M.log.info('DB: mongodb connection closed');
+    });
+
     await mongoose.connect(connectURL, options);
   }
   catch (error) {

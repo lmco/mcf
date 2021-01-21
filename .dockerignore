@@ -2,7 +2,9 @@
 **
 
 # Specify allowed files and directories
+
 !./app
+!./bin
 !./build
 !./certs
 !./config/default.cfg
@@ -13,8 +15,11 @@
 !./mbee.js
 #!./node_modules
 !./package.json
-!./plugins
+!./plugins/routes.js
 !./*.md
 !./scripts
 !./test
 !./yarn.lock
+!./Dockerfile
+!./Dockerfile-build
+!./docker-entrypoint.sh
