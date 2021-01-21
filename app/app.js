@@ -44,6 +44,20 @@ const ServerData = M.require('models.server-data');
 const User = M.require('models.user');
 const Webhook = M.require('models.webhook');
 const UIController = M.require('controllers.ui-controller');
+const allowlist = M.config.server.corsAllowList;
+
+// Cors options
+const corsOptions = {
+  credentials: true, // This is important.
+  origin: (origin, callback) => {
+    if (!origin || allowlist.includes(origin)) {
+      return callback(null, true);
+    }
+    else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+};
 
 // Publisher
 const publisher = require('./lib/pubsub/publisher');
@@ -107,7 +121,8 @@ function initApp() {
     // for parsing application/json
     app.use(bodyParser.json({ limit: M.config.server.requestSize || '50mb' }));
     app.use(bodyParser.text());
-    app.use(cors());
+    app.options('*', cors(corsOptions));
+    app.use(cors(corsOptions));
 
     // for parsing application/xwww-form-urlencoded
     app.use(bodyParser.urlencoded({ limit: M.config.server.requestSize || '50mb',

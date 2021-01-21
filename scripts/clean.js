@@ -63,7 +63,7 @@ function clean(_args) {
   // Clean logs
   if (args.length === 0 || args.includes('--all')) {
     log('Cleaning logs...');
-    execSync(`${rmd} ${path.join(root, 'build')} ${path.join(root, 'logs')}`);
+    execSync(`${rmd} ${path.join(root, 'build')} ${path.join(root, 'logs')}/*`);
   }
 
   // Clean data

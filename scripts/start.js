@@ -113,8 +113,10 @@ function start(args) {
   // have been successfully created
   if (M.config.server.https.enabled) {
     // Set http/2 options
-    const privateKey = fs.readFileSync(path.join(M.root, M.config.server.https.sslKey), 'utf8');
-    const certificate = fs.readFileSync(path.join(M.root, M.config.server.https.sslCert), 'utf8');
+    const privateKey = fs.readFileSync(path.isAbsolute(M.config.server.https.sslKey)
+      ? M.config.server.https.sslKey : path.join(M.root, M.config.server.https.sslKey), 'utf8');
+    const certificate = fs.readFileSync(path.isAbsolute(M.config.server.https.sslCert)
+      ? M.config.server.https.sslCert : path.join(M.root, M.config.server.https.sslCert), 'utf8');
     const options = {
       key: privateKey,
       cert: certificate,
