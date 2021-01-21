@@ -119,7 +119,7 @@ docker-push:publish-mcf:
   #   - /^release\/.*$/
   #   - /^prc\/.*$/
   script:
-    export DOCKER_URI=$DOCKER_URL/$DOCKER_ORG/$DOCKER_REPO
+    - export DOCKER_URI=$DOCKER_URL/$DOCKER_ORG/$DOCKER_REPO
     - echo $ARTIFACTORY_API_KEY | docker login -u $ARTIFACTORY_USER $DOCKER_URL --password-stdin
     - docker pull ${DOCKER_URI}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}
     - docker tag  ${DOCKER_URI}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA} ${DOCKER_URI}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}
