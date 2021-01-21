@@ -28,6 +28,9 @@ RUN curl -kL -o ./prince-13.5-1.centos7.x86_64.rpm \
     && yum install -y ./prince-13.5-1.centos7.x86_64.rpm \
     && rm prince-13.5-1.centos7.x86_64.rpm
 
+RUN chmod 755 /opt/mbee \
+    && chown -R mcf:mcf /opt/mbee
+
 USER mcf
 
 RUN git init \
