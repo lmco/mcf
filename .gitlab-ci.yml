@@ -68,7 +68,7 @@ test:mcf:
     # - yarn config set https-proxy $HTTPS_PROXY
     # - yarn config set no_proxy $NO_PROXY
     - NOPREINSTALL=1 yarn install
-    - chmod +x ./scripts/install-plugin-modules.sh
+    # - chmod +x ./scripts/install-plugin-modules.sh
     - ./scripts/install-plugin-modules.sh
     - node mbee lint
     - node mbee migrate -y
