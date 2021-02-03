@@ -1,0 +1,117 @@
+variables:
+  NO_PROXY: 127.0.0.1,localhost
+  GIT_SSL_NO_VERIFY: "true"
+  GIT_STRATEGY: clone
+  MBEE_ENV: pipeline
+  MCF_MAJ_VERSION: "4"
+  DOCKER_URL: jfrog.swf.mbx.us.lmco.com
+  DOCKER_ORG: mbx-docker
+  DOCKER_REPO: mcf
+  DOCKER_TAG: latest
+  DB_URL: mongodb
+  DB_PORT: 27017
+  REDIS_URL: redis
+  REDIS_PORT: 6379
+
+stages:
+  - docker-build
+  - test
+  - docker-push
+
+docker-build:mcf:
+  stage: docker-build
+  image: registry.gitlab.us.lmco.com:443/docker-images/docker:latest
+  tags:
+    - docker-builder
+  except:
+    - master
+  script:
+    - export MBEE_ENV=$MBEE_ENV
+    - export DOCKER_URI=$DOCKER_URL/$DOCKER_ORG/$DOCKER_REPO
+    - echo $ARTIFACTORY_API_KEY | docker login -u $ARTIFACTORY_USER $DOCKER_URL --password-stdin
+    - docker pull jfrog.swf.mbx.us.lmco.com/mbx-docker/base-node:12
+    - set -x
+      && docker build
+      --tag ${DOCKER_URI}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}
+      --build-arg NODE_ENV=${NODE_ENV} .
+    - docker push ${DOCKER_URI}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}
+
+test:mcf:
+  stage: test
+  artifacts:
+    paths:
+    - node_modules
+    - yarn.lock
+    - build
+    - plugins
+    - coverage
+    expire_in: 2h
+  except:
+    - master
+  tags:
+    - docker
+  dependencies:
+    - docker-build:mcf
+  image: ${DOCKER_URL}/${DOCKER_ORG}/${DOCKER_REPO}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}
+  services:
+    - name: $DOCKER_URL/$DOCKER_ORG/mongo:4.4
+      alias: mongodb
+    - name: $DOCKER_URL/$DOCKER_ORG/redis:6.0.9
+      alias: redis
+  before_script:
+    - export MBEE_ENV=$MBEE_ENV
+    - yarn config set strict-ssl false
+    - NOPREINSTALL=1 yarn install
+    - ./scripts/install-plugin-modules.sh
+    - node mbee lint
+    - node mbee migrate -y
+  script:
+    - nohup node mbee start &
+    - sleep 20
+    - yarn testall
+
+test:plugins:
+  stage: test
+  variables:
+    FF_NETWORK_PER_BUILD: 1
+  tags:
+    - docker
+  except:
+    - master
+  dependencies:
+    - docker-build:mcf
+  image: ${DOCKER_URL}/${DOCKER_ORG}/${DOCKER_REPO}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}
+  services:
+    - name: $DOCKER_URL/$DOCKER_ORG/mongo:4.4
+      alias: mongodb
+    - name: $DOCKER_URL/$DOCKER_ORG/redis:6.0.9
+      alias: redis
+  before_script:
+    - export MBEE_ENV=$MBEE_ENV
+    - yarn config set strict-ssl false
+    - NOPREINSTALL=1 yarn install
+    - node mbee migrate -y
+  script:
+    - node mbee test --plugins
+
+docker-push:publish-mcf:
+  stage: docker-push
+  image: registry.gitlab.us.lmco.com:443/docker-images/docker:latest
+  tags:
+    - docker-builder
+  except:
+    - master
+  # only:
+  #   - develop
+  #   - /^release\/.*$/
+  #   - /^prc\/.*$/
+  script:
+    - export DOCKER_URI=$DOCKER_URL/$DOCKER_ORG/$DOCKER_REPO
+    - echo $ARTIFACTORY_API_KEY | docker login -u $ARTIFACTORY_USER $DOCKER_URL --password-stdin
+    - docker pull ${DOCKER_URI}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}
+    - docker tag  ${DOCKER_URI}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA} ${DOCKER_URI}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}
+    - docker push ${DOCKER_URI}:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG}
+    - if [[ ! -z "${CI_COMMIT_TAG}" ]]; then
+    - docker tag $DOCKER_URI:${MCF_MAJ_VERSION}-${CI_COMMIT_REF_SLUG} $DOCKER_URI:${CI_COMMIT_TAG};
+    - docker push $DOCKER_URI:${CI_COMMIT_TAG};
+    - fi

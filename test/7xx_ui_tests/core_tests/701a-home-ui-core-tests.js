@@ -24,6 +24,7 @@ import { mount } from 'enzyme';
 import sinon from 'sinon';
 
 // MBEE components
+import { ApiClientProvider } from '../../../app/ui/components/context/ApiClientProvider';
 import Home from '../../../app/ui/components/home-views/home.jsx';
 
 /* eslint-enable no-unused-vars */
@@ -60,7 +61,9 @@ describe(M.getModuleName(module.filename), () => {
  */
 function homeRender(done) {
   // Render home component
-  const wrapper = mount(<Home />);
+  const wrapper = mount(<ApiClientProvider>
+                          <Home />
+                        </ApiClientProvider>);
   // Expect component to be in DOM
   chai.expect(wrapper.find(Home).length).to.equal(1);
   done();

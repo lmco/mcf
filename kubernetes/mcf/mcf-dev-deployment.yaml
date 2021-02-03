@@ -1,0 +1,76 @@
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcf-service
+  labels:
+    app: mcf
+spec:
+  ports:
+  - name: mcf
+    port: 9080
+    targetPort: 9080
+    protocol: TCP
+  selector:
+    app: mcf
+
+---
+
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcf-deployment
+  labels:
+    app: mcf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcf
+  template:
+    metadata:
+      labels:
+        app: mcf
+    spec:
+      nodeName: dev-dev # attaches the pod to the dev-dev node
+      dnsPolicy: Default # pod inherits dns name of the node
+      imagePullSecrets:
+      - name: mcf-repo
+      containers:
+        - name: mcf
+          imagePullPolicy: Always
+          image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-docker-donte:latest
+          ports:
+            - containerPort: 9080
+          env:
+            - name: MBEE_ENV
+              value: "production"
+          volumeMounts:
+            - name: cert
+              mountPath: /opt/mbee/certs/mcf.cer
+            - name: lmcert
+              mountPath: /opt/mbee/certs/LockheedMartinCertificateAuthority.pem
+            - name: key
+              mountPath: /opt/mbee/certs/mcf.key
+            - name: ca-pemstore
+              mountPath: /etc/ssl/certs/dev.mcf.us.lmco.com.pem
+              subPath: dev.mcf.us.lmco.com.pem
+            - name: mcf-dev-config
+              mountPath: /opt/mbee/config/production.cfg
+      volumes:
+        - name: cert
+          hostPath:
+            path: "/mnt/mbee/mbee-dev/certs/dev.mcf.us.lmco.com.cer"
+        - name: key
+          hostPath:
+            path: "/mnt/mbee/mbee-dev/certs/dev.mcf.us.lmco.com.key"
+        - name: lmcert
+          hostPath:
+            path: "/mnt/mbee/mbee-dev/certs/LockheedMartinCertificateAuthority.pem"
+        - name: ca-pemstore
+          configMap:
+            name: ca-pemstore
+        - name: mcf-dev-config
+          hostPath:
+            path: "/mnt/mbee/mbee-dev/test.cfg"

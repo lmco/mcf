@@ -110,7 +110,7 @@ function postProject(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Parse the JSON response
-    const createdProj = JSON.parse(_data);
+    const createdProj = JSON.parse(_data)[0];
 
     // Verify project created properly
     chai.expect(createdProj.id).to.equal(projData.id);
@@ -138,7 +138,7 @@ function postProject(done) {
   };
 
   // POST a project
-  APIController.postProject(req, res, next(req, res));
+  APIController.postProjects(req, res, next(req, res));
 }
 
 /**
@@ -231,7 +231,7 @@ function putProject(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Parse the JSON response
-    const replacedProj = JSON.parse(_data);
+    const replacedProj = JSON.parse(_data)[0];
 
     // Verify project created/replaced properly
     chai.expect(replacedProj.id).to.equal(projData.id);
@@ -259,7 +259,7 @@ function putProject(done) {
   };
 
   // PUTs a project
-  APIController.putProject(req, res, next(req, res));
+  APIController.putProjects(req, res, next(req, res));
 }
 
 /**
@@ -353,7 +353,7 @@ function getProject(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Parse the JSON response
-    const foundProj = JSON.parse(_data);
+    const foundProj = JSON.parse(_data)[0];
 
     // Verify correct project found
     chai.expect(foundProj.id).to.equal(projData.id);
@@ -381,7 +381,7 @@ function getProject(done) {
   };
 
   // GET a project
-  APIController.getProject(req, res, next(req, res));
+  APIController.getProjects(req, res, next(req, res));
 }
 
 /**
@@ -628,7 +628,7 @@ function patchProject(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Parse the JSON response
-    const updatedProj = JSON.parse(_data);
+    const updatedProj = JSON.parse(_data)[0];
 
     // Verify correct project updated
     chai.expect(updatedProj.id).to.equal(projData.id);
@@ -656,7 +656,7 @@ function patchProject(done) {
   };
 
   // PATCH a project
-  APIController.patchProject(req, res, next(req, res));
+  APIController.patchProjects(req, res, next(req, res));
 }
 
 /**
@@ -755,7 +755,7 @@ function deleteProject(done) {
   // Verifies the response data
   res.send = function send(_data) {
     // Parse the JSON response
-    const deletedID = JSON.parse(_data);
+    const deletedID = JSON.parse(_data)[0];
 
     // Verify correct project deleted
     chai.expect(deletedID).to.equal(projData.id);
@@ -767,7 +767,7 @@ function deleteProject(done) {
   };
 
   // DELETE a project
-  APIController.deleteProject(req, res, next(req, res));
+  APIController.deleteProjects(req, res, next(req, res));
 }
 
 /**

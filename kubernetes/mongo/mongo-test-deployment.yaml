@@ -1,0 +1,63 @@
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-service
+  labels:
+    app: mongo
+spec:
+  ports:
+  - name: mongo
+    port: 27017
+    targetPort: 27017
+    protocol: TCP
+  selector:
+    app: mongo
+
+---
+
+# External service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-external-service
+spec:
+  type: NodePort
+  ports:
+  - name: mongo
+    port: 27017
+    targetPort: 27017
+    nodePort: 30037
+    protocol: TCP
+  selector:
+    app: mongo
+
+---
+
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-deployment
+  labels:
+    app: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      nodeName: test-test # attaches the pod to the test-test node
+      dnsPolicy: Default # pod inherits dns name of the node
+      imagePullSecrets:
+      - name: mcf-repo
+      containers:
+        - name: mongo
+          imagePullPolicy: Always
+          image: registry.gitlab.us.lmco.com:443/mbx/mbee/mcf/mcf-mongo:latest
+          ports:
+            - containerPort: 27017

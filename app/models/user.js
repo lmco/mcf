@@ -53,7 +53,6 @@ const db = M.require('db');
 const validators = M.require('lib.validators');
 const extensions = M.require('models.plugin.extensions');
 
-
 /* -----------------------------( User Schema )------------------------------ */
 
 /**
@@ -164,6 +163,10 @@ const UserSchema = new db.Schema({
   changePassword: {
     type: 'Boolean',
     default: true
+  },
+  integration_keys: {
+    type: 'Object',
+    default: []
   }
 });
 
