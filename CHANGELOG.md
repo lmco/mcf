@@ -1,6 +1,59 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2021-02-08
+### Major Features and Improvements
+* Added Redis datastore for session management
+* Added Reconnect logic for Mongo
+* Added support for DIS (Dynamic Integration Service) so that external services
+  can integrate authentication within MCF and store auth tokens in session.
+* Updated Node version to 12.18.3 or higher.
+### Bug Fixes and Other Changes
+* Separated MongoDB from the MCF docker file for a more mircoservice architecture.
+* Added updates to the dockerfile.
+* Fixed broken UI tests.
+* Added 404 error page.
+### Configuration Changes
+* With the addition of redis as the session store, there are new session
+  configuration options.
+```json
+{
+  "session": {
+    "redis_host": "REDIS_URL",
+    "redis_port": "REDIS_PORT",
+    "redis_db": "REDIS_DATABASE_NUMBER",
+    "cookie": {
+      "secure": false, // true for HTTPS, false for HTTP
+      "httpOnly": true, // true for HTTP, false for HTTPS
+      "sameSite": "lax"
+    }
+  }
+}
+```
+* Added the commitURL configuration option for the mms3-adapter commit 
+  functionality.
+```json
+{
+  "server": {
+    "commitURL": "127.0.0.1" // This is the same host as MCF
+  }
+}
+```
+* Added the corsAllowList configuration option for cross origin resource
+  sharing.
+```json
+{
+  "server": {
+    "corsAllowList": [
+      "http://localhost:9080",
+      "http://127.0.0.1:9080",
+      "http://127.0.0.1",
+      "http://localhost"
+    ]
+  }
+}
+```
+
 ## [1.1.0] - 2020-04-28
 ### Bug Fixes and Other Changes
 * Fixed a bug where webhook custom data could not be updated
